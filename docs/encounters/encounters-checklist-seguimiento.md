@@ -4,7 +4,7 @@
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: cierre del PASO 1 y preparación del PASO 2.** Base independiente importada, identidad activa separada y módulos fuera de alcance aislados. Compilación, lint, TypeScript y pruebas de aislamiento pasan. Supabase/Resend/SQL y visual final continúan pendientes. Diseño vigente completo conservado; Home v2 manda. WordPress, DNS y Vercel permanecen intactos.
+**Foco actual: PASO 1 completado; preparación del PASO 2.** Base independiente publicada en main, identidad activa separada y módulos fuera de alcance aislados. Compilación, lint, TypeScript y pruebas de aislamiento pasan. Supabase/Resend/SQL y visual final continúan pendientes. Diseño vigente completo conservado; Home v2 manda. WordPress, DNS y Vercel permanecen intactos.
 
 
 ## Cómo actualizarlo
@@ -42,7 +42,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [ ] **1. Reunir accesos y materiales — EN CURSO.** WordPress, Hostinger y snapshot disponibles; cuenta de servicios y repo destino informados. Falta confirmar acceso Git local, control de dominio/DNS, dirección pública y Google.
 - [ ] **2. Respaldar la web actual — PENDIENTE.** Accesos recuperados; descargar respaldo de archivos/DB y copia DNS. Snapshot editorial ya disponible. No bloquea el arranque local.
 - [ ] **3. Definir el diseño — EN CURSO.** Entrega vigente recibida y verificada, prototipos y assets íntegros, Home v2. Contact tiene destinatario principal acordado, interfaz a resolver con diseño actual. No hay revisión visual aprobada aquí.
-- [ ] **4. Duplicar Katie en un GitHub nuevo — CIERRE.** Importación independiente y remoto correcto verificados; falta registrar commit/push de entrega.
+- [x] **4. Duplicar Katie en un GitHub nuevo — COMPLETO.** Importación independiente y remoto correcto verificados; commit 8560222 publicado en main del destino privado el 2026-10-02. Katie permanece intacto.
 - [ ] **5. Configurar servicios propios — PENDIENTE.** Primero Supabase y Resend nuevos; Vercel y deploy cuando el proyecto esté avanzado, según decisión del 30/09.
 - [ ] **6. Configurar tres administradores — PENDIENTE.** Acceso total para los fundadores; otros integrantes de Crew sin cuenta.
 - [x] **7. Reemplazar la identidad anterior — BASE IMPLEMENTADA.** Marca/URL/defaults/metadata/JSON-LD/emails/manifest/assets propios en aplicación activa; código histórico fuera de rutas. Contenido editorial real y diseño final pendientes.
@@ -198,6 +198,7 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 
 ### 2026-10-02 — implementación y comprobación del PASO 1
 
+- Publicado commit 8560222 en main del destino privado; cierre del PASO 1 y punto 4 completado. El acceso de colaboración ya permite push.
 - Acceso al repo destino confirmado como colaborador con escritura; vacío, sin trabajo que sobrescribir. Historial nuevo y origin exclusivo de Encounters.
 - Importada base SHA 102fc91 sin credenciales, datos privados, fixtures ni fotos de Katie; stack y resoluciones lockfile conservados.
 - Implementados identidad, metadata/manifest/JSON-LD, defaults, fuentes/tokens, shell y mapa de rutas. Core CMS/Auth/medios/newsletter reutilizado; contratos y modelo ampliado documentados sin SQL ejecutado.

@@ -1,6 +1,6 @@
 # Estado del PASO 1 — 2026-10-02
 
-Implementación local terminada y comprobada. Publicación Git se registra al cerrar la entrega. Supabase/Resend no conectados; no hay SQL nuevo aplicado, envíos reales, deploys ni cambios DNS/WordPress.
+PASO 1 implementado, comprobado y publicado en la rama main del repositorio privado encountersagainandagain/encounters-again-and-again. Commit de implementación: 8560222; push confirmado el 2026-10-02. Supabase/Resend no conectados; no hay SQL nuevo aplicado, envíos reales, deploys ni cambios DNS/WordPress.
 
 ## Implementado
 

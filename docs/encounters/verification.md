@@ -10,7 +10,7 @@ Entorno: Node 23.6.1, Next 16.2.6, aplicación local en 127.0.0.1:3210, sin .env
 | npm test | PASS: rutas, flags, rechazo antes de fetch, 61 hashes y numeración 1–22 |
 | npm run build | PASS, incluidas 23 páginas estáticas; sin credenciales. Descarga de fuentes requirió red autorizada al repetir |
 | TEST_BASE_URL=http://127.0.0.1:3210 node scripts/check-isolation.mjs | PASS: 26 rutas/API desactivadas 404; diez páginas/manifest 200 sin marca Katie; detalles 404; validación newsletter y configuración 400/404/503; revalidación no autorizada 401; sitemap vacío y noindex |
-| Accesos/remote | Katie lectura; destino privado pull/push y vacío antes de importación. Origin único Encounters |
+| Accesos/remote | Katie lectura; destino privado pull/push y vacío antes de importación. Origin único Encounters. Push de 8560222 a main confirmado |
 | Lockfile | Comparación JSON contra git show de fuente: mismas versiones, integridades y dependencias; solo nombre raíz diferente |
 | Identidad activa | Sin Katie/whatkatieseas/wks/tracking heredado en src/app/public/config activos; legado documentado fuera de compilación |
 | Archivos a versionar | Sin .env reales, .vercel, dependencias ni caches; exploración de patrones de secretos sin coincidencias. No equivale a auditoría criptográfica |
