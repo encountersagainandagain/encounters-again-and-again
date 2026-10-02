@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="assets/about-1-turtle-web.jpg" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #EAF5FA; text-decoration: none; }
+  a:hover { color: #8FD9EA; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(0, -9px, 0); }
+  }
+  @keyframes heroRise {
+    from { transform: translate3d(0, 14%, 0) scale(1.05); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  }
+  @keyframes heroTitleRise {
+    from { transform: translate3d(0, 48px, 0); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @keyframes heroFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes cueDrop {
+    0%, 100% { transform: translateY(0); opacity: 0.55; }
+    50%      { transform: translateY(8px); opacity: 1; }
+  }
+  @media (max-width: 1080px) {
+    /* tablet: el panel del hero pasa a dos columnas y la tercera ocupa el ancho */
+    [data-m="panel"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 16px clamp(18px, 3vw, 34px) !important; }
+    [data-m="panel"] > div:nth-child(3) { grid-column: 1 / -1 !important; }
+  }
+  @media (max-width: 860px) {
+    [data-m="row"] { grid-template-columns: minmax(0, 1fr) !important; gap: clamp(20px, 4vh, 34px) !important; }
+    /* en una columna la foto va siempre arriba del texto */
+    [data-m="row"] > [style*="order: 2"] { order: 0 !important; }
+    [data-m="row"] > [style*="order: 1"] { order: 1 !important; }
+  }
+  @media (max-width: 760px) {
+    [data-m="nav"] { padding: 14px 16px !important; }
+    [data-m="navlinks"] { justify-content: center !important; font-size: 10px !important; letter-spacing: 0.1em !important; gap: 6px 16px !important; }
+    [data-m="panel"] { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; padding: 20px 16px !important; }
+    [data-m="panel"] > div:nth-child(3) { grid-column: auto !important; }
+    [data-m="counter"] { display: none !important; }
+    [data-m="manifiesto"] > p:nth-of-type(2) { align-self: stretch !important; text-align: left !important; }
+  }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #061826; color: #EAF5FA; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; overflow: clip;">
+  <div data-m="veil" style="position: fixed; top: 0; left: 0; right: 0; height: 140px; z-index: 29; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.72), rgba(4,17,30,0.34) 50%, rgba(4,17,30,0));"></div>
+  <nav ref="{{ navRef }}" data-m="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'l c r'; align-items: center; gap: clamp(12px, 2vw, 36px); padding: 18px clamp(18px, 3vw, 46px); border-bottom: 1px solid rgba(255,255,255,0); transition: background 500ms ease, backdrop-filter 500ms ease, border-color 500ms ease;">
+    <div data-m="navlinks" style="grid-area: l; display: flex; align-items: center; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="Expeditions.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Encounters</span>
+          <span style="height: 12px; line-height: 12px;">Expeditions</span>
+        </span>
+      </a>
+      <a href="Workshops.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px; text-align: left;">Artsy Animals</span>
+          <span style="height: 12px; line-height: 12px; text-align: left;">Workshops</span>
+        </span>
+      </a>
+      <a href="Art.dc.html" style="display: block; height: 12px; line-height: 12px; white-space: nowrap; color: inherit;">Art</a>
+      <a href="Meaningful Messages.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Meaningful</span>
+          <span style="height: 12px; line-height: 12px;">Messages</span>
+        </span>
+      </a>
+    </div>
+    <a href="Abismo Home.dc.html" style="grid-area: c; justify-self: center; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+      <img src="assets/logo-mark-blanco.png" alt="Encounters" style="height: 32px; width: auto; margin-right: -2px;" />
+      <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 500;">
+        <span style="font-size: clamp(14px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+        <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; color: rgba(234,245,250,0.82);">again and again</span>
+      </span>
+    </a>
+    <div data-m="navlinks" style="grid-area: r; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="About.dc.html" style="white-space: nowrap; color: #8FD9EA;">About us</a>
+      <a href="The Crew.dc.html" style="white-space: nowrap;">The crew</a>
+      <a href="Contact.dc.html" style="white-space: nowrap;">Contact</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Hero fotos" style="position: relative; z-index: 1; height: 240vh; background: #EAF5FA;">
+    <div style="position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #EAF5FA;">
+      <div ref="{{ frameRef }}" style="position: relative; flex: none; height: 100vh; overflow: hidden; background: #061826;">
+        <div style="position: absolute; inset: 0; animation: heroRise 1500ms cubic-bezier(.16,.84,.24,1) both;">
+        <div ref="{{ f1 }}" style="position: absolute; inset: 0;">
+          <img src="assets/about-1-turtle-web.jpg" alt="Tortuga verde sobre el arrecife" style="width: 100%; height: 100%; object-fit: cover; object-position: center 58%; display: block;" />
+        </div>
+        <div ref="{{ f2 }}" style="position: absolute; inset: 0; opacity: 0;">
+          <img src="assets/about-3-bird-web.jpg" alt="Ave amarilla entre el follaje" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block;" />
+        </div>
+        <div ref="{{ f3 }}" style="position: absolute; inset: 0; opacity: 0;">
+          <img src="assets/about-2-ray-web.jpg" alt="Raya águila manchada sobre la arena" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center 45%; display: block;" />
+        </div>
+        <div ref="{{ f4 }}" style="position: absolute; inset: 0; opacity: 0;">
+          <img src="assets/about-4-shark-web.jpg" alt="Tiburón martillo en azul profundo" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center 55%; display: block;" />
+        </div>
+        </div>
+        <span style="position: absolute; z-index: 6; right: clamp(16px, 3vw, 34px); top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; letter-spacing: 0.08em; color: rgba(255,255,255,0.62); pointer-events: none; white-space: nowrap;">© Juani Molfino</span>
+
+        <div ref="{{ heroVeilRef }}" style="position: absolute; inset: 0; z-index: 4; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.66) 0%, rgba(4,17,30,0.4) 30%, rgba(4,17,30,0.3) 52%, rgba(4,17,30,0.66) 100%);"></div>
+
+        <div ref="{{ titleRef }}" style="position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(12px, 2.6vh, 26px); padding: clamp(120px, 16vh, 180px) clamp(20px, 5vw, 72px) clamp(80px, 12vh, 130px); text-align: center; pointer-events: none;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase; color: #ffffff; animation: heroFadeIn 900ms ease 420ms both;">What is our mission?</span>
+          <h1 style="margin: 0; max-width: 18ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2.4rem, min(8vw, 11vh), 6.4rem); line-height: 1.0; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; text-wrap: pretty; animation: heroTitleRise 1100ms cubic-bezier(.16,.84,.24,1) 700ms both;">To connect people with nature.</h1>
+        </div>
+
+        <div ref="{{ metaRef }}" style="position: absolute; z-index: 6; left: clamp(20px, 5vw, 72px); bottom: clamp(20px, 3.5vh, 38px); display: flex; align-items: center; gap: 14px; pointer-events: none;">
+          <span ref="{{ idxRef }}" style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; color: #ffffff;">01</span>
+          <span ref="{{ barRef }}" style="display: block; width: clamp(70px, 14vw, 170px); height: 2px; background: linear-gradient(to right, #ffffff var(--p, 0%), rgba(255,255,255,0.35) var(--p, 0%));"></span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; color: rgba(255,255,255,0.8);">04</span>
+        </div>
+
+        <div ref="{{ cueRef }}" style="position: absolute; z-index: 6; right: clamp(20px, 5vw, 72px); bottom: clamp(20px, 3.5vh, 38px); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.88); font-weight: 500; pointer-events: none;">
+          <span>Scroll</span>
+          <span style="display: block; width: 1px; height: 30px; background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0)); animation: cueDrop 2.6s ease-in-out infinite;"></span>
+        </div>
+      </div>
+
+      <div data-m="panel" style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 52px); align-content: start; padding: clamp(22px, 4vh, 46px) clamp(20px, 5vw, 72px); background: #EAF5FA; color: #0E2A38;">
+        <div ref="{{ c1 }}" style="display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #0F3B4C;">Our mission</span>
+          <p style="margin: 0; font-size: clamp(13px, 1.05vw, 16px); line-height: 1.6; color: rgba(14,42,56,0.86); text-wrap: pretty;">To connect people with nature — and to keep that connection alive long after the encounter is over.</p>
+        </div>
+        <div ref="{{ c2 }}" style="display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #0F3B4C;">Our stories</span>
+          <p style="margin: 0; font-size: clamp(13px, 1.05vw, 16px); line-height: 1.6; color: rgba(14,42,56,0.86); text-wrap: pretty;">We tell them with different art media: filmography and photography, writing and illustration. Whatever gets somebody close enough to an animal or a place to start caring about it.</p>
+        </div>
+        <div ref="{{ c3 }}" style="display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #0F3B4C;">Our actions</span>
+          <p style="margin: 0; font-size: clamp(13px, 1.05vw, 16px); line-height: 1.6; color: rgba(14,42,56,0.86); text-wrap: pretty;">Sea expeditions, beach cleanups, research assistance, animal workshops, conservation and communication efforts. We believe every action, no matter how small, makes a difference.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main style="position: relative; z-index: 2; margin-top: -100vh; background: #EAF5FA; color: #0E2A38;">
+    <div data-m="counter" style="position: fixed; right: clamp(18px, 3vw, 46px); bottom: clamp(18px, 3vh, 34px); z-index: 28; display: flex; align-items: baseline; gap: 6px; pointer-events: none; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; color: rgba(14,42,56,0.55); mix-blend-mode: difference;">
+      <span ref="{{ pctRef }}" style="color: #C9A55C;">000</span><span>%</span>
+    </div>
+
+    <section data-screen-label="Manifiesto" data-m="manifiesto" style="padding: clamp(70px, 18vh, 200px) clamp(20px, 5vw, 72px) clamp(70px, 16vh, 180px); max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(20px, 4vh, 44px);">
+      <p data-reveal style="margin: 0; max-width: 34ch; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(1.3rem, 3.2vw, 2.5rem); line-height: 1.25; color: #08222F; text-wrap: pretty;">Our world is evolving into the palm of our hands, showing us and teaching us everything we know.</p>
+      <p data-reveal data-reveal-delay="140ms" style="margin: 0; max-width: 34ch; align-self: flex-end; text-align: right; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(1.3rem, 3.2vw, 2.5rem); line-height: 1.25; color: rgba(14,42,56,0.74); text-wrap: pretty;">So why not show what is all around us instead, and try to give awareness to what is,</p>
+      <div data-reveal data-reveal-delay="300ms" style="display: flex; flex-direction: column; gap: clamp(10px, 2vh, 20px); padding-top: clamp(10px, 2vh, 22px); border-top: 1px solid rgba(14,42,56,0.18);">
+        <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;">What is</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(3rem, 15vw, 11rem); line-height: 0.88; letter-spacing: 0.02em; text-transform: uppercase; color: #08222F;">Our nature<span style="color: #0F3B4C;">.</span></span>
+      </div>
+    </section>
+
+    <section data-screen-label="How" style="padding: clamp(60px, 14vh, 160px) clamp(20px, 5vw, 72px) clamp(50px, 10vh, 120px); max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(22px, 4vh, 44px);">
+      <span data-reveal style="font-size: 10px; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase; color: #0F3B4C;">How?</span>
+      <h2 data-reveal style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 5.6vw, 4.2rem); line-height: 1.05; color: #08222F; text-wrap: pretty;">Through telling our stories and through our actions</h2>
+    </section>
+
+    <section data-screen-label="Storytelling" style="padding: 0 clamp(20px, 5vw, 72px) clamp(60px, 12vh, 140px); max-width: 1240px; margin: 0 auto;">
+      <div data-m="row" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(26px, 5vw, 70px); align-items: center;">
+        <div data-reveal style="display: flex; flex-direction: column; gap: clamp(16px, 2.6vh, 28px);">
+          <h3 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; color: #08222F;">Through storytelling</h3>
+          <span style="font-size: 13px; letter-spacing: 0.06em; color: rgba(14,42,56,0.68);">with different art media:</span>
+          <div style="display: flex; flex-direction: column;">
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 14px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">01</span>Filmography and photography</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 14px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">02</span>Writing</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); border-bottom: 1px solid rgba(14,42,56,0.18); padding: 14px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">03</span>Illustration</span>
+          </div>
+        </div>
+        <div data-reveal style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="position: relative; width: 100%; aspect-ratio: 3 / 2; border: 1px solid rgba(14,42,56,0.16); border-radius: 3px; overflow: hidden;">
+            <img src="assets/about-ray.webp" alt="Raya águila manchada sobre la arena, vista desde arriba" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" />
+          </div>
+          <a href="https://spottedfabri.com/pages/gallery" style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 14px; color: rgba(14,42,56,0.74);">Photo by Juani Molfino — explore here to get to his magic →</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="actions" data-screen-label="Actions" style="padding: 0 clamp(20px, 5vw, 72px) clamp(60px, 12vh, 140px); max-width: 1240px; margin: 0 auto;">
+      <div data-m="row" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(26px, 5vw, 70px); align-items: center;">
+        <div data-reveal style="display: flex; flex-direction: column; gap: 12px; order: 2;">
+          <div style="position: relative; width: 100%; aspect-ratio: 3 / 2; border: 1px solid rgba(14,42,56,0.16); border-radius: 3px; overflow: hidden;">
+            <img src="assets/about-sealions.webp" alt="Dos lobos marinos jugando bajo el agua" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block;" />
+          </div>
+          <a href="#contact" style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 14px; color: rgba(14,42,56,0.74);">explore here to join the expeditions →</a>
+        </div>
+        <div data-reveal style="display: flex; flex-direction: column; gap: clamp(16px, 2.6vh, 28px); order: 1;">
+          <h3 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; color: #08222F;">Through actions</h3>
+          <span style="max-width: 42ch; font-size: 13px; line-height: 1.6; color: rgba(14,42,56,0.68);">We help and support animals and nature through a range of different actions:</span>
+          <div style="display: flex; flex-direction: column;">
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 13px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">01</span>Sea expeditions</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 13px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">02</span>Beach cleanups</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 13px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">03</span>Research assistance</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); padding: 13px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">04</span>Animal workshops</span>
+            <span style="display: flex; align-items: baseline; gap: 14px; border-top: 1px solid rgba(14,42,56,0.18); border-bottom: 1px solid rgba(14,42,56,0.18); padding: 13px 0; font-size: clamp(15px, 1.4vw, 19px);"><span style="font-family: ui-monospace, monospace; font-size: 11px; color: #0F3B4C;">05</span>Conservation and communication efforts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Creencia" style="padding: clamp(40px, 8vh, 100px) clamp(20px, 5vw, 72px) clamp(60px, 12vh, 140px); max-width: 1240px; margin: 0 auto; border-top: 1px solid rgba(14,42,56,0.18);">
+      <h2 data-reveal style="margin: 0 auto; max-width: 20ch; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 6vw, 4.6rem); line-height: 1.06; color: #08222F; text-wrap: pretty;">We believe that every action, no matter how small, <em style="font-style: italic; color: #0F3B4C;">makes a difference</em>.</h2>
+    </section>
+
+    <section id="contact" data-screen-label="Contact" style="background: #061826; color: #EAF5FA;">
+      <div style="padding: clamp(60px, 12vh, 150px) clamp(20px, 5vw, 72px) clamp(50px, 9vh, 110px); max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(26px, 5vh, 50px);">
+        <h2 data-reveal style="margin: 0; max-width: 14ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 6vw, 4.2rem); line-height: 1.04; color: #ffffff;">Talk to us</h2>
+        <p data-reveal style="margin: 0; max-width: 54ch; font-size: clamp(15px, 1.3vw, 19px); line-height: 1.7; color: rgba(234,245,250,0.88); text-wrap: pretty;">Have any questions? We are always open to talk about the environment, new projects, creative opportunities and how you — or we — can help.</p>
+        <div data-reveal data-m="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: clamp(20px, 3vw, 44px); border-top: 1px solid rgba(255,255,255,0.16); padding-top: clamp(22px, 3vh, 36px);">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Email</span>
+            <a href="mailto:encountersagainandagain@gmail.com" style="font-size: clamp(14px, 1.2vw, 17px); word-break: break-word;">encountersagainandagain@gmail.com</a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Phone</span>
+            <a href="tel:+61451544843" style="font-size: clamp(14px, 1.2vw, 17px);">+61 451 544 843</a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Elsewhere</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: clamp(14px, 1.2vw, 17px);">
+              <a href="https://www.instagram.com/encountersagainandagain">Instagram</a>
+              <a href="https://www.youtube.com/@Encountersagainandagain">Youtube</a>
+            </div>
+          </div>
+        </div>
+        <footer style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.12); padding-top: clamp(20px, 3vh, 34px); font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(234,245,250,0.5);">
+          <span>© 2026 Encounters again and again</span>
+          <span>A space for community, art and nature</span>
+        </footer>
+      </div>
+    </section>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navRef: (el) => { this.nav = el; },
+      pctRef: (el) => { this.pct = el; },
+      frameRef: (el) => { this.frame = el; },
+      titleRef: (el) => { this.title = el; },
+      heroVeilRef: (el) => { this.heroVeil = el; },
+      metaRef: (el) => { this.meta = el; },
+      idxRef: (el) => { this.idx = el; },
+      barRef: (el) => { this.bar = el; },
+      cueRef: (el) => { this.cue = el; },
+      f1: (el) => { this.frames[0] = el; },
+      f2: (el) => { this.frames[1] = el; },
+      f3: (el) => { this.frames[2] = el; },
+      f4: (el) => { this.frames[3] = el; },
+      c1: (el) => { this.cols[0] = el; },
+      c2: (el) => { this.cols[1] = el; },
+      c3: (el) => { this.cols[2] = el; }
+    };
+  }
+
+  frames = [];
+  cols = [];
+  shown = 0;
+  progress = 0;
+  eased = 0;
+
+  static ramp(v, from, to, smooth) {
+    const k = Math.min(1, Math.max(0, (v - from) / (to - from)));
+    return smooth ? k * k * (3 - 2 * k) : k;
+  }
+
+  componentDidMount() {
+    const items = Array.from(document.querySelectorAll("[data-reveal]"));
+    items.forEach((el) => {
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, 22px, 0)";
+      el.style.transition = "opacity 900ms cubic-bezier(.2,.7,.2,1), transform 900ms cubic-bezier(.2,.7,.2,1)";
+      if (el.dataset.revealDelay) el.style.transitionDelay = el.dataset.revealDelay;
+    });
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.style.opacity = "1";
+        entry.target.style.transform = "translate3d(0, 0, 0)";
+        this.io.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    items.forEach((el) => this.io.observe(el));
+
+    this.cols.forEach((el) => {
+      if (!el) return;
+      el.style.transition = "opacity 700ms ease, transform 700ms cubic-bezier(.2,.7,.2,1)";
+    });
+
+    this.hero = document.querySelector('[data-screen-label="Hero fotos"]');
+    this.vh = window.innerHeight;
+
+    this.onScroll = () => {
+      const y = window.scrollY;
+      // la retracción de la foto ocurre en la primera pantalla de scroll;
+      // el resto del sticky lo consume el contenido que sube a taparlo
+      this.progress = Math.min(1, Math.max(0, y / this.vh));
+      const max = document.documentElement.scrollHeight - this.vh;
+      const p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+      this.globalPct = p;
+      if (this.pct) {
+        const txt = String(Math.round(p * 100)).padStart(3, "0");
+        if (txt !== this.lastPct) { this.pct.textContent = txt; this.lastPct = txt; }
+      }
+      if (this.nav) {
+        const k = Math.min(1, y / 240);
+        this.nav.style.background = "rgba(6,24,38," + (k * 0.55).toFixed(3) + ")";
+        this.nav.style.backdropFilter = k > 0.05 ? "blur(" + (k * 14).toFixed(1) + "px)" : "none";
+        this.nav.style.borderBottomColor = "rgba(255,255,255," + (k * 0.14).toFixed(3) + ")";
+      }
+    };
+
+    this.onResize = () => { this.vh = window.innerHeight; this.applyNav(); this.onScroll(); };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    window.addEventListener("resize", this.onResize);
+    this.applyNav();
+    this.onScroll();
+    this.loop();
+  }
+
+  applyNav() {
+    if (!this.nav) return;
+    const w = window.innerWidth;
+    const mode = w < 760 ? "mobile" : w < 980 ? "compact" : "wide";
+    if (mode === this.navMode) return;
+    this.navMode = mode;
+    if (mode === "mobile") {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"c" "l" "r"';
+      this.nav.style.rowGap = "14px";
+    } else if (mode === "compact") {
+      this.nav.style.gridTemplateColumns = "1fr 1fr";
+      this.nav.style.gridTemplateAreas = '"c c" "l r"';
+      this.nav.style.rowGap = "14px";
+    } else {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr) auto minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"l c r"';
+      this.nav.style.rowGap = "0px";
+    }
+  }
+
+  loop = () => {
+    this.raf = requestAnimationFrame(this.loop);
+    this.eased += (this.progress - this.eased) * 0.1;
+    const d = this.eased;
+    const R = Component.ramp;
+
+    // la foto se retrae de pantalla completa a una franja: el panel de texto emerge debajo
+    const shrink = R(d, 0, 0.22, true);
+    // el marco deja menos alto en pantallas angostas: el panel apilado necesita sitio
+    const w = window.innerWidth;
+    const minH = w < 760 ? 40 : w < 1080 ? 48 : 54;
+    if (this.frame) this.frame.style.height = (100 - (100 - minH) * shrink).toFixed(2) + "vh";
+    if (this.title) {
+      this.title.style.opacity = (1 - R(d, 0.02, 0.2)).toFixed(3);
+      this.title.style.transform = "translate3d(0, " + (R(d, 0.02, 0.24) * -40).toFixed(1) + "px, 0)";
+    }
+    if (this.heroVeil) this.heroVeil.style.opacity = (1 - shrink * 0.45).toFixed(3);
+    if (this.cue) this.cue.style.opacity = String(Math.max(0, 1 - d * 8));
+    if (this.meta) this.meta.style.opacity = (0.35 + shrink * 0.65).toFixed(3);
+
+    // las columnas del panel entran escalonadas ya con la foto encogida
+    for (let i = 0; i < this.cols.length; i++) {
+      const el = this.cols[i];
+      if (!el) continue;
+      const k = R(d, 0.14 + i * 0.05, 0.3 + i * 0.05, true);
+      el.style.opacity = k.toFixed(3);
+      el.style.transform = "translate3d(0, " + ((1 - k) * 26).toFixed(1) + "px, 0)";
+    }
+
+    // corte duro entre fotos, atado al porcentaje global de scroll (el que se muestra)
+    const g = this.globalPct || 0;
+    const current = g >= 0.06 ? 3 : g >= 0.04 ? 2 : g >= 0.02 ? 1 : 0;
+    if (current !== this.shown) {
+      this.shown = current;
+      for (let i = 0; i < this.frames.length; i++) {
+        const el = this.frames[i];
+        if (!el) continue;
+        el.style.opacity = i === current ? "1" : "0";
+        el.style.zIndex = i === current ? "1" : "0";
+      }
+      if (this.idx) this.idx.textContent = String(current + 1).padStart(2, "0");
+    }
+    if (this.bar) this.bar.style.setProperty("--p", Math.min(100, (g / 0.06) * 100).toFixed(1) + "%");
+  };
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    if (this.io) this.io.disconnect();
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("resize", this.onResize);
+  }
+}
+
+</script>
+</body>
+</html>

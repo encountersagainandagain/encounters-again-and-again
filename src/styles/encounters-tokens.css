@@ -1,0 +1,39 @@
+:root {
+  --enc-abismo: #061826;
+  --enc-marea: #0f3b4c;
+  --enc-laguna: #8fd9ea;
+  --enc-oro: #c9a55c;
+  --enc-arena: #e3d3b4;
+  --enc-coral: #e08a6e;
+  --enc-alga: #4e8a72;
+  --enc-espuma: #eaf5fa;
+  --enc-ink: #0e2a38;
+  --enc-ink-strong: #08222f;
+  --enc-paper: #ffffff;
+  --enc-font-heading: 'EB Garamond', Georgia, serif;
+  --enc-font-body: 'Archivo', Arial, sans-serif;
+  --enc-font-data: ui-monospace, monospace;
+  --enc-banner-size: clamp(2.4rem, min(11vw, 13vh), 8.5rem);
+  --enc-h2-size: clamp(2rem, 5.6vw, 4.4rem);
+  --enc-h3-size: clamp(1.6rem, 3.4vw, 2.8rem);
+  --enc-page-padding: clamp(20px, 5vw, 72px);
+  --enc-section-gap: clamp(70px, 16vh, 180px);
+  --enc-grid-gap: clamp(20px, 3vw, 44px);
+  --enc-reading-width: 680px;
+}
+
+body { background: var(--enc-abismo); color: var(--enc-espuma); font-family: var(--font-body), var(--enc-font-body); }
+h1, h2, h3 { font-family: var(--font-display), var(--enc-font-heading); }
+.enc-header, .enc-footer { padding: 24px var(--enc-page-padding); display: flex; gap: 24px; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid #eaf5fa22; }
+.enc-brand { display: flex; gap: 12px; align-items: center; }
+.enc-header nav { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; }
+.enc-preparation { min-height: 50vh; padding: 80px var(--enc-page-padding); }
+.enc-preparation h1 { font-size: clamp(2.4rem, 6vw, 5rem); max-width: 20ch; }
+.enc-preparation p { margin: 20px 0; }
+.enc-eyebrow { color: var(--enc-laguna); }
+.enc-newsletter { padding: 32px var(--enc-page-padding); }
+.enc-newsletter h2 { font-size: 2rem; }
+.enc-newsletter form { display: grid; gap: 12px; max-width: 500px; margin-top: 20px; }
+.enc-newsletter input, .enc-newsletter button { padding: 12px; color: var(--enc-ink); background: var(--enc-espuma); }
+.enc-newsletter button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--enc-laguna); outline-offset: 4px; }

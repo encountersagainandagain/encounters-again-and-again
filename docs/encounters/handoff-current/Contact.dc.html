@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #EAF5FA; text-decoration: none; }
+  a:hover { color: #8FD9EA; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes heroRise {
+    from { transform: translate3d(0, 14%, 0) scale(1.05); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  }
+  @keyframes heroTitleRise {
+    from { transform: translate3d(0, 48px, 0); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @keyframes heroFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  input::placeholder, textarea::placeholder { color: rgba(234,245,250,0.4); }
+  [data-pick] { cursor: pointer; }
+  [data-pick][data-on="1"] { background: #EAF5FA !important; color: #08222F !important; border-color: #EAF5FA !important; }
+  [data-pick][data-on="1"] [data-hint] { color: rgba(14,42,56,0.68) !important; }
+  @media (max-width: 760px) {
+    [data-m="nav"] { padding: 14px 16px !important; }
+    [data-m="navlinks"] { justify-content: center !important; font-size: 10px !important; letter-spacing: 0.1em !important; gap: 6px 16px !important; }
+    [data-m="picks"] { grid-template-columns: minmax(0, 1fr) !important; }
+    [data-m="fields"] { grid-template-columns: minmax(0, 1fr) !important; }
+    [data-m="panel"] { margin-top: -14vh !important; padding: clamp(28px, 8vw, 48px) clamp(20px, 6vw, 40px) clamp(36px, 10vw, 60px) !important; }
+  }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #061826; color: #EAF5FA; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; overflow: clip;">
+  <div ref="{{ veilRef }}" style="position: fixed; top: 0; left: 0; right: 0; height: 140px; z-index: 29; pointer-events: none; transition: opacity 400ms ease; background: linear-gradient(to bottom, rgba(4,17,30,0.72), rgba(4,17,30,0.34) 50%, rgba(4,17,30,0));"></div>
+  <nav ref="{{ navRef }}" data-m="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'l c r'; align-items: center; gap: clamp(12px, 2vw, 36px); padding: 18px clamp(18px, 3vw, 46px); color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0); transition: background 400ms ease, backdrop-filter 400ms ease, border-color 400ms ease, color 400ms ease;">
+    <div data-m="navlinks" style="grid-area: l; display: flex; align-items: center; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="Expeditions.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Encounters</span>
+          <span style="height: 12px; line-height: 12px;">Expeditions</span>
+        </span>
+      </a>
+      <a href="Workshops.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Artsy Animals</span>
+          <span style="height: 12px; line-height: 12px;">Workshops</span>
+        </span>
+      </a>
+      <a href="Art.dc.html" style="display: block; height: 12px; line-height: 12px; white-space: nowrap; color: inherit;">Art</a>
+      <a href="Meaningful Messages.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Meaningful</span>
+          <span style="height: 12px; line-height: 12px;">Messages</span>
+        </span>
+      </a>
+    </div>
+    <a href="Abismo Home.dc.html" style="grid-area: c; justify-self: center; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: inherit;">
+      <img ref="{{ navMarkRef }}" src="assets/logo-mark-blanco.png" alt="Encounters" style="height: 32px; width: auto; margin-right: -2px; transition: filter 400ms ease;" />
+      <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 500;">
+        <span style="font-size: clamp(14px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+        <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; opacity: 0.82;">again and again</span>
+      </span>
+    </a>
+    <div data-m="navlinks" style="grid-area: r; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="About.dc.html" style="white-space: nowrap; color: inherit;">About us</a>
+      <a href="The Crew.dc.html" style="white-space: nowrap; color: inherit;">The crew</a>
+      <a href="Contact.dc.html" style="white-space: nowrap; color: inherit; box-shadow: inset 0 -1px 0 currentColor;">Contact</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Contact hero" style="position: relative; height: 100vh; overflow: hidden; background: #061826;">
+    <div style="position: absolute; inset: 0; animation: heroRise 1500ms cubic-bezier(.16,.84,.24,1) both;">
+      <img ref="{{ heroImgRef }}" src="assets/reef-turtle-web.jpg" alt="Tortuga en el arrecife" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 52%; display: block;" />
+    </div>
+    <div style="position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.72) 0%, rgba(4,17,30,0.56) 46%, rgba(4,17,30,0.82) 100%);"></div>
+    <div ref="{{ heroTextRef }}" style="position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: clamp(14px, 3vh, 30px); padding: clamp(150px, 26vh, 300px) clamp(20px, 5vw, 72px) 0; text-align: center; pointer-events: none;">
+      <h1 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2.6rem, min(11vw, 13vh), 8.5rem); line-height: 0.96; letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff; animation: heroTitleRise 1100ms cubic-bezier(.16,.84,.24,1) 380ms both;">Get in touch</h1>
+      <p style="margin: 0; max-width: 46ch; font-size: clamp(15px, 1.25vw, 19px); line-height: 1.6; color: rgba(255,255,255,0.9); text-wrap: pretty; animation: heroFadeIn 900ms ease 900ms both;">Tell us a few things and we write back ourselves — usually within a couple of days, unless we are out at sea.</p>
+    </div>
+  </section>
+
+  <main style="position: relative; z-index: 4;">
+    <div data-m="panel" style="position: relative; width: min(1120px, 92vw); margin: -24vh auto 0; background: #08222F; border: 1px solid rgba(234,245,250,0.12); box-shadow: 0 -30px 90px -40px rgba(4,17,30,0.9); padding: clamp(40px, 6vw, 80px) clamp(28px, 5vw, 76px) clamp(50px, 7vw, 90px);">
+      <form ref="{{ formRef }}" style="display: flex; flex-direction: column; gap: clamp(36px, 5vh, 64px);">
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: clamp(18px, 3vh, 30px);">
+          <legend style="padding: 0; font-size: clamp(17px, 1.6vw, 23px); font-weight: 600; color: #ffffff;">What are you writing about?</legend>
+          <div data-m="picks" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(12px, 1.6vw, 20px);">
+            <button type="button" data-pick="expedition" style="appearance: none; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: clamp(18px, 2vw, 26px); background: transparent; border: 1px solid rgba(234,245,250,0.22); color: #EAF5FA; font-family: inherit; transition: background 220ms ease, border-color 220ms ease, color 220ms ease;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 1.7vw, 25px);">Joining an expedition</span>
+              <span data-hint="1" style="font-size: 13px; line-height: 1.5; color: rgba(234,245,250,0.6);">Crew, dates, what the boat needs.</span>
+            </button>
+            <button type="button" data-pick="workshops" style="appearance: none; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: clamp(18px, 2vw, 26px); background: transparent; border: 1px solid rgba(234,245,250,0.22); color: #EAF5FA; font-family: inherit; transition: background 220ms ease, border-color 220ms ease, color 220ms ease;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 1.7vw, 25px);">Workshops &amp; talks</span>
+              <span data-hint="1" style="font-size: 13px; line-height: 1.5; color: rgba(234,245,250,0.6);">Schools, markets, communities.</span>
+            </button>
+            <button type="button" data-pick="art" style="appearance: none; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: clamp(18px, 2vw, 26px); background: transparent; border: 1px solid rgba(234,245,250,0.22); color: #EAF5FA; font-family: inherit; transition: background 220ms ease, border-color 220ms ease, color 220ms ease;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 1.7vw, 25px);">The book &amp; the art</span>
+              <span data-hint="1" style="font-size: 13px; line-height: 1.5; color: rgba(234,245,250,0.6);">Copies, prints, illustrations.</span>
+            </button>
+            <button type="button" data-pick="together" style="appearance: none; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: clamp(18px, 2vw, 26px); background: transparent; border: 1px solid rgba(234,245,250,0.22); color: #EAF5FA; font-family: inherit; transition: background 220ms ease, border-color 220ms ease, color 220ms ease;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 1.7vw, 25px);">Making something together</span>
+              <span data-hint="1" style="font-size: 13px; line-height: 1.5; color: rgba(234,245,250,0.6);">Research, filming, conservation.</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <div data-m="fields" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(22px, 3vw, 38px);">
+          <label style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Your name</span>
+            <input name="name" type="text" placeholder="Georgia Webb" style="appearance: none; background: transparent; border: 0; border-bottom: 1px solid rgba(234,245,250,0.28); padding: 10px 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(17px, 1.5vw, 22px); color: #ffffff; outline: none;" style-focus="border-bottom-color: #8FD9EA" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Email</span>
+            <input name="email" type="email" placeholder="you@somewhere.sea" style="appearance: none; background: transparent; border: 0; border-bottom: 1px solid rgba(234,245,250,0.28); padding: 10px 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(17px, 1.5vw, 22px); color: #ffffff; outline: none;" style-focus="border-bottom-color: #8FD9EA" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Where from</span>
+            <input name="place" type="text" placeholder="Wollongong, AU" style="appearance: none; background: transparent; border: 0; border-bottom: 1px solid rgba(234,245,250,0.28); padding: 10px 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(17px, 1.5vw, 22px); color: #ffffff; outline: none;" style-focus="border-bottom-color: #8FD9EA" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">When</span>
+            <input name="when" type="text" placeholder="This season · next season · no rush" style="appearance: none; background: transparent; border: 0; border-bottom: 1px solid rgba(234,245,250,0.28); padding: 10px 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(17px, 1.5vw, 22px); color: #ffffff; outline: none;" style-focus="border-bottom-color: #8FD9EA" />
+          </label>
+        </div>
+
+        <label style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.6);">Your message</span>
+          <textarea name="message" rows="4" placeholder="Tell us about the encounter you have in mind." style="appearance: none; resize: vertical; background: transparent; border: 1px solid rgba(234,245,250,0.22); padding: clamp(14px, 1.6vw, 20px); font-family: 'EB Garamond', Georgia, serif; font-size: clamp(16px, 1.35vw, 20px); line-height: 1.55; color: #ffffff; outline: none;" style-focus="border-color: #8FD9EA"></textarea>
+        </label>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; border-top: 1px solid rgba(234,245,250,0.14); padding-top: clamp(22px, 3vh, 34px);">
+          <span ref="{{ noteRef }}" style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(14px, 1.15vw, 18px); color: rgba(234,245,250,0.6);">No newsletters, no lists. Just us writing back.</span>
+          <button type="submit" style="appearance: none; cursor: pointer; padding: 16px clamp(26px, 3vw, 42px); background: #EAF5FA; border: 1px solid #EAF5FA; color: #08222F; font-family: inherit; font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; transition: background 220ms ease, color 220ms ease;" style-hover="background: #8FD9EA; border-color: #8FD9EA">Send message</button>
+        </div>
+      </form>
+
+      <div ref="{{ doneRef }}" style="display: none; flex-direction: column; align-items: center; gap: clamp(14px, 2.4vh, 26px); padding: clamp(30px, 7vh, 80px) 0 clamp(20px, 4vh, 40px); text-align: center;">
+        <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #8FD9EA;">Message sent</span>
+        <h2 style="margin: 0; max-width: 24ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 5vw, 3.6rem); line-height: 1.04; color: #ffffff; text-wrap: pretty;">Thank you for writing</h2>
+        <p ref="{{ doneMsgRef }}" style="margin: 0; max-width: 44ch; font-size: clamp(15px, 1.15vw, 18px); line-height: 1.7; color: rgba(234,245,250,0.82); text-wrap: pretty;">We will get back to you as soon as we are within reach of signal.</p>
+        <svg data-scribble="1" viewBox="0 0 600 120" aria-hidden="true" style="display: block; width: min(320px, 60%); height: auto; overflow: visible;">
+          <path d="M14 70 C 120 18, 300 14, 430 34 C 540 52, 520 86, 380 90 C 240 94, 120 78, 66 58 C 36 46, 70 34, 150 34" fill="none" stroke="rgba(234,245,250,0.7)" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+      </div>
+    </div>
+
+    <section data-screen-label="Otros caminos" style="padding: clamp(80px, 18vh, 200px) clamp(20px, 5vw, 72px) clamp(90px, 20vh, 220px);">
+      <div style="max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: clamp(28px, 4vw, 64px);">
+        <div data-seq="0.94,0.4" style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.5);">Write to us</span>
+          <a href="mailto:encountersagainandagain@gmail.com" style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(18px, 1.7vw, 24px); color: #EAF5FA;">encountersagainandagain@gmail.com</a>
+        </div>
+        <div data-seq="0.9,0.4" style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.5);">Support the boat</span>
+          <a href="https://www.gofundme.com/u/encounters-expeditions" target="_blank" rel="noopener" style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(18px, 1.7vw, 24px); color: #EAF5FA;">Encounters Expeditions fundraiser</a>
+        </div>
+        <div data-seq="0.86,0.4" style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.5);">Read the book</span>
+          <a href="https://www.encountersagainandagain.org/" target="_blank" rel="noopener" style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(18px, 1.7vw, 24px); color: #EAF5FA;">encountersagainandagain.org</a>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Cierre" style="border-top: 1px solid rgba(255,255,255,0.14); margin: 0 clamp(20px, 5vw, 72px); padding: clamp(20px, 3vh, 34px) 0 clamp(40px, 6vh, 70px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(234,245,250,0.55);">
+      <span>© 2026 Encounters again and again</span>
+      <span>May the ocean be with you</span>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navRef: (el) => { this.nav = el; },
+      veilRef: (el) => { this.veil = el; },
+      navMarkRef: (el) => { this.navMark = el; },
+      heroImgRef: (el) => { this.heroImg = el; },
+      heroTextRef: (el) => { this.heroText = el; },
+      formRef: (el) => { this.form = el; },
+      noteRef: (el) => { this.note = el; },
+      doneRef: (el) => { this.done = el; },
+      doneMsgRef: (el) => { this.doneMsg = el; }
+    };
+  }
+
+  static ramp(v, from, to, smooth) {
+    const k = Math.min(1, Math.max(0, (v - from) / (to - from)));
+    return smooth ? k * k * (3 - 2 * k) : k;
+  }
+
+  static REPLY = {
+    expedition: "We will write back about dates, crew and what the boat needs for the next leg.",
+    workshops: "We will write back with what a workshop looks like and what we would need from your side.",
+    art: "We will write back about copies, prints and what Georgia has available right now.",
+    together: "We will write back — these are the messages we open first."
+  };
+
+  measureScribbles() {
+    const vh = window.innerHeight;
+    const docH = document.documentElement.scrollHeight;
+    (this.scribbles || []).forEach((sc) => {
+      const docTop = sc.svg.getBoundingClientRect().top + window.scrollY;
+      const minTop = Math.max(0, vh - (docH - docTop));
+      sc.span = Math.max(1, Math.min(vh * 0.4, vh - minTop));
+    });
+  }
+
+  armScribbles() {
+    this.scribbles = [];
+    Array.from(document.querySelectorAll("svg[data-scribble]")).forEach((svg) => {
+      const path = svg.querySelector("path");
+      if (!path || !path.getTotalLength) return;
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len + " " + len;
+      path.style.strokeDashoffset = String(len);
+      this.scribbles.push({ svg: svg, path: path, len: len, span: 1 });
+    });
+    this.measureScribbles();
+  }
+
+  armForm() {
+    this.picks = Array.from(document.querySelectorAll("[data-pick]"));
+    this.picks.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.choice = btn.dataset.pick;
+        this.picks.forEach((b) => {
+          if (b === btn) b.setAttribute("data-on", "1");
+          else b.removeAttribute("data-on");
+        });
+      });
+    });
+
+    if (!this.form) return;
+    this.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const data = new FormData(this.form);
+      const name = String(data.get("name") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      if (!name || !email.includes("@")) {
+        if (this.note) {
+          this.note.textContent = "We need a name and an email to write back.";
+          this.note.style.color = "#F2A66A";
+        }
+        return;
+      }
+      if (this.doneMsg && this.choice && Component.REPLY[this.choice]) {
+        this.doneMsg.textContent = Component.REPLY[this.choice];
+      }
+      this.form.style.display = "none";
+      if (this.done) this.done.style.display = "flex";
+      this.measureScribbles();
+    });
+  }
+
+  componentDidMount() {
+    this.seq = Array.from(document.querySelectorAll("[data-seq]")).map((el) => {
+      const [start, span, shift] = el.dataset.seq.split(",").map(Number);
+      const rise = shift || 70;
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, " + rise + "px, 0)";
+      el.style.willChange = "opacity, transform";
+      return { el, start: start || 0.9, span: span || 0.25, shift: rise };
+    });
+
+    this.armForm();
+    this.armScribbles();
+    this.hero = document.querySelector("[data-screen-label='Contact hero']");
+    this.vh = window.innerHeight;
+    this.onScroll = () => {
+      const y = window.scrollY;
+      this.progress = Math.min(1, Math.max(0, y / this.vh));
+      const dark = this.hero ? this.hero.getBoundingClientRect().bottom < 160 : true;
+      if (dark !== this.navDark) {
+        this.navDark = dark;
+        if (this.veil) this.veil.style.opacity = dark ? "0" : "1";
+      }
+      if (this.nav) {
+        const k = Math.min(1, y / 240);
+        this.nav.style.background = "rgba(6,24,38," + (k * 0.72).toFixed(3) + ")";
+        this.nav.style.backdropFilter = k > 0.05 ? "blur(" + (k * 14).toFixed(1) + "px)" : "none";
+        this.nav.style.borderBottomColor = "rgba(255,255,255," + (k * 0.14).toFixed(3) + ")";
+      }
+    };
+    this.onResize = () => { this.vh = window.innerHeight; this.measureScribbles(); this.applyNav(); this.onScroll(); };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    window.addEventListener("resize", this.onResize);
+    this.applyNav();
+    this.onScroll();
+    this.loop();
+  }
+
+  applyNav() {
+    if (!this.nav) return;
+    const w = window.innerWidth;
+    const mode = w < 760 ? "mobile" : w < 980 ? "compact" : "wide";
+    if (mode === this.navMode) return;
+    this.navMode = mode;
+    if (mode === "mobile") {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"c" "l" "r"';
+      this.nav.style.rowGap = "14px";
+    } else if (mode === "compact") {
+      this.nav.style.gridTemplateColumns = "1fr 1fr";
+      this.nav.style.gridTemplateAreas = '"c c" "l r"';
+      this.nav.style.rowGap = "14px";
+    } else {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr) auto minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"l c r"';
+      this.nav.style.rowGap = "0px";
+    }
+  }
+
+  progress = 0;
+  eased = 0;
+
+  loop = () => {
+    this.raf = requestAnimationFrame(this.loop);
+    this.eased += (this.progress - this.eased) * 0.08;
+    const R = Component.ramp;
+    const d = this.eased;
+    const vh = window.innerHeight || this.vh;
+
+    // la foto se hunde despacio detrás del panel y el título se va con ella
+    const k = R(d, 0, 0.9);
+    if (this.heroImg) {
+      this.heroImg.style.transform = "translate3d(0," + (k * 8).toFixed(1) + "%,0) scale(" + (1 + k * 0.07).toFixed(3) + ")";
+      this.heroImg.style.filter = "brightness(" + (1 - k * 0.35).toFixed(3) + ")";
+    }
+    if (this.heroText) {
+      const t = R(d, 0.04, 0.6);
+      this.heroText.style.opacity = (1 - t).toFixed(3);
+      this.heroText.style.transform = "translate3d(0," + (t * -60).toFixed(1) + "px,0)";
+    }
+
+    (this.seq || []).forEach((item) => {
+      const rect = item.el.getBoundingClientRect();
+      const p = R((vh * item.start - rect.top) / (vh * item.span), 0, 1, true);
+      item.el.style.opacity = p.toFixed(3);
+      item.el.style.transform = "translate3d(0," + ((1 - p) * item.shift).toFixed(1) + "px,0)";
+    });
+
+    (this.scribbles || []).forEach((sc) => {
+      const top = sc.svg.getBoundingClientRect().top;
+      const p = R((vh - top) / sc.span, 0, 1);
+      sc.path.style.strokeDashoffset = (sc.len * (1 - p)).toFixed(1);
+    });
+  };
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("resize", this.onResize);
+  }
+}
+</script>
+</body>
+</html>

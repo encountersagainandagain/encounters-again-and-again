@@ -1,0 +1,721 @@
+{
+  "schema_version": "1.0",
+  "prepared_at": "2026-09-23",
+  "status": "planning_only_do_not_deploy_directly",
+  "source_base_url": "https://encountersagainandagain.com",
+  "proposed_canonical_origin": "https://encountersagainandagain.com",
+  "canonical_host_requires_prelaunch_verification": true,
+  "sources": {
+    "snapshot_file": "encounters-content-snapshot/seed-content.json",
+    "captured_at": "2026-09-12T01:38:28.372317+00:00",
+    "url_field": "source_url; never proposed_path",
+    "scope": "11 pages and 1 post in original snapshot; not exhaustive traffic or media audit"
+  },
+  "decisions": {
+    "content_moved_http_status": 308,
+    "permanent_redirect_note": "301 también es válido. Aquí se propone 308 para una implementación coherente con redirects permanentes de Next. No se ha implementado.",
+    "trailing_slash": "prefer_no_trailing_slash_except_root; validate normalization with legacy rules",
+    "same_path_note": "200 is the canonical target response; /about/ may normalize to /about. Never create a redirect to itself.",
+    "unknown_urls": "404 unless explicit mapped equivalent",
+    "legacy_routes": "404/410 proposals require final content/traffic check; never bulk redirect to Home"
+  },
+  "pages": [
+    {
+      "source_url": "https://encountersagainandagain.com/elementor-page-3462/",
+      "source_path": "/elementor-page-3462/",
+      "title": "Meet The Team",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/crew",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": true
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/elementor-page-3107/",
+      "source_path": "/elementor-page-3107/",
+      "title": "Artsy Animals",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/workshops",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": true
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/elementor-3062/",
+      "source_path": "/elementor-3062/",
+      "title": "Encounters Expeditions",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/expeditions",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": true
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/elementor-2907/",
+      "source_path": "/elementor-2907/",
+      "title": "Wild Wonders",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/crew/wild-wonders",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": true
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/contact-3/",
+      "source_path": "/contact-3/",
+      "title": "Contact",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/contact",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": true
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/services-3/",
+      "source_path": "/services-3/",
+      "title": "Services",
+      "snapshot_group": "pages",
+      "migration_status": "legacy",
+      "target_path": null,
+      "proposed_action": "retire_pending_final_inventory",
+      "proposed_http_status": 410,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/",
+      "source_path": "/",
+      "title": "Home",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/",
+      "proposed_action": "keep",
+      "proposed_http_status": 200,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/about/",
+      "source_path": "/about/",
+      "title": "About",
+      "snapshot_group": "pages",
+      "migration_status": "core",
+      "target_path": "/about",
+      "proposed_action": "keep_with_trailing_slash_normalization",
+      "proposed_http_status": 200,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/shop/",
+      "source_path": "/shop/",
+      "title": "Shop",
+      "snapshot_group": "pages",
+      "migration_status": "future_disabled",
+      "target_path": null,
+      "proposed_action": "disabled_module",
+      "proposed_http_status": 404,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/customer-dashboard/",
+      "source_path": "/customer-dashboard/",
+      "title": "Dashboard",
+      "snapshot_group": "pages",
+      "migration_status": "system_disabled",
+      "target_path": null,
+      "proposed_action": "disabled_module",
+      "proposed_http_status": 404,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/checkout/",
+      "source_path": "/checkout/",
+      "title": "Checkout",
+      "snapshot_group": "pages",
+      "migration_status": "system_disabled",
+      "target_path": null,
+      "proposed_action": "disabled_module",
+      "proposed_http_status": 404,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.pages.source_url",
+      "requires_target_published": false
+    },
+    {
+      "source_url": "https://encountersagainandagain.com/you-never-know-what-encounter-could-change-your-life/",
+      "source_path": "/you-never-know-what-encounter-could-change-your-life/",
+      "title": "You never know what encounter could change your life",
+      "snapshot_group": "stories",
+      "migration_status": "core",
+      "target_path": "/meaningful-messages/you-never-know-what-encounter-could-change-your-life",
+      "proposed_action": "permanent_redirect",
+      "proposed_http_status": 308,
+      "mapping_status": "proposed_not_implemented",
+      "source_evidence": "seed-content.json: content.stories.source_url",
+      "requires_target_published": true
+    }
+  ],
+  "observed_link_aliases": [
+    {
+      "source_url": "https://encountersagainandagain.com/contact",
+      "target_path": "/contact",
+      "action": "serve_target_200_not_a_redirect",
+      "evidence": "internal link in snapshot"
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "image_001",
+      "source_url": "https://encountersagainandagain.com/wp-content/plugins/elementor/assets/images/placeholder.png",
+      "source_path": "/wp-content/plugins/elementor/assets/images/placeholder.png",
+      "local_path": "assets/images/placeholder-14d59cae57.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_002",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2022/10/Content-Writing.jpg",
+      "source_path": "/wp-content/uploads/2022/10/Content-Writing.jpg",
+      "local_path": "assets/images/Content-Writing-aeebeff2da.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_003",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2022/10/Graphic-Design.jpg",
+      "source_path": "/wp-content/uploads/2022/10/Graphic-Design.jpg",
+      "local_path": "assets/images/Graphic-Design-e3684db8db.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_004",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2022/10/Web-Design.jpg",
+      "source_path": "/wp-content/uploads/2022/10/Web-Design.jpg",
+      "local_path": "assets/images/Web-Design-4d78e9960e.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_005",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/20260206-20260206-DSC04937-1024x683.jpg",
+      "source_path": "/wp-content/uploads/2026/02/20260206-20260206-DSC04937-1024x683.jpg",
+      "local_path": "assets/images/20260206-20260206-DSC04937-1024x683-31de96ff6b.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_006",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/20260206-20260206-DSC04937-2048x1365.jpg",
+      "source_path": "/wp-content/uploads/2026/02/20260206-20260206-DSC04937-2048x1365.jpg",
+      "local_path": "assets/images/20260206-20260206-DSC04937-2048x1365-d89847fb38.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_007",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/20260206-20260206-DSC04973.jpg",
+      "source_path": "/wp-content/uploads/2026/02/20260206-20260206-DSC04973.jpg",
+      "local_path": "assets/images/20260206-20260206-DSC04973-eaecfc193d.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_008",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/629343249_17891594148421787_6036720627265269970_n-225x300.webp",
+      "source_path": "/wp-content/uploads/2026/02/629343249_17891594148421787_6036720627265269970_n-225x300.webp",
+      "local_path": "assets/images/629343249_17891594148421787_6036720627265269970_n-225x300-fec0040e76.webp",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_009",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/629343249_17891594148421787_6036720627265269970_n.webp",
+      "source_path": "/wp-content/uploads/2026/02/629343249_17891594148421787_6036720627265269970_n.webp",
+      "local_path": "assets/images/629343249_17891594148421787_6036720627265269970_n-d2069acb5a.webp",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_010",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC01979-1024x683.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC01979-1024x683.jpg",
+      "local_path": "assets/images/DSC01979-1024x683-7edae7fce7.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_011",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC01979-scaled-2048x1366.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC01979-scaled-2048x1366.jpg",
+      "local_path": "assets/images/DSC01979-scaled-2048x1366-51bd1ab437.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_012",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC05858-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC05858-scaled.jpg",
+      "local_path": "assets/images/DSC05858-scaled-8974109205.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_013",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC09366-2000x3556.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC09366-2000x3556.jpg",
+      "local_path": "assets/images/DSC09366-2000x3556-e7febd4ad0.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_014",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC09366-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC09366-scaled.jpg",
+      "local_path": "assets/images/DSC09366-scaled-889748128d.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_015",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/DSC09475-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/02/DSC09475-scaled.jpg",
+      "local_path": "assets/images/DSC09475-scaled-65f3a61d8d.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_016",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/WhatsApp-Image-2026-02-09-at-11.06.49-PM.jpeg",
+      "source_path": "/wp-content/uploads/2026/02/WhatsApp-Image-2026-02-09-at-11.06.49-PM.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2026-02-09-at-11.06.49-PM-d5dd72e57d.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_017",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/cropped-IMG_0237-1.jpeg",
+      "source_path": "/wp-content/uploads/2026/02/cropped-IMG_0237-1.jpeg",
+      "local_path": "assets/images/cropped-IMG_0237-1-f7e457b6c8.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_018",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/cropped-encounters.png",
+      "source_path": "/wp-content/uploads/2026/02/cropped-encounters.png",
+      "local_path": "assets/images/cropped-encounters-50ebce0045.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_019",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/02/encounters_vector_refined_text.svg",
+      "source_path": "/wp-content/uploads/2026/02/encounters_vector_refined_text.svg",
+      "local_path": "assets/images/encounters_vector_refined_text-f117e22f69.svg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_020",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Backcover_encounters-2000x2829.jpg",
+      "source_path": "/wp-content/uploads/2026/03/Backcover_encounters-2000x2829.jpg",
+      "local_path": "assets/images/Backcover_encounters-2000x2829-44f61352df.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_021",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Backcover_encounters-724x1024.jpg",
+      "source_path": "/wp-content/uploads/2026/03/Backcover_encounters-724x1024.jpg",
+      "local_path": "assets/images/Backcover_encounters-724x1024-537f0bc824.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_022",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/DSC03022.jpg",
+      "source_path": "/wp-content/uploads/2026/03/DSC03022.jpg",
+      "local_path": "assets/images/DSC03022-6b0f5a89af.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_023",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/DSC03691-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/03/DSC03691-scaled.jpg",
+      "local_path": "assets/images/DSC03691-scaled-2d4bc803f7.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_024",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/FabrizioFerrari-4-819x1024.jpg",
+      "source_path": "/wp-content/uploads/2026/03/FabrizioFerrari-4-819x1024.jpg",
+      "local_path": "assets/images/FabrizioFerrari-4-819x1024-6f9008d2c3.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_025",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/FabrizioFerrari-4-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/03/FabrizioFerrari-4-scaled.jpg",
+      "local_path": "assets/images/FabrizioFerrari-4-scaled-ffe1b80bde.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_026",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Green-sea-turtle-1024x743.jpg",
+      "source_path": "/wp-content/uploads/2026/03/Green-sea-turtle-1024x743.jpg",
+      "local_path": "assets/images/Green-sea-turtle-1024x743-1639f7c93c.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_027",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Green-sea-turtle.jpg",
+      "source_path": "/wp-content/uploads/2026/03/Green-sea-turtle.jpg",
+      "local_path": "assets/images/Green-sea-turtle-cb3132b045.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_028",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29-1-711x1024.jpg",
+      "source_path": "/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29-1-711x1024.jpg",
+      "local_path": "assets/images/PHOTO-2026-02-26-12-19-29-1-711x1024-7ae4b992fb.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_029",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29-1.jpg",
+      "source_path": "/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29-1.jpg",
+      "local_path": "assets/images/PHOTO-2026-02-26-12-19-29-1-789b5b58ce.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_030",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29.jpg",
+      "source_path": "/wp-content/uploads/2026/03/PHOTO-2026-02-26-12-19-29.jpg",
+      "local_path": "assets/images/PHOTO-2026-02-26-12-19-29-f12beafe98.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_031",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Screenshot-2026-03-12-162636.png",
+      "source_path": "/wp-content/uploads/2026/03/Screenshot-2026-03-12-162636.png",
+      "local_path": "assets/images/Screenshot-2026-03-12-162636-16ba0f1388.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_032",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/The_Little_Things_.jpg",
+      "source_path": "/wp-content/uploads/2026/03/The_Little_Things_.jpg",
+      "local_path": "assets/images/The_Little_Things_-b73909248d.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_033",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Underwater-adventure-logo-design-1024x683.png",
+      "source_path": "/wp-content/uploads/2026/03/Underwater-adventure-logo-design-1024x683.png",
+      "local_path": "assets/images/Underwater-adventure-logo-design-1024x683-eebd879ef2.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_034",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Underwater-adventure-logo-design.png",
+      "source_path": "/wp-content/uploads/2026/03/Underwater-adventure-logo-design.png",
+      "local_path": "assets/images/Underwater-adventure-logo-design-e50f692735.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_035",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/Untitled_Artwork-1.jpg",
+      "source_path": "/wp-content/uploads/2026/03/Untitled_Artwork-1.jpg",
+      "local_path": "assets/images/Untitled_Artwork-1-4f58c57b64.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_036",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2025-09-30-at-11.31.37-AM-1024x768.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2025-09-30-at-11.31.37-AM-1024x768.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2025-09-30-at-11.31.37-AM-1024x768-5a8bcedc67.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_037",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2025-09-30-at-11.31.37-AM.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2025-09-30-at-11.31.37-AM.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2025-09-30-at-11.31.37-AM-0e7998a120.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_038",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-07-at-7.35.00-PM.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-07-at-7.35.00-PM.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2026-02-07-at-7.35.00-PM-94e17f39f0.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_039",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-07-at-7.36.04-PM.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2026-02-07-at-7.36.04-PM.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2026-02-07-at-7.36.04-PM-09159d8fee.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_040",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-12-at-3.20.44-PM-scaled.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-12-at-3.20.44-PM-scaled.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2026-03-12-at-3.20.44-PM-scaled-9106ba4a74.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_041",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-12-at-3.21.06-PM.jpeg",
+      "source_path": "/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-12-at-3.21.06-PM.jpeg",
+      "local_path": "assets/images/WhatsApp-Image-2026-03-12-at-3.21.06-PM-1bbf28d142.jpeg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_042",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/encounters-cover-small-205x300.png",
+      "source_path": "/wp-content/uploads/2026/03/encounters-cover-small-205x300.png",
+      "local_path": "assets/images/encounters-cover-small-205x300-eda80fdec2.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_043",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/encounters-cover-small.png",
+      "source_path": "/wp-content/uploads/2026/03/encounters-cover-small.png",
+      "local_path": "assets/images/encounters-cover-small-07826bfd04.png",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_044",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/georgia-selfie.jpg",
+      "source_path": "/wp-content/uploads/2026/03/georgia-selfie.jpg",
+      "local_path": "assets/images/georgia-selfie-b5173c9e54.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_045",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/manta.jpg",
+      "source_path": "/wp-content/uploads/2026/03/manta.jpg",
+      "local_path": "assets/images/manta-955a678ea4.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_046",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/pexels-photo-18695445-18695445-2000x2930.jpg",
+      "source_path": "/wp-content/uploads/2026/03/pexels-photo-18695445-18695445-2000x2930.jpg",
+      "local_path": "assets/images/pexels-photo-18695445-18695445-2000x2930-539c193860.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_047",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/pexels-photo-18695445-18695445-scaled.jpg",
+      "source_path": "/wp-content/uploads/2026/03/pexels-photo-18695445-18695445-scaled.jpg",
+      "local_path": "assets/images/pexels-photo-18695445-18695445-scaled-748fb12cb6.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_048",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/re-encounters-fake-cover-208x300.jpg",
+      "source_path": "/wp-content/uploads/2026/03/re-encounters-fake-cover-208x300.jpg",
+      "local_path": "assets/images/re-encounters-fake-cover-208x300-11eca1f1f6.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_049",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/re-encounters-fake-cover.jpg",
+      "source_path": "/wp-content/uploads/2026/03/re-encounters-fake-cover.jpg",
+      "local_path": "assets/images/re-encounters-fake-cover-a31d2272dd.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    },
+    {
+      "asset_id": "image_050",
+      "source_url": "https://encountersagainandagain.com/wp-content/uploads/2026/03/unnamed.jpg",
+      "source_path": "/wp-content/uploads/2026/03/unnamed.jpg",
+      "local_path": "assets/images/unnamed-34c6cc3dfa.jpg",
+      "source_host_control_expected": true,
+      "new_asset_url": null,
+      "disposition": "review_preserve_original_path_or_redirect_to_equivalent_asset_after_upload",
+      "review_notes": "Confirmar uso editorial; excluir placeholders o demo del seed público cuando corresponda. No redirigir medios a páginas HTML."
+    }
+  ],
+  "external_sites": [
+    {
+      "url": "https://www.encountersagainandagain.org/",
+      "action": "keep_external_link",
+      "note": "Separate book domain, no migration or redirect authorized here."
+    }
+  ],
+  "unpublished_proposals_not_legacy_urls": [
+    "/team",
+    "/our-story",
+    "/wild-wonders",
+    "/projects/artsy-animals",
+    "/projects/encounters-expeditions",
+    "/messages",
+    "/stories/[slug]"
+  ],
+  "pending_inventory": [
+    "Verify public sitemaps and robots; this session tool reads failed, not proof of absence.",
+    "Compare pages changed since snapshot.",
+    "Check GSC, analytics or server logs if available.",
+    "Inventory category/tag/author archives, pagination and ?p=/?page_id= legacy aliases if actually present.",
+    "Map indexed uploads, image variants and downloadable files after storage upload.",
+    "Verify http/https, www/root and trailing slash behavior."
+  ],
+  "validation_before_activation": [
+    "Target exists, is published, returns 200 and uses its own canonical.",
+    "No self redirect, loop or avoidable redirect chain.",
+    "Keep original path case and escaping until tested.",
+    "New sitemap and internal links use final canonical destinations.",
+    "No redirection to Katie or unrelated Home page."
+  ]
+}

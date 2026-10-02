@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #EAF5FA; text-decoration: none; }
+  a:hover { color: #8FD9EA; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes heroRise {
+    from { transform: translate3d(0, 14%, 0) scale(1.05); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  }
+  @keyframes heroTitleRise {
+    from { transform: translate3d(0, 48px, 0); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @keyframes heroFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes cueDrop {
+    0%, 100% { transform: translateY(0); opacity: 0.55; }
+    50%      { transform: translateY(8px); opacity: 1; }
+  }
+  @media (max-width: 1080px) {
+    [data-m="card"] { width: 86vw !important; margin-left: -43vw !important; top: max(13%, 112px) !important; }
+  }
+  @media (max-width: 760px) {
+    [data-m="nav"] { padding: 14px 16px !important; }
+    [data-m="navlinks"] { justify-content: center !important; font-size: 10px !important; letter-spacing: 0.1em !important; gap: 6px 16px !important; }
+    [data-m="card"] { width: 92vw !important; margin-left: -46vw !important; top: max(12%, 116px) !important; bottom: 4% !important; height: auto !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: 34% minmax(0, 1fr) !important; grid-template-areas: 'media' 'text' !important; }
+    [data-m="cardText"] { padding: clamp(18px, 5vw, 28px) !important; gap: 10px !important; }
+    [data-m="cardText"] h2 { font-size: clamp(1.4rem, 6vw, 2rem) !important; }
+    [data-m="cardText"] p { font-size: 14px !important; line-height: 1.6 !important; }
+  }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #EAF5FA; color: #0E2A38; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; overflow: clip;">
+  <div ref="{{ veilRef }}" style="position: fixed; top: 0; left: 0; right: 0; height: 140px; z-index: 29; pointer-events: none; transition: opacity 400ms ease; background: linear-gradient(to bottom, rgba(4,17,30,0.72), rgba(4,17,30,0.34) 50%, rgba(4,17,30,0));"></div>
+  <nav ref="{{ navRef }}" data-m="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'l c r'; align-items: center; gap: clamp(12px, 2vw, 36px); padding: 18px clamp(18px, 3vw, 46px); color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0); transition: background 400ms ease, backdrop-filter 400ms ease, border-color 400ms ease, color 400ms ease;">
+    <div data-m="navlinks" style="grid-area: l; display: flex; align-items: center; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="Expeditions.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit; box-shadow: inset 0 -1px 0 currentColor;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Encounters</span>
+          <span style="height: 12px; line-height: 12px;">Expeditions</span>
+        </span>
+      </a>
+      <a href="Workshops.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Artsy Animals</span>
+          <span style="height: 12px; line-height: 12px;">Workshops</span>
+        </span>
+      </a>
+      <a href="Art.dc.html" style="display: block; height: 12px; line-height: 12px; white-space: nowrap; color: inherit;">Art</a>
+      <a href="Meaningful Messages.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Meaningful</span>
+          <span style="height: 12px; line-height: 12px;">Messages</span>
+        </span>
+      </a>
+    </div>
+    <a href="Abismo Home.dc.html" style="grid-area: c; justify-self: center; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: inherit;">
+      <img ref="{{ navMarkRef }}" src="assets/logo-mark-blanco.png" alt="Encounters" style="height: 32px; width: auto; margin-right: -2px; transition: filter 400ms ease;" />
+      <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 500;">
+        <span style="font-size: clamp(14px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+        <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; opacity: 0.82;">again and again</span>
+      </span>
+    </a>
+    <div data-m="navlinks" style="grid-area: r; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="About.dc.html" style="white-space: nowrap; color: inherit;">About us</a>
+      <a href="The Crew.dc.html" style="white-space: nowrap; color: inherit;">The crew</a>
+      <a href="Contact.dc.html" style="white-space: nowrap; color: inherit;">Contact</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Expeditions hero" data-m="dissolve" style="position: relative; z-index: 1; height: 660vh; background: #061826;">
+    <div data-m="dissolveInner" style="position: sticky; top: 0; height: 100vh; overflow: hidden; background: #061826;">
+      <div style="position: absolute; inset: 0; animation: heroRise 1500ms cubic-bezier(.16,.84,.24,1) both;">
+        <img ref="{{ heroARef }}" src="assets/crew-banner.jpg" alt="La tripulación arriba del agua" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" />
+      </div>
+      <div style="position: absolute; inset: 0; z-index: 2; display: grid; grid-template-columns: repeat(6, 1fr);">
+        <div data-panel="0" style="position: relative; overflow: hidden; clip-path: inset(100% 0 0 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: 0%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+        <div data-panel="1" style="position: relative; overflow: hidden; clip-path: inset(0 0 100% 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: -100%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+        <div data-panel="2" style="position: relative; overflow: hidden; clip-path: inset(100% 0 0 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: -200%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+        <div data-panel="3" style="position: relative; overflow: hidden; clip-path: inset(0 0 100% 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: -300%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+        <div data-panel="4" style="position: relative; overflow: hidden; clip-path: inset(100% 0 0 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: -400%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+        <div data-panel="5" style="position: relative; overflow: hidden; clip-path: inset(0 0 100% 0);"><img src="assets/reef-turtle-web.jpg" alt="" style="position: absolute; top: 0; left: -500%; width: 600%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" /></div>
+      </div>
+      <div ref="{{ heroVeilRef }}" style="position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.62) 0%, rgba(4,17,30,0.24) 42%, rgba(4,17,30,0.66) 100%);"></div>
+      <div ref="{{ heroTextRef }}" style="position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(8px, 1.8vh, 18px); padding: clamp(110px, 15vh, 170px) clamp(20px, 5vw, 72px) clamp(70px, 11vh, 130px); text-align: center; pointer-events: none;">
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(17px, 2.2vw, 30px); color: rgba(255,255,255,0.94); animation: heroFadeIn 900ms ease 420ms both;">following our nature</span>
+        <h1 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2.8rem, min(14vw, 16vh), 11rem); line-height: 0.95; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; animation: heroTitleRise 1100ms cubic-bezier(.16,.84,.24,1) 700ms both;">Expeditions</h1>
+      </div>
+      <div ref="{{ cueRef }}" style="position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(22px, 4vh, 44px); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.88); pointer-events: none;">
+        <span>Scroll</span>
+        <span style="display: block; width: 1px; height: 30px; background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0)); animation: cueDrop 2.6s ease-in-out infinite;"></span>
+      </div>
+
+      <div style="position: absolute; inset: 0; z-index: 5;">
+        <article data-card="0.42,0.50,0.55,0.62" data-m="card" data-screen-label="Card 01" style="position: absolute; top: max(13%, 104px); left: 50%; width: min(66vw, 1120px); margin-left: max(-33vw, -560px); height: 76%; display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr); grid-template-areas: 'media text'; background: #ffffff; border: 1px solid rgba(14,42,56,0.14); box-shadow: 0 50px 110px -50px rgba(4,17,30,0.85); overflow: hidden;">
+          <div style="position: relative; grid-area: media; height: 100%; overflow: hidden; background: #0F3B4C;">
+            <image-slot id="exp-coqui" shape="rect" placeholder="Coqui, el velero — foto vertical"></image-slot>
+          </div>
+          <div data-m="cardText" style="grid-area: text; display: flex; flex-direction: column; justify-content: center; gap: clamp(12px, 2.2vh, 24px); padding: clamp(26px, 4vw, 64px);">
+            <span style="display: flex; align-items: baseline; gap: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;"><span style="font-family: ui-monospace, monospace; letter-spacing: 0.1em; opacity: 0.6;">01</span>The boat</span>
+            <h2 style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.06; color: #08222F; text-wrap: pretty;">A small sailboat called Coqui</h2>
+            <p style="margin: 0; max-width: 46ch; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">We bought her to turn her into a platform: supporting conservation projects, documenting marine life, and helping the people already working to protect our seas.</p>
+            <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(14px, 1.15vw, 18px); color: rgba(14,42,56,0.7);">Fabri, Juli, Majita and Hugo.</span>
+          </div>
+        </article>
+
+        <article data-card="0.55,0.62,0.67,0.74" data-m="card" data-screen-label="Card 02" style="position: absolute; top: max(13%, 104px); left: 50%; width: min(66vw, 1120px); margin-left: max(-33vw, -560px); height: 76%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr); grid-template-areas: 'text media'; background: #ffffff; border: 1px solid rgba(14,42,56,0.14); box-shadow: 0 50px 110px -50px rgba(4,17,30,0.85); overflow: hidden;">
+          <div data-m="cardText" style="grid-area: text; display: flex; flex-direction: column; justify-content: center; gap: clamp(12px, 2.2vh, 24px); padding: clamp(26px, 4vw, 64px);">
+            <span style="display: flex; align-items: baseline; gap: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;"><span style="font-family: ui-monospace, monospace; letter-spacing: 0.1em; opacity: 0.6;">02</span>How it started</span>
+            <h2 style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.06; color: #08222F; text-wrap: pretty;">A purpose that connected us</h2>
+            <p style="margin: 0; max-width: 46ch; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">It brought us together in Australian waters — to experience the beauty of this world and try to help it. We love the sea. We love animals and people. We want to protect our nature.</p>
+          </div>
+          <div style="position: relative; grid-area: media; height: 100%; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/crew-group.jpg" alt="La tripulación" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block;" />
+          </div>
+        </article>
+
+        <article data-card="0.67,0.74,0.79,0.86" data-m="card" data-screen-label="Card 03" style="position: absolute; top: max(13%, 104px); left: 50%; width: min(66vw, 1120px); margin-left: max(-33vw, -560px); height: 76%; display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr); grid-template-areas: 'media text'; background: #ffffff; border: 1px solid rgba(14,42,56,0.14); box-shadow: 0 50px 110px -50px rgba(4,17,30,0.85); overflow: hidden;">
+          <div style="position: relative; grid-area: media; height: 100%; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/crew-crossing.jpg" alt="Travesía" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" />
+          </div>
+          <div data-m="cardText" style="grid-area: text; display: flex; flex-direction: column; justify-content: center; gap: clamp(12px, 2.2vh, 24px); padding: clamp(26px, 4vw, 64px);">
+            <span style="display: flex; align-items: baseline; gap: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;"><span style="font-family: ui-monospace, monospace; letter-spacing: 0.1em; opacity: 0.6;">03</span>The work</span>
+            <h2 style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.06; color: #08222F; text-wrap: pretty;">Alongside the people doing it</h2>
+            <p style="margin: 0; max-width: 46ch; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">Over the last years we have moved around the world taking part in conservation efforts: working alongside scientists and researchers, crewing on research and conservation vessels.</p>
+          </div>
+        </article>
+
+        <article data-card="0.79,0.86,0.91,0.97" data-m="card" data-screen-label="Card 04" style="position: absolute; top: max(13%, 104px); left: 50%; width: min(66vw, 1120px); margin-left: max(-33vw, -560px); height: 76%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr); grid-template-areas: 'text media'; background: #ffffff; border: 1px solid rgba(14,42,56,0.14); box-shadow: 0 50px 110px -50px rgba(4,17,30,0.85); overflow: hidden;">
+          <div data-m="cardText" style="grid-area: text; display: flex; flex-direction: column; justify-content: center; gap: clamp(12px, 2.2vh, 24px); padding: clamp(26px, 4vw, 64px);">
+            <span style="display: flex; align-items: baseline; gap: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;"><span style="font-family: ui-monospace, monospace; letter-spacing: 0.1em; opacity: 0.6;">04</span>On board</span>
+            <h2 style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.06; color: #08222F; text-wrap: pretty;">What the boat needs to carry</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px; max-width: 46ch;">
+              <span style="display: flex; gap: 12px; align-items: baseline; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.6; color: rgba(14,42,56,0.86); border-top: 1px solid rgba(14,42,56,0.14); padding-top: 10px;"><span style="font-family: ui-monospace, monospace; font-size: 10px; opacity: 0.55;">01</span>Binoculars for spotting animals</span>
+              <span style="display: flex; gap: 12px; align-items: baseline; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.6; color: rgba(14,42,56,0.86); border-top: 1px solid rgba(14,42,56,0.14); padding-top: 10px;"><span style="font-family: ui-monospace, monospace; font-size: 10px; opacity: 0.55;">02</span>Camera gear for photo ID and documentation</span>
+              <span style="display: flex; gap: 12px; align-items: baseline; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.6; color: rgba(14,42,56,0.86); border-top: 1px solid rgba(14,42,56,0.14); padding-top: 10px;"><span style="font-family: ui-monospace, monospace; font-size: 10px; opacity: 0.55;">03</span>Marine equipment</span>
+            </div>
+          </div>
+          <div style="position: relative; grid-area: media; height: 100%; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/about-sealions.webp" alt="Lobos marinos" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block;" />
+          </div>
+        </article>
+
+        <article data-card="0.91,0.97,1.4,1.5" data-m="card" data-screen-label="Card 05" style="position: absolute; top: max(13%, 104px); left: 50%; width: min(66vw, 1120px); margin-left: max(-33vw, -560px); height: 76%; display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr); grid-template-areas: 'media text'; background: #08222F; color: #EAF5FA; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 50px 110px -50px rgba(4,17,30,0.9); overflow: hidden;">
+          <div style="position: relative; grid-area: media; height: 100%; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/about-ray.webp" alt="Raya" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; display: block;" />
+          </div>
+          <div data-m="cardText" style="grid-area: text; display: flex; flex-direction: column; justify-content: center; gap: clamp(12px, 2.2vh, 24px); padding: clamp(26px, 4vw, 64px);">
+            <span style="display: flex; align-items: baseline; gap: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #8FD9EA;"><span style="font-family: ui-monospace, monospace; letter-spacing: 0.1em; opacity: 0.6;">05</span>Help</span>
+            <h2 style="margin: 0; max-width: 20ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.06; color: #ffffff; text-wrap: pretty;">Help our sailboat help the ocean</h2>
+            <p style="margin: 0; max-width: 46ch; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.84); text-wrap: pretty;">A project based on kindness, soundness and pure intentions. Every fund raised goes solely into running it — keeping the boat, the work and the stories moving us through the seas.</p>
+            <a href="https://www.gofundme.com/u/encounters-expeditions" target="_blank" rel="noopener" style="font-size: 10px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: #8FD9EA;">Support the expeditions &rarr;</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <main style="position: relative; z-index: 2; background: #EAF5FA;">
+    <section data-screen-label="Cierre" style="background: #061826; color: #EAF5FA; padding: clamp(90px, 24vh, 260px) clamp(20px, 5vw, 72px) clamp(90px, 20vh, 220px);">
+      <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(40px, 12vh, 140px);">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <h2 data-seq="1.1,0.5" style="margin: 0; max-width: 22ch; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, min(8vw, 11vh), 6rem); line-height: 1.0; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff;">May the ocean be with you</h2>
+          <svg data-scribble="1" viewBox="0 0 600 120" aria-hidden="true" style="display: block; width: min(380px, 56%); height: auto; overflow: visible;">
+            <path d="M14 70 C 120 18, 300 14, 430 34 C 540 52, 520 86, 380 90 C 240 94, 120 78, 66 58 C 36 46, 70 34, 150 34" fill="none" stroke="rgba(234,245,250,0.7)" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div id="contact" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: clamp(20px, 3vh, 34px); font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(234,245,250,0.55);">
+          <span>© 2026 Encounters again and again</span>
+          <a href="mailto:encountersagainandagain@gmail.com" style="color: rgba(234,245,250,0.8);">encountersagainandagain@gmail.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navRef: (el) => { this.nav = el; },
+      veilRef: (el) => { this.veil = el; },
+      navMarkRef: (el) => { this.navMark = el; },
+      heroARef: (el) => { this.heroA = el; },
+      heroVeilRef: (el) => { this.heroVeil = el; },
+      heroTextRef: (el) => { this.heroText = el; },
+      cueRef: (el) => { this.cue = el; }
+    };
+  }
+
+  static ramp(v, from, to, smooth) {
+    const k = Math.min(1, Math.max(0, (v - from) / (to - from)));
+    return smooth ? k * k * (3 - 2 * k) : k;
+  }
+
+  // el banner no avanza: el scroll disuelve la foto de arriba en la de abajo del agua
+  // (6 franjas en dos pasadas intercaladas) y después, sobre esa segunda imagen,
+  // van entrando las cards una tras otra sin que el pin se suelte
+  static ORDER = [0, 2, 4, 1, 3, 5];
+
+  measureScribbles() {
+    const vh = window.innerHeight;
+    const docH = document.documentElement.scrollHeight;
+    (this.scribbles || []).forEach((sc) => {
+      const docTop = sc.svg.getBoundingClientRect().top + window.scrollY;
+      const minTop = Math.max(0, vh - (docH - docTop));
+      sc.span = Math.max(1, Math.min(vh * 0.4, vh - minTop));
+    });
+  }
+
+  armScribbles() {
+    this.scribbles = [];
+    Array.from(document.querySelectorAll("svg[data-scribble]")).forEach((svg) => {
+      const path = svg.querySelector("path");
+      if (!path || !path.getTotalLength) return;
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len + " " + len;
+      path.style.strokeDashoffset = String(len);
+      this.scribbles.push({ svg: svg, path: path, len: len, span: 1 });
+    });
+    this.measureScribbles();
+  }
+
+  componentDidMount() {
+    this.seq = Array.from(document.querySelectorAll("[data-seq]")).map((el) => {
+      const [start, span, shift] = el.dataset.seq.split(",").map(Number);
+      const rise = shift || 70;
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, " + rise + "px, 0)";
+      el.style.willChange = "opacity, transform";
+      return { el, start: start || 0.9, span: span || 0.25, shift: rise };
+    });
+
+    this.cards = Array.from(document.querySelectorAll("[data-card]")).map((el) => {
+      const [inFrom, inTo, outFrom, outTo] = el.dataset.card.split(",").map(Number);
+      el.style.opacity = "0";
+      el.style.willChange = "opacity, transform";
+      return { el, inFrom, inTo, outFrom, outTo };
+    });
+
+    this.panels = Array.from(document.querySelectorAll("[data-panel]"))
+      .sort((a, b) => Number(a.dataset.panel) - Number(b.dataset.panel));
+    this.dissolve = document.querySelector("[data-m='dissolve']");
+    this.dissolveInner = document.querySelector("[data-m='dissolveInner']");
+
+    this.armScribbles();
+    this.vh = window.innerHeight;
+    this.onScroll = () => {
+      const y = window.scrollY;
+      const light = this.dissolve ? this.dissolve.getBoundingClientRect().bottom < 120 : true;
+      if (light !== this.navLight) {
+        this.navLight = light;
+        if (this.veil) this.veil.style.opacity = light ? "0" : "1";
+        if (this.navMark) this.navMark.style.filter = light ? "invert(1)" : "none";
+        if (this.nav) this.nav.style.color = light ? "#0E2A38" : "#ffffff";
+      }
+      if (this.nav) {
+        const k = Math.min(1, y / 240);
+        this.nav.style.background = light
+          ? "rgba(234,245,250," + (0.6 + k * 0.32).toFixed(3) + ")"
+          : "rgba(6,24,38," + (k * 0.55).toFixed(3) + ")";
+        this.nav.style.backdropFilter = k > 0.05 ? "blur(" + (k * 14).toFixed(1) + "px)" : "none";
+        this.nav.style.borderBottomColor = light
+          ? "rgba(14,42,56,0.14)"
+          : "rgba(255,255,255," + (k * 0.14).toFixed(3) + ")";
+      }
+    };
+    this.onResize = () => { this.vh = window.innerHeight; this.measureScribbles(); this.applyNav(); this.onScroll(); };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    window.addEventListener("resize", this.onResize);
+    this.applyNav();
+    this.onScroll();
+    this.loop();
+  }
+
+  applyNav() {
+    if (!this.nav) return;
+    const w = window.innerWidth;
+    const mode = w < 760 ? "mobile" : w < 980 ? "compact" : "wide";
+    if (mode === this.navMode) return;
+    this.navMode = mode;
+    if (mode === "mobile") {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"c" "l" "r"';
+      this.nav.style.rowGap = "14px";
+    } else if (mode === "compact") {
+      this.nav.style.gridTemplateColumns = "1fr 1fr";
+      this.nav.style.gridTemplateAreas = '"c c" "l r"';
+      this.nav.style.rowGap = "14px";
+    } else {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr) auto minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"l c r"';
+      this.nav.style.rowGap = "0px";
+    }
+  }
+
+  dissolveProgress() {
+    if (!this.dissolve || !this.dissolveInner) return 0;
+    const rect = this.dissolve.getBoundingClientRect();
+    const run = Math.max(1, rect.height - this.dissolveInner.offsetHeight);
+    return Math.min(1, Math.max(0, -rect.top / run));
+  }
+
+  loop = () => {
+    this.raf = requestAnimationFrame(this.loop);
+    const R = Component.ramp;
+    const vh = window.innerHeight || this.vh;
+    const t = this.dissolveProgress();
+
+    // primera pasada: franjas 1-3-5. segunda: 2-4-6. cada una sube o baja alternada
+    (this.panels || []).forEach((panel, i) => {
+      const j = Component.ORDER.indexOf(i);
+      const from = (j < 3 ? 0.05 : 0.24) + (j % 3) * 0.045;
+      const p = R(t, from, from + 0.11, true);
+      const hidden = ((1 - p) * 100).toFixed(2) + "%";
+      panel.style.clipPath = i % 2 === 0
+        ? "inset(" + hidden + " 0 0 0)"
+        : "inset(0 0 " + hidden + " 0)";
+    });
+
+    if (this.heroA) {
+      const k = R(t, 0, 0.5);
+      this.heroA.style.transform = "scale(" + (1 + k * 0.06).toFixed(4) + ")";
+      this.heroA.style.filter = "saturate(" + (1 - k * 0.2).toFixed(2) + ")";
+    }
+    if (this.heroText) {
+      const o = R(t, 0.06, 0.22, true);
+      this.heroText.style.opacity = (1 - o).toFixed(3);
+      this.heroText.style.transform = "translate3d(0," + (o * -46).toFixed(1) +
+        "px,0) scale(" + (1 + o * 0.05).toFixed(3) + ")";
+    }
+    if (this.cue) this.cue.style.opacity = (1 - R(t, 0, 0.05)).toFixed(3);
+    // el agua se oscurece un poco mientras las cards están en pantalla
+    if (this.heroVeil) this.heroVeil.style.opacity = (1 + R(t, 0.36, 0.5, true) * 0.55).toFixed(3);
+
+    (this.cards || []).forEach((card) => {
+      const p = R(t, card.inFrom, card.inTo, true);
+      const out = R(t, card.outFrom, card.outTo, true);
+      card.el.style.opacity = (p * (1 - out)).toFixed(3);
+      card.el.style.transform = "translate3d(0," + ((1 - p) * 90 - out * 130).toFixed(1) +
+        "px,0) scale(" + (0.965 + p * 0.035 - out * 0.05).toFixed(4) + ")";
+      const blur = (1 - p) * 5 + out * 6;
+      card.el.style.filter = blur < 0.05 ? "none" : "blur(" + blur.toFixed(2) + "px)";
+      card.el.style.pointerEvents = p * (1 - out) > 0.6 ? "auto" : "none";
+    });
+
+    (this.seq || []).forEach((item) => {
+      const rect = item.el.getBoundingClientRect();
+      const p = R((vh * item.start - rect.top) / (vh * item.span), 0, 1, true);
+      item.el.style.opacity = p.toFixed(3);
+      item.el.style.transform = "translate3d(0," + ((1 - p) * item.shift).toFixed(1) +
+        "px,0) scale(" + (0.965 + p * 0.035).toFixed(4) + ")";
+      const blur = (1 - p) * 5;
+      item.el.style.filter = blur < 0.05 ? "none" : "blur(" + blur.toFixed(2) + "px)";
+    });
+
+    (this.scribbles || []).forEach((sc) => {
+      const top = sc.svg.getBoundingClientRect().top;
+      const p = R((vh - top) / sc.span, 0, 1);
+      sc.path.style.strokeDashoffset = (sc.len * (1 - p)).toFixed(1);
+    });
+  };
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("resize", this.onResize);
+  }
+}
+</script>
+</body>
+</html>

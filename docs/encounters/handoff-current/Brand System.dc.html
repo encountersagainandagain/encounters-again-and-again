@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #8FD9EA; text-decoration: none; }
+  a:hover { color: #E3D3B4; }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #061826; color: #EAF5FA; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; padding: clamp(28px, 6vw, 88px) clamp(18px, 5vw, 72px) clamp(60px, 10vh, 120px);">
+  <header style="display: flex; flex-direction: column; gap: 14px; max-width: 62ch; margin-bottom: clamp(38px, 7vh, 80px);">
+    <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase; color: #C9A55C;">Sistema visual</span>
+    <h1 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 5.5vw, 3.6rem); line-height: 1.02; letter-spacing: 0.01em; color: #ffffff;">Encounters <em style="font-style: italic;">again and again</em></h1>
+    <p style="margin: 0; font-size: clamp(14px, 1.2vw, 17px); line-height: 1.6; color: rgba(234,245,250,0.82); text-wrap: pretty;">Paleta y tipografías de referencia para todas las páginas. Arte, mar y afecto: azules profundos como base, oro y arena como calidez heredada del logo, coral y laguna sólo como acentos.</p>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: clamp(20px, 3vh, 32px); margin-bottom: clamp(46px, 9vh, 96px);">
+    <h2 style="margin: 0; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.6);">01 · Paleta</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: clamp(12px, 1.6vw, 20px);">
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #061826;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Abismo</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#061826</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Fondo base de toda la web. El único color que cubre pantalla completa.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #0F3B4C;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Marea</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#0F3B4C</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Superficies elevadas: tarjetas, bloques de sección, footer.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #8FD9EA;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Laguna</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#8FD9EA</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Acento frío: hover de links, antetítulos, detalles del agua.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #C9A55C;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Oro</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#C9A55C</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Heredado del logo. Filetes, numeración, firmas. Nunca en párrafos.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #E3D3B4;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Arena</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#E3D3B4</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Modo papel: secciones de lectura larga, el libro, los dibujos.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #E08A6E;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Coral</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#E08A6E</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">El afecto. Un solo uso por pantalla: la acción principal.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #4E8A72;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Alga</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#4E8A72</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Lo terrestre: selva, conservación, aliados como Gondwana.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+        <div style="height: clamp(96px, 13vh, 132px); background: #EAF5FA;"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;">
+          <span style="font-size: 13px; font-weight: 600;">Espuma</span>
+          <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(234,245,250,0.62);">#EAF5FA</span>
+          <span style="font-size: 11px; line-height: 1.5; color: rgba(234,245,250,0.72);">Texto por defecto sobre fondos oscuros. Blanco puro sólo en titulares.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: clamp(12px, 1.6vw, 20px);">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: clamp(18px, 2.4vw, 28px); background: #0F3B4C; border-radius: 3px;">
+        <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #8FD9EA;">Par frío</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 2.2vw, 26px); line-height: 1.25; color: #ffffff;">Marea + Laguna: secciones de mar, datos, navegación.</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: clamp(18px, 2.4vw, 28px); background: #E3D3B4; border-radius: 3px;">
+        <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #8A5A3C;">Par cálido</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 2.2vw, 26px); line-height: 1.25; color: #2B2119;">Arena + Coral: el libro, los talleres, todo lo hecho a mano.</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: clamp(18px, 2.4vw, 28px); background: #061826; border: 1px solid #C9A55C; border-radius: 3px;">
+        <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #C9A55C;">Par de marca</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 2.2vw, 26px); line-height: 1.25; color: #ffffff;">Abismo + Oro: portadas, hero, cierre de página.</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: clamp(20px, 3vh, 32px); margin-bottom: clamp(46px, 9vh, 96px);">
+    <h2 style="margin: 0; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.6);">02 · Tipografías</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: clamp(20px, 3vw, 44px);">
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: clamp(20px, 2.6vw, 32px); border: 1px solid rgba(255,255,255,0.14); border-radius: 3px;">
+        <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #C9A55C;">Voz · titulares</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 0.95; color: #ffffff;">EB Garamond</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(17px, 1.8vw, 22px); line-height: 1.4; color: rgba(234,245,250,0.9);">again and again — la itálica es la voz de la marca</span>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: rgba(234,245,250,0.72);">Regular 400 y Medium 500. Titulares en mayúsculas con <span style="font-family: ui-monospace, monospace;">letter-spacing .14em</span>; frases sueltas en itálica, sin tracking.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: clamp(20px, 2.6vw, 32px); border: 1px solid rgba(255,255,255,0.14); border-radius: 3px;">
+        <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #8FD9EA;">Interfaz · textos</span>
+        <span style="font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.03em; color: #ffffff;">Archivo</span>
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.9);">Navegación, etiquetas y datos</span>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: rgba(234,245,250,0.72);">400 para párrafos, 500/600 para etiquetas, 700 sólo en titulares de sección en mayúsculas.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); padding: 14px clamp(16px, 2.4vw, 28px); background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(234,245,250,0.66);">
+        <span>Rol</span><span>Muestra</span><span>Especificación</span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); align-items: center; padding: clamp(14px, 2vh, 20px) clamp(16px, 2.4vw, 28px); border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(234,245,250,0.8);">Display</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(24px, 3.4vw, 46px); line-height: 0.95; letter-spacing: 0.14em; text-transform: uppercase; color: #ffffff;">Encounters</span>
+        <span style="font-family: ui-monospace, monospace; font-size: 10px; line-height: 1.7; color: rgba(234,245,250,0.66);">Garamond 400 · clamp(1.9rem, min(8.6vw,11.5vh), 7rem) · lh .92 · ls .14em</span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); align-items: center; padding: clamp(14px, 2vh, 20px) clamp(16px, 2.4vw, 28px); border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(234,245,250,0.8);">Sección</span>
+        <span style="font-size: clamp(20px, 2.8vw, 34px); font-weight: 700; line-height: 0.98; letter-spacing: -0.035em; text-transform: uppercase; color: #ffffff;">Ongoing projects</span>
+        <span style="font-family: ui-monospace, monospace; font-size: 10px; line-height: 1.7; color: rgba(234,245,250,0.66);">Archivo 700 · clamp(2rem, 5.4vw, 4.4rem) · lh .95 · ls -.035em</span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); align-items: center; padding: clamp(14px, 2vh, 20px) clamp(16px, 2.4vw, 28px); border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(234,245,250,0.8);">Frase</span>
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(16px, 1.9vw, 24px); line-height: 1.35; color: rgba(234,245,250,0.94);">follow the current …where will it lead you..</span>
+        <span style="font-family: ui-monospace, monospace; font-size: 10px; line-height: 1.7; color: rgba(234,245,250,0.66);">Garamond itálica 400 · clamp(15px, min(1.9vw,2.7vh), 24px) · lh 1.35</span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); align-items: center; padding: clamp(14px, 2vh, 20px) clamp(16px, 2.4vw, 28px); border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(234,245,250,0.8);">Cuerpo</span>
+        <span style="font-size: clamp(14px, 1.15vw, 17px); line-height: 1.65; color: rgba(234,245,250,0.88);">A space for community, art and nature.</span>
+        <span style="font-family: ui-monospace, monospace; font-size: 10px; line-height: 1.7; color: rgba(234,245,250,0.66);">Archivo 400 · clamp(15px, 1.15vw, 17px) · lh 1.65 · máx 68ch</span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: clamp(10px, 2vw, 28px); align-items: center; padding: clamp(14px, 2vh, 20px) clamp(16px, 2.4vw, 28px); border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(234,245,250,0.8);">Etiqueta</span>
+        <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #8FD9EA;">Encounters expeditions</span>
+        <span style="font-family: ui-monospace, monospace; font-size: 10px; line-height: 1.7; color: rgba(234,245,250,0.66);">Archivo 600 · 9–11px · ls .26em · uppercase</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: clamp(16px, 2.4vh, 26px);">
+    <h2 style="margin: 0; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.6);">03 · Reglas</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(14px, 2vw, 26px);">
+      <p style="margin: 0; font-size: 13px; line-height: 1.65; color: rgba(234,245,250,0.84); text-wrap: pretty;"><span style="display: block; margin-bottom: 6px; font-weight: 600; color: #ffffff;">Un solo acento por pantalla.</span>Coral y Oro no conviven en la misma vista salvo que uno sea un filete de 1px.</p>
+      <p style="margin: 0; font-size: 13px; line-height: 1.65; color: rgba(234,245,250,0.84); text-wrap: pretty;"><span style="display: block; margin-bottom: 6px; font-weight: 600; color: #ffffff;">Texto sobre imagen, siempre con velo.</span>Degradado <span style="font-family: ui-monospace, monospace; font-size: 12px;">rgba(4,17,30,.78 → 0)</span> o halo radial. Nunca texto con opacidad sobre foto.</p>
+      <p style="margin: 0; font-size: 13px; line-height: 1.65; color: rgba(234,245,250,0.84); text-wrap: pretty;"><span style="display: block; margin-bottom: 6px; font-weight: 600; color: #ffffff;">Los dibujos mandan.</span>Cuando hay ilustración del cliente, el color de fondo se apaga: Abismo plano y el dibujo respira.</p>
+      <p style="margin: 0; font-size: 13px; line-height: 1.65; color: rgba(234,245,250,0.84); text-wrap: pretty;"><span style="display: block; margin-bottom: 6px; font-weight: 600; color: #ffffff;">Sin bordes redondeados grandes.</span>Radio máximo 3px. La marca es dibujo a mano, no tarjetas de app.</p>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+</body>
+</html>

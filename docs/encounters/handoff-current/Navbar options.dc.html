@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #eaf5fa; text-decoration: none; }
+  a:hover { color: #8fd9ea; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #061826; color: #eaf5fa; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; padding: clamp(28px, 5vh, 64px) clamp(18px, 3vw, 46px) clamp(60px, 10vh, 120px); display: flex; flex-direction: column; gap: clamp(36px, 6vh, 72px);">
+  <header style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: #8fd9ea; font-weight: 600;">Encounters · exploración de navbar</span>
+    <h1 style="margin: 0; font-size: clamp(1.8rem, 4vw, 3.2rem); font-weight: 700; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95;">Opciones de navbar</h1>
+    <p style="margin: 0; max-width: 62ch; color: rgba(226,242,248,0.8); font-size: 15px; line-height: 1.6;">Cada opción sobre el mismo fondo del hero. Los enlaces no tienen funcionalidad todavía.</p>
+  </header>
+
+  <section id="1a" style="display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; border: 1px solid rgba(143,217,234,0.6); color: #8fd9ea; border-radius: 999px; padding: 4px 10px;">1a</span>
+      <span style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(226,242,248,0.72); font-weight: 600;">Wordmark a la izquierda, secciones pegadas a la derecha</span>
+    </div>
+    <div style="position: relative; border-radius: 6px; overflow: hidden; background: linear-gradient(160deg, #0c3350, #061826);">
+      <img src="assets/fondo.png" alt="" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.55;" />
+      <div style="position: relative; height: clamp(160px, 22vh, 230px);">
+        <nav style="display: flex; align-items: center; justify-content: space-between; gap: clamp(20px, 4vw, 60px); padding: 20px clamp(16px, 2.4vw, 34px); border-bottom: 1px solid rgba(255,255,255,0.14); background: rgba(6,24,38,0.35); backdrop-filter: blur(10px);">
+          <div style="display: flex; align-items: flex-end; gap: clamp(18px, 3vw, 44px);">
+            <a href="#" style="display: flex; flex-direction: column; gap: 2px; font-family: 'EB Garamond', Georgia, serif; font-weight: 500; white-space: nowrap;">
+              <span style="font-size: clamp(15px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+              <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; color: rgba(234,245,250,0.82);">again and again</span>
+            </a>
+            <div style="display: flex; align-items: center; gap: clamp(12px, 1.6vw, 24px); padding-bottom: 3px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+              <a href="#" style="white-space: nowrap;">About us</a>
+              <a href="#" style="white-space: nowrap;">The crew</a>
+              <a href="#" style="white-space: nowrap;">Contact</a>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: clamp(12px, 1.6vw, 24px); padding-bottom: 3px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+            <a href="#" style="white-space: nowrap;">Encounters expeditions</a>
+            <a href="#" style="white-space: nowrap;">Artsy Animals</a>
+            <a href="#" style="white-space: nowrap;">Meaningful messages</a>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <section id="1b" style="display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <span style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; border: 1px solid rgba(143,217,234,0.6); color: #8fd9ea; border-radius: 999px; padding: 4px 10px;">1b</span>
+      <span style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(226,242,248,0.72); font-weight: 600;">Igual que 1a, con los títulos largos en rotación automática</span>
+    </div>
+    <div style="position: relative; border-radius: 6px; overflow: hidden; background: linear-gradient(160deg, #0c3350, #061826);">
+      <img src="assets/fondo.png" alt="" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.55;" />
+      <div style="position: relative; height: clamp(160px, 22vh, 230px);">
+        <nav style="display: flex; align-items: center; justify-content: space-between; gap: clamp(20px, 4vw, 60px); padding: 20px clamp(16px, 2.4vw, 34px); border-bottom: 1px solid rgba(255,255,255,0.14); background: rgba(6,24,38,0.35); backdrop-filter: blur(10px);">
+          <div style="display: flex; align-items: flex-end; gap: clamp(18px, 3vw, 44px);">
+            <a href="#" style="display: flex; flex-direction: column; gap: 2px; font-family: 'EB Garamond', Georgia, serif; font-weight: 500; white-space: nowrap;">
+              <span style="font-size: clamp(15px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+              <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; color: rgba(234,245,250,0.82);">again and again</span>
+            </a>
+            <div style="display: flex; align-items: center; gap: clamp(12px, 1.6vw, 24px); padding-bottom: 3px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+              <a href="#" style="white-space: nowrap;">About us</a>
+              <a href="#" style="white-space: nowrap;">The crew</a>
+              <a href="#" style="white-space: nowrap;">Contact</a>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: clamp(12px, 1.6vw, 24px); padding-bottom: 3px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+            <a href="#" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+              <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+                <span style="height: 12px; line-height: 12px;">Encounters</span>
+                <span style="height: 12px; line-height: 12px;">Expeditions</span>
+              </span>
+            </a>
+            <a href="#" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+              <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite; animation-delay: 1.2s;">
+                <span style="height: 12px; line-height: 12px;">Artsy Animals</span>
+                <span style="height: 12px; line-height: 12px;">Workshops</span>
+              </span>
+            </a>
+            <a href="#" style="display: block; height: 12px; overflow: hidden; white-space: nowrap;">
+              <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite; animation-delay: 2.4s;">
+                <span style="height: 12px; line-height: 12px;">Meaningful</span>
+                <span style="height: 12px; line-height: 12px;">Messages</span>
+              </span>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <p style="margin: 0; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; color: rgba(226,242,248,0.5);">Decime cuál va y la paso a la home.</p>
+</div>
+
+</x-dc>
+</body>
+</html>

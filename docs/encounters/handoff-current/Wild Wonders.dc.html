@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #EAF5FA; text-decoration: none; }
+  a:hover { color: #8FD9EA; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes heroRise {
+    from { transform: translate3d(0, 14%, 0) scale(1.05); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  }
+  @keyframes heroTitleRise {
+    from { transform: translate3d(0, 48px, 0); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @keyframes heroFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes cueDrop {
+    0%, 100% { transform: translateY(0); opacity: 0.55; }
+    50%      { transform: translateY(8px); opacity: 1; }
+  }
+  @media (max-width: 1080px) {
+    /* tablet: la grilla de 6 pasa a 3 y los hijos abarcan todo el ancho */
+    [data-m="row"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: clamp(30px, 8vh, 90px) clamp(16px, 2.4vw, 32px) !important; }
+    [data-m="row"] > * { grid-column: 1 / -1 !important; }
+  }
+  @media (max-width: 760px) {
+    [data-m="nav"] { padding: 14px 16px !important; }
+    [data-m="navlinks"] { justify-content: center !important; font-size: 10px !important; letter-spacing: 0.1em !important; gap: 6px 16px !important; }
+    [data-m="row"] { grid-template-columns: minmax(0, 1fr) !important; gap: clamp(24px, 6vh, 60px) !important; }
+    [data-m="row"] > * { grid-column: 1 / -1 !important; }
+    [data-m="pair"] { grid-template-columns: minmax(0, 1fr) !important; }
+    [data-m="crew"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    [data-m="strip"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #EAF5FA; color: #0E2A38; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; overflow: clip;">
+  <div ref="{{ veilRef }}" style="position: fixed; top: 0; left: 0; right: 0; height: 140px; z-index: 29; pointer-events: none; transition: opacity 400ms ease; background: linear-gradient(to bottom, rgba(4,17,30,0.72), rgba(4,17,30,0.34) 50%, rgba(4,17,30,0));"></div>
+  <nav ref="{{ navRef }}" data-m="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'l c r'; align-items: center; gap: clamp(12px, 2vw, 36px); padding: 18px clamp(18px, 3vw, 46px); color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0); transition: background 400ms ease, backdrop-filter 400ms ease, border-color 400ms ease, color 400ms ease;">
+    <div data-m="navlinks" style="grid-area: l; display: flex; align-items: center; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="Expeditions.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Encounters</span>
+          <span style="height: 12px; line-height: 12px;">Expeditions</span>
+        </span>
+      </a>
+      <a href="Workshops.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Artsy Animals</span>
+          <span style="height: 12px; line-height: 12px;">Workshops</span>
+        </span>
+      </a>
+      <a href="Art.dc.html" style="display: block; height: 12px; line-height: 12px; white-space: nowrap; color: inherit;">Art</a>
+      <a href="Meaningful Messages.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Meaningful</span>
+          <span style="height: 12px; line-height: 12px;">Messages</span>
+        </span>
+      </a>
+    </div>
+    <a href="Abismo Home.dc.html" style="grid-area: c; justify-self: center; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: inherit;">
+      <img ref="{{ navMarkRef }}" src="assets/logo-mark-blanco.png" alt="Encounters" style="height: 32px; width: auto; margin-right: -2px; transition: filter 400ms ease;" />
+      <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 500;">
+        <span style="font-size: clamp(14px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+        <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; opacity: 0.82;">again and again</span>
+      </span>
+    </a>
+    <div data-m="navlinks" style="grid-area: r; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="About.dc.html" style="white-space: nowrap; color: inherit;">About us</a>
+      <a href="The Crew.dc.html" style="white-space: nowrap; color: inherit;">The crew</a>
+      <a href="Contact.dc.html" style="white-space: nowrap; color: inherit;">Contact</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Wild Wonders hero" style="position: relative; z-index: 1; height: 240vh; background: #EAF5FA;">
+    <div style="position: sticky; top: 0; height: 100vh; overflow: hidden; background: #061826;">
+      <div style="position: absolute; inset: 0; animation: heroRise 1500ms cubic-bezier(.16,.84,.24,1) both;"><img ref="{{ heroImgRef }}" src="assets/ww-banner.webp" alt="Apneísta sobre el fondo, fotografía de Spotted Fabri" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; display: block;" /></div>
+      <div ref="{{ heroVeilRef }}" style="position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.6) 0%, rgba(4,17,30,0.28) 40%, rgba(4,17,30,0.62) 100%);"></div>
+      <div ref="{{ heroTextRef }}" style="position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(8px, 1.8vh, 18px); padding: clamp(110px, 15vh, 170px) clamp(20px, 5vw, 72px) clamp(70px, 11vh, 130px); text-align: center; pointer-events: none;">
+        <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(17px, 2.2vw, 30px); color: rgba(255,255,255,0.94); animation: heroFadeIn 900ms ease 420ms both;">meet georgia</span>
+        <h1 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2.6rem, min(13vw, 15vh), 10rem); line-height: 0.95; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; animation: heroTitleRise 1100ms cubic-bezier(.16,.84,.24,1) 700ms both;">Wild Wonders</h1>
+      </div>
+      <div ref="{{ cueRef }}" style="position: absolute; z-index: 3; left: 0; right: 0; bottom: clamp(22px, 4vh, 44px); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.88); pointer-events: none;">
+        <span>Scroll</span>
+        <span style="display: block; width: 1px; height: 30px; background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0)); animation: cueDrop 2.6s ease-in-out infinite;"></span>
+      </div>
+    </div>
+  </section>
+
+  <main style="position: relative; z-index: 2; margin-top: -100vh; background: #EAF5FA;">
+    <section data-screen-label="Meet georgia" style="padding: clamp(110px, 30vh, 320px) clamp(20px, 5vw, 72px) clamp(90px, 24vh, 260px); max-width: 1240px; margin: 0 auto;">
+      <div style="display: flex; flex-direction: column; gap: clamp(6px, 1.4vh, 16px);">
+        <h2 data-seq="0.95,0.5" style="margin: 0; max-width: 16ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 7vw, 5.4rem); line-height: 1.0; letter-spacing: 0.01em; color: #08222F; text-wrap: pretty;">meet georgia</h2>
+        <svg data-scribble="1" viewBox="0 0 600 130" aria-hidden="true" style="display: block; width: min(440px, 62%); height: auto; margin-left: clamp(-10px, 1vw, 20px); overflow: visible;">
+          <path d="M10 92 C 96 26, 188 20, 244 56 C 296 90, 256 118, 218 100 C 172 78, 214 40, 306 38 C 420 36, 522 56, 590 26" fill="none" stroke="rgba(14,42,56,0.55)" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+      </div>
+    </section>
+
+    <section data-screen-label="Wild Wonders" style="padding: 0 clamp(20px, 5vw, 72px) clamp(110px, 32vh, 340px); max-width: 1240px; margin: 0 auto;">
+      <div data-m="row" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(20px, 3vw, 44px);">
+        <div data-seq="1.42,0.6" style="grid-column: 4 / 7; display: flex; flex-direction: column; gap: 22px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #0F3B4C;">Wild Wonders</span>
+          <p style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(19px, 2.1vw, 30px); line-height: 1.32; color: #08222F; text-wrap: pretty;">She created the name &ldquo;Wild Wonders&rdquo; for herself when she was 7 years old.</p>
+          <p style="margin: 0; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">It was initially created for her animal sanctuary that she would eventually build in the future.. that will still come. But for now, the name &ldquo;Wild Wonders&rdquo; has become more of a description of herself.</p>
+          <p style="margin: 0; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">For her art aswell. It is always inspired by nature and community. <span style="font-weight: 600; letter-spacing: 0.06em;">SCROLL DOWN TO SEE SOME OF THAT ART (:</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Par de fotos" style="position: relative; height: 150vh; margin-bottom: clamp(16px, 4vh, 48px);">
+      <div data-m="pair" style="position: sticky; top: max(96px, 13vh); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0;">
+        <div ref="{{ pairARef }}" style="position: relative; height: clamp(300px, 74vh, 780px); overflow: hidden; background: #0F3B4C;">
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #0F3B4C;"><img src="assets/ww-georgia.webp" alt="Georgia Webb" loading="lazy" decoding="async" style="width: min(100%, 236px); height: auto; max-height: 100%; display: block;" /></div>
+        </div>
+        <div ref="{{ pairBRef }}" style="position: relative; height: clamp(300px, 74vh, 780px); overflow: hidden; background: #0F3B4C;">
+          <img src="assets/ww-backcover.webp" alt="Guepardo, pintura de Georgia Webb" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 60%; display: block;" />
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Encounters" style="padding: 0 clamp(20px, 5vw, 72px) clamp(70px, 20vh, 220px); max-width: 1240px; margin: 0 auto;">
+      <div data-m="row" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(60px, 18vh, 180px) clamp(20px, 3vw, 44px); align-items: start;">
+        <div data-seq="1.2,0.5" style="grid-column: 1 / 4; display: flex; flex-direction: column; gap: clamp(6px, 1.4vh, 16px);">
+          <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 4.8vw, 3.6rem); line-height: 1.06; letter-spacing: 0.01em; color: #08222F; text-wrap: pretty;">Illustrations of a little big book:</h2>
+          <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(1.9rem, 6vw, 4.4rem); line-height: 1.0; letter-spacing: 0.06em; text-transform: uppercase; color: #0F3B4C;">Encounters</span>
+        </div>
+        <div data-seq="1.05,0.5" style="grid-column: 4 / 7; display: flex; flex-direction: column; gap: 20px;">
+          <p style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(17px, 1.8vw, 24px); line-height: 1.45; color: #08222F; text-wrap: pretty;">While on Heron Island. Georgia met so many creative people, including Julian Lange..</p>
+          <p style="margin: 0; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">He was writing a book about the how he felt in the moments he encountered nature at its fullest and and how those encounters shaped his life.</p>
+          <p style="margin: 0; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.75; color: rgba(14,42,56,0.86); text-wrap: pretty;">So with Georgia&rsquo;s love for art and nature, they created the book together.</p>
+          <a href="https://www.encountersagainandagain.org/" style="font-size: 10px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: #0F3B4C;">click here for Encounters &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Portadas" style="padding: 0 clamp(20px, 5vw, 72px) clamp(90px, 24vh, 260px); max-width: 1240px; margin: 0 auto;">
+      <div data-m="row" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(40px, 10vh, 110px) clamp(20px, 3vw, 44px); align-items: end;">
+        <div data-seq="1.05,0.5" style="grid-column: 1 / 4; display: flex; flex-direction: column; gap: 12px;">
+          <div style="position: relative; width: min(100%, 424px); aspect-ratio: 3 / 4; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/ww-cover.webp" alt="Tapa del libro Encounters" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" />
+          </div>
+          <span style="font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(14,42,56,0.6);">[ cover ]</span>
+        </div>
+        <div data-seq="0.88,0.5" style="grid-column: 4 / 7; display: flex; flex-direction: column; gap: 12px;">
+          <div style="position: relative; width: min(100%, 424px); aspect-ratio: 3 / 4; overflow: hidden; background: #0F3B4C;">
+            <img src="assets/ww-backcover.webp" alt="Contratapa del libro Encounters" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" />
+          </div>
+          <span style="font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(14,42,56,0.6);">[ back cover ]</span>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen-label="Logos" style="background: #061826; color: #EAF5FA; padding: clamp(90px, 24vh, 260px) clamp(20px, 5vw, 72px) clamp(90px, 20vh, 220px);">
+      <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(60px, 18vh, 190px);">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <h2 data-seq="1.1,0.5" style="margin: 0; max-width: 24ch; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.6rem, 5vw, 3.6rem); line-height: 1.08; letter-spacing: 0.01em; color: #ffffff; text-wrap: pretty;">Designed both logos for : Encounters Expeditions : and : Encounters again and again :</h2>
+          <svg data-scribble="1" viewBox="0 0 600 120" aria-hidden="true" style="display: block; width: min(380px, 56%); height: auto; overflow: visible;">
+            <path d="M14 70 C 120 18, 300 14, 430 34 C 540 52, 520 86, 380 90 C 240 94, 120 78, 66 58 C 36 46, 70 34, 150 34" fill="none" stroke="rgba(234,245,250,0.7)" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div data-m="pair" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 0 calc(clamp(20px, 5vw, 72px) * -1);">
+          <div data-seq="1,0.34,70" style="position: relative; height: clamp(340px, 70vh, 720px); overflow: hidden; background: #0F3B4C;">
+            <image-slot id="ww-logo-expeditions" shape="rect" placeholder="Logo de Encounters Expeditions"></image-slot>
+            <span style="position: absolute; inset: auto 0 0 0; padding: clamp(14px, 1.8vw, 26px); font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #ffffff; background: linear-gradient(to top, rgba(4,17,30,0.86), rgba(4,17,30,0));">Encounters Expeditions</span>
+          </div>
+          <div data-seq="0.86,0.34,70" style="position: relative; height: clamp(340px, 70vh, 720px); overflow: hidden; background: #0F3B4C;">
+            <div style="position: absolute; inset: 0; background: #EAF5FA;"></div><img src="assets/ww-logo-encounters.webp" alt="Logo de Encounters again and again" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: clamp(18px, 4%, 48px); display: block;" />
+            <span style="position: absolute; inset: auto 0 0 0; padding: clamp(14px, 1.8vw, 26px); font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: #0E2A38;">Encounters again and again</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: clamp(22px, 5vh, 50px);">
+          <span data-seq="1.1,0.45" style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #8FD9EA;">Drafts of the logos (that were not used) &darr;</span>
+          <div data-m="strip" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 0 calc(clamp(20px, 5vw, 72px) * -1);">
+            <div data-seq="1,0.34,70" style="position: relative; height: clamp(260px, 56vh, 560px); overflow: hidden; background: #0F3B4C;">
+              <div style="position: absolute; inset: 0; background: #EAF5FA;"></div><img src="assets/ww-logo-draft-teal.webp" alt="Boceto descartado del logo" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: clamp(18px, 4%, 48px); display: block;" />
+            </div>
+            <div data-seq="0.9,0.34,70" style="position: relative; height: clamp(260px, 56vh, 560px); overflow: hidden; background: #0F3B4C;">
+              <image-slot id="ww-draft-2" shape="rect" placeholder="Boceto de logo 2"></image-slot>
+            </div>
+          </div>
+        </div>
+
+        <div id="contact" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: clamp(20px, 3vh, 34px); font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(234,245,250,0.55);">
+          <span>© 2026 Encounters again and again</span>
+          <a href="mailto:encountersagainandagain@gmail.com" style="color: rgba(234,245,250,0.8);">encountersagainandagain@gmail.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navRef: (el) => { this.nav = el; },
+      veilRef: (el) => { this.veil = el; },
+      navMarkRef: (el) => { this.navMark = el; },
+      heroImgRef: (el) => { this.heroImg = el; },
+      heroVeilRef: (el) => { this.heroVeil = el; },
+      heroTextRef: (el) => { this.heroText = el; },
+      cueRef: (el) => { this.cue = el; },
+      pairARef: (el) => { this.pairA = el; },
+      pairBRef: (el) => { this.pairB = el; },
+      pairBRefUnused: null
+    };
+  }
+
+  progress = 0;
+  eased = 0;
+
+  static ramp(v, from, to, smooth) {
+    const k = Math.min(1, Math.max(0, (v - from) / (to - from)));
+    return smooth ? k * k * (3 - 2 * k) : k;
+  }
+
+  // el garabato se dibuja con el scroll, justo después de su título
+  // el recorrido de cada garabato se limita a lo que queda de página debajo de él,
+  // así el trazo siempre termina (incluso el último, casi al final del documento)
+  measureScribbles() {
+    const vh = window.innerHeight;
+    const docH = document.documentElement.scrollHeight;
+    (this.scribbles || []).forEach((sc) => {
+      const docTop = sc.svg.getBoundingClientRect().top + window.scrollY;
+      const minTop = Math.max(0, vh - (docH - docTop));
+      // trazo rápido, como una firma
+      sc.span = Math.max(1, Math.min(vh * 0.4, vh - minTop));
+    });
+  }
+
+  armScribbles() {
+    this.scribbles = [];
+    Array.from(document.querySelectorAll("svg[data-scribble]")).forEach((svg) => this.armScribble(svg));
+  }
+
+  armScribble(svg) {
+    const path = svg && svg.querySelector("path");
+    if (!path || !path.getTotalLength) return;
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len + " " + len;
+    path.style.strokeDashoffset = String(len);
+    (this.scribbles = this.scribbles || []).push({ svg: svg, path: path, len: len, span: 1 });
+    this.measureScribbles();
+  }
+
+  componentDidMount() {
+    // todo aparece atado al scroll, uno detrás del otro: data-seq="inicio,recorrido"
+    // (fracciones de la altura de pantalla), nunca con temporizadores
+    this.seq = Array.from(document.querySelectorAll("[data-seq]")).map((el) => {
+      const [start, span, shift] = el.dataset.seq.split(",").map(Number);
+      const rise = shift || 70;
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, " + rise + "px, 0)";
+      el.style.willChange = "opacity, transform";
+      return { el, start: start || 0.9, span: span || 0.25, shift: rise };
+    });
+
+    // el par: la izquierda primero; la derecha necesita otro 20% de pantalla de scroll
+    // el par vive dentro de un sticky: su rampa se mide contra la sección, no contra
+    // el elemento (cuyo top se congela al quedar pegado), y termina antes del pin
+    // salen en el mismo orden en que entran: exitStart/exitSpan, medidos sobre el pin
+    this.pairSection = this.pairA && this.pairA.closest("section");
+    const pairSection = this.pairSection;
+    // entrada y salida encadenadas dentro del pin: nunca hay un tramo quieto
+    // entrada mientras la sección sube (aterrizan justo al fijarse) y salida ya en el pin
+    if (this.pairA) this.seq.push({ el: this.pairA, ref: pairSection, start: 1, span: 0.85, shift: 110, outFrom: 0.14, outTo: 0.56 });
+    if (this.pairB) this.seq.push({ el: this.pairB, ref: pairSection, start: 0.8, span: 0.8, shift: 110, outFrom: 0.42, outTo: 0.88 });
+    [this.pairA, this.pairB].forEach((el) => {
+      if (!el) return;
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, 110px, 0)";
+      el.style.willChange = "opacity, transform, filter";
+    });
+
+    this.armScribbles();
+    this.vh = window.innerHeight;
+    this.onScroll = () => {
+      const y = window.scrollY;
+      this.progress = Math.min(1, Math.max(0, y / this.vh));
+      // sobre el papel claro todo el navbar cambia de estado: velo, fondo, tinta y logo
+      const light = y > this.vh * 0.95;
+      if (light !== this.navLight) {
+        this.navLight = light;
+        if (this.veil) this.veil.style.opacity = light ? "0" : "1";
+        if (this.navMark) this.navMark.style.filter = light ? "invert(1)" : "none";
+        if (this.nav) this.nav.style.color = light ? "#0E2A38" : "#ffffff";
+      }
+      if (this.nav) {
+        const k = Math.min(1, y / 240);
+        this.nav.style.background = light
+          ? "rgba(234,245,250," + (0.6 + k * 0.32).toFixed(3) + ")"
+          : "rgba(6,24,38," + (k * 0.55).toFixed(3) + ")";
+        this.nav.style.backdropFilter = k > 0.05 ? "blur(" + (k * 14).toFixed(1) + "px)" : "none";
+        this.nav.style.borderBottomColor = light
+          ? "rgba(14,42,56,0.14)"
+          : "rgba(255,255,255," + (k * 0.14).toFixed(3) + ")";
+      }
+    };
+    this.onResize = () => { this.vh = window.innerHeight; this.measureScribbles(); this.applyNav(); this.onScroll(); };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    window.addEventListener("resize", this.onResize);
+    this.applyNav();
+    this.onScroll();
+    this.loop();
+  }
+
+  applyNav() {
+    if (!this.nav) return;
+    const w = window.innerWidth;
+    const mode = w < 760 ? "mobile" : w < 980 ? "compact" : "wide";
+    if (mode === this.navMode) return;
+    this.navMode = mode;
+    if (mode === "mobile") {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"c" "l" "r"';
+      this.nav.style.rowGap = "14px";
+    } else if (mode === "compact") {
+      this.nav.style.gridTemplateColumns = "1fr 1fr";
+      this.nav.style.gridTemplateAreas = '"c c" "l r"';
+      this.nav.style.rowGap = "14px";
+    } else {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr) auto minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"l c r"';
+      this.nav.style.rowGap = "0px";
+    }
+  }
+
+  loop = () => {
+    this.raf = requestAnimationFrame(this.loop);
+    this.eased += (this.progress - this.eased) * 0.06;
+    const d = this.eased;
+    const R = Component.ramp;
+
+    // la imagen se opaca y el papel la va tapando
+    const k = R(d, 0.02, 0.5, true);
+    if (this.heroImg) {
+      this.heroImg.style.transform = "scale(" + (1 + k * 0.08).toFixed(3) + ")";
+      this.heroImg.style.filter = "brightness(" + (1 - k * 0.45).toFixed(3) + ") saturate(" + (1 - k * 0.25).toFixed(2) + ")";
+    }
+    if (this.heroVeil) this.heroVeil.style.opacity = (1 + k * 0.4).toFixed(3);
+    if (this.heroText) {
+      const t = R(d, 0.06, 0.42);
+      this.heroText.style.opacity = (1 - t).toFixed(3);
+      this.heroText.style.transform = "translate3d(0," + (t * -50).toFixed(1) + "px,0) scale(" + (1 + t * 0.06).toFixed(3) + ")";
+    }
+    if (this.cue) this.cue.style.opacity = String(Math.max(0, 1 - d * 8));
+
+    const vh = window.innerHeight || this.vh;
+    (this.seq || []).forEach((item) => {
+      const rect = (item.ref || item.el).getBoundingClientRect();
+      const p = R((vh * item.start - rect.top) / (vh * item.span), 0, 1, true);
+      let out = 0;
+      if (item.outFrom) {
+        // avance dentro del pin: 0 al fijarse, 1 al soltarse
+        const stick = item.el.closest("[style*='sticky']") || item.el;
+        const top = parseFloat(getComputedStyle(stick).top) || 0;
+        const run = rect.height - stick.offsetHeight - top;
+        // sin recorrido de pin (móvil: el bloque fluye) no hay fase de salida
+        if (run > 1 && getComputedStyle(stick).position === "sticky") {
+          const pin = Math.min(1, Math.max(0, (top - rect.top) / run));
+          out = R((pin - item.outFrom) / (item.outTo - item.outFrom), 0, 1, true);
+        }
+      }
+      item.el.style.opacity = (p * (1 - out)).toFixed(3);
+      // entrada acentuada: sube, crece un poco y sale de foco. la salida sigue subiendo
+      item.el.style.transform = "translate3d(0," + ((1 - p) * item.shift - out * item.shift * 1.6).toFixed(1) +
+        "px,0) scale(" + (0.965 + p * 0.035 - out * 0.05).toFixed(4) + ")";
+      const blur = (1 - p) * 5 + out * 6;
+      item.el.style.filter = blur < 0.05 ? "none" : "blur(" + blur.toFixed(2) + "px)";
+    });
+
+    (this.scribbles || []).forEach((sc) => {
+      const top = sc.svg.getBoundingClientRect().top;
+      // rampa desde que entra por abajo: alcanzable incluso al final del documento,
+      // y de todos modos posterior al título que lleva encima
+      const p = R((vh - top) / sc.span, 0, 1);
+      sc.path.style.strokeDashoffset = (sc.len * (1 - p)).toFixed(1);
+    });
+  };
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("resize", this.onResize);
+  }
+}
+
+</script>
+</body>
+</html>

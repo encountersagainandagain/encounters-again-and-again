@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #061826; }
+  * { box-sizing: border-box; }
+  a { color: #EAF5FA; text-decoration: none; }
+  a:hover { color: #8FD9EA; }
+  @keyframes navRoll {
+    0%, 38%   { transform: translateY(0); }
+    50%, 88%  { transform: translateY(-50%); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes heroRise {
+    from { transform: translate3d(0, 14%, 0) scale(1.05); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  }
+  @keyframes heroTitleRise {
+    from { transform: translate3d(0, 48px, 0); opacity: 0; }
+    to   { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @keyframes heroFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes cueDrop {
+    0%, 100% { transform: translateY(0); opacity: 0.55; }
+    50%      { transform: translateY(8px); opacity: 1; }
+  }
+  /* el carrusel de sesiones se mueve por dentro; el scroll no se contagia a la página */
+  [data-rail] { scrollbar-width: none; -ms-overflow-style: none; }
+  [data-rail]::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  @media (max-width: 1080px) {
+    /* el nav apilado es más alto: el pin lo despeja y la card del workshop pasado crece con su contenido */
+    [data-m="shopPin"] { padding-top: 110px !important; }
+    [data-m="shop"] { grid-template-columns: minmax(0, 1fr) !important; gap: clamp(20px, 4vh, 40px) !important; }
+    [data-m="card"][data-seq] { align-self: stretch !important; }
+    [data-m="card"][data-seq] > [style*="grid-area: rail"] { padding: clamp(18px, 3vw, 34px) !important; gap: 14px !important; }
+    [data-m="card"][data-seq] > [style*="grid-area: rail"] > span:first-child { display: none !important; }
+    [data-m="shopIntro"] { max-width: 42ch !important; }
+    [data-m="shopNote"] { display: none !important; }
+  }
+  @media (max-width: 760px) {
+    [data-m="nav"] { padding: 14px 16px !important; }
+    [data-m="navlinks"] { justify-content: center !important; font-size: 10px !important; letter-spacing: 0.1em !important; gap: 6px 16px !important; }
+    [data-m="shopPin"] { position: static !important; height: auto !important; }
+    [data-m="shopWrap"] { height: auto !important; padding-bottom: clamp(40px, 10vh, 90px) !important; }
+    [data-m="card"] { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: 'media' 'rail' !important; height: auto !important; }
+    [data-m="cardMedia"] { height: 38vh !important; }
+    [data-m="rail"] { height: 58vh !important; }
+  }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #061826; color: #EAF5FA; font-family: Archivo, 'Helvetica Neue', Helvetica, sans-serif; overflow: clip;">
+  <div ref="{{ veilRef }}" style="position: fixed; top: 0; left: 0; right: 0; height: 140px; z-index: 29; pointer-events: none; transition: opacity 400ms ease; background: linear-gradient(to bottom, rgba(4,17,30,0.72), rgba(4,17,30,0.34) 50%, rgba(4,17,30,0));"></div>
+  <nav ref="{{ navRef }}" data-m="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'l c r'; align-items: center; gap: clamp(12px, 2vw, 36px); padding: 18px clamp(18px, 3vw, 46px); color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0); transition: background 400ms ease, backdrop-filter 400ms ease, border-color 400ms ease, color 400ms ease;">
+    <div data-m="navlinks" style="grid-area: l; display: flex; align-items: center; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="Expeditions.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Encounters</span>
+          <span style="height: 12px; line-height: 12px;">Expeditions</span>
+        </span>
+      </a>
+      <a href="Workshops.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit; box-shadow: inset 0 -1px 0 currentColor;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Artsy Animals</span>
+          <span style="height: 12px; line-height: 12px;">Workshops</span>
+        </span>
+      </a>
+      <a href="Art.dc.html" style="display: block; height: 12px; line-height: 12px; white-space: nowrap; color: inherit; box-shadow: inset 0 -1px 0 currentColor;">Art</a>
+      <a href="Meaningful Messages.dc.html" style="display: block; height: 12px; overflow: hidden; white-space: nowrap; color: inherit;">
+        <span style="display: flex; flex-direction: column; animation: navRoll 7s ease-in-out infinite;">
+          <span style="height: 12px; line-height: 12px;">Meaningful</span>
+          <span style="height: 12px; line-height: 12px;">Messages</span>
+        </span>
+      </a>
+    </div>
+    <a href="Abismo Home.dc.html" style="grid-area: c; justify-self: center; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: inherit;">
+      <img ref="{{ navMarkRef }}" src="assets/logo-mark-blanco.png" alt="Encounters" style="height: 32px; width: auto; margin-right: -2px; transition: filter 400ms ease;" />
+      <span style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 500;">
+        <span style="font-size: clamp(14px, 1.5vw, 20px); letter-spacing: 0.3em; text-transform: uppercase; padding-left: 0.3em; line-height: 1.05;">Encounters</span>
+        <span style="font-size: clamp(9px, 0.95vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; padding-left: 0.2em; line-height: 1.05; opacity: 0.82;">again and again</span>
+      </span>
+    </a>
+    <div data-m="navlinks" style="grid-area: r; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px clamp(10px, 1.3vw, 22px); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">
+      <a href="About.dc.html" style="white-space: nowrap; color: inherit;">About us</a>
+      <a href="The Crew.dc.html" style="white-space: nowrap; color: inherit;">The crew</a>
+      <a href="Contact.dc.html" style="white-space: nowrap; color: inherit;">Contact</a>
+    </div>
+  </nav>
+
+  <section data-screen-label="Workshops hero" style="position: relative; height: 100vh; overflow: hidden; background: #061826;">
+    <div style="position: absolute; inset: 0; animation: heroRise 1500ms cubic-bezier(.16,.84,.24,1) both;">
+      <img ref="{{ heroImgRef }}" src="assets/ww-banner.webp" alt="Taller junto al agua" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; display: block;" />
+    </div>
+    <div style="position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(to bottom, rgba(4,17,30,0.7) 0%, rgba(4,17,30,0.46) 44%, rgba(4,17,30,0.86) 100%);"></div>
+    <div ref="{{ heroTextRef }}" style="position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(8px, 1.8vh, 18px); padding: clamp(110px, 15vh, 170px) clamp(20px, 5vw, 72px) clamp(70px, 11vh, 130px); text-align: center; pointer-events: none;">
+      <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(17px, 2.2vw, 30px); color: rgba(255,255,255,0.94); animation: heroFadeIn 900ms ease 420ms both;">artsy animals</span>
+      <h1 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2.7rem, min(13vw, 15vh), 10rem); line-height: 0.95; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; animation: heroTitleRise 1100ms cubic-bezier(.16,.84,.24,1) 700ms both;">Workshops</h1>
+    </div>
+    <div ref="{{ cueRef }}" style="position: absolute; z-index: 3; left: 0; right: 0; bottom: clamp(22px, 4vh, 44px); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.88); pointer-events: none;">
+      <span>Scroll</span>
+      <span style="display: block; width: 1px; height: 30px; background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0)); animation: cueDrop 2.6s ease-in-out infinite;"></span>
+    </div>
+  </section>
+
+  <main style="position: relative; z-index: 4; background: #061826;">
+    <div data-m="shopWrap" data-screen-label="Workshop 01" style="position: relative; height: 165vh;">
+      <div data-m="shopPin" style="position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding: 82px clamp(20px, 4vw, 60px) 16px;">
+        <div data-m="shop" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(24px, 4vw, 70px); align-items: stretch; height: 100%;">
+          <div style="display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 5vh, 60px);">
+            <div data-m="shopIntro" style="display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px);">
+              <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.5);">Workshop 01 · Running</span>
+              <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 4.4vw, 4rem); line-height: 0.98; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; text-wrap: pretty;">Draw the ocean</h2>
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.04; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(234,245,250,0.42);">three sessions</span>
+            </div>
+            <div data-m="shopNote" style="display: flex; flex-direction: column; gap: 12px; max-width: 34ch;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(16px, 1.4vw, 21px); color: #ffffff;">Who it is for</span>
+              <p style="margin: 0; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.7; color: rgba(234,245,250,0.7); text-wrap: pretty;">Schools and community groups, no drawing experience needed. We bring the materials and the stories; the room brings the animals it wants to meet.</p>
+            </div>
+          </div>
+
+          <article data-m="card" style="position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: 'rail media'; height: 100%; background: #0E2A38; border: 1px solid rgba(234,245,250,0.12); overflow: hidden;">
+            <div data-rail="w1" data-m="rail" style="grid-area: rail; position: relative; height: 100%; overflow-y: auto; overscroll-behavior-y: contain; scroll-snap-type: y mandatory;">
+              <div data-slide="0" style="height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding: clamp(24px, 3vw, 48px) clamp(24px, 3vw, 48px) clamp(78px, 7vw, 106px); border-bottom: 1px solid rgba(234,245,250,0.12);">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: #ffffff;">01</span>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">Looking first</span>
+                  <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.74); text-wrap: pretty;">We open with photographs and the stories behind them — what it felt like to be in the water with a whale, what the turtle was doing before the camera came out. Nobody draws yet.</p>
+                </div>
+              </div>
+              <div data-slide="1" style="height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding: clamp(24px, 3vw, 48px) clamp(24px, 3vw, 48px) clamp(78px, 7vw, 106px); border-bottom: 1px solid rgba(234,245,250,0.12);">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: #ffffff;">02</span>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">Drawing together</span>
+                  <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.74); text-wrap: pretty;">Georgia works through her own process out loud — the shapes she starts with, the mistakes she keeps. Everyone picks one animal and stays with it until the page is full.</p>
+                </div>
+              </div>
+              <div data-slide="2" style="height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding: clamp(24px, 3vw, 48px) clamp(24px, 3vw, 48px) clamp(78px, 7vw, 106px);">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: #ffffff;">03</span>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">Putting it up</span>
+                  <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.74); text-wrap: pretty;">Every drawing goes on the wall, with the name of the animal and one line about why it was chosen. The room reads itself, and the wall stays after we leave.</p>
+                </div>
+              </div>
+            </div>
+            <div data-m="cardMedia" style="grid-area: media; position: relative; height: 100%; overflow: hidden; background: #0F3B4C;">
+              <img data-shot="w1" data-i="0" src="assets/reef-turtle-web.jpg" alt="Tortuga en el arrecife" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 50%; display: block;" />
+              <img data-shot="w1" data-i="1" src="assets/ww-cheetah-crop.webp" alt="Ilustración en proceso" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 50%; display: block; opacity: 0;" />
+              <img data-shot="w1" data-i="2" src="assets/ww-backcover.webp" alt="Dibujos terminados" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: clamp(16px, 3%, 44px); display: block; opacity: 0;" />
+            </div>
+            <div style="position: absolute; z-index: 3; left: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: clamp(14px, 1.6vw, 22px) clamp(24px, 3vw, 48px); font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.72); background: linear-gradient(to top, rgba(14,42,56,0.96), rgba(14,42,56,0));">
+              <span data-count="w1" style="font-family: ui-monospace, monospace; letter-spacing: 0.1em;">01 / 03</span>
+              <span style="position: relative; display: block; width: clamp(60px, 8vw, 120px); height: 1px; background: rgba(234,245,250,0.26);"><span data-bar="w1" style="position: absolute; inset: 0 auto 0 0; width: 33%; background: #8FD9EA; transition: width 220ms ease;"></span></span>
+              <span>Sessions</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div data-m="shopWrap" data-screen-label="Workshop 02" style="position: relative; height: 165vh;">
+      <div data-m="shopPin" style="position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding: 82px clamp(20px, 4vw, 60px) 16px;">
+        <div data-m="shop" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(24px, 4vw, 70px); align-items: stretch; height: 100%;">
+          <div style="display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 5vh, 60px);">
+            <div data-m="shopIntro" style="display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px);">
+              <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(234,245,250,0.5);">Workshop 02 · Running</span>
+              <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 4.4vw, 4rem); line-height: 0.98; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; text-wrap: pretty;">Encounters at the market</h2>
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.04; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(234,245,250,0.42);">two sessions</span>
+            </div>
+            <div data-m="shopNote" style="display: flex; flex-direction: column; gap: 12px; max-width: 34ch;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(16px, 1.4vw, 21px); color: #ffffff;">A note about the stall</span>
+              <p style="margin: 0; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.7; color: rgba(234,245,250,0.7); text-wrap: pretty;">It travels: a table, the book, the prints and whatever we can carry. Half of it is selling, half of it is talking to whoever stops.</p>
+            </div>
+          </div>
+
+          <article data-m="card" style="position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: 'rail media'; height: 100%; background: #0E2A38; border: 1px solid rgba(234,245,250,0.12); overflow: hidden;">
+            <div data-rail="w2" data-m="rail" style="grid-area: rail; position: relative; height: 100%; overflow-y: auto; overscroll-behavior-y: contain; scroll-snap-type: y mandatory;">
+              <div data-slide="0" style="height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding: clamp(24px, 3vw, 48px) clamp(24px, 3vw, 48px) clamp(78px, 7vw, 106px); border-bottom: 1px solid rgba(234,245,250,0.12);">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: #ffffff;">01</span>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">The stall</span>
+                  <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.74); text-wrap: pretty;">We set up early with the book, the prints and a stack of blank paper. Anyone who stops gets asked the same question: which animal have you actually met?</p>
+                </div>
+              </div>
+              <div data-slide="1" style="height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding: clamp(24px, 3vw, 48px) clamp(24px, 3vw, 48px) clamp(78px, 7vw, 106px);">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: #ffffff;">02</span>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">The reading</span>
+                  <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.74); text-wrap: pretty;">Late in the afternoon we read a few pages out loud for whoever is around, kids sitting on the grass. It usually turns into a conversation about the sea instead.</p>
+                </div>
+              </div>
+            </div>
+            <div data-m="cardMedia" style="grid-area: media; position: relative; height: 100%; overflow: hidden; background: #0F3B4C;">
+              <img data-shot="w2" data-i="0" src="assets/ww-cover.webp" alt="El libro en la mesa" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: clamp(16px, 3%, 44px); display: block;" />
+              <img data-shot="w2" data-i="1" src="assets/crew-group.jpg" alt="Lectura con la gente" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; opacity: 0;" />
+            </div>
+            <div style="position: absolute; z-index: 3; left: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: clamp(14px, 1.6vw, 22px) clamp(24px, 3vw, 48px); font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(234,245,250,0.72); background: linear-gradient(to top, rgba(14,42,56,0.96), rgba(14,42,56,0));">
+              <span data-count="w2" style="font-family: ui-monospace, monospace; letter-spacing: 0.1em;">01 / 02</span>
+              <span style="position: relative; display: block; width: clamp(60px, 8vw, 120px); height: 1px; background: rgba(234,245,250,0.26);"><span data-bar="w2" style="position: absolute; inset: 0 auto 0 0; width: 50%; background: #8FD9EA; transition: width 220ms ease;"></span></span>
+              <span>Sessions</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div data-m="shopWrap" data-screen-label="Workshop pasado" style="position: relative; height: 130vh;">
+      <div data-m="shopPin" style="position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding: 82px clamp(20px, 4vw, 60px) 16px;">
+        <div data-m="shop" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(24px, 4vw, 70px); align-items: stretch; height: 100%;">
+          <div style="display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 5vh, 60px);">
+            <div data-m="shopIntro" style="display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px);">
+              <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #8FD9EA;">Workshop 03 · Finished</span>
+              <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 4.4vw, 4rem); line-height: 0.98; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff; text-wrap: pretty;">Wild wonders at Coledale</h2>
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.04; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(234,245,250,0.42);">two afternoons</span>
+            </div>
+            <div data-m="shopNote" style="display: flex; flex-direction: column; gap: 12px; max-width: 34ch;">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(16px, 1.4vw, 21px); color: #ffffff;">What stayed</span>
+              <p style="margin: 0; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.7; color: rgba(234,245,250,0.7); text-wrap: pretty;">Forty-one drawings, a wall that stayed up for a month, and three families who came back for the second afternoon.</p>
+            </div>
+          </div>
+
+          <article data-m="card" data-seq="0.9,0.4" style="position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: 'rail media'; height: 100%; background: #08222F; border: 1px solid rgba(143,217,234,0.28); overflow: hidden;">
+            <div style="grid-area: rail; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; padding: clamp(24px, 3vw, 48px);">
+              <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1; color: rgba(234,245,250,0.5);">—</span>
+              <div style="display: flex; flex-direction: column; gap: 16px;">
+                <span style="font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: clamp(18px, 1.7vw, 26px); color: #ffffff;">How it went</span>
+                <p style="margin: 0; max-width: 44ch; font-size: clamp(14px, 1.05vw, 17px); line-height: 1.75; color: rgba(234,245,250,0.78); text-wrap: pretty;">Two afternoons at the markets, one long table, and more people than chairs. Everyone drew the animal they had met — and a few who had never met one drew the one they wanted to.</p>
+                <a href="#" style="display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; margin-top: 6px; padding: 14px clamp(20px, 2.4vw, 32px); border: 1px solid #8FD9EA; color: #8FD9EA; font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;" style-hover="background: #8FD9EA; color: #08222F">See the result &rarr;</a>
+              </div>
+            </div>
+            <div data-m="cardMedia" style="grid-area: media; position: relative; height: 100%; overflow: hidden; background: #0F3B4C;">
+              <image-slot id="ws-coledale" shape="rect" placeholder="Foto del workshop terminado"></image-slot>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <section data-screen-label="Cierre" style="padding: clamp(80px, 20vh, 220px) clamp(20px, 5vw, 72px) clamp(40px, 8vh, 90px);">
+      <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 4vh, 44px); text-align: center;">
+        <h2 data-seq="1.05,0.45" style="margin: 0; max-width: 24ch; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, min(7vw, 10vh), 5rem); line-height: 1.0; letter-spacing: 0.02em; text-transform: uppercase; color: #ffffff;">Want one of these in your room?</h2>
+        <a href="Contact.dc.html" data-seq="0.95,0.4" style="padding: 16px clamp(26px, 3vw, 42px); background: #EAF5FA; color: #08222F; font-size: 10px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;" style-hover="background: #8FD9EA">Write to us</a>
+      </div>
+    </section>
+
+    <section style="border-top: 1px solid rgba(255,255,255,0.14); margin: 0 clamp(20px, 5vw, 72px); padding: clamp(20px, 3vh, 34px) 0 clamp(40px, 6vh, 70px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(234,245,250,0.55);">
+      <span>© 2026 Encounters again and again</span>
+      <a href="mailto:encountersagainandagain@gmail.com" style="color: rgba(234,245,250,0.8);">encountersagainandagain@gmail.com</a>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navRef: (el) => { this.nav = el; },
+      veilRef: (el) => { this.veil = el; },
+      navMarkRef: (el) => { this.navMark = el; },
+      heroImgRef: (el) => { this.heroImg = el; },
+      heroTextRef: (el) => { this.heroText = el; },
+      cueRef: (el) => { this.cue = el; }
+    };
+  }
+
+  static ramp(v, from, to, smooth) {
+    const k = Math.min(1, Math.max(0, (v - from) / (to - from)));
+    return smooth ? k * k * (3 - 2 * k) : k;
+  }
+
+  // cada workshop es un carrusel vertical propio: el scroll dentro del riel pasa
+  // de sesión a sesión (overscroll contenido) y sólo por fuera avanza al siguiente workshop
+  armRails() {
+    this.rails = Array.from(document.querySelectorAll("[data-rail]")).map((rail) => {
+      const key = rail.dataset.rail;
+      const shots = Array.from(document.querySelectorAll("[data-shot='" + key + "']"));
+      const count = rail.querySelectorAll("[data-slide]").length;
+      const item = {
+        rail, shots, count,
+        countEl: document.querySelector("[data-count='" + key + "']"),
+        barEl: document.querySelector("[data-bar='" + key + "']")
+      };
+      const sync = () => this.syncRail(item);
+      rail.addEventListener("scroll", sync, { passive: true });
+      sync();
+      return item;
+    });
+  }
+
+  syncRail(item) {
+    const h = item.rail.clientHeight || 1;
+    const raw = item.rail.scrollTop / h;
+    const i = Math.max(0, Math.min(item.count - 1, Math.round(raw)));
+    item.shots.forEach((img, n) => {
+      const d = Math.min(1, Math.abs(raw - n));
+      img.style.opacity = (1 - d).toFixed(3);
+      img.style.transform = "scale(" + (1 + d * 0.04).toFixed(4) + ")";
+    });
+    if (item.countEl) {
+      item.countEl.textContent = String(i + 1).padStart(2, "0") + " / " + String(item.count).padStart(2, "0");
+    }
+    if (item.barEl) item.barEl.style.width = (((i + 1) / item.count) * 100).toFixed(1) + "%";
+  }
+
+  componentDidMount() {
+    this.seq = Array.from(document.querySelectorAll("[data-seq]")).map((el) => {
+      const [start, span, shift] = el.dataset.seq.split(",").map(Number);
+      const rise = shift || 70;
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, " + rise + "px, 0)";
+      el.style.willChange = "opacity, transform";
+      return { el, start: start || 0.9, span: span || 0.25, shift: rise };
+    });
+
+    this.armRails();
+    this.hero = document.querySelector("[data-screen-label='Workshops hero']");
+    this.vh = window.innerHeight;
+    this.onScroll = () => {
+      const y = window.scrollY;
+      this.progress = Math.min(1, Math.max(0, y / this.vh));
+      const past = this.hero ? this.hero.getBoundingClientRect().bottom < 160 : true;
+      if (past !== this.navPast) {
+        this.navPast = past;
+        if (this.veil) this.veil.style.opacity = past ? "0" : "1";
+      }
+      if (this.nav) {
+        const k = Math.min(1, y / 240);
+        this.nav.style.background = "rgba(6,24,38," + (k * 0.72).toFixed(3) + ")";
+        this.nav.style.backdropFilter = k > 0.05 ? "blur(" + (k * 14).toFixed(1) + "px)" : "none";
+        this.nav.style.borderBottomColor = "rgba(255,255,255," + (k * 0.14).toFixed(3) + ")";
+      }
+    };
+    this.onResize = () => {
+      this.vh = window.innerHeight;
+      (this.rails || []).forEach((item) => this.syncRail(item));
+      this.applyNav();
+      this.onScroll();
+    };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    window.addEventListener("resize", this.onResize);
+    this.applyNav();
+    this.onScroll();
+    this.loop();
+  }
+
+  applyNav() {
+    if (!this.nav) return;
+    const w = window.innerWidth;
+    const mode = w < 760 ? "mobile" : w < 980 ? "compact" : "wide";
+    if (mode === this.navMode) return;
+    this.navMode = mode;
+    if (mode === "mobile") {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"c" "l" "r"';
+      this.nav.style.rowGap = "14px";
+    } else if (mode === "compact") {
+      this.nav.style.gridTemplateColumns = "1fr 1fr";
+      this.nav.style.gridTemplateAreas = '"c c" "l r"';
+      this.nav.style.rowGap = "14px";
+    } else {
+      this.nav.style.gridTemplateColumns = "minmax(0, 1fr) auto minmax(0, 1fr)";
+      this.nav.style.gridTemplateAreas = '"l c r"';
+      this.nav.style.rowGap = "0px";
+    }
+  }
+
+  progress = 0;
+  eased = 0;
+
+  loop = () => {
+    this.raf = requestAnimationFrame(this.loop);
+    this.eased += (this.progress - this.eased) * 0.08;
+    const R = Component.ramp;
+    const d = this.eased;
+    const vh = window.innerHeight || this.vh;
+
+    const k = R(d, 0, 0.9);
+    if (this.heroImg) {
+      this.heroImg.style.transform = "translate3d(0," + (k * 7).toFixed(1) + "%,0) scale(" + (1 + k * 0.07).toFixed(3) + ")";
+      this.heroImg.style.filter = "brightness(" + (1 - k * 0.4).toFixed(3) + ")";
+    }
+    if (this.heroText) {
+      const t = R(d, 0.05, 0.62);
+      this.heroText.style.opacity = (1 - t).toFixed(3);
+      this.heroText.style.transform = "translate3d(0," + (t * -58).toFixed(1) + "px,0)";
+    }
+    if (this.cue) this.cue.style.opacity = String(Math.max(0, 1 - d * 8));
+
+    (this.seq || []).forEach((item) => {
+      const rect = item.el.getBoundingClientRect();
+      const p = R((vh * item.start - rect.top) / (vh * item.span), 0, 1, true);
+      item.el.style.opacity = p.toFixed(3);
+      item.el.style.transform = "translate3d(0," + ((1 - p) * item.shift).toFixed(1) + "px,0)";
+    });
+  };
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("resize", this.onResize);
+  }
+}
+</script>
+</body>
+</html>
