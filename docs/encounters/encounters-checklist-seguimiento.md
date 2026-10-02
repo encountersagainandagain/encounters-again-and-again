@@ -25,7 +25,7 @@ Documento de seguimiento del checklist de 22 pasos acordado. El detalle funciona
 | Hosting | Acceso a Hostinger disponible; plan y servicios aún no revisados. | Descargar respaldo coherente de archivos/DB e identificar DNS/correo. |
 | Email público de comunicaciones | Contact irá al correo principal del colectivo, confirmado por Juani; dirección exacta pendiente. | Confirmar dirección para Settings, contacto y Reply-To; separada de la cuenta técnica. |
 | Cuenta de servicios | Confirmada por Juani: `encounters.services@outlook.com`. Sustituye la propuesta anterior de Gmail. | Utilizarla al configurar los servicios del proyecto; altas y conexiones aún pendientes de confirmar. |
-| Texto e imágenes del sitio | ZIP editorial conservado pero truncado: comprobado el 02/10, sin seed JSON recuperable. Diseño vigente íntegro. | Obtener copia editorial completa antes del seed; ver migration-source-integrity.md. |
+| Texto e imágenes del sitio | Copia completa verificada el 02/10: checksum/CRC/JSON válidos, 11 páginas, 1 story, 161 bloques y 50 imágenes. Diseño vigente íntegro. | Bloqueo resuelto. ZIP definitivo: docs/encounters/migration-source/encounters-content-snapshot.zip; importación pendiente PASO 3. |
 | Backup restaurable de WordPress | Pendiente; snapshot editorial disponible. | Descargar desde Hostinger archivos y DB de la misma copia/fecha; guardar fuera del hosting. |
 | Analytics y Search Console | Existencia/configuración y accesos aún no comprobados. | Revisar plugins/etiquetas y confirmar propiedades/cuentas. |
 | Diseño | Entrega vigente verificada el 01/10: 61 archivos completos, Home v2; antiguo archivado. | Implementar y validar por página en PASO 4; diferencias en design-decisions.md. |
@@ -54,7 +54,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [ ] **13. Incorporar resultados y Messages — PENDIENTE.** Posts de experiencia asociados a actividades y publicaciones ilustradas/poemas.
 - [ ] **14. Completar Próximamente y Home — PENDIENTE.** Destacados, orden y listas automáticas; no duplicar fichas ni mostrar secciones vacías.
 - [ ] **15. Completar About, Contact y Newsletter — PENDIENTE.** Settings editables, suscripción, envío de prueba, envío manual y baja.
-- [ ] **16. Importar contenido existente — BLOQUEADO POR ARCHIVO.** Snapshot editorial truncado; obtener original completo con seed-content.json y assets antes del seed idempotente.
+- [ ] **16. Importar contenido existente — PENDIENTE (PASO 3).** Bloqueo del archivo resuelto: copia completa verificada en docs/encounters/migration-source/encounters-content-snapshot.zip. Seed SQL, importación, subida de imágenes y migraciones todavía no ejecutados.
 - [ ] **17. Preparar SEO y redirecciones — EN CURSO (PLAN).** Mapa inicial preparado desde URLs reales del snapshot. Faltan inventario final, implementación y pruebas de reglas, canonicals, sitemap, robots, metadata y publicación sin deploy.
 - [ ] **18. Validar con los fundadores — PENDIENTE.** Diseño, móvil, edición, publicación, resultados, necesidades y newsletter.
 - [ ] **19. Preparar Analytics y Search Console — PENDIENTE.** En el punto 1 se investiga qué existe; aquí se configura/valida la medición de la web nueva.
@@ -99,7 +99,7 @@ El ZIP editorial sirve para importar contenido a Next.js. No contiene necesariam
 
 **Restaurar significa recuperar WordPress si se pierde o se daña. No es un paso necesario para construir la nueva web.** Podemos conservar la instalación actual en Hostinger mientras desarrollamos y validamos Encounters en Vercel. El respaldo permite recuperar la versión anterior incluso si la instalación original deja de estar disponible; conservar únicamente el sitio activo no reemplaza ese respaldo.
 
-- [x] Snapshot editorial conservado. **Integridad fallida el 02/10:** copia truncada; obtener original completo antes de importación.
+- [x] Snapshot editorial completo conservado y validado. **Bloqueo resuelto el 02/10:** checksum esperado, CRC y JSON correctos; 11 páginas, 1 story, 161 bloques y 50 imágenes. Ruta: docs/encounters/migration-source/encounters-content-snapshot.zip.
 - [ ] Identificar qué respaldos de archivos y base de datos ofrece el plan de Hostinger. Alternativa: herramienta de WordPress ya disponible si sirve para generar el respaldo.
 - [ ] Opcional como complemento: descargar exportación XML desde **Herramientas → Exportar → Todo el contenido → Descargar archivo de exportación**. Es un respaldo complementario del contenido; no incluye los archivos binarios de medios ni sustituye una copia completa. No bloquea esta etapa si obtenemos un backup completo del hosting. [Exportación oficial](https://wordpress.org/documentation/article/tools-export-screen/).
 - [ ] Generar y descargar backup de base de datos y archivos con la herramienta disponible. El método exacto se define después de ver el panel.
@@ -195,6 +195,13 @@ En el listado: título, introducción breve y perfiles con retrato, nombre, espe
 Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poco contenido. Las secciones opcionales desaparecen cuando no hay información. Entregar ambas vistas y sus decisiones de diseño para revisión con Juani; Home se retomará después.
 
 ## Registro de cambios
+
+### 2026-10-02 — resolución del bloqueo editorial
+
+- Recibidos ZIP completo y carpeta extraída en Downloads; ambos coinciden byte a byte en sus 56 archivos. Originales conservados.
+- Copia definitiva: docs/encounters/migration-source/encounters-content-snapshot.zip; SHA-256 `2c5fee58cdadbf98a444380c9fcf98c857c4c16335004e3f25e3fafc2ccabbc6`.
+- CRC completo, JSON válido, CSV/raw presentes y conteos verificados: 11 páginas, 1 story, 161 bloques y 50 imágenes. Inventarios y tamaños coinciden.
+- Bloqueo del snapshot resuelto; punto 16 permanece pendiente para PASO 3. Listo para iniciar PASO 2. Sin seed SQL, importaciones, subidas a Storage ni migraciones.
 
 ### 2026-10-02 — implementación y comprobación del PASO 1
 

@@ -12,4 +12,4 @@ No hay migraciones nuevas generadas ni aplicadas en PASO 1. SQL histórico de Ka
 
 Antes de cada aplicación: revisar SQL y destino; respaldo apropiado al entorno. No db reset remoto. Recuperación por migración correctiva o restauración del entorno nuevo autorizado; conservar registro y nunca ejecutar dos veces por cambiar de herramienta.
 
-Precondición del seed: reemplazar el snapshot truncado identificado en migration-source-integrity.md por una copia editorial completa y verificada. No usar las entradas parciales como fuente canónica.
+Precondición de integridad del archivo cumplida el 2026-10-02: copia completa verificada en docs/encounters/migration-source/encounters-content-snapshot.zip; ver migration-source-integrity.md. Usar esa copia canónica en el PASO 3. Todavía no se generó seed SQL ni se importó contenido o ejecutaron migraciones.

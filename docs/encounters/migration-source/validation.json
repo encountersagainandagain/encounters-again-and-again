@@ -1,0 +1,34 @@
+{
+  "validated_on": "2026-10-02",
+  "result": "PASS",
+  "archive_path": "docs/encounters/migration-source/encounters-content-snapshot.zip",
+  "sha256": "2c5fee58cdadbf98a444380c9fcf98c857c4c16335004e3f25e3fafc2ccabbc6",
+  "expected_sha256": "2c5fee58cdadbf98a444380c9fcf98c857c4c16335004e3f25e3fafc2ccabbc6",
+  "bytes": 12902905,
+  "zip_crc": "PASS: all 56 files",
+  "required_files": [
+    "encounters-content-snapshot/seed-content.json",
+    "encounters-content-snapshot/content-blocks.csv",
+    "encounters-content-snapshot/image-inventory.csv",
+    "encounters-content-snapshot/raw/wordpress-pages.json",
+    "encounters-content-snapshot/raw/wordpress-posts.json"
+  ],
+  "seed_json": "valid",
+  "counts": {
+    "pages": 11,
+    "stories": 1,
+    "editorial_blocks": 161,
+    "image_files": 50,
+    "seed_images": 50,
+    "content_blocks_csv_rows": 161,
+    "image_inventory_csv_rows": 50,
+    "raw_pages": 11,
+    "raw_posts": 1
+  },
+  "image_paths_and_sizes_match_seed_and_csv": true,
+  "downloads_extracted_folder_matches_archive": true,
+  "sql_generated": false,
+  "content_imported": false,
+  "storage_uploads": false,
+  "migrations_executed": false
+}

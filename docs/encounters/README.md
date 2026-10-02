@@ -15,4 +15,4 @@ La instrucción de Juani del 01/10/2026 actualiza el diseño y limita la ejecuci
 - [Diseño y diferencias funcionales](design-decisions.md)
 - [Cobertura por página](page-progress.md)
 
-El snapshot editorial sigue conservado en el starter kit local, pero se comprobó que está truncado y requiere una copia completa antes del seed. No es un respaldo restaurable de WordPress. No copiar backups, usuarios ni credenciales al repositorio. El seguimiento integrado aquí conserva el historial original y pasa a ser la copia activa; el starter kit queda como material de origen.
+El snapshot editorial completo está conservado en `migration-source/encounters-content-snapshot.zip` y validado en `migration-source/validation.json`; reemplaza como fuente canónica la copia truncada del starter kit. Bloqueo editorial resuelto. No es un respaldo restaurable de WordPress. No copiar backups, usuarios ni credenciales al repositorio. El seguimiento integrado aquí conserva el historial original y pasa a ser la copia activa; el starter kit queda como material de origen.

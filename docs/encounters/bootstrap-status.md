@@ -32,4 +32,4 @@ Pendientes funcionales acotados: Contact (formulario vs contacto directo y persi
 
 Próxima acción: PASO 2, crear Supabase y Resend propios y proporcionar las ocho variables por .env.local; confirmar emails admin/contacto, remitente y método SQL. Vercel continúa pendiente por instrucción.
 
-Bloqueo editorial encontrado: encounters-content-snapshot.zip está truncado (también dentro del ZIP del starter kit), sin seed-content.json recuperable. Ver migration-source-integrity.md; obtener copia completa antes del seed del PASO 3. No bloquea servicios ni el cierre técnico del PASO 1.
+Bloqueo editorial RESUELTO el 2026-10-02: copia completa validada y conservada en `docs/encounters/migration-source/encounters-content-snapshot.zip`. SHA-256 coincide con el indicado por Juani; CRC de los 56 archivos correcto, seed JSON válido, 11 páginas, 1 story, 161 bloques y 50 imágenes verificados contra JSON/CSV/raw. Ver migration-source-integrity.md y migration-source/validation.json. Proyecto listo para iniciar PASO 2. No se generó seed SQL, importó contenido, subió imágenes a Storage ni ejecutó migraciones.

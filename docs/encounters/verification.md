@@ -16,7 +16,7 @@ Entorno: Node 23.6.1, Next 16.2.6, aplicación local en 127.0.0.1:3210, sin .env
 | Archivos a versionar | Sin .env reales, .vercel, dependencias ni caches; exploración de patrones de secretos sin coincidencias. No equivale a auditoría criptográfica |
 | Fuente | Katie HEAD 102fc91 y git status limpio después de trabajar |
 | ZIP de diseño | 61 archivos idénticos y dependencias locales de 13 HTML presentes |
-| Snapshot editorial | FALLA: ZIP truncado, bloquea seed posterior; ver migration-source-integrity.md |
+| Snapshot editorial | PASS tras recibir copia completa: SHA-256 esperado, CRC de 56 archivos, JSON/CSV/raw y conteos 11/1/161/50 correctos; ver migration-source-integrity.md |
 
 ## Navegador
 
