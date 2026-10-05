@@ -19,11 +19,6 @@ type UnsubscribePageProps = {
   }>;
 };
 
-type UnsubscribeResult = {
-  email: string;
-  status: string;
-};
-
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value
@@ -39,14 +34,14 @@ async function unsubscribe(token: string) {
 
   if (error) throw new Error('Unable to process unsubscribe request.');
 
-  return Array.isArray(data) ? (data[0] as UnsubscribeResult | undefined) ?? null : null;
+  return data === true;
 }
 
 export default async function UnsubscribePage({ params }: UnsubscribePageProps) {
   if (!supabase) return <section className="enc-preparation"><h1>Newsletter</h1><p>Unsubscribe is not configured yet.</p></section>;
   const { token } = await params;
   const result = await unsubscribe(token);
-  const success = result?.status === 'unsubscribed';
+  const success = result === true;
 
   return (
     <main className="min-h-screen bg-cream pt-28 md:pt-32">

@@ -9,13 +9,12 @@ import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   createAdminPost,
+  saveAdminPostWithBlocks,
   fetchAdminPost,
   fetchAdminPostBlocks,
   fetchPostSlugReferences,
-  replaceAdminPostBlocks,
   updateAdminPost,
   type AdminPostBlockContent,
-  type AdminPostBlockInput,
   type AdminPostBlockType,
   type AdminPostInput,
   type AdminPostSlugReference,
@@ -1515,29 +1514,6 @@ export function AdminPostForm({ id }: { id?: string }) {
     setBlocks((current) => current.filter((block) => block.localId !== localId));
   };
 
-  const saveBlocks = async () => {
-    if (!id) return [];
-    setBlockErrorMessage('');
-    setBlockSaveMessage('');
-
-    const blockInputs: AdminPostBlockInput[] = blocks.map((block, index) => ({
-      type: block.type,
-      position: index,
-      content: block.content,
-    }));
-
-    const savedBlocks = await replaceAdminPostBlocks(id, blockInputs);
-    setBlocks(
-      savedBlocks.map((block) => ({
-        localId: block.id,
-        type: block.type,
-        content: block.content,
-      }))
-    );
-
-    return savedBlocks;
-  };
-
   const handleSaveAll = async (successMessage = 'Post and content blocks saved.') => {
     if (!id) return false;
 
@@ -1548,8 +1524,7 @@ export function AdminPostForm({ id }: { id?: string }) {
     setIsSavingBlocks(true);
 
     try {
-      const savedPost = await savePostMetadata();
-      await saveBlocks();
+      const savedPost = await saveAdminPostWithBlocks(id, buildPostInput(), blocks.map((block,position)=>({type:block.type,position,content:block.content})));
       await requestAdminRevalidation({
         scope: 'posts',
         slugs: [savedPost.slug, originalSlug],
@@ -3586,7 +3561,7 @@ export function AdminPostForm({ id }: { id?: string }) {
                               >
                                 {block.type === 'heading' ? 'Heading text' : 'Paragraph text'}
                               </label>
-                              {block.type === 'paragraph' && (
+                              {(block.type === 'paragraph' || block.type === 'source') && (
                                 <InlineFormattingToolbar
                                   onFormat={(format) =>
                                     applyParagraphFormat(block.localId, format)

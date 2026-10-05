@@ -739,7 +739,7 @@ function DynamicBlock({
     );
   }
 
-  if (block.type === 'paragraph') {
+  if (block.type === 'paragraph' || block.type === 'source') {
     return (
       <div className="max-w-3xl mx-auto">
         <RichParagraphText

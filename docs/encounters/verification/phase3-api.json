@@ -1,0 +1,16 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "result": "PASS",
+  "checks": [
+    "Existing founder session authenticates; is_admin true",
+    "anon: draft, media, newsletter protected; content/upload/admin escalation denied",
+    "non-admin: draft, media, newsletter protected; content/upload/admin escalation denied",
+    "REST save failure rolls back header and blocks",
+    "Publish visible through REST, category/detail and RLS-controlled image; public bucket bypass denied",
+    "Both responsible Crew profiles include the same artwork",
+    "Unpublish immediately hides image",
+    "Admin API checks database authorization; newsletter sending disabled"
+  ],
+  "fixtures": "deleted",
+  "emails_sent": 0
+}

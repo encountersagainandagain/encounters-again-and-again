@@ -1,0 +1,18 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "mode": "transactional-preflight",
+  "result": "PASS",
+  "checks": [
+    "20 tables with RLS",
+    "SECURITY DEFINER search_path fixed",
+    "Private media bucket, size and MIME limits",
+    "Admin atomic artwork + two contributors",
+    "anon: drafts/media hidden, writes denied, forged user_metadata has no privilege",
+    "authenticated: drafts/media hidden, writes denied, forged user_metadata has no privilege",
+    "Failed save rolls back header and blocks; line breaks preserved",
+    "Published artwork visible in category and two crew relations",
+    "Unpublish revokes media visibility",
+    "Newsletter normalizes/deduplicates, consent and unsubscribe; no email"
+  ],
+  "fixtures": "rolled back"
+}

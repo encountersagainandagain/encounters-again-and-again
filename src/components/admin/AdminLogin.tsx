@@ -5,7 +5,7 @@ import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { isAllowedAdminEmail } from '@/lib/adminAccess';
+import { hasAdminAccess } from '@/lib/adminAccess';
 
 export function AdminLogin() {
   const router = useRouter();
@@ -17,11 +17,11 @@ export function AdminLogin() {
   useEffect(() => {
     if (!supabase) return;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session && isAllowedAdminEmail(data.session.user.email)) {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session && await hasAdminAccess()) {
         router.replace('/admin');
       }
-    });
+    }).catch(() => setErrorMessage('Administrator permissions could not be checked.'));
   }, [router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

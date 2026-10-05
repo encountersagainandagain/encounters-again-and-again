@@ -1,0 +1,20 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "mode": "applied-schema",
+  "result": "PASS",
+  "checks": [
+    "20 tables with RLS",
+    "Catalog: 106 constraints, 43 indexes, 29 foreign keys",
+    "SECURITY DEFINER search_path fixed",
+    "Private media bucket, size and MIME limits",
+    "Needs retain pending/obtained; workshop optional fields, independent states and sessions",
+    "Admin atomic artwork + two contributors",
+    "anon: drafts/media hidden, writes denied, forged user_metadata has no privilege",
+    "authenticated: drafts/media hidden, writes denied, forged user_metadata has no privilege",
+    "Failed save rolls back header and blocks; line breaks preserved",
+    "Published artwork visible in category and two crew relations",
+    "Unpublish revokes media visibility",
+    "Newsletter normalizes/deduplicates, consent and unsubscribe; no email"
+  ],
+  "fixtures": "rolled back"
+}

@@ -21,9 +21,14 @@ export type AdminPostBlockType =
   | 'toc'
   | 'list'
   | 'faq'
-  | 'accordion';
+  | 'accordion'
+  | 'source';
 
 export type AdminPostBlockContent = {
+  media_id?: string;
+  images?: {media_id?:string;alt?:string;caption?:string}[];
+  links?: {label?:string;url?:string}[];
+  source_type?:string;
   text?: string;
   showNumbers?: boolean;
   src?: string;
@@ -279,28 +284,14 @@ export async function replaceAdminPostBlocks(
 ) {
   if (!modules.affiliates && blocks.some(block => block.type === 'affiliate_link')) throw new Error('Affiliate blocks are disabled.');
   const client = requireSupabase();
-  const { error: deleteError } = await client
-    .from('post_blocks')
-    .delete()
-    .eq('post_id', postId);
-
-  if (deleteError) throw deleteError;
-
-  if (blocks.length === 0) return [];
-
-  const rows = blocks.map((block, index) => ({
-    post_id: postId,
-    type: block.type,
-    position: index,
-    content: block.content,
-  }));
-
-  const { data, error } = await client
-    .from('post_blocks')
-    .insert(rows)
-    .select()
-    .order('position', { ascending: true });
-
+  const { error } = await client.rpc('save_content', {p_post:{id:postId},p_blocks:blocks});
   if (error) throw error;
-  return (data ?? []) as AdminPostBlock[];
+  return fetchAdminPostBlocks(postId);
+}
+
+export async function saveAdminPostWithBlocks(id:string, input:AdminPostInput, blocks:AdminPostBlockInput[]) {
+  const client=requireSupabase();
+  const {error}=await client.rpc('save_content',{p_post:{...input,id},p_blocks:blocks});
+  if(error)throw error;
+  return fetchAdminPost(id);
 }

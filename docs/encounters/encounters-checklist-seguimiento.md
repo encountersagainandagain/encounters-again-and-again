@@ -1,10 +1,10 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-02.
+Última actualización: 2026-10-05.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASO 1 completado; preparación del PASO 2.** Base independiente publicada en main, identidad activa separada y módulos fuera de alcance aislados. Compilación, lint, TypeScript y pruebas de aislamiento pasan. Supabase/Resend/SQL y visual final continúan pendientes. Diseño vigente completo conservado; Home v2 manda. WordPress, DNS y Vercel permanecen intactos.
+**Foco actual: PASOS 1 y 2 completados; PASO 3 en ejecución.** Supabase exclusivo conectado, dos admins confirmados, registro público desactivado. Esquema/RLS/Storage y CMS mínimo implementados; validación y checkpoint de FASE 3A en curso. Resend autentica pero dominio/envíos pendientes. Visual final corresponde al PASO 4. WordPress, DNS y Vercel intactos.
 
 
 ## Cómo actualizarlo
@@ -43,16 +43,16 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [ ] **2. Respaldar la web actual — PENDIENTE.** Accesos recuperados; descargar respaldo de archivos/DB y copia DNS. Snapshot editorial ya disponible. No bloquea el arranque local.
 - [ ] **3. Definir el diseño — EN CURSO.** Entrega vigente recibida y verificada, prototipos y assets íntegros, Home v2. Contact tiene destinatario principal acordado, interfaz a resolver con diseño actual. No hay revisión visual aprobada aquí.
 - [x] **4. Duplicar Katie en un GitHub nuevo — COMPLETO.** Importación independiente y remoto correcto verificados; commit 8560222 publicado en main del destino privado el 2026-10-02. Katie permanece intacto.
-- [ ] **5. Configurar servicios propios — PENDIENTE.** Primero Supabase y Resend nuevos; Vercel y deploy cuando el proyecto esté avanzado, según decisión del 30/09.
-- [ ] **6. Configurar tres administradores — PENDIENTE.** Acceso total para los fundadores; otros integrantes de Crew sin cuenta.
+- [ ] **5. Configurar servicios propios — PARCIAL.** Supabase nuevo conectado y probado; Resend autentica. Dominio Resend, Vercel y deploy pospuestos por instrucción.
+- [ ] **6. Configurar tres administradores — PARCIAL.** Dos fundadores confirmados registrados en admin_users con RLS. Tercero pendiente de alta; mecanismo aditivo documentado en sql-runbook. Crew independiente de Auth.
 - [x] **7. Reemplazar la identidad anterior — BASE IMPLEMENTADA.** Marca/URL/defaults/metadata/JSON-LD/emails/manifest/assets propios en aplicación activa; código histórico fuera de rutas. Contenido editorial real y diseño final pendientes.
 - [x] **8. Organizar y documentar módulos — BASE IMPLEMENTADA.** Registro central, rechazo de rutas/consultas, admin core, scripts/cron/integraciones ajenos aislados y código archivado con reactivación documentada.
-- [ ] **9. Adaptar el CMS compartido — PENDIENTE.** Posts, bloques, inputs específicos, categorías, responsables, borradores, preview y duplicación.
-- [ ] **10. Completar Art y Crew — PENDIENTE.** Probar obra con dos responsables, categoría y aparición automática en perfiles/listados sin deploy.
-- [ ] **11. Construir Expeditions — PENDIENTE.** Presentación editable, fichas, participantes, colaboración y checklist de necesidades.
-- [ ] **12. Construir Workshops — PENDIENTE.** Campos opcionales, etapas, fechas y estados de actividad/inscripción.
-- [ ] **13. Incorporar resultados y Messages — PENDIENTE.** Posts de experiencia asociados a actividades y publicaciones ilustradas/poemas.
-- [ ] **14. Completar Próximamente y Home — PENDIENTE.** Destacados, orden y listas automáticas; no duplicar fichas ni mostrar secciones vacías.
+- [ ] **9. Adaptar el CMS compartido — BASE IMPLEMENTADA.** Posts/bloques y campos específicos, categorías, responsables, borradores, preview textual, duplicación y guardado atómico. Preview visual completo y revisión final durante PASO 4.
+- [ ] **10. Completar Art y Crew — BASE IMPLEMENTADA.** Modelo/CMS y rutas mínimas de categoría, obra y perfiles. Ver pruebas en phase3-api.json; visual final y curación editorial pendientes.
+- [ ] **11. Construir Expeditions — BASE IMPLEMENTADA.** Esquema/CMS de presentación, fichas, responsables y necesidades pendiente/conseguido. Visual pendiente.
+- [ ] **12. Construir Workshops — BASE IMPLEMENTADA.** Campos opcionales, sesiones y estados independientes probados. Visual pendiente.
+- [ ] **13. Incorporar resultados y Messages — BASE IMPLEMENTADA.** Relaciones múltiples y poemas con saltos preservados. Visual pendiente.
+- [ ] **14. Completar Próximamente y Home — BASE IMPLEMENTADA.** Configuración editable de orden/fijados/ocultamiento, listas y anuncios. Visual pendiente.
 - [ ] **15. Completar About, Contact y Newsletter — PENDIENTE.** Settings editables, suscripción, envío de prueba, envío manual y baja.
 - [ ] **16. Importar contenido existente — PENDIENTE (PASO 3).** Bloqueo del archivo resuelto: copia completa verificada en docs/encounters/migration-source/encounters-content-snapshot.zip. Seed SQL, importación, subida de imágenes y migraciones todavía no ejecutados.
 - [ ] **17. Preparar SEO y redirecciones — EN CURSO (PLAN).** Mapa inicial preparado desde URLs reales del snapshot. Faltan inventario final, implementación y pruebas de reglas, canonicals, sitemap, robots, metadata y publicación sin deploy.

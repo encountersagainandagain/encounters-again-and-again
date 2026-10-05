@@ -1,0 +1,11 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "result": "PASS",
+  "checks": [
+    "Browser created draft and paragraph through CMS form",
+    "Reloaded CMS list shows saved draft",
+    "Exact text persisted; anon cannot read draft",
+    "Test document removed; posts and media empty before import"
+  ],
+  "fixtures": "deleted"
+}

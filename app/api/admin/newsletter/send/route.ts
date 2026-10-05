@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { isAllowedAdminEmail } from '@/lib/adminAccess';
 import {
   buildAdminNewsletterEmail,
   buildNewsletterUnsubscribeHeaders,
@@ -77,7 +76,9 @@ async function getAdminClient(request: Request) {
   });
 
   const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user || !isAllowedAdminEmail(data.user.email)) return null;
+  if (error || !data.user) return null;
+  const permission = await supabase.rpc('is_admin');
+  if (permission.error || permission.data !== true) return null;
 
   return supabase;
 }
@@ -138,6 +139,7 @@ async function sendInBatches(
 }
 
 export async function POST(request: Request) {
+  if (process.env.ENCOUNTERS_EMAIL_ENABLED !== 'true') return NextResponse.json({error:'Email delivery is disabled until domain verification and an authorized delivery test.'},{status:503});
   if (!modules.newsletter) return NextResponse.json({error:'Not found'}, {status:404});
   if (!process.env.RESEND_API_KEY || !process.env.NEWSLETTER_FROM_EMAIL) return NextResponse.json({error:'Newsletter delivery is not configured.'}, {status:503});
   const supabase = await getAdminClient(request);

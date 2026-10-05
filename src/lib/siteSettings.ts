@@ -281,9 +281,11 @@ export const fetchSiteSettings = cache(async function fetchSiteSettings() {
 export async function updateSiteSettings(settings: SiteSettings) {
   if (!modules.commerce && settings.shopEnabled) throw new Error('Commerce is disabled.');
   const client = requireSupabase();
+  const existing=await client.from('site_settings').select('value').eq('key','site').maybeSingle();
+  if(existing.error)throw existing.error;
   const { data, error } = await client
     .from('site_settings')
-    .upsert({ key: 'site', value: settings }, { onConflict: 'key' })
+    .upsert({ key: 'site', value: {...existing.data?.value,...settings} }, { onConflict: 'key' })
     .select('value')
     .single();
 

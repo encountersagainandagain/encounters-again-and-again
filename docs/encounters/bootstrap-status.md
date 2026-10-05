@@ -1,4 +1,10 @@
-# Estado del PASO 1 — 2026-10-02
+# Estado actual — PASO 3 en curso, 2026-10-05
+
+PASOS 1 y 2 completados. Supabase exclusivo lzwmwofxoegkxykglneq conectado; Auth sin registro público y dos fundadores confirmados. Resend autentica, dominio pendiente; no envíos. ADMIN_EMAILS es ahora server-only y el acceso se verifica contra admin_users/RLS.
+
+FASE 3A validada: 13 migraciones aplicadas con Supabase CLI, 20 tablas con RLS, 106 constraints, 43 índices, 29 FKs, bucket privado media, CMS mínimo y rutas provisionales conectadas. Pruebas SQL transaccionales, HTTP anon/no-admin/admin y creación de borrador/bloque desde navegador pasan. Ver phase3-implementation.md y verification/phase3-*.json. Lint, TypeScript y tests PASS; build PASS con `npm run build -- --webpack`. Turbopack falló por descargas intermitentes de Google Fonts, sin error de site_settings. Snapshot íntegro en migration-source/encounters-content-snapshot.zip; bloqueo de archivo resuelto. Checkpoint previo a importación en preparación. No diseño final, DNS, WordPress ni deploy.
+
+## Estado histórico del PASO 1 — 2026-10-02
 
 PASO 1 implementado, comprobado y publicado en la rama main del repositorio privado encountersagainandagain/encounters-again-and-again. Commit de implementación: 8560222; push confirmado el 2026-10-02. Supabase/Resend no conectados; no hay SQL nuevo aplicado, envíos reales, deploys ni cambios DNS/WordPress.
 

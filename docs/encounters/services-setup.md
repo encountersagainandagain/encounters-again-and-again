@@ -11,7 +11,7 @@ Crear proyecto Encounters separado de Katie. Juani aporta valores en .env.local 
 | NEXT_PUBLIC_SUPABASE_URL | Supabase proyecto nuevo → Connect / Project URL | Pública | Cliente DB/Auth/Storage |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY | API keys del proyecto nuevo: anon o publishable compatible con supabase-js | Pública | Cliente protegido mediante RLS |
 | SUPABASE_SERVICE_ROLE_KEY | API keys → service_role del nuevo proyecto | Exclusiva servidor, secreta | Operaciones servidor autorizadas; nunca navegador |
-| NEXT_PUBLIC_ADMIN_EMAILS | Juani confirma 3 emails de Fabri, Flaco y Georgie | Pública; no es seguridad por sí sola | UI heredada y allowlist API; coincidir con admin_users |
+| ADMIN_EMAILS | Emails confirmados de los fundadores en Auth | Servidor, privada | Bootstrap aditivo de admin_users; no autoriza la UI/API por sí sola |
 | NEXT_PUBLIC_SITE_URL | Configuración de entorno | Pública | Origen de links/canonical/bajas; local http://localhost:3000, producción https://encountersagainandagain.com |
 
 Auth: desactivar signup público; cuentas soportadas por Auth una vez confirmados emails; callbacks/recuperación de localhost ahora, preview/producción cuando existan. Crew no implica usuario Auth. Storage bucket media y RLS se preparan en PASO 3. Método SQL: acordar CLI con historial o SQL Editor ordenado; credencial de conexión/token CLI adicional solo si el método lo usa, no inventar DATABASE_URL de otro ORM.
@@ -45,4 +45,4 @@ Confirmar el correo público y guardarlo en site_settings.email durante PASO 3. 
 
 Solo si se aprueba formulario: añadir CONTACT_TO_EMAIL (destinatario confirmado) y CONTACT_FROM_EMAIL (remitente Resend verificado), ambas exclusivas de servidor, y reactivar su endpoint. Solo si se conserva aviso de alta: añadir NEWSLETTER_NOTIFICATION_EMAIL (opcional servidor) y su envío. Estas tres variables NO son requisitos del arranque actual y se omitieron de .env.example para evitar configuración falsa.
 
-Para probar entrega en PASO 2/3 hace falta además un destinatario de prueba indicado por Juani. El envío manual por lotes se conserva, pero el flujo de prueba y las garantías persistentes de reenvío requieren validación con el nuevo esquema. No probar contra listas reales al conectar por primera vez.
+Durante PASO 3 no se envía ningún correo. Resend autentica pero el dominio sigue sin verificar; ENCOUNTERS_EMAIL_ENABLED=false bloquea envíos. La entrega real se comprobará más adelante con autorización y destinatario de prueba.

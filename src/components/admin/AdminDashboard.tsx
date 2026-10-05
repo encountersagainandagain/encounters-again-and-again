@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { modules } from '@/config/modules';
 export function AdminDashboard() {
   const items = [
-    { enabled: modules.cms, href: '/admin/posts', label: 'Content and media' },
+    { enabled: modules.cms, href: '/admin/content', label: 'Content and media' },
     { enabled: modules.cms, href: '/admin/settings', label: 'Site settings' },
     { enabled: modules.newsletter, href: '/admin/newsletter', label: 'Newsletter' },
   ];

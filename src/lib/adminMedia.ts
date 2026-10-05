@@ -10,7 +10,6 @@ const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
 const DEFAULT_TARGET_SIZE = 450 * 1024;
 const LONG_LIVED_CACHE_SECONDS = '31536000';
 const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const OPTIMIZED_UPLOAD_PREFIX = 'optimized';
 
 type ImageOptimizationOptions = {
   maxWidth?: number;
@@ -295,7 +294,13 @@ export async function uploadMediaFile(
   const cleanFolder = folder
     .replace(/^\/+|\/+$/g, '')
     .replace(/^optimized\/?/, '');
-  const filePath = `${OPTIMIZED_UPLOAD_PREFIX}/${cleanFolder}/${crypto.randomUUID()}-${sanitizeFileName(uploadFile.name)}`;
+  const safeFolder=['crew','expeditions','workshops','art','posts','settings'].includes(cleanFolder)?cleanFolder:'posts';
+  const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await uploadFile.arrayBuffer()))).map(x=>x.toString(16).padStart(2,'0')).join('');
+  const existing=await client.from('media').select('id').eq('sha256',sha256).maybeSingle();
+  if(existing.error)throw existing.error;
+  if(existing.data)return `/api/media/${existing.data.id}`;
+  const id=crypto.randomUUID();
+  const filePath = `${safeFolder}/${sha256}-${sanitizeFileName(uploadFile.name)}`;
 
   const { error } = await client.storage.from(MEDIA_BUCKET).upload(filePath, uploadFile, {
     cacheControl: LONG_LIVED_CACHE_SECONDS,
@@ -304,6 +309,8 @@ export async function uploadMediaFile(
 
   if (error) throw error;
 
-  const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(filePath);
-  return data.publicUrl;
+  const image=await loadImage(uploadFile);
+  const saved=await client.from('media').insert({id,storage_path:filePath,sha256,mime_type:uploadFile.type,bytes:uploadFile.size,alt:uploadFile.name,width:image.naturalWidth,height:image.naturalHeight});
+  if(saved.error)throw saved.error;
+  return `/api/media/${id}`;
 }

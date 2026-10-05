@@ -8,6 +8,7 @@ const inputSchema = z.object({
   source: z.string().trim().max(80).default('unknown'),
   website: z.string().max(120).default(''),
   campaignId: z.unknown().optional(),
+  consent: z.literal(true),
 });
 const limits = new Map<string, { count: number; expires: number }>();
 export async function POST(request: Request) {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   const entry = limits.get(key) || {count:0,expires:now + 15 * 60 * 1000};
   if (++entry.count > 5) return NextResponse.json({error:'Please try again later.'}, {status:429});
   limits.set(key,entry);
-  const {error} = await supabaseAdmin.rpc('subscribe_to_newsletter', {subscriber_email:parsed.data.email,subscriber_source:parsed.data.source});
+  const {error} = await supabaseAdmin.rpc('subscribe_to_newsletter', {subscriber_email:parsed.data.email,subscriber_source:parsed.data.source,consent:parsed.data.consent});
   if (error) return NextResponse.json({error:'Unable to subscribe right now.'}, {status:502});
   // No subscription details/tokens in public response; no automatic email sends.
   return NextResponse.json({ok:true});

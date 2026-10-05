@@ -6,3 +6,6 @@ node_modules/
 *.tsbuildinfo
 .DS_Store
 backups/
+supabase/.temp/
+supabase/.branches/
+.encounters-work/
