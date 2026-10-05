@@ -4,7 +4,7 @@
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASOS 1 y 2 completados; PASO 3 en ejecución.** Supabase exclusivo conectado, dos admins confirmados, registro público desactivado. Esquema/RLS/Storage y CMS mínimo implementados; validación y checkpoint de FASE 3A en curso. Resend autentica pero dominio/envíos pendientes. Visual final corresponde al PASO 4. WordPress, DNS y Vercel intactos.
+**Foco actual: PASOS 1, 2 y 3 completados; listo para PASO 4 visual.** Supabase exclusivo, dos admins confirmados, signup desactivado. Esquema/RLS/Storage/CMS mínimo validados; snapshot importado y repetido sin duplicados. Checkpoint 3A: 28510a2217b468eb577bbeb98a73cd6bf9c94702. Ver bootstrap-status y phase3-implementation. Resend autentica pero dominio/envíos pendientes. WordPress, DNS y Vercel intactos.
 
 
 ## Cómo actualizarlo
@@ -24,16 +24,16 @@ Documento de seguimiento del checklist de 22 pasos acordado. El detalle funciona
 | Dominio / DNS | Acceso solicitado; aún no confirmado. | Identificar proveedor y permisos. Acceder a Hostinger no confirma por sí solo control del dominio/DNS. |
 | Hosting | Acceso a Hostinger disponible; plan y servicios aún no revisados. | Descargar respaldo coherente de archivos/DB e identificar DNS/correo. |
 | Email público de comunicaciones | Contact irá al correo principal del colectivo, confirmado por Juani; dirección exacta pendiente. | Confirmar dirección para Settings, contacto y Reply-To; separada de la cuenta técnica. |
-| Cuenta de servicios | Confirmada por Juani: `encounters.services@outlook.com`. Sustituye la propuesta anterior de Gmail. | Utilizarla al configurar los servicios del proyecto; altas y conexiones aún pendientes de confirmar. |
-| Texto e imágenes del sitio | Copia completa verificada el 02/10: checksum/CRC/JSON válidos, 11 páginas, 1 story, 161 bloques y 50 imágenes. Diseño vigente íntegro. | Bloqueo resuelto. ZIP definitivo: docs/encounters/migration-source/encounters-content-snapshot.zip; importación pendiente PASO 3. |
+| Cuenta de servicios | Confirmada: `encounters.services@outlook.com`; Supabase y Resend propios conectados. | Separarla del correo público/Reply-To; Vercel después. |
+| Texto e imágenes del sitio | Snapshot importado y validado: 12 documentos, 161 bloques, 6 Crew, 50 referencias/49 archivos únicos. | Bloqueo resuelto. ZIP definitivo: docs/encounters/migration-source/encounters-content-snapshot.zip. Curación visual/editorial en PASO 4. |
 | Backup restaurable de WordPress | Pendiente; snapshot editorial disponible. | Descargar desde Hostinger archivos y DB de la misma copia/fecha; guardar fuera del hosting. |
 | Analytics y Search Console | Existencia/configuración y accesos aún no comprobados. | Revisar plugins/etiquetas y confirmar propiedades/cuentas. |
 | Diseño | Entrega vigente verificada el 01/10: 61 archivos completos, Home v2; antiguo archivado. | Implementar y validar por página en PASO 4; diferencias en design-decisions.md. |
 | Rutas y SEO | Mapa inicial de 12 URLs del snapshot y 50 imágenes preparado; sin reglas desplegadas. | Confirmar destinos, ampliar inventario y probar al implementar. |
 | Base Katie | Acceso confirmado; revisión parcial del commit `102fc91acd4dd312dc15436e8e3de22643b84ce7`, incluyendo SQL central, bloques y newsletter. | Astra confirma referencia y copia código versionado, sin datos/servicios de Katie. |
 | Repo nuevo | Acceso pull/push confirmado como juanimolfino; privado y vacío antes de importación. Único remoto origin de Encounters. | Publicación de cierre registrada en bootstrap-status.md. |
-| Servicios nuevos | Supabase y Resend todavía pendientes; Vercel se deja para más adelante. | Conectarlos en Paso 2 del instructivo. |
-| Implementación nueva | Aplicación independiente ejecutable sin servicios; core reutilizado, identidad propia, aislamiento y comprobaciones locales realizadas. | PASO 2: servicios propios. |
+| Servicios nuevos | Supabase Auth/DB/Storage y claves probados; Resend autentica, dominio pendiente. | No envío ni deploy; tercero cuando corresponda. |
+| Implementación nueva | 13 migraciones, 20 tablas con RLS, CMS mínimo, importación idempotente y rutas públicas provisionales verificadas. | PASO 4: implementación visual por página. |
 
 La cuenta `encounters.services@outlook.com` se usará para registrar y administrar GitHub, Vercel, Supabase, Resend y los servicios necesarios. No se asume que sea el correo público del colectivo, ni que deba reemplazar el que ya usan para comunicarse. El remitente de newsletter se configurará posteriormente según el dominio y el proveedor de envío. Tener la cuenta creada no implica que los demás servicios ya estén configurados.
 
@@ -54,7 +54,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [ ] **13. Incorporar resultados y Messages — BASE IMPLEMENTADA.** Relaciones múltiples y poemas con saltos preservados. Visual pendiente.
 - [ ] **14. Completar Próximamente y Home — BASE IMPLEMENTADA.** Configuración editable de orden/fijados/ocultamiento, listas y anuncios. Visual pendiente.
 - [ ] **15. Completar About, Contact y Newsletter — PENDIENTE.** Settings editables, suscripción, envío de prueba, envío manual y baja.
-- [ ] **16. Importar contenido existente — PENDIENTE (PASO 3).** Bloqueo del archivo resuelto: copia completa verificada en docs/encounters/migration-source/encounters-content-snapshot.zip. Seed SQL, importación, subida de imágenes y migraciones todavía no ejecutados.
+- [x] **16. Importar contenido existente — COMPLETO (SNAPSHOT).** 12 documentos, 161 bloques exactos, 6 Crew, 1 Messages, 8 publicados/4 draft. 49 imágenes únicas subidas + 1 referencia reutilizada; repetición sin duplicados. Vídeo no incluido en ZIP y curación de Art pendientes de PASO 4; sincronización WordPress futura en punto 20.
 - [ ] **17. Preparar SEO y redirecciones — EN CURSO (PLAN).** Mapa inicial preparado desde URLs reales del snapshot. Faltan inventario final, implementación y pruebas de reglas, canonicals, sitemap, robots, metadata y publicación sin deploy.
 - [ ] **18. Validar con los fundadores — PENDIENTE.** Diseño, móvil, edición, publicación, resultados, necesidades y newsletter.
 - [ ] **19. Preparar Analytics y Search Console — PENDIENTE.** En el punto 1 se investiga qué existe; aquí se configura/valida la medición de la web nueva.
@@ -264,4 +264,12 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Registrado banner/navbar de Home y nueva prioridad de diseño: The Crew y perfil antes de completar Home.
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
-Próxima actualización: PASO 2 (Supabase/Resend propios y configuración segura); comprobaciones iniciales de WordPress/Hostinger; handoff vigente al avanzar cada página. No se marcarán servicios, SQL o deploy como completados hasta su ejecución y verificación.
+Próxima actualización: PASO 4, recorrido visual Art → obra → responsables/Crew y después páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS mínimo ya ejecutados y probados; diseño final, deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-05 — cierre PASO 3
+
+- 13 migraciones propias aplicadas por CLI exclusivamente a Encounters. 20 tablas con RLS, 106 constraints, 43 índices, 29 FKs. Dos admins reales; registro público desactivado y tercero documentado.
+- CMS atómico y campos específicos; anon/no-admin/admin, Storage privado, publicación/borradores, obra con dos responsables en sus perfiles y guardado desde navegador: PASS. Fixtures/sesión eliminados; cero emails.
+- Checkpoint 3A 28510a2217b468eb577bbeb98a73cd6bf9c94702 antes de importar. Dry-run y dos ejecuciones; 12 documentos/161 bloques, 6 Crew, 1 Messages, 8 publicados/4 draft, 49 archivos únicos para 50 imágenes. Segunda ejecución reutiliza todo. Textos/posiciones/hashes y rutas comprobados.
+- Lint, TypeScript y tests PASS. Build Webpack PASS; Turbopack sufrió fallos de descarga de Google Fonts. No fallo de site_settings. Aislamiento HTTP de 26 rutas PASS.
+- Estado y evidencia en bootstrap-status.md, phase3-implementation.md y verification/phase3-final.json. Diseño final, vídeo faltante, curación, redirecciones/SEO y entrega Resend pendientes; WordPress/DNS/Vercel/Katie sin cambios.

@@ -1,8 +1,16 @@
-# Estado actual — PASO 3 en curso, 2026-10-05
+# Estado actual — PASO 3 completado, 2026-10-05
 
 PASOS 1 y 2 completados. Supabase exclusivo lzwmwofxoegkxykglneq conectado; Auth sin registro público y dos fundadores confirmados. Resend autentica, dominio pendiente; no envíos. ADMIN_EMAILS es ahora server-only y el acceso se verifica contra admin_users/RLS.
 
-FASE 3A validada: 13 migraciones aplicadas con Supabase CLI, 20 tablas con RLS, 106 constraints, 43 índices, 29 FKs, bucket privado media, CMS mínimo y rutas provisionales conectadas. Pruebas SQL transaccionales, HTTP anon/no-admin/admin y creación de borrador/bloque desde navegador pasan. Ver phase3-implementation.md y verification/phase3-*.json. Lint, TypeScript y tests PASS; build PASS con `npm run build -- --webpack`. Turbopack falló por descargas intermitentes de Google Fonts, sin error de site_settings. Snapshot íntegro en migration-source/encounters-content-snapshot.zip; bloqueo de archivo resuelto. Checkpoint previo a importación en preparación. No diseño final, DNS, WordPress ni deploy.
+FASE 3A validada: 13 migraciones aplicadas con Supabase CLI, 20 tablas con RLS, 106 constraints, 43 índices, 29 FKs, bucket privado media, CMS mínimo y rutas provisionales conectadas. Pruebas SQL transaccionales, HTTP anon/no-admin/admin y creación de borrador/bloque desde navegador pasan. Checkpoint previo a importación: `28510a2217b468eb577bbeb98a73cd6bf9c94702`.
+
+FASE 3B completada: 11 páginas + 1 story en 12 documentos, 161 bloques exactos, 6 Crew y 1 Messages; 8 publicados core y 4 draft (legacy/future/system). 50 referencias de imágenes: 49 archivos únicos subidos, 1 reutilizado por hash, 0 fallidos. Segunda ejecución: 0 documentos/medios nuevos; 12 documentos, 6 Crew y 50 referencias reutilizados. Textos/posiciones/asset_id, hashes, rutas públicas y borradores validados. Dos usuarios reales confirmados, signup sigue desactivado, fixtures y sesión temporal eliminados. Newsletter sin suscriptores importados ni correos enviados.
+
+Lint, TypeScript y tests PASS; aislamiento HTTP de 26 rutas desactivadas PASS. Build PASS con `npm run build -- --webpack`; Turbopack falló por descargas intermitentes de Google Fonts, sin error de site_settings. Ver [implementación y lista de migraciones](phase3-implementation.md), [validación final y conteos](verification/phase3-final.json), [checkpoint](verification/phase3a-checkpoint.json) y [runbook](sql-runbook.md).
+
+Snapshot definitivo: `docs/encounters/migration-source/encounters-content-snapshot.zip`; bloqueo resuelto. No depende de WordPress para imágenes. Un vídeo ausente del ZIP, placeholder y curación de Art quedan documentados. Sin categorías/obras/actividades individuales inventadas. Redirecciones originales preservadas y seis destinos registrados en route_history, sin activar reglas.
+
+Próxima acción PASO 4: implementar el primer recorrido visual Art → obra → sus dos responsables/Crew contra prototipos y handoff vigentes, conservando el modelo/RLS; continuar página por página y Home v2. Pendientes de lanzamiento: tercer fundador, contacto definitivo, vídeo, SEO/redirecciones, dominio y prueba de entrega Resend. WordPress, DNS, Katie y Vercel permanecen intactos.
 
 ## Estado histórico del PASO 1 — 2026-10-02
 

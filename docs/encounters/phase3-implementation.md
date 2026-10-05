@@ -54,4 +54,14 @@ Rutas públicas leen Supabase/RLS con plantillas mínimas, sin diseño visual ni
 
 source_url/current_slug/hash/IDs y mapa original preservados. Enlaces propios se traducen solo con destino conocido; wp-admin se conserva como procedencia pero no se renderiza. Vídeos ausentes del ZIP pendientes, no cargados desde WordPress. Placeholder Elementor conservado para revisión. Email en texto del snapshot se conserva literalmente y no se asume como destinatario operativo.
 
-Pendiente PASO 4: fidelidad visual, preview visual completo, curación de Art, vídeo faltante y revisión de contactos/enlaces heredados. Entrega de newsletter pendiente dominio Resend. Redirecciones y SEO de lanzamiento antes del cambio de dominio.
+Pendiente PASO 4: fidelidad visual, preview visual completo, curación de Art, vídeo faltante y revisión de contactos/enlaces heredados. Entrega de newsletter pendiente dominio Resend. Redirecciones, historial automático al cambiar slug/categoría y SEO de lanzamiento antes del cambio de dominio.
+
+## FASE 3B — importación ejecutada
+
+Checkpoint previo: 28510a2217b468eb577bbeb98a73cd6bf9c94702. Dry-run seguido de ejecución real: 12 documentos y 161 bloques, 6 Crew y 1 extensión Messages; 8 publicados y 4 draft. Cero documentos ignorados: el contenido excluido queda archivado como borrador sin ruta pública.
+
+50 referencias de imágenes, 49 archivos únicos subidos, 1 reutilizado, 0 fallidos. image_029 e image_030 tienen bytes idénticos. El manifiesto conserva ambos asset_id y su único media_id/path. Todos los textos originales siguen en bloques; no se expandieron sections/curated_groups. Las demás entidades estructurales quedan vacías hasta curación o nueva creación desde CMS.
+
+Vídeo pendiente: encounters_expeditions_009 referencia YOUTUBESHORT.mp4, no incluido en el ZIP. No se descargó de WordPress ni se carga como dependencia del sitio. Evidencia definitiva: verification/phase3-import.json, phase3-import-repeat.json y phase3-final.json. Segunda ejecución reutilizó 12 documentos, 6 Crew y 50 referencias, sin escribir imágenes nuevas ni duplicar bloques. La validación final comparó todos los textos, posiciones y asset_id y comprobó las rutas, publicación y signup desactivado.
+
+Lint/TypeScript/tests y aislamiento HTTP PASS. Build con Webpack PASS; descarga de fuentes falló intermitentemente en Turbopack. Ningún fallo de site_settings. El navegador confirmó creación/persistencia de borrador y carga de las siete imágenes del perfil desde /api/media; captura phase3-imported-crew.png. No se considera aprobación del diseño visual.

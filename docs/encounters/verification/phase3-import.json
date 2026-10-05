@@ -1,0 +1,476 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "snapshot_sha256": "2c5fee58cdadbf98a444380c9fcf98c857c4c16335004e3f25e3fafc2ccabbc6",
+  "mode": "apply",
+  "documents": [
+    {
+      "source_id": "wordpress:page:3462",
+      "id": "5433a425-d809-5a2e-a05e-5d2fe6d13c43",
+      "source_url": "https://encountersagainandagain.com/elementor-page-3462/",
+      "current_slug": "elementor-page-3462",
+      "path": "/crew",
+      "kind": "page",
+      "status": "published",
+      "blocks": 36
+    },
+    {
+      "source_id": "wordpress:page:3107",
+      "id": "0b5819c4-12c9-55f5-a045-e7656bf5c040",
+      "source_url": "https://encountersagainandagain.com/elementor-page-3107/",
+      "current_slug": "elementor-page-3107",
+      "path": "/workshops",
+      "kind": "page",
+      "status": "published",
+      "blocks": 13
+    },
+    {
+      "source_id": "wordpress:page:3062",
+      "id": "d2f12612-0000-5a18-ab71-8ffe967d1bdc",
+      "source_url": "https://encountersagainandagain.com/elementor-3062/",
+      "current_slug": "elementor-3062",
+      "path": "/expeditions",
+      "kind": "page",
+      "status": "published",
+      "blocks": 14
+    },
+    {
+      "source_id": "wordpress:page:2907",
+      "id": "17de9058-f9f1-5e5f-a434-e715df63667c",
+      "source_url": "https://encountersagainandagain.com/elementor-2907/",
+      "current_slug": "elementor-2907",
+      "path": "/crew/wild-wonders",
+      "kind": "crew_member",
+      "status": "published",
+      "blocks": 16
+    },
+    {
+      "source_id": "wordpress:page:1879",
+      "id": "cb2634d2-b121-5cc4-a7e0-74f444abbca8",
+      "source_url": "https://encountersagainandagain.com/contact-3/",
+      "current_slug": "contact-3",
+      "path": "/contact",
+      "kind": "page",
+      "status": "published",
+      "blocks": 7
+    },
+    {
+      "source_id": "wordpress:page:1878",
+      "id": "8117424c-6a2c-5564-aa2b-6975ab0a5cf5",
+      "source_url": "https://encountersagainandagain.com/services-3/",
+      "current_slug": "services-3",
+      "path": null,
+      "kind": "page",
+      "status": "draft",
+      "blocks": 12
+    },
+    {
+      "source_id": "wordpress:page:1448",
+      "id": "828b918f-408e-5106-ae88-1f73f4e2df29",
+      "source_url": "https://encountersagainandagain.com/",
+      "current_slug": "home",
+      "path": "/",
+      "kind": "page",
+      "status": "published",
+      "blocks": 41
+    },
+    {
+      "source_id": "wordpress:page:14",
+      "id": "4b2f09fe-d9da-5bba-a9af-4faf9f319e8e",
+      "source_url": "https://encountersagainandagain.com/about/",
+      "current_slug": "about",
+      "path": "/about",
+      "kind": "page",
+      "status": "published",
+      "blocks": 16
+    },
+    {
+      "source_id": "wordpress:page:11",
+      "id": "301de17d-b2b7-5c25-a5d8-42026fc4b191",
+      "source_url": "https://encountersagainandagain.com/shop/",
+      "current_slug": "shop",
+      "path": null,
+      "kind": "page",
+      "status": "draft",
+      "blocks": 0
+    },
+    {
+      "source_id": "wordpress:page:9",
+      "id": "ebf95851-f83a-5dcd-a066-a834f62ae3ac",
+      "source_url": "https://encountersagainandagain.com/customer-dashboard/",
+      "current_slug": "customer-dashboard",
+      "path": null,
+      "kind": "page",
+      "status": "draft",
+      "blocks": 0
+    },
+    {
+      "source_id": "wordpress:page:8",
+      "id": "5aba9448-dc8c-56ae-a355-0ec700e932e4",
+      "source_url": "https://encountersagainandagain.com/checkout/",
+      "current_slug": "checkout",
+      "path": null,
+      "kind": "page",
+      "status": "draft",
+      "blocks": 0
+    },
+    {
+      "source_id": "wordpress:story:1",
+      "id": "9bb5c739-9374-50e7-a36a-33cc2a61a5d9",
+      "source_url": "https://encountersagainandagain.com/you-never-know-what-encounter-could-change-your-life/",
+      "current_slug": "you-never-know-what-encounter-could-change-your-life",
+      "path": "/meaningful-messages/you-never-know-what-encounter-could-change-your-life",
+      "kind": "message",
+      "status": "published",
+      "blocks": 6
+    }
+  ],
+  "images": {
+    "uploaded": 49,
+    "reused": 1,
+    "failed": 0
+  },
+  "crew": {
+    "imported": 6,
+    "reused": 0
+  },
+  "posts": {
+    "imported": 12,
+    "reused": 0
+  },
+  "review": [
+    {
+      "source_block_id": "encounters_expeditions_009",
+      "reason": "Video not included in snapshot; original URL retained as provenance, not loaded from WordPress."
+    },
+    {
+      "source_id": "wordpress:page:2907",
+      "reason": "Curated groups retained as editorial organization, not expanded into duplicate blocks or invented artworks."
+    },
+    {
+      "reason": "Institutional expeditions/workshops pages retained as pages. No individual activities, art categories or artworks invented."
+    },
+    {
+      "reason": "Elementor placeholder image retained verbatim; replace editorially during PASO 4."
+    }
+  ],
+  "ignored_content": 0,
+  "phase3a_commit": "28510a2217b468eb577bbeb98a73cd6bf9c94702",
+  "expected": {
+    "pages": 11,
+    "stories": 1,
+    "posts": 12,
+    "blocks": 161,
+    "images": 50,
+    "crew_members": 6,
+    "messages": 1,
+    "published": 8,
+    "draft": 4,
+    "expeditions": 0,
+    "workshops": 0,
+    "artworks": 0,
+    "art_categories": 0
+  },
+  "image_manifest": [
+    {
+      "asset_id": "image_001",
+      "media_id": "20e8212a-f5dd-587a-ac2b-3914ec03b915",
+      "path": "posts/836fcaa8a3e005edfbeaf6a650a567c45fd00559ae52b39efe0341b5a6f52832.png",
+      "sha256": "836fcaa8a3e005edfbeaf6a650a567c45fd00559ae52b39efe0341b5a6f52832"
+    },
+    {
+      "asset_id": "image_002",
+      "media_id": "9886d8f2-7ce4-54ed-a9e2-14bfe0a1fc2e",
+      "path": "posts/b0de2388f7f9ce6a81c32899c0f11840d27495492b1ec4ce22f0175637a50a3b.jpg",
+      "sha256": "b0de2388f7f9ce6a81c32899c0f11840d27495492b1ec4ce22f0175637a50a3b"
+    },
+    {
+      "asset_id": "image_003",
+      "media_id": "fb6656b4-e0e7-5ed6-a0ba-d784730931ea",
+      "path": "posts/45741627eb46b02c67d5e865b0be43f5857b52591f1b7f8371e01bea3c8e460b.jpg",
+      "sha256": "45741627eb46b02c67d5e865b0be43f5857b52591f1b7f8371e01bea3c8e460b"
+    },
+    {
+      "asset_id": "image_004",
+      "media_id": "d860672e-d8c5-5d90-ac65-29f833357f9e",
+      "path": "posts/61d8c978a8a24797a411f8d120b68ec56dcdbdba67adba0aaebc954f0ed2505b.jpg",
+      "sha256": "61d8c978a8a24797a411f8d120b68ec56dcdbdba67adba0aaebc954f0ed2505b"
+    },
+    {
+      "asset_id": "image_005",
+      "media_id": "dc914d13-54c3-5dbe-a6ac-58742969feb8",
+      "path": "crew/6ebb88a797ccf89b718a38bca391a9f74c16083b519f01a43b5c227830f6de6d.jpg",
+      "sha256": "6ebb88a797ccf89b718a38bca391a9f74c16083b519f01a43b5c227830f6de6d"
+    },
+    {
+      "asset_id": "image_006",
+      "media_id": "bea8d1f3-713e-540c-a6a1-d097b68d0473",
+      "path": "crew/56f91f009e051b259c815cd6b7ca3085def7103d87807b6c3e2b35a090b217cb.jpg",
+      "sha256": "56f91f009e051b259c815cd6b7ca3085def7103d87807b6c3e2b35a090b217cb"
+    },
+    {
+      "asset_id": "image_007",
+      "media_id": "82a4320e-cbb6-548c-aee8-fe86edd3a89e",
+      "path": "crew/64611f3f956e07ad550849a467b534482f5f99987fd0d3b64df3080fe063d616.jpg",
+      "sha256": "64611f3f956e07ad550849a467b534482f5f99987fd0d3b64df3080fe063d616"
+    },
+    {
+      "asset_id": "image_008",
+      "media_id": "a515b1e3-8eb7-5707-a54c-ba30c0024f64",
+      "path": "posts/a38cdaea857889bbb242e3cde64bedd38fa7f23a331648eabd4344bcbfe0dedb.webp",
+      "sha256": "a38cdaea857889bbb242e3cde64bedd38fa7f23a331648eabd4344bcbfe0dedb"
+    },
+    {
+      "asset_id": "image_009",
+      "media_id": "4628899c-16e8-5aa1-a473-965fd7627b8f",
+      "path": "posts/3c81b11f96c95db935338d9184f9b12469c047183410892f5442f6faf01c459b.webp",
+      "sha256": "3c81b11f96c95db935338d9184f9b12469c047183410892f5442f6faf01c459b"
+    },
+    {
+      "asset_id": "image_010",
+      "media_id": "f5ce3067-d632-5328-a0bb-26e7c9c43663",
+      "path": "crew/ec2bffeb4a6eee4705c9a25714ef81f17ca5b6b104c1964b0c8c940214ea4734.jpg",
+      "sha256": "ec2bffeb4a6eee4705c9a25714ef81f17ca5b6b104c1964b0c8c940214ea4734"
+    },
+    {
+      "asset_id": "image_011",
+      "media_id": "a96a1597-0057-5690-aee7-719b974a02e5",
+      "path": "crew/3999972d3ed1cd2e203fdce9a0af7688e6e6b3fc85ca1669bd0e79048e6b74f7.jpg",
+      "sha256": "3999972d3ed1cd2e203fdce9a0af7688e6e6b3fc85ca1669bd0e79048e6b74f7"
+    },
+    {
+      "asset_id": "image_012",
+      "media_id": "8e60253c-ee4b-59a0-abe6-ebb0d29fc10e",
+      "path": "crew/ed36207292d03b56b70f524507a18911f32ab96001984ef2c7fc4cbd96682a78.jpg",
+      "sha256": "ed36207292d03b56b70f524507a18911f32ab96001984ef2c7fc4cbd96682a78"
+    },
+    {
+      "asset_id": "image_013",
+      "media_id": "75a2f6e2-9eb1-5983-ab35-4b5079adaf66",
+      "path": "crew/31a098236536bad67f80f52b031f119907db8dfcf6ed41e7e1d488e9452c1318.jpg",
+      "sha256": "31a098236536bad67f80f52b031f119907db8dfcf6ed41e7e1d488e9452c1318"
+    },
+    {
+      "asset_id": "image_014",
+      "media_id": "ccd8a149-d91a-5032-a98a-f8bee4e62f61",
+      "path": "crew/82c7d27f80e07f4a0cba8f7eeecfe00ffc7098aa875d03a1d095f5c4cccde46b.jpg",
+      "sha256": "82c7d27f80e07f4a0cba8f7eeecfe00ffc7098aa875d03a1d095f5c4cccde46b"
+    },
+    {
+      "asset_id": "image_015",
+      "media_id": "82cf3494-8989-58dc-a914-ccc9e906dc9e",
+      "path": "crew/be0bcaef4f3f2fdd9c4360a62acdc82027a73887fdc43ebf3b5c3228b30c9456.jpg",
+      "sha256": "be0bcaef4f3f2fdd9c4360a62acdc82027a73887fdc43ebf3b5c3228b30c9456"
+    },
+    {
+      "asset_id": "image_016",
+      "media_id": "91c6364a-a011-573d-ad38-6efa3768b0ff",
+      "path": "crew/bb33996ed977ea0d28ecea84ad41dc18b56bdf80dc3e9f61d12cf6740ab9a809.jpeg",
+      "sha256": "bb33996ed977ea0d28ecea84ad41dc18b56bdf80dc3e9f61d12cf6740ab9a809"
+    },
+    {
+      "asset_id": "image_017",
+      "media_id": "bf0c0488-d87b-5861-ad48-fa543cb9567a",
+      "path": "crew/3127c9e7d3d8bd768ff847ebd716de4b972baa6eddb9c517c5e69d2e882a61f4.jpeg",
+      "sha256": "3127c9e7d3d8bd768ff847ebd716de4b972baa6eddb9c517c5e69d2e882a61f4"
+    },
+    {
+      "asset_id": "image_018",
+      "media_id": "57e6ccd6-ae39-56aa-ade2-dbfed9944aaa",
+      "path": "crew/1b2b044d7c9c9e5128d697c000579d51cfae90820f5db6efc88551ddbb562fad.png",
+      "sha256": "1b2b044d7c9c9e5128d697c000579d51cfae90820f5db6efc88551ddbb562fad"
+    },
+    {
+      "asset_id": "image_019",
+      "media_id": "e482eb4e-cf70-5993-accf-ab54de6b478d",
+      "path": "workshops/0cf08553e37507a316ef482a3c9dbd677886bc7ef2c036f507272b3d7ef011ac.svg",
+      "sha256": "0cf08553e37507a316ef482a3c9dbd677886bc7ef2c036f507272b3d7ef011ac"
+    },
+    {
+      "asset_id": "image_020",
+      "media_id": "42108b89-84a5-507b-ad61-7924f1c5c574",
+      "path": "crew/16245154fb0e63618e61641dd682d0a7a25cac351604924dc87673eed5a80943.jpg",
+      "sha256": "16245154fb0e63618e61641dd682d0a7a25cac351604924dc87673eed5a80943"
+    },
+    {
+      "asset_id": "image_021",
+      "media_id": "7b8d3085-fa31-54f9-a4fc-6370c705b2b3",
+      "path": "crew/4ed7b0e4940779a02a6665d114dee9fd4b653b3854aaaaaa33d35a9294dad468.jpg",
+      "sha256": "4ed7b0e4940779a02a6665d114dee9fd4b653b3854aaaaaa33d35a9294dad468"
+    },
+    {
+      "asset_id": "image_022",
+      "media_id": "95a85966-5056-509d-aade-d47008bf594e",
+      "path": "crew/e747d86beebb5a9447af7f967580d8898ceec04ead45e24cae3c943e26d9f0e6.jpg",
+      "sha256": "e747d86beebb5a9447af7f967580d8898ceec04ead45e24cae3c943e26d9f0e6"
+    },
+    {
+      "asset_id": "image_023",
+      "media_id": "0dcf990b-4c76-5454-a5e0-aec3b010bbcf",
+      "path": "crew/be4a1d41c0e46d08c9704f237e960cb69c0471d227fac14d3da54fc17b1cce18.jpg",
+      "sha256": "be4a1d41c0e46d08c9704f237e960cb69c0471d227fac14d3da54fc17b1cce18"
+    },
+    {
+      "asset_id": "image_024",
+      "media_id": "e567c31d-34f5-5aa5-a541-e0bb949abafd",
+      "path": "crew/49d98e1b8e3e929724a4353779ca71178b50ee32c0177a46c46150e969745ba0.jpg",
+      "sha256": "49d98e1b8e3e929724a4353779ca71178b50ee32c0177a46c46150e969745ba0"
+    },
+    {
+      "asset_id": "image_025",
+      "media_id": "291f0786-1e90-5c22-ad0e-48afa71a4842",
+      "path": "crew/6606ada6be0e63e28c4b150322036a000982fadc0531c25e5958d2b0b88d9790.jpg",
+      "sha256": "6606ada6be0e63e28c4b150322036a000982fadc0531c25e5958d2b0b88d9790"
+    },
+    {
+      "asset_id": "image_026",
+      "media_id": "9aa736d0-9e3a-5e23-af84-69bba4284f2f",
+      "path": "posts/649b03a3f09eeb5ef61970effeb6667580bfd41900f9c116239160fa9ac463e3.jpg",
+      "sha256": "649b03a3f09eeb5ef61970effeb6667580bfd41900f9c116239160fa9ac463e3"
+    },
+    {
+      "asset_id": "image_027",
+      "media_id": "857a921b-b9ad-571a-a0a9-b3215f75dd93",
+      "path": "posts/c183fa7eb8e8647582331b444d31a59bb565102b379290fb9e4cd065ca188825.jpg",
+      "sha256": "c183fa7eb8e8647582331b444d31a59bb565102b379290fb9e4cd065ca188825"
+    },
+    {
+      "asset_id": "image_028",
+      "media_id": "794c5267-9b3c-577e-a225-96ecdb167ff7",
+      "path": "expeditions/3f729632864f780c5d9ccec0efc608bf4a301d39176e79379adeb6c91b6353a7.jpg",
+      "sha256": "3f729632864f780c5d9ccec0efc608bf4a301d39176e79379adeb6c91b6353a7"
+    },
+    {
+      "asset_id": "image_029",
+      "media_id": "675c0b8b-1e60-5798-a640-0d47213301e1",
+      "path": "crew/9e8d95b100b68febbc965bcfb3b38dcc030c037ab0531e36436ba9ebb209358d.jpg",
+      "sha256": "9e8d95b100b68febbc965bcfb3b38dcc030c037ab0531e36436ba9ebb209358d"
+    },
+    {
+      "asset_id": "image_030",
+      "media_id": "675c0b8b-1e60-5798-a640-0d47213301e1",
+      "path": "crew/9e8d95b100b68febbc965bcfb3b38dcc030c037ab0531e36436ba9ebb209358d.jpg",
+      "sha256": "9e8d95b100b68febbc965bcfb3b38dcc030c037ab0531e36436ba9ebb209358d"
+    },
+    {
+      "asset_id": "image_031",
+      "media_id": "d25dd631-95e6-5f37-a350-cf3ab81086e5",
+      "path": "crew/c24994ff761b25ed74b55ca0fc700014dbd8428e2de6c3ed6f97647bc4622783.png",
+      "sha256": "c24994ff761b25ed74b55ca0fc700014dbd8428e2de6c3ed6f97647bc4622783"
+    },
+    {
+      "asset_id": "image_032",
+      "media_id": "48b788c3-2935-5c75-ac20-5995d9cdc209",
+      "path": "posts/75e1e92168ef06a9d08fea183eca8a86cbe19230b9878750872207a399ec636e.jpg",
+      "sha256": "75e1e92168ef06a9d08fea183eca8a86cbe19230b9878750872207a399ec636e"
+    },
+    {
+      "asset_id": "image_033",
+      "media_id": "e288d9d7-4bdd-5807-aca1-2b34cc804828",
+      "path": "posts/3ce5542f12ed9493a5680d4f70d0c3d5348f102dc589209de05e9dda5c399d28.png",
+      "sha256": "3ce5542f12ed9493a5680d4f70d0c3d5348f102dc589209de05e9dda5c399d28"
+    },
+    {
+      "asset_id": "image_034",
+      "media_id": "9fa6a908-4cfb-5845-accf-271c23d32608",
+      "path": "posts/82a159c556cda42d6235eef481561d876622c6b5eb42a44e51638650f41801da.png",
+      "sha256": "82a159c556cda42d6235eef481561d876622c6b5eb42a44e51638650f41801da"
+    },
+    {
+      "asset_id": "image_035",
+      "media_id": "0bdd757a-40bc-5ef8-a2fc-f4ac04d13e7c",
+      "path": "posts/50690c2610ba12d1076c35c0b2abef5d1598f3a3550c2299b7880e75e508dbdb.jpg",
+      "sha256": "50690c2610ba12d1076c35c0b2abef5d1598f3a3550c2299b7880e75e508dbdb"
+    },
+    {
+      "asset_id": "image_036",
+      "media_id": "7b2ed486-baeb-533c-aae4-ab5d9f145b3d",
+      "path": "crew/17551682ab27f6bade6f6b155893f79580c70a79c985f3199a480ea103d1015f.jpeg",
+      "sha256": "17551682ab27f6bade6f6b155893f79580c70a79c985f3199a480ea103d1015f"
+    },
+    {
+      "asset_id": "image_037",
+      "media_id": "fd706163-5f6e-5255-a31e-eaee6b0f96a9",
+      "path": "crew/edf7bd195fc3e2c5dcc358a32568737d591155996a968461f32b070bee6284eb.jpeg",
+      "sha256": "edf7bd195fc3e2c5dcc358a32568737d591155996a968461f32b070bee6284eb"
+    },
+    {
+      "asset_id": "image_038",
+      "media_id": "4aab9cff-83df-5b8d-aa91-27afe9edb845",
+      "path": "crew/78e1786f9d37876041f896cc56e904856c0e5fb62564ebb58df44bd27c95b7c6.jpeg",
+      "sha256": "78e1786f9d37876041f896cc56e904856c0e5fb62564ebb58df44bd27c95b7c6"
+    },
+    {
+      "asset_id": "image_039",
+      "media_id": "b1a293b4-f490-50cd-afce-1cb4300c578c",
+      "path": "expeditions/e22dbf9d55619af537b513025d9de1ae640d83f33b66be5c5412d7dfdc8d4dc7.jpeg",
+      "sha256": "e22dbf9d55619af537b513025d9de1ae640d83f33b66be5c5412d7dfdc8d4dc7"
+    },
+    {
+      "asset_id": "image_040",
+      "media_id": "46773f83-abee-58d3-a3de-71fa0ea91543",
+      "path": "expeditions/8a31840db13daa230311cba935c618f68e371a970ecc3a09e2d45c56fa7f6b39.jpeg",
+      "sha256": "8a31840db13daa230311cba935c618f68e371a970ecc3a09e2d45c56fa7f6b39"
+    },
+    {
+      "asset_id": "image_041",
+      "media_id": "d4f5e6f8-de4b-510d-a332-2d6718aaaf5b",
+      "path": "expeditions/cef39e22e168557466e1dd9efbbca8e8abb711c34914f07ddb59d6704f71950c.jpeg",
+      "sha256": "cef39e22e168557466e1dd9efbbca8e8abb711c34914f07ddb59d6704f71950c"
+    },
+    {
+      "asset_id": "image_042",
+      "media_id": "a8c88289-b334-5b87-ab2e-79f3fb79a6ad",
+      "path": "posts/0d845f918419d4de0f26828c7f1dd520608e64e53f58a67e521833adf82e3d1d.png",
+      "sha256": "0d845f918419d4de0f26828c7f1dd520608e64e53f58a67e521833adf82e3d1d"
+    },
+    {
+      "asset_id": "image_043",
+      "media_id": "70125ba8-ef26-581c-a821-d83e81bba81a",
+      "path": "crew/b5a65f38575aec3d5d27a99c29379b368490cc90b77add6de5cdd554570baabf.png",
+      "sha256": "b5a65f38575aec3d5d27a99c29379b368490cc90b77add6de5cdd554570baabf"
+    },
+    {
+      "asset_id": "image_044",
+      "media_id": "9ed1097e-0f52-53f9-adc2-b2a536653539",
+      "path": "crew/ef7da88215de2af86afde882a8638a58c82e31d5f4713b5973a6705445c20111.jpg",
+      "sha256": "ef7da88215de2af86afde882a8638a58c82e31d5f4713b5973a6705445c20111"
+    },
+    {
+      "asset_id": "image_045",
+      "media_id": "1bf5b43e-521b-5c7d-aaf1-3e21c8429192",
+      "path": "posts/be53c6145c251599aaba4a4381771d292577206c80083e935988fe0a2bb5053f.jpg",
+      "sha256": "be53c6145c251599aaba4a4381771d292577206c80083e935988fe0a2bb5053f"
+    },
+    {
+      "asset_id": "image_046",
+      "media_id": "2a910982-c438-5567-a4e2-6eeb930b388d",
+      "path": "posts/3e37c1ed26c292b985ee0be282a5388117b538e9f9f7e64a392164a87ef746de.jpg",
+      "sha256": "3e37c1ed26c292b985ee0be282a5388117b538e9f9f7e64a392164a87ef746de"
+    },
+    {
+      "asset_id": "image_047",
+      "media_id": "65eb4fa0-1f6a-5dc2-a904-5a405323415f",
+      "path": "posts/4d1c6ba7ec4be7ccb05703772e3a7e5565442675cd522b8654a3ee02c031d249.jpg",
+      "sha256": "4d1c6ba7ec4be7ccb05703772e3a7e5565442675cd522b8654a3ee02c031d249"
+    },
+    {
+      "asset_id": "image_048",
+      "media_id": "892ff259-1e2b-525d-a826-ef2cfd2c85ff",
+      "path": "posts/a745644de8f2a002832a31390dd5e279c5bd831cc0c996d8b654807caf0b93e7.jpg",
+      "sha256": "a745644de8f2a002832a31390dd5e279c5bd831cc0c996d8b654807caf0b93e7"
+    },
+    {
+      "asset_id": "image_049",
+      "media_id": "69f5db30-fcb8-55e2-adc0-0e7cbd5ce07c",
+      "path": "posts/dcf4081dca0782ef94d350f8d988e7ea58f159170cf196239a5dc314add763b9.jpg",
+      "sha256": "dcf4081dca0782ef94d350f8d988e7ea58f159170cf196239a5dc314add763b9"
+    },
+    {
+      "asset_id": "image_050",
+      "media_id": "f3fc232b-be2d-589b-a245-f6cf6b4938fa",
+      "path": "posts/912a1c67076799f8200362be29d27855a8bd3e12d05e4985adb6ba3de4398836.jpg",
+      "sha256": "912a1c67076799f8200362be29d27855a8bd3e12d05e4985adb6ba3de4398836"
+    }
+  ],
+  "result": "PASS"
+}

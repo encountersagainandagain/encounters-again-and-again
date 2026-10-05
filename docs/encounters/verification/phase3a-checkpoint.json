@@ -1,0 +1,22 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "commit": "28510a2217b468eb577bbeb98a73cd6bf9c94702",
+  "date": "2026-10-05",
+  "applied_migrations": 13,
+  "tables_with_rls": 20,
+  "constraints": 106,
+  "indexes": 43,
+  "foreign_keys": 29,
+  "admin_users": 2,
+  "editorial_posts_before_import": 0,
+  "media_before_import": 0,
+  "lint": "PASS",
+  "typescript": "PASS",
+  "tests": "PASS",
+  "build": "PASS: npm run build -- --webpack",
+  "build_note": "Turbopack font downloads failed intermittently; Webpack build completed. No site_settings failure.",
+  "sql_rls": "PASS",
+  "http_anon_nonadmin_admin": "PASS",
+  "browser_cms": "PASS",
+  "emails_sent": 0
+}

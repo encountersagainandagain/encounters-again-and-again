@@ -40,12 +40,13 @@ if (process.env.TEST_BASE_URL) {
   for (const path of ['/posts/new-slug','/crew/missing','/art/books/missing']) assert.equal((await fetch(base+path)).status,404,path);
   const post = body => fetch(base+'/api/newsletter/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   assert.equal((await post({email:'invalid'})).status,400);
-  assert.equal((await post({email:'reader@example.com',campaignId:'disabled'})).status,404);
-  assert.equal((await post({email:'reader@example.com'})).status,503);
+  assert.equal((await post({email:'reader@example.invalid',consent:true,campaignId:'disabled'})).status,404);
+  assert.equal((await post({email:'reader@example.invalid'})).status,400);
+  assert.equal((await post({email:'reader@example.invalid',consent:true,website:'honeypot'})).status,200);
   const newsletterAdmin=await fetch(base+'/api/admin/newsletter/send',{method:'POST'});
   assert.equal(newsletterAdmin.status,503);
   assert.equal((await fetch(base+'/api/admin/revalidate',{method:'POST'})).status,401);
   const sitemap=await (await fetch(base+'/sitemap.xml')).text(); assert.doesNotMatch(sitemap,/<loc>|whatkatieseas/);
   const robots=await (await fetch(base+'/robots.txt')).text(); assert.match(robots,/Disallow: \/\s/);
-  console.log('PASS: 26 disabled HTTP paths, 10 own-brand preparation pages, unpublished details, newsletter 400/404/503, unauthorized revalidation and SEO exclusion.');
+  console.log('PASS: 26 disabled HTTP paths, 10 own-brand pages, unpublished details, newsletter consent/campaign/honeypot checks, delivery disabled, unauthorized revalidation and SEO exclusion. No subscriptions created.');
 }

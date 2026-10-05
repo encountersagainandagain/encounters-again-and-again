@@ -1,0 +1,95 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "result": "PASS",
+  "counts": {
+    "admin_users": 2,
+    "site_settings": 1,
+    "posts": 12,
+    "post_blocks": 161,
+    "media": 49,
+    "crew_members": 6,
+    "messages": 1,
+    "expeditions": 0,
+    "expedition_needs": 0,
+    "expedition_cards": 0,
+    "workshops": 0,
+    "workshop_sessions": 0,
+    "art_categories": 0,
+    "artworks": 0,
+    "post_contributors": 0,
+    "post_relations": 0,
+    "upcoming_items": 0,
+    "newsletter_subscribers": 0,
+    "route_history": 6,
+    "post_media": 40
+  },
+  "published": 8,
+  "draft": 4,
+  "checks": [
+    "Second import: 12 documents, 6 crew and 50 images reused; no duplicates",
+    "8 core published / 4 withheld drafts; anon sees 149 core blocks only",
+    "All 161 canonical block positions, IDs and original text match snapshot; asset_id links preserved",
+    "Second import downloaded and verified all 50 image references against source hashes, including SVG; manifests match",
+    "Published routes and SVG respond; disabled/legacy routes 404; no WordPress img source",
+    "Public signup disabled; exactly 2 confirmed real Auth users; test users removed"
+  ],
+  "http": [
+    {
+      "path": "/crew",
+      "status": 200
+    },
+    {
+      "path": "/workshops",
+      "status": 200
+    },
+    {
+      "path": "/expeditions",
+      "status": 200
+    },
+    {
+      "path": "/crew/wild-wonders",
+      "status": 200
+    },
+    {
+      "path": "/contact",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/about",
+      "status": 200
+    },
+    {
+      "path": "/meaningful-messages/you-never-know-what-encounter-could-change-your-life",
+      "status": 200
+    },
+    {
+      "path": "/art",
+      "status": 200
+    },
+    {
+      "path": "/meaningful-messages",
+      "status": 200
+    },
+    {
+      "path": "/shop",
+      "status": 404
+    },
+    {
+      "path": "/checkout",
+      "status": 404
+    },
+    {
+      "path": "/customer-dashboard",
+      "status": 404
+    },
+    {
+      "path": "/services-3",
+      "status": 404
+    }
+  ],
+  "emails_sent": 0
+}

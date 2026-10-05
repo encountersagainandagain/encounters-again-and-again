@@ -1,4 +1,10 @@
-# Mapeo de esquema — propuesta, sin SQL ejecutado
+# Mapeo de esquema
+
+Actualización PASO 3, 2026-10-05: modelo implementado en 13 migraciones propias y aplicado únicamente a Encounters. Resolución final en phase3-implementation.md: posts/bloques conservados, entidades con extensiones tipadas, sesiones y necesidades en tablas, admin_users/RLS y guardado atómico. Dos admins actuales, alta del tercero documentada. El mapeo comparativo siguiente conserva la auditoría original del PASO 1; ya no representa SQL pendiente salvo visual, historial automático de cambios de URL y decisiones de lanzamiento.
+
+Snapshot importado: 12 documentos, 161 bloques, 6 fichas Crew, 1 Messages. 50 referencias de imágenes → 49 archivos únicos por SHA-256; image_029 e image_030 comparten archivo. Presentaciones institucionales conservadas sin inventar expediciones/workshops individuales. Source IDs/URLs/slugs y grupos editoriales trazables. Ver verification/phase3-import.json; repetición y validación final se registran por separado.
+
+## Auditoría histórica del PASO 1
 
 Auditado código del SHA base y SQL histórico versionado; no se consultó ninguna DB. El esquema realmente instalado en Katie no se presume idéntico a estos archivos.
 
