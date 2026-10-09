@@ -1,5 +1,11 @@
 # Runbook de PASO 3 — actualizado 2026-10-05
 
+## Incremento PASO 4 — 2026-10-06
+
+Aplicada migración 14 `20261006000100_art_crew_publication.sql`: featured de categorías, puertas de publicación en RLS/media, creación transaccional de perfil Crew sin Auth e historial de URLs Art/Crew. Ninguna fila editorial real modificada. Preflight y comprobación posterior con `node scripts/verify-phase4-db.mjs --preflight --transaction-pooler` y sin `--preflight`: transacciones revertidas, cero fixtures comprometidos y cero usuarios creados. Destino comprobado en cada conexión por encounters-context. Pooler 5432 dio timeout; opción explícita `--transaction-pooler` usa 6543 del mismo proyecto.
+
+Secuencia usada: preflight → `node scripts/encounters-cli.mjs plan` (solo una migración, sin seeds) → `apply` → verificación. No editar este SQL después de su aplicación: cualquier corrección requiere otro incremento. El endpoint de medios conserva no-store; no convertir media en bucket público. Historial legacy hacia páginas aún pendientes no se activa. Ver phase4-art-crew.md.
+
 Único destino permitido: `lzwmwofxoegkxykglneq`. Los scripts rechazan otra URL, project ref o usuario del pooler. SQL histórico de Katie y handoff son referencias; nunca ejecutarlos contra servicios.
 
 `.env.local` ignorado por Git: URL/clave pública, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_EMAILS`, `SUPABASE_ACCESS_TOKEN` y `SUPABASE_DB_PASSWORD`. No hace falta DATABASE_URL: link obtiene el pooler y el script añade la contraseña solo en memoria. El token personal autentica CLI/Management API; su vencimiento requiere renovarlo para administración, no para servir la web. No se publica en Vercel ni en el navegador.

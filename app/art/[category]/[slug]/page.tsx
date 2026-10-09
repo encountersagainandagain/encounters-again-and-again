@@ -1,4 +1,14 @@
-import {ContentDetail} from '@/components/public/EncountersContent';
+import Link from 'next/link';
+import {editorialRedirectOr404} from '@/features/encounters/editorial-redirect';
+import {editorialData,editorialMetadata,visibleArt} from '@/features/encounters/editorial-data';
+import {readBlocks,contentPath} from '@/features/encounters/public-content';
+import {artworkPath,safeHref,string} from '@/features/encounters/presentation';
+import {Responsible} from '@/components/public/ArtViews';
+import {ScrollStage,MediaEmbed} from '@/components/public/EditorialInteractive';
+import {Breadcrumbs,Closing,PhotoHero} from '@/components/public/EditorialPieces';
+import {EditorialBlocks} from '@/components/public/EditorialBlocks';
 export const dynamic='force-dynamic';
 export const dynamicParams = true;
-export default async function Page({params}:{params:Promise<{category:string;slug:string}>}){const {category,slug}=await params;return <ContentDetail kind="artwork" category={category} slug={slug}/>;}
+type Props={params:Promise<{category:string;slug:string}>};
+export async function generateMetadata({params}:Props){const {category,slug}=await params;const data=await editorialData();const p=visibleArt(data).find(p=>p.slug===slug&&artworkPath(p,data.artworks,data.categories)===`/art/${category}/${slug}`);if(!p)return {title:'Work not found',robots:{index:false}};return editorialMetadata(p.title,`/art/${category}/${slug}`,p,p.cover_id||data.artworks.find(a=>a.id===p.id)?.media_id);}
+export default async function Page({params}:Props){const {category,slug}=await params;const data=await editorialData();const path=`/art/${category}/${slug}`;const post=visibleArt(data).find(p=>artworkPath(p,data.artworks,data.categories)===path);if(!post)return editorialRedirectOr404(path);const art=data.artworks.find(a=>a.id===post.id)!;const cat=data.categories.find(c=>c.id===art.category_id)!;const blocks=await readBlocks(post.id);const related=data.posts.filter(p=>data.relations.some(r=>r.post_id===post.id&&r.related_post_id===p.id||r.related_post_id===post.id&&r.post_id===p.id));return <ScrollStage className="editorial-page artwork-page"><PhotoHero title={post.title} kicker={string(post.kicker)||string(cat.name)} meta={string(post.meta_line)} cover={post.cover_id||art.media_id} media={data.media}/><div id="editorial-content"><Breadcrumbs items={[{label:'Art',href:'/art'},{label:string(cat.name),href:`/art/${category}`},{label:post.title,href:path}]}/><div className="artwork-intro"><Responsible postId={post.id} data={data}/>{post.excerpt&&<p className="editorial-lead">{post.excerpt}</p>}{art.caption?<p>{string(art.caption)}</p>:null}</div><MediaEmbed kind={art.embed_kind} id={art.embed_id}/><EditorialBlocks blocks={blocks} media={data.media} showIndex={!!post.show_index}/>{safeHref(art.external_url)&&<div className="editorial-cta"><a className="editorial-button" href={safeHref(art.external_url)}>View work ↗</a></div>}{related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{await Promise.all(related.map(async p=><Link key={p.id} href={await contentPath(p)}>{p.title} →</Link>))}</section>}</div><Closing/></ScrollStage>;}

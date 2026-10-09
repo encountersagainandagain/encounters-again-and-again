@@ -1,4 +1,14 @@
-# Estado actual — PASO 3 completado, 2026-10-05
+# Estado actual — PASO 4.0–4.2 implementado, revisión visual pendiente
+
+2026-10-06: base compartida, Art/categoría/obra y Crew/perfil implementados sobre FASE 3B. CMS con preview visual, duplicación con identidad nueva, contacto/redes Crew y creación atómica de perfil sin Auth. Tipografía local EB Garamond/Archivo, Storage privado reutilizado y permisos de medios vinculados a publicación. Migración incremental 14 aplicada al proyecto exclusivo; pruebas transaccionales revertidas PASS. Sin importar/seed ni modificar contenido editorial real.
+
+Build estándar Turbopack, lint, TypeScript y tests verificados en esta sesión. Evidencia, capturas, diferencias de movimiento y pruebas pendientes de escritura mediante navegador en [phase4-art-crew.md](phase4-art-crew.md). Art sigue sin obras/categorías curadas; se presenta su estado vacío. Solo Georgia tiene perfil publicado habilitado. Indexación global sigue bloqueada hasta lanzamiento. Dos redirects de Crew listos, ninguno hacia páginas pendientes.
+
+**Detenerse para revisión visual de Art y Crew. No continuar automáticamente con Home ni otras páginas.** Sin deploy, DNS, WordPress, Katie, envíos o altas de usuarios.
+
+2026-10-09: cierre tras interrupciones; lint/typecheck/tests repetidos PASS, HTTP y SQL PASS, capturas desktop/móvil/tablet, teclado y reduced motion comprobados. Sesión administrativa temporal revocada y archivo eliminado. Pendientes explícitos: curación Art y recorrido completo de edición/preview/publicación mediante navegador en entorno seguro; no se afirma aprobación visual.
+
+## Estado histórico — PASO 3 completado, 2026-10-05
 
 PASOS 1 y 2 completados. Supabase exclusivo lzwmwofxoegkxykglneq conectado; Auth sin registro público y dos fundadores confirmados. Resend autentica, dominio pendiente; no envíos. ADMIN_EMAILS es ahora server-only y el acceso se verifica contra admin_users/RLS.
 

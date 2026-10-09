@@ -6,6 +6,7 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   if(!modules.media||!/^[0-9a-f-]{36}$/i.test(id))return new Response(null,{status:404});
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL; const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key)return new Response(null,{status:503});
+  if(new URL(url).origin!=='https://lzwmwofxoegkxykglneq.supabase.co')return new Response(null,{status:503});
   const authorization=request.headers.get('authorization');
   const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},...(authorization?{global:{headers:{Authorization:authorization}}}:{})});
   const {data:media,error}=await client.from('media').select('storage_path,mime_type').eq('id',id).maybeSingle();

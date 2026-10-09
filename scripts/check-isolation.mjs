@@ -46,7 +46,8 @@ if (process.env.TEST_BASE_URL) {
   const newsletterAdmin=await fetch(base+'/api/admin/newsletter/send',{method:'POST'});
   assert.equal(newsletterAdmin.status,503);
   assert.equal((await fetch(base+'/api/admin/revalidate',{method:'POST'})).status,401);
-  const sitemap=await (await fetch(base+'/sitemap.xml')).text(); assert.doesNotMatch(sitemap,/<loc>|whatkatieseas/);
+  const sitemap=await (await fetch(base+'/sitemap.xml')).text(); assert.doesNotMatch(sitemap,/whatkatieseas|\/expeditions|\/workshops|\/meaningful-messages/);
+  assert.match(sitemap,/<loc>https?:\/\/[^<]+\/crew<\/loc>/);
   const robots=await (await fetch(base+'/robots.txt')).text(); assert.match(robots,/Disallow: \/\s/);
   console.log('PASS: 26 disabled HTTP paths, 10 own-brand pages, unpublished details, newsletter consent/campaign/honeypot checks, delivery disabled, unauthorized revalidation and SEO exclusion. No subscriptions created.');
 }

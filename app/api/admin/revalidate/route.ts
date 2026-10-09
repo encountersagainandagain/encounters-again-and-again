@@ -13,6 +13,9 @@ export async function POST(request: Request) {
   const paths = ['/', '/about','/contact','/crew','/art','/expeditions','/workshops','/meaningful-messages','/sitemap.xml'];
   for (const slug of input.data.slugs) paths.push(routes.post(slug));
   if (input.data.scope === 'settings') revalidatePath('/', 'layout');
+  revalidatePath('/art/[category]', 'page');
+  revalidatePath('/art/[category]/[slug]', 'page');
+  revalidatePath('/crew/[slug]', 'page');
   for (const path of paths) revalidatePath(path);
   return NextResponse.json({revalidated:true,paths});
 }

@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {artworkPath,profileVisible,safeHref,duplicateContent} from '../src/features/encounters/presentation.ts';
+const category={id:'category',slug:'books',status:'published'};
+const work={id:'work',slug:'real-title',kind:'artwork',status:'published',published_at:'2026-01-01',source_id:'imported',updated_at:'today'};
+const details=[{id:'work',category_id:'category'}];
+assert.equal(artworkPath(work,details,[category]),'/art/books/real-title');
+assert.equal(artworkPath(work,details,[{...category,status:'draft'}]),null);
+assert.equal(artworkPath({...work,status:'draft'},details,[category]),null);
+const member={status:'published',has_page:true,page_post_id:'profile'};
+assert.equal(profileVisible(member,[{id:'profile',kind:'crew_member',status:'published'}]),true);
+for(const status of ['draft','published'])assert.equal(profileVisible({...member,has_page:false},[{id:'profile',kind:'crew_member',status}]),false);
+assert.equal(profileVisible(member,[{id:'profile',kind:'crew_member',status:'draft'}]),false);
+assert.equal(safeHref('javascript:alert(1)'),undefined);assert.equal(safeHref('//example.org'),undefined);assert.equal(safeHref('mailto:person@example.org'),'mailto:person@example.org');
+const one=duplicateContent(work,'12345678-a'),two=duplicateContent(work,'87654321-b');
+assert.equal(one.status,'draft');assert.equal(one.published_at,null);assert.equal(one.source_id,undefined);assert.equal(one.updated_at,undefined);assert.notEqual(one.slug,two.slug);assert.notEqual(one.id,work.id);
+console.log('PASS: category/profile publication gates, canonical paths, safe links and independent draft identities.');

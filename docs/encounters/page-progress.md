@@ -1,4 +1,8 @@
-# Cobertura por página — PASO 1
+# Cobertura por página
+
+Actualización 2026-10-06: Art, categoría, obra, Crew y perfil ya tienen frontend/CMS/SEO visual de PASO 4.0–4.2, pendientes de revisión del usuario. Art sin curación real; pruebas pobladas solo con fixtures revertidos/en memoria. Capturas y diferencias en [phase4-art-crew.md](phase4-art-crew.md). Base de pasos anteriores conservada. **No continuar con otras páginas ni Home.**
+
+## Registro histórico — PASO 1
 
 Referencias conservadas, shell provisional implementado (marca/navegación/colores/fuentes/newsletter) y páginas de preparación; sin páginas visuales completas ni animaciones implementadas. Datos/admin/SEO por página pendientes PASOS 3/4; no validado contra servicios.
 

@@ -20,12 +20,13 @@ export function client(admin = false, token) {
     ...(token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : {}),
   });
 }
-export function database() {
+export function database({transactionPooler=false}={}) {
   assertTarget();
   if (!process.env.SUPABASE_DB_PASSWORD) throw new Error('SUPABASE_DB_PASSWORD missing');
   const path = 'supabase/.temp/pooler-url';
   const url = new URL(existsSync(path) ? readFileSync(path, 'utf8').trim() : `postgresql://postgres@db.${projectRef}.supabase.co:5432/postgres`);
   if (!(url.hostname === `db.${projectRef}.supabase.co` || (url.hostname.endsWith('.pooler.supabase.com') && url.username === `postgres.${projectRef}`))) throw new Error('Database target mismatch');
+  if(transactionPooler&&url.hostname.endsWith('.pooler.supabase.com'))url.port='6543';
   url.password = process.env.SUPABASE_DB_PASSWORD;
   return postgres(url.toString(), { ssl: 'require', max: 1, prepare: false, connect_timeout: 15, onnotice() {} });
 }

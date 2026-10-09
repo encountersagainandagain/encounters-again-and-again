@@ -10,7 +10,7 @@
     "preview": "next start",
     "typecheck": "tsc --noEmit",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
-    "test": "node scripts/check-isolation.mjs && npm run check:preparation"
+    "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",

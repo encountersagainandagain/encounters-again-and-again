@@ -1,10 +1,10 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-05.
+Última actualización: 2026-10-06.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASOS 1, 2 y 3 completados; listo para PASO 4 visual.** Supabase exclusivo, dos admins confirmados, signup desactivado. Esquema/RLS/Storage/CMS mínimo validados; snapshot importado y repetido sin duplicados. Checkpoint 3A: 28510a2217b468eb577bbeb98a73cd6bf9c94702. Ver bootstrap-status y phase3-implementation. Resend autentica pero dominio/envíos pendientes. WordPress, DNS y Vercel intactos.
+**Foco actual: PASO 4.0–4.2 implementado; detenido para revisión visual de Art/Crew.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
 
 
 ## Cómo actualizarlo
@@ -48,7 +48,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [x] **7. Reemplazar la identidad anterior — BASE IMPLEMENTADA.** Marca/URL/defaults/metadata/JSON-LD/emails/manifest/assets propios en aplicación activa; código histórico fuera de rutas. Contenido editorial real y diseño final pendientes.
 - [x] **8. Organizar y documentar módulos — BASE IMPLEMENTADA.** Registro central, rechazo de rutas/consultas, admin core, scripts/cron/integraciones ajenos aislados y código archivado con reactivación documentada.
 - [ ] **9. Adaptar el CMS compartido — BASE IMPLEMENTADA.** Posts/bloques y campos específicos, categorías, responsables, borradores, preview textual, duplicación y guardado atómico. Preview visual completo y revisión final durante PASO 4.
-- [ ] **10. Completar Art y Crew — BASE IMPLEMENTADA.** Modelo/CMS y rutas mínimas de categoría, obra y perfiles. Ver pruebas en phase3-api.json; visual final y curación editorial pendientes.
+- [ ] **10. Completar Art y Crew — IMPLEMENTADO, REVISIÓN PENDIENTE.** Recorridos visuales/CMS/SEO y relaciones implementados; RLS y publicación probadas con SQL revertido, render poblado en memoria. Capturas desktop/móvil. Curación de Art, aprobación visual y escritura por navegador en entorno seguro pendientes; ver phase4-art-crew.md.
 - [ ] **11. Construir Expeditions — BASE IMPLEMENTADA.** Esquema/CMS de presentación, fichas, responsables y necesidades pendiente/conseguido. Visual pendiente.
 - [ ] **12. Construir Workshops — BASE IMPLEMENTADA.** Campos opcionales, sesiones y estados independientes probados. Visual pendiente.
 - [ ] **13. Incorporar resultados y Messages — BASE IMPLEMENTADA.** Relaciones múltiples y poemas con saltos preservados. Visual pendiente.
@@ -264,7 +264,16 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Registrado banner/navbar de Home y nueva prioridad de diseño: The Crew y perfil antes de completar Home.
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
-Próxima actualización: PASO 4, recorrido visual Art → obra → responsables/Crew y después páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS mínimo ya ejecutados y probados; diseño final, deploy/DNS y entrega de email siguen pendientes.
+Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-06 — PASO 4.0–4.2
+
+- Implementados base visual y recorridos Art/categoría/obra, Crew/perfil; datos reales y vacíos, sin categorías ni autores inventados.
+- CMS con preview visual, duplicación draft con IDs/slug nuevos, redes Crew, creación atómica de perfil y settings de presentación. Categorías/destacados/orden administrables.
+- Migración 14: publicación de categoría/perfil vinculada a RLS y medios, historial automático de URLs. Bucket privado intacto, imágenes compartidas conservadas.
+- Fuentes originales locales con OFL; build estándar Turbopack pasa. Lint, TypeScript, tests, render y SQL transaccional validados; detalles en phase4-art-crew.md.
+- SEO dinámico para las rutas de esta entrega; noindex de preparación conservado. Solo dos redirects de Crew activados. Sin despliegue ni cambios de contenido importado.
+- Se detiene aquí para revisión visual. Prueba de creación/publicación por navegador pendiente de entorno seguro, sin fixtures publicados en la base compartida.
 
 ### 2026-10-05 — cierre PASO 3
 

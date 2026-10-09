@@ -2,14 +2,15 @@ import 'server-only';
 import {createClient} from '@supabase/supabase-js';
 import {cache} from 'react';
 export type ContentRow={id:string;kind:string;slug:string;title:string;excerpt:string;cover_id:string|null;cover_alt:string;source_role:string|null;featured:boolean;home_rank:number|null;sort:number;[key:string]:unknown};
-export type ContentBlock={id:string;type:string;position:number;content:Record<string,unknown>};
+export type ContentBlock={id:string;type:string;position:number;content:Record<string,unknown>;anchor?:string;source_block_id?:string};
 export const publicClient=()=>{
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key)throw new Error('Supabase is not configured.');
+  if(new URL(url).origin!=='https://lzwmwofxoegkxykglneq.supabase.co')throw new Error('Unexpected Encounters database target.');
   return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,cache:'no-store'})}});
 };
 export const readPosts=cache(async()=>{const {data,error}=await publicClient().from('posts').select('*').eq('status','published').order('sort').order('published_at',{ascending:false});if(error)throw error;return (data||[]) as ContentRow[];});
-export async function readRows(table:string){const {data,error}=await publicClient().from(table).select('*');if(error)throw error;return (data||[]) as Record<string,unknown>[];}
+export const readRows=cache(async(table:string)=>{const {data,error}=await publicClient().from(table).select('*');if(error)throw error;return (data||[]) as Record<string,unknown>[];});
 export async function readBlocks(id:string){const {data,error}=await publicClient().from('post_blocks').select('*').eq('post_id',id).order('position');if(error)throw error;return (data||[]) as ContentBlock[];}
 export async function contentPath(post:ContentRow){
   const kindPaths:Record<string,string>={expedition:'expeditions',workshop:'workshops',message:'meaningful-messages',crew_member:'crew'};

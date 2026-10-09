@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import Image from 'next/image';
-import { EB_Garamond, Archivo } from 'next/font/google';
+import localFont from 'next/font/local';
 import { brand, siteUrl } from '@/config/brand';
-import { publicNavigation } from '@/config/routes';
-import { isRouteEnabled } from '@/config/module-policy';
+import { SiteChrome } from '@/components/public/SiteChrome';
+import { readRows } from '@/features/encounters/public-content';
 import { JsonLd } from '@/components/JsonLd';
 import '@/index.css';
 import '@/styles/encounters-tokens.css';
-const heading = EB_Garamond({ subsets: ['latin'], weight: ['400','500'], style: ['normal','italic'], variable: '--font-display', display: 'swap' });
-const body = Archivo({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-body', display: 'swap' });
+import '@/styles/editorial.css';
+const heading = localFont({ src: [{path:'../public/fonts/eb-garamond.ttf',weight:'400 500',style:'normal'},{path:'../public/fonts/eb-garamond-italic.ttf',weight:'400 500',style:'italic'}], variable: '--font-display', display: 'swap' });
+const body = localFont({ src: '../public/fonts/archivo.ttf', weight: '400 700', variable: '--font-body', display: 'swap' });
+// Shared contact/settings are read under anonymous RLS on every request.
+export const dynamic='force-dynamic';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: brand.name, template: `%s | ${brand.name}` },
@@ -18,13 +19,11 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', siteName: brand.name, title: brand.name, description: brand.description, images: [brand.logo] },
   twitter: { card: 'summary', title: brand.name, description: brand.description, images: [brand.logo] },
 };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const settings=process.env.NEXT_PUBLIC_SUPABASE_URL?(await readRows('site_settings')).find(s=>s.key==='site')?.value as Record<string,unknown>|undefined:undefined;
   return <html lang="en"><body className={`${heading.variable} ${body.variable}`}>
     <JsonLd id="organization-jsonld" data={{ '@context':'https://schema.org', '@type':'Organization', '@id':`${siteUrl}/#organization`, name:brand.name, url:siteUrl, logo:`${siteUrl}${brand.logo}` }} />
     <JsonLd id="website-jsonld" data={{ '@context':'https://schema.org', '@type':'WebSite', name:brand.name, url:siteUrl }} />
-    <header className="enc-header"><Link href="/" className="enc-brand"><Image src={brand.logo} alt="" width={44} height={44} />{brand.name}</Link>
-      <nav aria-label="Main navigation">{publicNavigation.filter(item => isRouteEnabled(item.href)).map(item => <Link href={item.href} key={item.href}>{item.label}</Link>)}</nav>
-    </header><main>{children}</main>
-    <footer className="enc-footer"><span>{brand.name}</span><Link href="/contact">Contact</Link></footer>
+    <SiteChrome settings={settings||{}}>{children}</SiteChrome>
   </body></html>;
 }

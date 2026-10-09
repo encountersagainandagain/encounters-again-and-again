@@ -1,4 +1,4 @@
-export type Field = {key:string;label:string;type?:'text'|'textarea'|'number'|'date'|'checkbox'|'select';options?:string[];reference?:string;required?:boolean};
+export type Field = {key:string;label:string;type?:'text'|'textarea'|'number'|'date'|'checkbox'|'select'|'links';options?:string[];reference?:string;required?:boolean};
 const f=(key:string,label:string,type:Field['type']='text'):Field=>({key,label,type});
 const ref=(key:string,label:string,reference:string):Field=>({key,label,type:'select',reference});
 const choice=(key:string,label:string,options:string[]):Field=>({key,label,type:'select',options});
@@ -10,7 +10,7 @@ const dates=[f('starts_on','Starts on','date'),f('ends_on','Ends on','date'),f('
 export const details:Record<string,{table:string;fields:Field[]}>={
   expedition:{table:'expeditions',fields:[activity,...dates,ref('underwater_id','Underwater image','media')]},
   workshop:{table:'workshops',fields:[activity,choice('registration_status','Registration',['open','closed','full','not_applicable']),...dates,f('audience_note','Who is it for','textarea'),f('language','Language'),f('modality','Format'),f('includes','What is included','textarea'),f('price','Price','number'),f('currency','Currency'),f('capacity','Places','number'),f('signup_email','Registration email'),f('signup_subject','Registration subject'),f('signup_label','Registration button label')]},
-  artwork:{table:'artworks',fields:[{...ref('category_id','Art category','art_categories'),required:true},f('caption','Caption','textarea'),ref('media_id','Main image','media'),f('external_url','External link'),choice('embed_kind','Embed type',['youtube','spotify']),f('embed_id','Video or episode ID'),f('span','Grid columns (1–6)','number'),f('full_height','Full height image','checkbox')]},
+  artwork:{table:'artworks',fields:[{...ref('category_id','Art category','art_categories'),required:true},f('caption','Caption','textarea'),ref('media_id','Main image','media'),f('external_url','External link'),choice('embed_kind','Embed type',['youtube','spotify']),f('embed_id','YouTube ID / Spotify episode/ID'),f('span','Grid columns (1–6)','number'),f('full_height','Full height image','checkbox')]},
   message:{table:'messages',fields:[f('message','Message / poem','textarea'),f('body','Additional text','textarea'),ref('illustration_id','Illustration','media'),f('credit','Credit')]},
 };
 export const entities:Record<string,{label:string;fields:Field[]}>={
@@ -20,6 +20,8 @@ export const entities:Record<string,{label:string;fields:Field[]}>={
   expedition_cards:{label:'Expedition presentation cards',fields:[{...ref('post_id','Program page or expedition','posts'),required:true},f('kicker','Kicker'),{...f('title','Title'),required:true},f('body','Text','textarea'),f('signature','Signature'),ref('media_id','Image','media'),choice('media_side','Image side',['left','right']),choice('theme','Theme',['light','dark']),f('cta_label','Link label'),f('cta_url','Link URL'),f('sort','Order','number')]},
   media:{label:'Media library',fields:[f('alt','Image description'),f('credit','Credit'),f('focal_x','Horizontal focus (0–1)','number'),f('focal_y','Vertical focus (0–1)','number'),choice('fit','Fit',['cover','contain'])]},
 };
+entities.crew_members.fields.push({key:'social_links',label:'Optional contact and social links',type:'links'});
+entities.art_categories.fields.push(f('featured','Featured category','checkbox'));
 export const children:Record<string,{table:string;foreignKey:string;label:string;fields:Field[]}>= {
   expedition:{table:'expedition_needs',foreignKey:'expedition_id',label:'Needs',fields:[{...f('title','Need'),required:true},f('body','Description','textarea'),choice('status','State',['pending','obtained','closed']),f('contact_url','Contact link'),f('sort','Order','number')]},
   workshop:{table:'workshop_sessions',foreignKey:'workshop_id',label:'Sessions',fields:[{...f('title','Session title'),required:true},f('body','Description','textarea'),f('place','Place'),f('held_on','Date','date'),ref('media_id','Image','media'),f('sort','Order','number')]},

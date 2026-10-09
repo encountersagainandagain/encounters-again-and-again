@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { defaultSiteSettings, fetchSiteSettings, updateSiteSettings } from '@/lib/siteSettings';
 import { requestAdminRevalidation } from '@/lib/adminRevalidation';
 import {HomeSettings} from './HomeSettings';
+import {EditorialSettings} from './EditorialSettings';
 const fields = [
   ['name', 'Site name'], ['tagline', 'Tagline'], ['description', 'Description'],
   ['email', 'Public contact email'], ['instagram', 'Instagram'], ['youtube', 'YouTube'],
@@ -26,6 +27,6 @@ export function AdminSettings() {
   return <section className="section-padding py-12"><Link href="/admin">Administration</Link><h1 className="font-display text-4xl">Site settings</h1>
     <form onSubmit={save} className="mt-8 grid max-w-2xl gap-5">{fields.map(([key,label]) => <label key={key}>{label}
       <input type={key === 'email' ? 'email' : 'text'} value={settings[key]} onChange={event => setSettings({...settings, [key]:event.target.value})} className="block w-full border p-3 text-black" />
-    </label>)}<button disabled={!ready} className="btn-ocean" type="submit">Save settings</button><p role="status">{message}</p></form><HomeSettings/>
+    </label>)}<button disabled={!ready} className="btn-ocean" type="submit">Save settings</button><p role="status">{message}</p></form><EditorialSettings/><HomeSettings/>
   </section>;
 }

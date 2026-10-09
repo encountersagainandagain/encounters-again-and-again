@@ -1,0 +1,22 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "date": "2026-10-06",
+  "migration": "20261006000100_art_crew_publication.sql",
+  "migration_applied": true,
+  "preflight": "PASS, entire transaction rolled back",
+  "applied_schema_test": "PASS, entire transaction rolled back",
+  "checks": [
+    "Draft work and media hidden from anonymous visitors",
+    "Authenticated non-admin cannot edit or create crew profiles",
+    "Published artwork has two responsible crew members",
+    "Unpublishing category removes artwork and image access under RLS",
+    "Shared image remains available while another published work references it",
+    "Artwork and category slug changes preserve the original URL to the current published target",
+    "Unpublishing crew hides its profile document and contributor relation",
+    "Invalid block save rolls back title and blocks"
+  ],
+  "committed_fixtures": 0,
+  "auth_users_created": 0,
+  "emails_sent": 0,
+  "connection": "Verified project transaction pooler, port 6543; session port 5432 timed out"
+}

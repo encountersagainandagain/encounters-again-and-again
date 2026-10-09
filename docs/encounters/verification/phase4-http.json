@@ -1,0 +1,59 @@
+{
+  "project_ref": "lzwmwofxoegkxykglneq",
+  "result": "PASS",
+  "checks": [
+    "Imported counts unchanged; four drafts and their blocks hidden anonymously",
+    "Completed routes, canonical/OG, published-only sitemap and only ready legacy redirects",
+    "Anonymous published image uses stable endpoint with no-store",
+    "Existing admin session reads drafts; anonymous revalidation is denied; no email sent"
+  ],
+  "responses": [
+    {
+      "path": "/art",
+      "status": 200,
+      "location": null
+    },
+    {
+      "path": "/crew",
+      "status": 200,
+      "location": null
+    },
+    {
+      "path": "/crew/wild-wonders",
+      "status": 200,
+      "location": null
+    },
+    {
+      "path": "/crew/julian-lange",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/art/nonexistent",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/art/nonexistent/nonexistent",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/elementor-page-3462",
+      "status": 308,
+      "location": "/crew"
+    },
+    {
+      "path": "/elementor-2907",
+      "status": 308,
+      "location": "/crew/wild-wonders"
+    },
+    {
+      "path": "/elementor-3062",
+      "status": 404,
+      "location": null
+    }
+  ],
+  "committed_fixtures": 0,
+  "emails_sent": 0
+}
