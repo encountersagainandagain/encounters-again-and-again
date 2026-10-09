@@ -4,6 +4,8 @@ Fecha: 2026-10-06. Alcance exclusivo: base compartida, Art/categoría/obra y Cre
 
 Cierre de verificación: 2026-10-09, tras interrupciones de la sesión. Los reinicios no ejecutaron importaciones, seeds ni nuevas migraciones.
 
+Publicación Git: `eec113e` (`feat: implement Art and Crew editorial journeys`) publicado en `origin/main`, repositorio `encountersagainandagain/encounters-again-and-again`, sin force push. El commit de documentación posterior registra este resultado. Sin despliegue.
+
 ## Punto de partida comprobado
 
 Directorio local correcto, árbol limpio al iniciar, HEAD `2fe403f`, ancestro `28510a2` y único remoto `https://github.com/encountersagainandagain/encounters-again-and-again`. No se encontró AGENTS.md aplicable. Se leyeron los seis documentos de continuidad, los diez Markdown pedidos del handoff y los cuatro reportes históricos. Los prototipos Art, The Crew, Wild Wonders y Post se abrieron conservando support.js/assets.
