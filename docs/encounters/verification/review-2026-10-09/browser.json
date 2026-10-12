@@ -1,0 +1,154 @@
+{
+  "date": "2026-10-09",
+  "base": "http://127.0.0.1:3218",
+  "checks": [
+    {
+      "name": "/crew desktop pin",
+      "viewport": 1000,
+      "width": 1440,
+      "overflow": false,
+      "pin": 2400,
+      "heroTop": 0,
+      "heroHeight": 1000,
+      "position": "sticky",
+      "contentTop": 600,
+      "copyOpacity": "0",
+      "result": "PASS"
+    },
+    {
+      "name": "/crew reduced motion",
+      "viewport": 1000,
+      "width": 1440,
+      "overflow": false,
+      "pin": 1000,
+      "heroTop": 0,
+      "heroHeight": 1000,
+      "position": "relative",
+      "contentTop": 1000,
+      "copyOpacity": "1",
+      "result": "PASS"
+    },
+    {
+      "name": "/crew/wild-wonders desktop pin",
+      "viewport": 1000,
+      "width": 1440,
+      "overflow": false,
+      "pin": 2400,
+      "heroTop": 0,
+      "heroHeight": 1000,
+      "position": "sticky",
+      "contentTop": 600,
+      "copyOpacity": "0",
+      "result": "PASS"
+    },
+    {
+      "name": "/crew/wild-wonders reduced motion",
+      "viewport": 1000,
+      "width": 1440,
+      "overflow": false,
+      "pin": 1000,
+      "heroTop": 0,
+      "heroHeight": 1000,
+      "position": "relative",
+      "contentTop": 1000,
+      "copyOpacity": "1",
+      "result": "PASS"
+    },
+    {
+      "name": "5-category carousel",
+      "result": "PASS"
+    },
+    {
+      "name": "category → artwork → both contributors → artwork",
+      "result": "PASS"
+    },
+    {
+      "name": "artwork index and image carousel",
+      "result": "PASS"
+    },
+    {
+      "name": "empty sample category",
+      "result": "PASS"
+    },
+    {
+      "name": "/art mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "position": null,
+      "copyOpacity": null,
+      "result": "PASS"
+    },
+    {
+      "name": "/crew mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "pin": 844,
+      "heroTop": 0,
+      "heroHeight": 844,
+      "position": "relative",
+      "contentTop": 844,
+      "copyOpacity": "1",
+      "result": "PASS"
+    },
+    {
+      "name": "/crew/wild-wonders mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "pin": 844,
+      "heroTop": 0,
+      "heroHeight": 844,
+      "position": "relative",
+      "contentTop": 844,
+      "copyOpacity": "1",
+      "result": "PASS"
+    },
+    {
+      "name": "/review/art mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "position": null,
+      "copyOpacity": null,
+      "result": "PASS"
+    },
+    {
+      "name": "/review/art/test-gallery mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "position": null,
+      "copyOpacity": null,
+      "result": "PASS"
+    },
+    {
+      "name": "/review/art/test-gallery/test-work mobile",
+      "viewport": 844,
+      "width": 390,
+      "overflow": false,
+      "position": null,
+      "contentTop": 844,
+      "copyOpacity": "1",
+      "result": "PASS"
+    },
+    {
+      "name": "keyboard skip link",
+      "result": "PASS"
+    },
+    {
+      "name": "production review route",
+      "status": 404,
+      "containsFixture": false
+    },
+    {
+      "name": "non-local host review route",
+      "status": 404,
+      "containsFixture": false
+    }
+  ],
+  "errors": [],
+  "cms": "BLOCKED: no isolated Supabase test environment; no CMS writes attempted",
+  "result": "PASS"
+}

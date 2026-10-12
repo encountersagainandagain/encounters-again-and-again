@@ -116,3 +116,26 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.editorial-page *,.editorial-nav{animation:none!important;transition:none!important;scroll-behavior:auto!important}.editorial-page [data-seq]{opacity:1!important;transform:none!important;filter:none!important}.editorial-page [data-scribble] path,.art-signature path{stroke-dashoffset:0!important}.hero-image{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.nav-roll{animation:none!important}}
 @media(max-width:759px){.crew-story-copy,.profile-opening,.imported-pair>.editorial-blocks{grid-template-columns:1fr}.crew-story-copy>.editorial-blocks{grid-column:1}.crew-story-title{margin-block:60px}.profile-opening{margin-block:60px}.profile-opening .block-images img,.imported-pair .block-images img{height:55svh}}
+
+/* Crew/profile: restore the current HTML's 240vh pin and paper overlap. */
+.hero-motion{position:absolute;inset:0}
+.photo-hero-pin{position:relative;z-index:1;height:240vh;background:var(--enc-espuma)}
+.photo-hero-pin>.photo-hero{position:sticky;top:0;height:100vh;min-height:0}
+.photo-hero-pin+#editorial-content{position:relative;z-index:2;margin-top:-100vh;background:var(--enc-espuma)}
+.profile-page .photo-hero-pin .hero-image img{object-position:center 45%}
+@media(max-width:759px),(prefers-reduced-motion:reduce){
+  .photo-hero-pin{height:auto}
+  .photo-hero-pin>.photo-hero{position:relative;height:auto;min-height:100svh}
+  .photo-hero-pin+#editorial-content{margin-top:0}
+}
+.review-notice{position:fixed;z-index:35;bottom:8px;left:8px;right:8px;width:fit-content;max-width:calc(100% - 16px);padding:10px 14px;background:#fff1c9;color:#30210a;border:1px solid #806120;font:12px/1.5 Arial,sans-serif;box-shadow:0 2px 12px #0002}
+.review-notice a{text-decoration:underline;text-underline-offset:2px}
+.scroll-cue:focus-visible{opacity:1!important}
+/* Legacy overflow-x:hidden creates a non-scrolling ancestor and disables sticky. */
+html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
+.photo-hero-pin{overflow:visible}
+
+/* Center the first/last snap targets so every carousel arrow can advance. */
+.editorial-rail{padding-inline:19vw}
+.category-carousel .editorial-rail{padding-inline:max(0px,calc((100% - min(30vw,420px))/2))}
+@media(max-width:759px){.editorial-rail{padding-inline:8vw}.category-carousel .editorial-rail{padding-inline:max(0px,calc((100% - 84vw)/2))}}

@@ -10,11 +10,25 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
     const items=Array.from(element.querySelectorAll<HTMLElement>('[data-seq]'));
     const strokes=Array.from(element.querySelectorAll<SVGPathElement>('[data-scribble] path'));
     const hero=element.querySelector<HTMLElement>('[data-hero-image]');
-    const reset=()=>{items.forEach(el=>{el.style.opacity='1';el.style.transform='none';el.style.filter='none';});strokes.forEach(p=>{p.style.strokeDashoffset='0';});if(hero)hero.style.transform='none';};
+    const pin=element.querySelector<HTMLElement>('[data-hero-pin]');
+    const copy=pin?.querySelector<HTMLElement>('.hero-copy');
+    const shade=pin?.querySelector<HTMLElement>('.hero-shade');
+    const cue=pin?.querySelector<HTMLElement>('.scroll-cue');
+    const desktop=matchMedia('(min-width: 760px)');
+    const ramp=(v:number,from:number,to:number,smooth=false)=>{const k=Math.max(0,Math.min(1,(v-from)/(to-from)));return smooth?k*k*(3-2*k):k;};
+    const resetHero=()=>{for(const el of [hero,copy,shade,cue])if(el){el.style.transform='none';el.style.filter='none';el.style.opacity='1';}};
+    const reset=()=>{items.forEach(el=>{el.style.opacity='1';el.style.transform='none';el.style.filter='none';});strokes.forEach(p=>{p.style.strokeDashoffset='0';});resetHero();};
     const paint=(time:number)=>{
       if(motion.matches){reset();return;}
-      eased=time-last>140?progress:eased+(progress-eased)*.08;last=time;
-      if(hero)hero.style.transform=`translateY(${eased*5}%) scale(${1+eased*.06})`;
+      eased=time-last>140?progress:eased+(progress-eased)*(pin ? .06 : .08);last=time;
+      if(pin&&desktop.matches){
+        const k=ramp(eased,.02,.5,true),t=ramp(eased,.06,.42);
+        if(hero){hero.style.transform=`scale(${1+k*.08})`;hero.style.filter=`brightness(${1-k*.45}) saturate(${1-k*.25})`;}
+        if(shade)shade.style.opacity=String(1+k*.4);
+        if(copy){copy.style.opacity=String(1-t);copy.style.transform=`translate3d(0,${t*-50}px,0) scale(${1+t*.06})`;}
+        if(cue)cue.style.opacity=String(Math.max(0,1-eased*8));
+      }else if(pin){resetHero();}
+      else if(hero)hero.style.transform=`translateY(${eased*5}%) scale(${1+eased*.06})`;
       items.forEach(el=>{
         const rect=el.getBoundingClientRect();if(rect.top>vh*1.4)return;
         const [start=0.94,span=0.4,shift=60]=(el.dataset.seq||'').split(',').map(Number);
@@ -38,8 +52,8 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
 
 export function Carousel({children,label,compact=false}:{children:ReactNode[];label:string;compact?:boolean}) {
   const rail=useRef<HTMLDivElement>(null);const [index,setIndex]=useState(0);
-  function move(step:number){const r=rail.current;if(!r)return;const target=r.children[Math.max(0,Math.min(children.length-1,index+step))] as HTMLElement; r.scrollTo({left:target.offsetLeft-r.offsetLeft-(r.clientWidth-target.clientWidth)/2,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
-  return <section className={`editorial-carousel ${compact?'category-carousel':''}`} aria-label={label}><div ref={rail} className="editorial-rail" tabIndex={0} onScroll={()=>{const r=rail.current;if(!r)return;const center=r.scrollLeft+r.clientWidth/2;let best=0,distance=Infinity;Array.from(r.children).forEach((el,i)=>{const item=el as HTMLElement;const d=Math.abs(item.offsetLeft-r.offsetLeft+item.clientWidth/2-center);if(d<distance){distance=d;best=i;}});setIndex(best);}}>{children.map((child,i)=><div className="editorial-slide" key={i}>{child}</div>)}</div><div className="carousel-controls"><button type="button" aria-label={`Previous ${label}`} disabled={index===0} onClick={()=>move(-1)}>←</button><output aria-live="polite">{String(index+1).padStart(2,'0')} / {String(children.length).padStart(2,'0')}</output><button type="button" aria-label={`Next ${label}`} disabled={index===children.length-1} onClick={()=>move(1)}>→</button></div></section>;
+  function move(step:number){const r=rail.current;if(!r)return;const target=r.children[Math.max(0,Math.min(children.length-1,index+step))] as HTMLElement; r.scrollTo({left:target.offsetLeft-(r.clientWidth-target.clientWidth)/2,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
+  return <section className={`editorial-carousel ${compact?'category-carousel':''}`} aria-label={label}><div ref={rail} className="editorial-rail" tabIndex={0} onScroll={()=>{const r=rail.current;if(!r)return;const center=r.scrollLeft+r.clientWidth/2;let best=0,distance=Infinity;Array.from(r.children).forEach((el,i)=>{const item=el as HTMLElement;const d=Math.abs(item.offsetLeft+item.clientWidth/2-center);if(d<distance){distance=d;best=i;}});setIndex(best);}}>{children.map((child,i)=><div className="editorial-slide" key={i}>{child}</div>)}</div><div className="carousel-controls"><button type="button" aria-label={`Previous ${label}`} disabled={index===0} onClick={()=>move(-1)}>←</button><output aria-live="polite">{String(index+1).padStart(2,'0')} / {String(children.length).padStart(2,'0')}</output><button type="button" aria-label={`Next ${label}`} disabled={index===children.length-1} onClick={()=>move(1)}>→</button></div></section>;
 }
 
 export function MediaEmbed({kind,id}:{kind:unknown;id:unknown}) {

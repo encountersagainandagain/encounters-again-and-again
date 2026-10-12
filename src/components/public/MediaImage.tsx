@@ -6,5 +6,5 @@ export function MediaImage({id,media,alt='',className='',priority=false,contain=
   // Never substitute the imported Elementor placeholder for an editorial image.
   if(!item || /placeholder/i.test(`${item.alt} ${item.source_url}`))return null;
   const preview=string(item.preview_url);
-  return <Image src={preview.startsWith('blob:')?preview:`/api/media/${item.id}`} alt={alt||string(item.alt)} width={Number(item.width)||1200} height={Number(item.height)||900} priority={priority} loading={priority?'eager':'lazy'} unoptimized className={className} style={{objectFit:contain?'contain':item.fit==='contain'?'contain':'cover',objectPosition:`${Number(item.focal_x??.5)*100}% ${Number(item.focal_y??.5)*100}%`}}/>;
+  return <Image src={(preview.startsWith('blob:')||preview.startsWith('/design/'))?preview:`/api/media/${item.id}`} alt={alt||string(item.alt)} width={Number(item.width)||1200} height={Number(item.height)||900} priority={priority} loading={priority?'eager':'lazy'} unoptimized className={className} style={{objectFit:contain?'contain':item.fit==='contain'?'contain':'cover',objectPosition:`${Number(item.focal_x??.5)*100}% ${Number(item.focal_y??.5)*100}%`}}/>;
 }

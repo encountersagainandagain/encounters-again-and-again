@@ -1,5 +1,7 @@
 # Diseño vigente y diferencias
 
+Actualización 2026-10-11: el cambio de portadas Crew/perfil a flujo libre no tenía motivo ni autorización registrados. Por instrucción del usuario se restaura el HTML vigente: 240vh, sticky 100vh, superposición -100vh y rampas de zoom/oscurecimiento/salida del texto; libre en móvil <760px y reduced motion. Pendiente de aprobación visual de la ejecución. Las diferencias restantes y el entorno de muestras se detallan en [phase4-review.md](phase4-review.md).
+
 Fuente: `Efecto agua al scrollear Next.js (2).zip`, carpeta `entrega/`; SHA y archivos en design-manifest.json. Los 61 archivos coinciden con la referencia extraída del starter kit. Estructura conservada. 13 HTML, 16 Markdown, 30 assets y 2 scripts. No se ha aprobado visualmente la implementación de ninguna página.
 
 | Archivos | Diferencia y consecuencia | Resolución / recomendación |

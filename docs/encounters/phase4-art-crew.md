@@ -1,5 +1,7 @@
 # PASO 4 · checkpoints 4.0, 4.1 y 4.2
 
+**Continuidad 2026-10-12:** [guía de revisión local, rutas, evidencias y bloqueo del CMS](phase4-review.md). El pin de portadas fue restaurado y probado; Art dispone de muestras solo locales bajo `/review`. Este avance se publica como checkpoint técnico para conservarlo, sin declarar aprobación visual. La aprobación visual y la prueba de escritura del CMS en una base aislada siguen pendientes.
+
 Fecha: 2026-10-06. Alcance exclusivo: base compartida, Art/categoría/obra y Crew/perfil. Detenerse para revisión visual. Home, Expeditions, Workshops, Messages, About y Contact no reciben implementación visual en esta entrega.
 
 Cierre de verificación: 2026-10-09, tras interrupciones de la sesión. Los reinicios no ejecutaron importaciones, seeds ni nuevas migraciones.
@@ -76,7 +78,7 @@ La inspección administrativa llegó al listado autenticado y confirmó lectura 
 
 Los HTML vigentes prevalecen sobre los Markdown: Crew y Wild Wonders tienen portada oscura y lectura clara; Art usa chips redondeados y el nav alterna etiquetas como el prototipo. Se conserva texto original del snapshot aunque difiera del copy del prototipo.
 
-No se replica el pin de 240vh de las portadas de Crew/perfil: portada de un viewport y flujo continuo con parallax/revelado, sin retener el scroll. Esta diferencia de movimiento requiere revisión visual. Las tarjetas crecen con biografías largas, evitando recortes de texto en móvil. La organización del relato conserva todos los bloques originales usados; las biografías duplicadas en Team se muestran desde crew_members, su fuente editable.
+El checkpoint original omitía el pin de 240vh de las portadas de Crew/perfil, sin motivo ni aprobación documentados. En la revisión local se restauró el patrón del HTML vigente: 240vh, sticky de 100vh y papel superpuesto -100vh, liberado en móvil y reduced motion. Geometría comprobada en navegador; ritmo pendiente de aprobación visual. Las tarjetas crecen con biografías largas, evitando recortes de texto en móvil. La organización del relato conserva todos los bloques originales usados; las biografías duplicadas en Team se muestran desde crew_members, su fuente editable.
 
 Art permanece sin categorías ni obras reales. Por eso las capturas públicas muestran el estado vacío y el recorrido poblado está validado con fixtures SQL revertidos/renderizado en memoria; **no hay aprobación visual de una colección real**. Pendiente definir categorías, atribuciones, portadas y relaciones editoriales. Solo Georgia tiene perfil habilitado; no se habilitan los otros cinco automáticamente. No se inventan correos, fechas ni relaciones. Vídeo ausente encounters_expeditions_009 y tercer fundador siguen fuera de esta entrega.
 

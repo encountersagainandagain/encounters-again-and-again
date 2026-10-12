@@ -1,6 +1,8 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-06.
+Última actualización: 2026-10-11.
+
+**Revisión local de Art/Crew:** [guía y evidencia](phase4-review.md). Pin de portadas restaurado; recorrido de muestras, filtros, carruseles, índice, móvil y reduced motion comprobados desde navegador. Curación y aprobación visual pendientes. Crear/guardar/previsualizar/publicar/duplicar mediante CMS y comprobar privacidad en otra sesión siguen **bloqueados por falta de una base de pruebas aislada**. Las muestras locales no sustituyen esa prueba ni agregan contenido a la base real.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
