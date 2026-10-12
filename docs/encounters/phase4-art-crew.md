@@ -1,6 +1,6 @@
 # PASO 4 · checkpoints 4.0, 4.1 y 4.2
 
-**Continuidad 2026-10-12:** [guía de revisión local, rutas, evidencias y bloqueo del CMS](phase4-review.md). El pin de portadas fue restaurado y probado; Art dispone de muestras solo locales bajo `/review`. Este avance se publica como checkpoint técnico para conservarlo, sin declarar aprobación visual. La aprobación visual y la prueba de escritura del CMS en una base aislada siguen pendientes.
+**Continuidad 2026-10-12:** [guía de revisión local, rutas y evidencias](phase4-review.md). El pin de portadas fue restaurado y probado; Art dispone de muestras solo locales bajo `/review`. El checkpoint técnico no declara aprobación visual. La escritura completa del CMS y su privacidad ya pasaron contra Supabase local aislado; la aprobación visual sigue pendiente.
 
 Fecha: 2026-10-06. Alcance exclusivo: base compartida, Art/categoría/obra y Crew/perfil. Detenerse para revisión visual. Home, Expeditions, Workshops, Messages, About y Contact no reciben implementación visual en esta entrega.
 

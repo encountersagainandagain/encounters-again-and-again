@@ -12,6 +12,7 @@
     "cms:local:prepare": "node scripts/local-cms.mjs prepare",
     "cms:local:dev": "node scripts/local-cms.mjs dev",
     "cms:local:status": "node scripts/local-cms.mjs status",
+    "cms:local:verify": "node scripts/verify-local-cms.mjs",
     "cms:local:stop": "node scripts/local-cms.mjs stop",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
     "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs"

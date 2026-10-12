@@ -59,7 +59,7 @@ Se corrigió además el cálculo de offsets del carrusel y se centraron sus extr
 
 ## Verificación funcional y límite del CMS
 
-**Actualización 2026-10-12:** Supabase CLI está disponible tanto en Homebrew (`2.120.0`) como en la dependencia fijada por el proyecto (`2.119.0`). No hay runtime de contenedores instalado: Docker, Podman, Colima y OrbStack están ausentes. Supabase local necesita uno para iniciar Postgres, Auth, PostgREST y Storage, por lo que el recorrido integrado todavía no se ejecutó.
+**Actualización 2026-10-12:** Supabase CLI está disponible tanto en Homebrew (`2.120.0`) como en la dependencia fijada por el proyecto (`2.119.0`). Se instalaron las herramientas gratuitas Colima `0.10.3` y Docker CLI `29.9.0`; Colima quedó activo con 4 CPU, 6 GB de memoria y disco de 30 GB. Supabase local inició Postgres, Auth, PostgREST y Storage, aplicó las 14 migraciones existentes y completó el recorrido integrado.
 
 La preparación del repositorio ya quedó lista para ese entorno:
 
@@ -69,20 +69,20 @@ La preparación del repositorio ya quedó lista para ese entorno:
 - El código solo admite el origen remoto confirmado o, con `ENCOUNTERS_ALLOW_LOCAL_SUPABASE=true` y fuera de producción, exactamente `127.0.0.1:54321`/`localhost:54321`. Los tests rechazan otros proyectos, otros puertos y Supabase local sin la bandera explícita.
 - `npm run cms:local:stop` detiene únicamente el stack local. No se usa `db reset` remoto, importación del snapshot ni datos reales.
 
-La opción gratuita preparada es Colima con Docker CLI. Instalación pendiente fuera del repositorio: `brew install colima docker`, seguida de `colima start --cpu 4 --memory 6 --disk 30`. Después se podrá ejecutar `npm run cms:local:prepare`, iniciar la app aislada y completar el recorrido desde navegador.
+La app aislada queda disponible en `http://127.0.0.1:3219`; la revisión visual original continúa en `http://127.0.0.1:3218`. Usan directorios de compilación separados para poder funcionar al mismo tiempo. Para futuros arranques: `colima start`, `npm run cms:local:prepare` y `npm run cms:local:dev`. No hace falta crear un proyecto alojado ni servicio pago.
 
-No se usó la base real como reemplazo. No se inició sesión administrativa, no se crearon categorías, obras o usuarios, no se publicó ni duplicó contenido real. Las pruebas SQL históricas con rollback siguen siendo evidencia histórica, no una prueba nueva desde navegador.
+No se usó la base real como reemplazo. La sesión administrativa, la categoría, las obras, el usuario y los integrantes de Crew son locales y sintéticos. No se importó el snapshot, no se copió contenido real y no se enviaron correos.
 
 | Recorrido | Estado |
 | --- | --- |
 | Pantallas públicas, noindex, pin, móvil y reduced motion | Evidencia de esta revisión en `verification/review-2026-10-09/browser.json` y capturas. |
-| Categoría → obra → dos responsables → obra | Se prueba con navegación real del navegador sobre fixtures en memoria. No prueba persistencia. |
-| Crear categoría y obra, asignar responsables y guardar borrador en CMS | **PREPARADO, NO EJECUTADO**: falta instalar/iniciar Colima + Docker CLI. |
-| Previsualizar borrador desde CMS y publicar | **PREPARADO, NO EJECUTADO**, mismo bloqueo de runtime. |
-| Duplicar desde CMS y comprobar copia en borrador | **PREPARADO, NO EJECUTADO** en navegador. Los tests existentes de la función de duplicación comprueban draft, nuevos identificadores y limpieza de procedencia; no sustituyen esta prueba. |
-| Anónimo no puede acceder al borrador/copias/medios privados | **PENDIENTE de prueba integrada** después de iniciar el entorno local. No se concluye RLS a partir de las rutas ficticias o de los tests de presentación. |
+| Categoría → obra → dos responsables → perfiles → obra | **PASS** con datos persistidos en Supabase local; ambos perfiles mostraron la relación inversa. |
+| Crear categoría y obra, asignar responsables y guardar borrador en CMS | **PASS** desde navegador: categoría publicada, obra draft, bloque y dos responsables guardados. |
+| Previsualizar borrador desde CMS y publicar | **PASS**: preview visual mostró el contenido guardado; antes de publicar la URL devolvió 404 y después respondió 200. |
+| Duplicar desde CMS y comprobar copia en borrador | **PASS**: título, UUID y slug nuevos; estado draft; bloque, categoría y dos responsables conservados. |
+| Anónimo no puede acceder al borrador/copias/medios privados | **PASS**: la copia devolvió 404; anon recibió cero filas del post, artwork, bloques y media; Storage rechazó la descarga y `/api/media/[id]` devolvió 404. |
 
-Para desbloquear: instalar e iniciar Colima + Docker CLI, ejecutar los comandos locales documentados y completar la secuencia desde navegador. No hace falta crear un proyecto alojado, servicio pago ni aportar credenciales remotas. No copiar datos reales ni repetir la importación para preparar ese entorno.
+Resultado estructurado: [result.json](verification/review-2026-10-12-local-cms/result.json). Capturas: [duplicado draft en admin](verification/review-2026-10-12-local-cms/admin-duplicate-draft.png), [obra publicada](verification/review-2026-10-12-local-cms/published-artwork.png) y [duplicado anónimo 404](verification/review-2026-10-12-local-cms/anonymous-duplicate-404.png). La verificación directa confirmó registro público desactivado, destino `127.0.0.1:54321`, dos identidades distintas, dos responsables por obra, original publicado visible, duplicado draft privado y medio sintético privado inaccesible por tabla, Storage y endpoint. `remote_writes: 0`; `emails_sent: 0`.
 
 ## Evidencia de navegador
 

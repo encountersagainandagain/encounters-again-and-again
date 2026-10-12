@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   poweredByHeader: false,
   allowedDevOrigins: ['127.0.0.1'],
   images: {

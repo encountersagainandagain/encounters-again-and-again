@@ -98,7 +98,7 @@ if(command==='prepare'){
   const state=await readState();
   const child=spawn('npm',['run','dev','--','--hostname','127.0.0.1','--port','3219'],{
     stdio:'inherit',
-    env:{...process.env,NEXT_PUBLIC_SUPABASE_URL:state.url,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.anonKey,SUPABASE_SERVICE_ROLE_KEY:state.serviceRoleKey,NEXT_PUBLIC_SITE_URL:state.siteUrl,ENCOUNTERS_ALLOW_LOCAL_SUPABASE:'true',ENCOUNTERS_EMAIL_ENABLED:'false'},
+    env:{...process.env,NEXT_DIST_DIR:'.next-cms-local',NEXT_PUBLIC_SUPABASE_URL:state.url,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.anonKey,SUPABASE_SERVICE_ROLE_KEY:state.serviceRoleKey,NEXT_PUBLIC_SITE_URL:state.siteUrl,ENCOUNTERS_ALLOW_LOCAL_SUPABASE:'true',ENCOUNTERS_EMAIL_ENABLED:'false'},
   });
   child.on('exit',(code,signal)=>process.exit(signal?1:(code??1)));
 }else{

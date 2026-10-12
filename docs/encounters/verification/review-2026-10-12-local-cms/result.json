@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-12",
+  "target": "Supabase local only",
+  "origin": "http://127.0.0.1:54321",
+  "result": "PASS",
+  "auth": {
+    "public_signup_disabled": true,
+    "synthetic_admin": true
+  },
+  "category": {
+    "slug": "local-test-gallery",
+    "status": "published"
+  },
+  "original": {
+    "slug": "local-test-artwork",
+    "status": "published",
+    "anonymous_visible": true,
+    "contributors": 2
+  },
+  "duplicate": {
+    "slug": "local-test-artwork-copy-257fa64b",
+    "status": "draft",
+    "distinct_identity": true,
+    "anonymous_visible": false,
+    "anonymous_blocks_visible": 0,
+    "contributors": 2
+  },
+  "private_media": {
+    "anonymous_row_visible": false,
+    "anonymous_storage_download": false,
+    "public_endpoint_status": 404
+  },
+  "browser": [
+    "category saved",
+    "artwork draft saved",
+    "visual preview rendered",
+    "draft returned 404",
+    "published work returned 200",
+    "responsible profiles linked",
+    "duplicate saved as draft",
+    "duplicate returned 404"
+  ],
+  "remote_writes": 0,
+  "emails_sent": 0
+}

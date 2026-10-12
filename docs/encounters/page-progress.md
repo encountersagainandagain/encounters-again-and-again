@@ -1,6 +1,6 @@
 # Cobertura por página
 
-Continuidad 2026-10-11: [revisión local de Art/Crew](phase4-review.md) preparada. Pin de portadas restaurado y comprobado en escritorio, móvil y reduced motion; navegación poblada con muestras en memoria bajo `/review/art`. La escritura desde CMS sigue bloqueada por falta de Supabase de pruebas aislado. Sin cambios de datos reales ni aprobación visual.
+Continuidad 2026-10-12: [revisión local de Art/Crew](phase4-review.md) preparada. Pin de portadas comprobado en escritorio, móvil y reduced motion; navegación poblada con muestras en memoria bajo `/review/art`. Crear, guardar, previsualizar, publicar, duplicar, relacionar dos responsables y privacidad pasaron desde navegador contra Supabase local aislado. Sin cambios de datos reales ni aprobación visual.
 
 Actualización 2026-10-06: Art, categoría, obra, Crew y perfil ya tienen frontend/CMS/SEO visual de PASO 4.0–4.2, pendientes de revisión del usuario. Art sin curación real; pruebas pobladas solo con fixtures revertidos/en memoria. Capturas y diferencias en [phase4-art-crew.md](phase4-art-crew.md). Base de pasos anteriores conservada. **No continuar con otras páginas ni Home.**
 

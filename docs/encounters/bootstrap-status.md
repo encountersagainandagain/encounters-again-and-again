@@ -2,7 +2,7 @@
 
 2026-10-06: base compartida, Art/categoría/obra y Crew/perfil implementados sobre FASE 3B. CMS con preview visual, duplicación con identidad nueva, contacto/redes Crew y creación atómica de perfil sin Auth. Tipografía local EB Garamond/Archivo, Storage privado reutilizado y permisos de medios vinculados a publicación. Migración incremental 14 aplicada al proyecto exclusivo; pruebas transaccionales revertidas PASS. Sin importar/seed ni modificar contenido editorial real.
 
-Build estándar Turbopack, lint, TypeScript y tests verificados en esta sesión. Evidencia, capturas, diferencias de movimiento y pruebas pendientes de escritura mediante navegador en [phase4-art-crew.md](phase4-art-crew.md). Art sigue sin obras/categorías curadas; se presenta su estado vacío. Solo Georgia tiene perfil publicado habilitado. Indexación global sigue bloqueada hasta lanzamiento. Dos redirects de Crew listos, ninguno hacia páginas pendientes.
+Build estándar Turbopack, lint, TypeScript y tests verificados. Evidencia, capturas y diferencias de movimiento en [phase4-art-crew.md](phase4-art-crew.md). El 12/10 la escritura, preview, publicación, duplicación, responsables y privacidad pasaron desde navegador contra Supabase local aislado; ver [phase4-review.md](phase4-review.md). Art sigue sin obras/categorías curadas; se presenta su estado vacío. Solo Georgia tiene perfil publicado habilitado. Indexación global sigue bloqueada hasta lanzamiento. Dos redirects de Crew listos, ninguno hacia páginas pendientes.
 
 **Detenerse para revisión visual de Art y Crew. No continuar automáticamente con Home ni otras páginas.** Sin deploy, DNS, WordPress, Katie, envíos o altas de usuarios.
 
