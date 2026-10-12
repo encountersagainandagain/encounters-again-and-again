@@ -1,5 +1,7 @@
 # Estado actual — PASO 4.0–4.2 implementado, revisión visual pendiente
 
+**Continuidad en otra herramienta:** [handoff técnico para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt listo para copiar](CLAUDE_CODE_PROMPT_2026-10-12.md). El corte documentado corresponde a `ad883d8`; la aprobación visual continúa pendiente.
+
 2026-10-06: base compartida, Art/categoría/obra y Crew/perfil implementados sobre FASE 3B. CMS con preview visual, duplicación con identidad nueva, contacto/redes Crew y creación atómica de perfil sin Auth. Tipografía local EB Garamond/Archivo, Storage privado reutilizado y permisos de medios vinculados a publicación. Migración incremental 14 aplicada al proyecto exclusivo; pruebas transaccionales revertidas PASS. Sin importar/seed ni modificar contenido editorial real.
 
 Build estándar Turbopack, lint, TypeScript y tests verificados. Evidencia, capturas y diferencias de movimiento en [phase4-art-crew.md](phase4-art-crew.md). El 12/10 la escritura, preview, publicación, duplicación, responsables y privacidad pasaron desde navegador contra Supabase local aislado; ver [phase4-review.md](phase4-review.md). Art sigue sin obras/categorías curadas; se presenta su estado vacío. Solo Georgia tiene perfil publicado habilitado. Indexación global sigue bloqueada hasta lanzamiento. Dos redirects de Crew listos, ninguno hacia páginas pendientes.

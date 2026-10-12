@@ -2,6 +2,8 @@
 
 Última actualización: 2026-10-12.
 
+**Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
+
 **Revisión local de Art/Crew:** [guía y evidencia](phase4-review.md). Checkpoint visual `63299c4` publicado únicamente en Encounters; no implica aprobación. Pin de portadas, muestras, filtros, carruseles, índice, móvil y reduced motion comprobados. Supabase local aislado quedó operativo con las 14 migraciones y datos sintéticos; desde navegador pasaron crear, guardar draft, preview, publicar, relacionar dos responsables, duplicar y privacidad anónima. `.env.local` y la base remota no cambiaron. Curación y aprobación visual siguen pendientes.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
