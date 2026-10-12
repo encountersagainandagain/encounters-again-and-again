@@ -1,8 +1,8 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-11.
+Última actualización: 2026-10-12.
 
-**Revisión local de Art/Crew:** [guía y evidencia](phase4-review.md). Pin de portadas restaurado; recorrido de muestras, filtros, carruseles, índice, móvil y reduced motion comprobados desde navegador. Curación y aprobación visual pendientes. Crear/guardar/previsualizar/publicar/duplicar mediante CMS y comprobar privacidad en otra sesión siguen **bloqueados por falta de una base de pruebas aislada**. Las muestras locales no sustituyen esa prueba ni agregan contenido a la base real.
+**Revisión local de Art/Crew:** [guía y evidencia](phase4-review.md). Checkpoint visual `63299c4` publicado únicamente en Encounters; no implica aprobación. Pin de portadas restaurado; recorrido de muestras, filtros, carruseles, índice, móvil y reduced motion comprobados desde navegador. Curación y aprobación visual pendientes. El entorno aislado de CMS quedó preparado con migraciones y datos sintéticos, sin alterar `.env.local` ni la base remota; la ejecución de crear/guardar/previsualizar/publicar/duplicar y privacidad espera la instalación gratuita de Colima + Docker CLI.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 

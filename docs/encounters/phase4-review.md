@@ -59,7 +59,17 @@ Se corrigió además el cálculo de offsets del carrusel y se centraron sus extr
 
 ## Verificación funcional y límite del CMS
 
-**Bloqueo confirmado:** `.env.local` solo identifica el proyecto real `lzwmwofxoegkxykglneq`; no hay configuración de Supabase de pruebas ni Docker/Podman. Tener `psql` instalado no proporciona Auth, PostgREST, Storage y RLS equivalentes. Los clientes actuales además restringen el destino al proyecto verificado: preparar un entorno de pruebas requerirá configuración explícita y aislada; no basta con cambiar una URL a ciegas.
+**Actualización 2026-10-12:** Supabase CLI está disponible tanto en Homebrew (`2.120.0`) como en la dependencia fijada por el proyecto (`2.119.0`). No hay runtime de contenedores instalado: Docker, Podman, Colima y OrbStack están ausentes. Supabase local necesita uno para iniciar Postgres, Auth, PostgREST y Storage, por lo que el recorrido integrado todavía no se ejecutó.
+
+La preparación del repositorio ya quedó lista para ese entorno:
+
+- `npm run cms:local:prepare` inicia Supabase local con las 14 migraciones existentes, verifica que Auth mantenga el registro público desactivado y crea un administrador y dos integrantes de Crew estrictamente sintéticos.
+- Las credenciales y claves locales se generan en `.encounters-work/local-cms.json`, ruta ignorada por Git. No modifica `.env.local`.
+- `npm run cms:local:dev` inicia una segunda aplicación en `127.0.0.1:3219` con variables de proceso locales. El servidor habitual y la base remota conservan su configuración.
+- El código solo admite el origen remoto confirmado o, con `ENCOUNTERS_ALLOW_LOCAL_SUPABASE=true` y fuera de producción, exactamente `127.0.0.1:54321`/`localhost:54321`. Los tests rechazan otros proyectos, otros puertos y Supabase local sin la bandera explícita.
+- `npm run cms:local:stop` detiene únicamente el stack local. No se usa `db reset` remoto, importación del snapshot ni datos reales.
+
+La opción gratuita preparada es Colima con Docker CLI. Instalación pendiente fuera del repositorio: `brew install colima docker`, seguida de `colima start --cpu 4 --memory 6 --disk 30`. Después se podrá ejecutar `npm run cms:local:prepare`, iniciar la app aislada y completar el recorrido desde navegador.
 
 No se usó la base real como reemplazo. No se inició sesión administrativa, no se crearon categorías, obras o usuarios, no se publicó ni duplicó contenido real. Las pruebas SQL históricas con rollback siguen siendo evidencia histórica, no una prueba nueva desde navegador.
 
@@ -67,12 +77,12 @@ No se usó la base real como reemplazo. No se inició sesión administrativa, no
 | --- | --- |
 | Pantallas públicas, noindex, pin, móvil y reduced motion | Evidencia de esta revisión en `verification/review-2026-10-09/browser.json` y capturas. |
 | Categoría → obra → dos responsables → obra | Se prueba con navegación real del navegador sobre fixtures en memoria. No prueba persistencia. |
-| Crear categoría y obra, asignar responsables y guardar borrador en CMS | **BLOQUEADO**, requiere Supabase de pruebas aislado. |
-| Previsualizar borrador desde CMS y publicar | **BLOQUEADO**, mismo requisito. |
-| Duplicar desde CMS y comprobar copia en borrador | **BLOQUEADO** en navegador. Los tests existentes de la función de duplicación comprueban draft, nuevos identificadores y limpieza de procedencia; no sustituyen esta prueba. |
-| Anónimo no puede acceder al borrador/copias/medios privados | **PENDIENTE de prueba integrada en entorno aislado**. No se concluye RLS a partir de las rutas ficticias o de los tests de presentación. |
+| Crear categoría y obra, asignar responsables y guardar borrador en CMS | **PREPARADO, NO EJECUTADO**: falta instalar/iniciar Colima + Docker CLI. |
+| Previsualizar borrador desde CMS y publicar | **PREPARADO, NO EJECUTADO**, mismo bloqueo de runtime. |
+| Duplicar desde CMS y comprobar copia en borrador | **PREPARADO, NO EJECUTADO** en navegador. Los tests existentes de la función de duplicación comprueban draft, nuevos identificadores y limpieza de procedencia; no sustituyen esta prueba. |
+| Anónimo no puede acceder al borrador/copias/medios privados | **PENDIENTE de prueba integrada** después de iniciar el entorno local. No se concluye RLS a partir de las rutas ficticias o de los tests de presentación. |
 
-Para desbloquear: disponer de Supabase local completo o proyecto de pruebas separado, credenciales y administrador exclusivo de prueba, sin correos; configurar clientes con protección explícita del destino. Luego ejecutar la secuencia solicitada y comprobar desde otra sesión anónima tanto URLs como API y medios. No copiar datos reales ni repetir la importación para preparar ese entorno.
+Para desbloquear: instalar e iniciar Colima + Docker CLI, ejecutar los comandos locales documentados y completar la secuencia desde navegador. No hace falta crear un proyecto alojado, servicio pago ni aportar credenciales remotas. No copiar datos reales ni repetir la importación para preparar ese entorno.
 
 ## Evidencia de navegador
 

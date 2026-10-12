@@ -1,12 +1,13 @@
 import 'server-only';
 import {createClient} from '@supabase/supabase-js';
 import {cache} from 'react';
+import {assertEncountersSupabaseTarget} from '@/lib/encountersSupabaseTarget';
 export type ContentRow={id:string;kind:string;slug:string;title:string;excerpt:string;cover_id:string|null;cover_alt:string;source_role:string|null;featured:boolean;home_rank:number|null;sort:number;[key:string]:unknown};
 export type ContentBlock={id:string;type:string;position:number;content:Record<string,unknown>;anchor?:string;source_block_id?:string};
 export const publicClient=()=>{
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key)throw new Error('Supabase is not configured.');
-  if(new URL(url).origin!=='https://lzwmwofxoegkxykglneq.supabase.co')throw new Error('Unexpected Encounters database target.');
+  assertEncountersSupabaseTarget(url);
   return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,cache:'no-store'})}});
 };
 export const readPosts=cache(async()=>{const {data,error}=await publicClient().from('posts').select('*').eq('status','published').order('sort').order('published_at',{ascending:false});if(error)throw error;return (data||[]) as ContentRow[];});
