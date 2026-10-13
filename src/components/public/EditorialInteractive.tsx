@@ -15,9 +15,13 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
     const shade=pin?.querySelector<HTMLElement>('.hero-shade');
     const cue=pin?.querySelector<HTMLElement>('.scroll-cue');
     const desktop=matchMedia('(min-width: 760px)');
+    // Sticky image pair: both enter while the section rises and leave, in the same order, during the pin.
+    const pairPin=element.querySelector<HTMLElement>('[data-pair-pin]');
+    const pairStick=pairPin?.firstElementChild as HTMLElement|null|undefined;
+    const pairs=Array.from(pairPin?.querySelectorAll<HTMLElement>('[data-pair]')||[]).map(el=>({el,...(el.dataset.pair==='b'?{start:.8,span:.8,from:.42,to:.88}:{start:1,span:.85,from:.14,to:.56})}));
     const ramp=(v:number,from:number,to:number,smooth=false)=>{const k=Math.max(0,Math.min(1,(v-from)/(to-from)));return smooth?k*k*(3-2*k):k;};
     const resetHero=()=>{for(const el of [hero,copy,shade,cue])if(el){el.style.transform='none';el.style.filter='none';el.style.opacity='1';}};
-    const reset=()=>{items.forEach(el=>{el.style.opacity='1';el.style.transform='none';el.style.filter='none';});strokes.forEach(p=>{p.style.strokeDashoffset='0';});resetHero();};
+    const reset=()=>{items.forEach(el=>{el.style.opacity='1';el.style.transform='none';el.style.filter='none';});pairs.forEach(({el})=>{el.style.opacity='1';el.style.transform='none';el.style.filter='none';});strokes.forEach(p=>{p.style.strokeDashoffset='0';});resetHero();};
     const paint=(time:number)=>{
       if(motion.matches){reset();return;}
       eased=time-last>140?progress:eased+(progress-eased)*(pin ? .06 : .08);last=time;
@@ -38,6 +42,18 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
         const k=Math.max(0,Math.min(1,(vh*start-rect.top)/distance));const p=rect.bottom<0?1:k*k*(3-2*k);
         el.style.opacity=String(p);el.style.transform=`translate3d(0,${(1-p)*shift}px,0) scale(${.965+p*.035})`;el.style.filter=p>.99?'none':`blur(${(1-p)*5}px)`;
       });
+      if(pairPin&&pairStick&&pairs.length){
+        const rect=pairPin.getBoundingClientRect();
+        if(rect.top<vh*1.4&&rect.bottom>-vh*.4){
+          const style=getComputedStyle(pairStick),top=parseFloat(style.top)||0,run=rect.height-pairStick.offsetHeight-top;
+          // Without pin travel (mobile, where the pair flows) there is no exit phase.
+          const pinned=run>1&&style.position==='sticky'?Math.max(0,Math.min(1,(top-rect.top)/run)):-1;
+          pairs.forEach(({el,start,span,from,to})=>{
+            const p=ramp((vh*start-rect.top)/(vh*span),0,1,true),out=pinned<0?0:ramp((pinned-from)/(to-from),0,1,true),blur=(1-p)*5+out*6;
+            el.style.opacity=String(p*(1-out));el.style.transform=`translate3d(0,${(1-p)*110-out*176}px,0) scale(${.965+p*.035-out*.05})`;el.style.filter=blur<.05?'none':`blur(${blur}px)`;
+          });
+        }
+      }
       strokes.forEach(path=>{const svg=path.ownerSVGElement;if(!svg)return;const rect=svg.getBoundingClientRect();const minTop=rect.top+scrollY-(document.documentElement.scrollHeight-vh);const span=Math.max(1,Math.min(vh*.4,vh-minTop));const p=Math.max(0,Math.min(1,(vh-rect.top)/span));path.style.strokeDasharray='1';path.style.strokeDashoffset=String(1-p);});
       frame=requestAnimationFrame(paint);
     };

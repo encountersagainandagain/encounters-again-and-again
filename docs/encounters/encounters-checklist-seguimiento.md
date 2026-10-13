@@ -1,14 +1,16 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-12.
+Última actualización: 2026-10-13.
 
 **Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
+
+**Fidelidad visual de `/crew` (2026-10-13):** [detalle, verificaciones y capturas](phase4-review.md). Implementado: relato, par de fotos pineado, tarjetas, «More about us», tira, navbar, footer y cue según `The Crew.dc.html`, con contenido del CMS. Verificado con límites de tiempo: TypeScript y eslint de lo modificado, desktop y móvil de `/crew`, pines contra el prototipo, teclado, reduced motion, navbar/footer en `/art` y `/review/art`. Pendiente: recarga en bucle de `/crew/wild-wonders` en desarrollo (anterior a esta entrega, sin investigar), tests/lint/build completos y anchos intermedios. **Esperando revisión visual de Juani; sin aprobación.**
 
 **Revisión local de Art/Crew:** [guía y evidencia](phase4-review.md). Checkpoint visual `63299c4` publicado únicamente en Encounters; no implica aprobación. Pin de portadas, muestras, filtros, carruseles, índice, móvil y reduced motion comprobados. Supabase local aislado quedó operativo con las 14 migraciones y datos sintéticos; desde navegador pasaron crear, guardar draft, preview, publicar, relacionar dos responsables, duplicar y privacidad anónima. `.env.local` y la base remota no cambiaron. Curación y aprobación visual siguen pendientes.
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASO 4.0–4.2 implementado; detenido para revisión visual de Art/Crew.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
+**Foco actual: PASO 4.0–4.2; `/crew` corregida según el prototipo y detenida para revisión visual de Juani. El resto de Art/Crew espera esa respuesta.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
 
 
 ## Cómo actualizarlo
@@ -52,7 +54,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [x] **7. Reemplazar la identidad anterior — BASE IMPLEMENTADA.** Marca/URL/defaults/metadata/JSON-LD/emails/manifest/assets propios en aplicación activa; código histórico fuera de rutas. Contenido editorial real y diseño final pendientes.
 - [x] **8. Organizar y documentar módulos — BASE IMPLEMENTADA.** Registro central, rechazo de rutas/consultas, admin core, scripts/cron/integraciones ajenos aislados y código archivado con reactivación documentada.
 - [ ] **9. Adaptar el CMS compartido — BASE IMPLEMENTADA.** Posts/bloques y campos específicos, categorías, responsables, borradores, preview textual, duplicación y guardado atómico. Preview visual completo y revisión final durante PASO 4.
-- [ ] **10. Completar Art y Crew — IMPLEMENTADO, REVISIÓN VISUAL PENDIENTE.** Recorridos visuales/CMS/SEO y relaciones implementados; escritura, preview, publicación, duplicación y privacidad probadas desde navegador contra Supabase local aislado. Capturas desktop/móvil y evidencia del CMS disponibles. Curación de Art y aprobación visual pendientes; ver phase4-review.md.
+- [ ] **10. Completar Art y Crew — IMPLEMENTADO, REVISIÓN VISUAL PENDIENTE.** Recorridos visuales/CMS/SEO y relaciones implementados; escritura, preview, publicación, duplicación y privacidad probadas desde navegador contra Supabase local aislado. Capturas desktop/móvil y evidencia del CMS disponibles. Curación de Art y aprobación visual pendientes; ver phase4-review.md. 2026-10-13: `/crew` rehecha con mayor fidelidad al prototipo, esperando revisión; bucle de recarga de `/crew/wild-wonders` en desarrollo pendiente, por lo que el recorrido no se da por cerrado.
 - [ ] **11. Construir Expeditions — BASE IMPLEMENTADA.** Esquema/CMS de presentación, fichas, responsables y necesidades pendiente/conseguido. Visual pendiente.
 - [ ] **12. Construir Workshops — BASE IMPLEMENTADA.** Campos opcionales, sesiones y estados independientes probados. Visual pendiente.
 - [ ] **13. Incorporar resultados y Messages — BASE IMPLEMENTADA.** Relaciones múltiples y poemas con saltos preservados. Visual pendiente.
@@ -269,6 +271,14 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
 Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-13 — fidelidad visual de `/crew`
+
+- Feedback de Juani: la estructura va, falta apego estético al diseño. Se comparó `The Crew.dc.html` con la implementación en navegador y se corrigió solo `/crew`, más navbar, footer y cue compartidos.
+- Implementado: titular y antetítulo del relato, jerarquía tipográfica, par de fotos sticky de 150vh, titular «A project to unite them all», tarjetas a sangre, «More about us», tira de retratos, garabatos del prototipo, navbar y footer. Contenido desde el CMS, sin textos ni imágenes fijos.
+- Verificado con tiempos límite: TypeScript, eslint de lo modificado, capturas desktop/móvil, pines, teclado, reduced motion y navbar/footer en `/art` y `/review/art`. No ejecutados: tests, lint completo, build y anchos intermedios.
+- Pendiente separado: `/crew/wild-wonders` se recarga en bucle en desarrollo; ocurre también sin estos cambios. Documentado en phase4-review.md, sin investigar.
+- Sin cambios en CMS, datos, migraciones, Auth, RLS, Storage, correos ni despliegues. Sin aprobación visual. Próxima acción: revisión de Juani.
 
 ### 2026-10-06 — PASO 4.0–4.2
 
