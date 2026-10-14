@@ -24,7 +24,3 @@ export function CrewIntroduction({blocks,media}:{blocks:ContentBlock[];media:Row
     {project.length>0&&<section className="crew-row crew-project">{heading&&<h2 data-seq="1.2,0.5">{heading}</h2>}<div data-seq="1.05,0.5">{projectCopy.map((text,i)=><p key={i} className={i===0&&projectCopy.length>1?'crew-voice':undefined}>{text}</p>)}</div></section>}
     {extra.length>0&&<EditorialBlocks blocks={extra} media={media}/>}</>;
 }
-export function WildWondersStory({blocks,media}:{blocks:ContentBlock[];media:Row[]}){
-  const pick=(...positions:number[])=>blocks.filter(b=>positions.some(i=>b.source_block_id===`wild_wonders_${String(i).padStart(3,'0')}`));
-  return <div className="wild-wonders-story"><div className="profile-opening"><EditorialBlocks blocks={pick(0)} media={media}/><EditorialBlocks blocks={pick(1,2,3)} media={media}/></div><section className="profile-book"><EditorialBlocks blocks={pick(4,5)} media={media}/><div className="profile-opening"><div className="imported-pair"><EditorialBlocks blocks={pick(6,8)} media={media}/></div><EditorialBlocks blocks={pick(7,9)} media={media}/></div></section><EditorialBlocks blocks={pick(10)} media={media}/><div className="imported-pair"><EditorialBlocks blocks={pick(11,12)} media={media}/></div><EditorialBlocks blocks={pick(13)} media={media}/><div className="imported-pair"><EditorialBlocks blocks={pick(14,15)} media={media}/></div><EditorialBlocks blocks={blocks.filter(b=>!/^wild_wonders_\d{3}$/.test(b.source_block_id||''))} media={media}/></div>;
-}

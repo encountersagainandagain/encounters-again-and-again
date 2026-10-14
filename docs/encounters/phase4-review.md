@@ -8,9 +8,77 @@ Cierre de comprobaciones 2026-10-11: `npm run lint`, `npm test`, `npm run build`
 
 Checkpoint técnico 2026-10-12: el avance se conserva en Git y se publica únicamente en el repositorio privado de Encounters. Esto no constituye aprobación visual; la revisión del usuario continúa abierta. Sin despliegue ni cambios en servicios externos.
 
+## Entrega del perfil `/crew/[slug]` — 2026-10-13
+
+Estado: **implementada y esperando revisión visual de Juani. No está aprobada.** Caso real: `/crew/wild-wonders`. `/crew` se mantiene como fue aprobada. Sin cambios en CMS, datos, migraciones, Auth, RLS, Storage, correos ni despliegues.
+
+Revisar en `http://127.0.0.1:3218/crew/wild-wonders`. Prototipo: `http://127.0.0.1:3220/Wild%20Wonders.dc.html` (si no responde: `cd docs/encounters/handoff-current && python3 -m http.server 3220 --bind 127.0.0.1`).
+
+### Recarga continua de Wild Wonders: resuelta
+
+- **Causa comprobada:** caché de desarrollo de Turbopack obsoleta en `.next/dev`. Se había creado el 6/10, cuando el repositorio estaba en `Desktop/developer/…`; hoy está en `Desktop/Codigo/…` y la caché conservaba rutas absolutas viejas. Al suscribirse al chunk de `/crew/[slug]`, el servidor respondía por el websocket de HMR `reloadPage` con `TurbopackInternalError: Failed to write app endpoint /crew/[slug]/page — Next.js package not found`, y el navegador recargaba sin fin.
+- **Evidencia:** mensajes del websocket capturados con Playwright (cuatro `reloadPage` en 8s); archivos `.sst` de `.next/dev/cache/turbopack` con la ruta vieja; un servidor temporal con directorio de build limpio (`NEXT_DIST_DIR=.next-diag`, puerto 3231) sirvió la misma página sin ningún `reloadPage`.
+- **La «recarga inicial» de las otras páginas no era una recarga.** Playwright emite dos eventos `framenavigated` por carga, pero el servidor registra un solo `GET` del documento y no hay `reloadPage`. La cifra de «2 navegaciones» de la entrega anterior contaba ese evento.
+- **Solución:** se detuvo el servidor 3218, se retiró `.next/dev` (caché regenerable, ignorada por Git) y se reinició con `npm run dev -- --hostname 127.0.0.1 --port 3218`. No se desactivó HMR ni ninguna función, y no hubo cambios de código para esto. El servidor temporal y `.next-diag` se eliminaron; los cambios que Next generó en `tsconfig.json` y `next-env.d.ts` se revirtieron.
+- **Verificado después (límite 100s):** una sola solicitud del documento en 15s, cero `reloadPage`; navegación perfil → `/crew` → perfil sin recargas.
+- Si el repositorio vuelve a moverse de carpeta: detener el servidor y borrar `.next/dev` (y `.next-cms-local/dev` para el 3219) antes de iniciarlo. La caché del 3219 no contenía la ruta vieja.
+
+### Implementado
+
+Referencia: `Wild Wonders.dc.html`, abierto junto a la implementación a 1440×900 y 390×844. El prototipo usa la misma estructura que The Crew, así que el perfil reutiliza sus filas, el par sticky, la sección oscura y los garabatos.
+
+`src/components/public/ProfileStory.tsx` es la plantilla para **todos** los perfiles: lee la secuencia de bloques de cualquier post `crew_member` y la compone por tipo de bloque, sin identificadores ni textos de Georgia. Reemplaza al adaptador específico `WildWondersStory`, que se eliminó.
+
+| Parte de la plantilla | Regla |
+| --- | --- |
+| Apertura | Primer encabezado → titular con garabato. Párrafos previos al segundo encabezado → columna 4–6, con el alias (o el nombre) como antetítulo y el primer párrafo como lead. |
+| Par sticky | Las dos primeras imágenes de la apertura. Con una sola, se suma la última imagen del primer capítulo (retrato junto a una obra, como en el prototipo). Las imágenes de menos de 600px de ancho se muestran a su tamaño sobre Marea en lugar de ampliarse. |
+| Capítulo | Cada encabezado abre un capítulo; los encabezados consecutivos forman titular + nombre en mayúsculas. Párrafos a la derecha (el primero en itálica si hay más de uno), enlaces de bloques `source` como antetítulo-enlace, imágenes como portadas 3:4 con pie `[ … ]` si el medio tiene pie cargado. |
+| Galería oscura | Un texto de un solo párrafo seguido de dos o más imágenes abre una sección oscura: el primero como titular centrado con garabato y fichas altas; los siguientes como antetítulo Laguna con fichas bajas. Imágenes en `contain` sobre Espuma. |
+| Otros bloques | Citas, carruseles, video, listas y demás siguen pasando por el renderizador compartido, en su orden. |
+| Relacionados | Contacto, obras por categoría y «Other encounters» sin cambios: se ocultan si no hay contenido publicado. Hoy Georgia no tiene ninguno. |
+
+Decisiones tomadas para apegarse al prototipo, a confirmar en la revisión:
+
+- La portada ya no muestra el rol bajo el título.
+- La barra de migas no se ve; sigue en el documento con su JSON-LD y aparece al recibir foco de teclado.
+- Se quitó el cierre claro «following our nature», igual que en `/crew`. `13-crew-member.md` lo describe como parte del layout; el HTML no lo tiene.
+- En el navbar del perfil «The crew» no lleva marca de activo, como en el prototipo (en `/crew` sigue en Laguna).
+
+Archivos: `app/crew/[slug]/page.tsx`, `src/components/public/ProfileStory.tsx` (nuevo), `ImportedEditorial.tsx` y `src/styles/editorial.css`.
+
+### Verificado
+
+Chrome headless con Playwright fuera del repositorio, solo lectura contra 3218, cada comprobación con límite de 100s. Todas terminaron.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `npx tsc --noEmit`, `eslint app/crew src/components/public`, `npm test` | Sin errores; tests PASS. |
+| Estabilidad y navegación | Ver sección anterior. |
+| Desktop 1440×900 y móvil 390×844 contra el prototipo, 12 posiciones cada uno | Composición coincidente; diferencias listadas abajo. |
+| Imágenes, enlaces, consola, SEO (1440 y 390) | 10 de 10 imágenes cargadas, sin desbordamiento, sin errores de consola. Enlaces: `/crew` y el externo del libro. `noindex, nofollow`, canonical y JSON-LD de migas presentes. |
+| Teclado | Skip link → contenido → cue → migas (se hacen visibles) → enlace del libro, todos con contorno visible. |
+| Reduced motion | Portada y par sin pin, 14 de 14 elementos animados en reposo, garabatos completos, sin animación del cue, sin desbordamiento. |
+| `/crew` sin cambios | Altura 8762px, igual que la aprobada; tres garabatos, activo en Laguna, cuerpo del relato a 18px, 6 tarjetas y 6 retratos. |
+
+No ejecutado: build, lint completo del repositorio, anchos intermedios, vista previa del CMS para perfiles (sigue usando el renderizador genérico, no esta plantilla), un perfil con obras relacionadas publicadas (no existe contenido real) y un segundo perfil real que confirme la plantilla con otro contenido.
+
+Capturas: [prototipo desktop](verification/review-2026-10-13-profile/prototype-desktop.jpg) · [prototipo, 12 posiciones](verification/review-2026-10-13-profile/prototype-scroll-states.jpg) · [perfil, 12 posiciones](verification/review-2026-10-13-profile/profile-scroll-states.jpg) · [antes de esta entrega](verification/review-2026-10-13-profile/profile-desktop-before.jpg) · [prototipo móvil](verification/review-2026-10-13-profile/prototype-mobile.jpg) · [perfil móvil](verification/review-2026-10-13-profile/profile-mobile.jpg) · [reduced motion](verification/review-2026-10-13-profile/profile-reduced-pair.jpg) · [migas con foco](verification/review-2026-10-13-profile/profile-keyboard-breadcrumb.jpg) · [`/crew` sin cambios](verification/review-2026-10-13-profile/crew-unchanged-story.jpg).
+
+### Diferencias visuales pendientes
+
+- Los pies `[ cover ]` / `[ back cover ]` y las etiquetas de los logos no aparecen: los medios no tienen pie cargado en el CMS.
+- El prototipo resalta en negrita «SCROLL DOWN TO SEE SOME OF THAT ART (:»; el bloque es texto plano.
+- El titular de la sección oscura ocupa más líneas porque el texto importado está en mayúsculas.
+- El prototipo deja huecos para un logo y un boceto; el CMS tiene las cuatro imágenes y se muestran todas.
+- La portada en móvil sigue en flujo, como en `/crew`.
+- Recortes según el foco 50/50 de cada medio.
+
+Próxima acción: **revisión visual de Juani sobre `/crew/wild-wonders`**. No se avanza con Art ni otras páginas.
+
 ## Entrega de fidelidad visual de `/crew` — 2026-10-13
 
-Estado: **implementada y esperando revisión visual de Juani. No está aprobada.** Responde al feedback «el formato más o menos va, pero no está muy estético; debe apegarse más al diseño». Alcance: solo `/crew`, más navbar, footer y cue de scroll compartidos. Sin cambios en el CMS, contenido, migraciones, Auth, RLS, Storage ni despliegues. El recorrido Art/Crew completo **no** queda cerrado: ver el pendiente de `/crew/wild-wonders` más abajo.
+Estado: **aprobada visualmente por Juani el 2026-10-13** sobre el commit `cbea565`: «No vi diferencias, lo hizo muy bien». La aprobación incluye las tres decisiones visuales listadas abajo. Es una aprobación visual: las verificaciones técnicas no ejecutadas siguen pendientes. Responde al feedback «el formato más o menos va, pero no está muy estético; debe apegarse más al diseño». Alcance: solo `/crew`, más navbar, footer y cue de scroll compartidos. Sin cambios en el CMS, contenido, migraciones, Auth, RLS, Storage ni despliegues. El recorrido Art/Crew completo **no** queda cerrado: ver el pendiente de `/crew/wild-wonders` más abajo.
 
 Revisar en `http://127.0.0.1:3218/crew`. Prototipo para comparar: `cd docs/encounters/handoff-current && python3 -m http.server 3220 --bind 127.0.0.1` y abrir `http://127.0.0.1:3220/The%20Crew.dc.html`.
 
@@ -32,7 +100,7 @@ Referencia: `The Crew.dc.html` (prevalece sobre los Markdown), abierto en Chrome
 | Garabatos | Tres trazos del prototipo (`title`, `loop`, `wide`), atados al scroll. |
 | Móvil | Se eliminó el cuerpo del relato a ~40px causado por una regla que se filtraba. |
 
-Decisiones tomadas para apegarse al prototipo, a confirmar en la revisión:
+Decisiones tomadas para apegarse al prototipo, aprobadas con la entrega:
 
 - Se quitó de `/crew` el cierre claro «following our nature» que quedaba entre la sección oscura y el footer. `12-crew.md` menciona un cierre; el HTML no lo tiene.
 - Las tarjetas ya no muestran el alias ni el enlace «Meet … →». Ambos campos siguen editables; el acceso al perfil queda en la tira.
@@ -59,15 +127,9 @@ No ejecutado en esta entrega: `npm test`, `npm run lint` completo, build, anchos
 
 Capturas: [prototipo desktop 1](verification/review-2026-10-13-crew/prototype-desktop-1.jpg) · [2](verification/review-2026-10-13-crew/prototype-desktop-2.jpg) · [implementación desktop 1](verification/review-2026-10-13-crew/crew-desktop-1.jpg) · [2](verification/review-2026-10-13-crew/crew-desktop-2.jpg) · [antes de esta entrega](verification/review-2026-10-13-crew/crew-desktop-before.jpg) · [pines del prototipo](verification/review-2026-10-13-crew/prototype-pin-states.jpg) · [pines de la implementación](verification/review-2026-10-13-crew/crew-pin-states.jpg) · [móvil](verification/review-2026-10-13-crew/crew-mobile.jpg) · [prototipo móvil 1](verification/review-2026-10-13-crew/prototype-mobile-1.jpg) · [2](verification/review-2026-10-13-crew/prototype-mobile-2.jpg) · [reduced motion](verification/review-2026-10-13-crew/crew-reduced-pair.jpg) · [foco de teclado](verification/review-2026-10-13-crew/crew-keyboard-focus-strip.jpg) · [tira](verification/review-2026-10-13-crew/crew-strip-direct-jump.jpg) · [Art, footer](verification/review-2026-10-13-crew/art-footer.jpg) · [Art de prueba, navbar](verification/review-2026-10-13-crew/review-art-top.jpg).
 
-### Pendiente separado: recarga en bucle de `/crew/wild-wonders` en desarrollo
+### Recarga en bucle de `/crew/wild-wonders`: resuelta
 
-**Sin resolver y sin investigar la causa.** Mientras siga abierto, el recorrido Art/Crew no se considera cerrado.
-
-- Síntoma: en el servidor de desarrollo 3218 la página responde HTTP 200 pero se recarga sola sin detenerse. La consola repite `[HMR] connected` → `[Fast Refresh] rebuilding` → navegación completa.
-- Evidencia: 8 navegaciones del frame principal en 12s; `/crew` y `/review/art` hicieron 2 (una recarga tras la carga inicial) y `/art` y `/review/art` una recarga en la comprobación del 13/10. Al cortar quedaban pendientes la propia página y `/api/media/9ed1097e-…`. Con `waitUntil: 'networkidle'` la carga agota 120s.
-- Es anterior a esta entrega: con los cambios apartados (`git stash`) dio las mismas 8 navegaciones en dos mediciones seguidas; después se restauraron.
-- Cómo reproducir: abrir `http://127.0.0.1:3218/crew/wild-wonders` con la consola abierta, o con Playwright contar eventos `framenavigated` del frame principal durante 12s tras `goto(..., {waitUntil: 'domcontentloaded'})`.
-- Sin comprobar: si ocurre en un navegador con interfaz, en el servidor 3219, en `/review/crew/*` o en un build de producción.
+Documentada aquí como pendiente el 13/10 y resuelta en la entrega del perfil (sección superior): era la caché de desarrollo de Turbopack, no el código. La «recarga tras la carga inicial» atribuida a las demás páginas era un evento duplicado de la herramienta, no una recarga.
 
 ### Diferencias visuales pendientes
 
@@ -80,7 +142,7 @@ Capturas: [prototipo desktop 1](verification/review-2026-10-13-crew/prototype-de
 - El navbar móvil mide ~16px más que el prototipo por el área táctil de los enlaces.
 - El activo en Laguna sobre navbar claro tiene poco contraste; es fiel al prototipo.
 
-Próxima acción: **revisión visual de Juani sobre `/crew`**. Después de su respuesta, continuar con el resto de Art/Crew y con el bucle de Wild Wonders.
+Las diferencias anteriores dependen de contenido del CMS o fueron aceptadas en la revisión. Siguen sin ejecutar para `/crew`: build, lint completo, anchos 360/768/1024px y hover de la tira.
 
 ## Revisión local de Art/Crew — 2026-10-09: abrir la revisión
 

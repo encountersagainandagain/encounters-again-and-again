@@ -20,7 +20,8 @@
 .nav-roll-window{display:block;height:12px;overflow:hidden}.nav-roll{display:flex;flex-direction:column;animation:editorial-nav-roll 7s ease-in-out infinite}.nav-roll>span{height:12px;line-height:12px;white-space:nowrap}
 @keyframes editorial-nav-roll{0%,38%,100%{transform:translateY(0)}50%,88%{transform:translateY(-50%)}}
 .editorial-nav nav a[aria-current=page]{box-shadow:inset 0 -1px currentColor}
-body:has(.crew-page,.profile-page) .editorial-nav nav a[aria-current=page]{box-shadow:none;color:#8fd9ea}
+body:has(.crew-page) .editorial-nav nav a[aria-current=page]{box-shadow:none;color:#8fd9ea}
+body:has(.profile-page) .editorial-nav nav a[aria-current=page]{box-shadow:none}
 .editorial-nav nav a:hover{color:#8fd9ea}
 .editorial-nav[data-light=true] nav a:hover{color:#0f3b4c}
 .nav-left{grid-area:l}.nav-right{grid-area:r;justify-content:flex-end}
@@ -96,8 +97,6 @@ body:has(.crew-page,.profile-page) .editorial-nav nav a[aria-current=page]{box-s
 .editorial-carousel{margin-inline:auto;width:100%;max-width:100%;overflow:hidden}.editorial-rail{position:relative;display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;padding-inline:8vw;scrollbar-width:thin}.editorial-slide{flex:0 0 62vw;scroll-snap-align:center}.editorial-slide figure img{width:100%;height:72svh;object-fit:contain}.editorial-slide figcaption{font-size:13px;margin-top:12px}.category-carousel .editorial-slide{flex-basis:min(30vw,420px)}.category-carousel .editorial-rail{padding-inline:0}
 .carousel-controls{display:flex;gap:20px;justify-content:center;align-items:center;margin-top:24px}.carousel-controls button{border:1px solid currentColor;width:42px;height:42px}.carousel-controls button:disabled{opacity:.3}.carousel-controls output{font:11px monospace;letter-spacing:.1em}
 .imported-pair>.editorial-blocks{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0}.imported-pair>.editorial-blocks>*{margin:0!important;width:100%}.imported-pair .block-images img{height:74svh}
-.profile-opening{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(30px,6vw,90px);max-width:1240px;margin:100px auto;padding:0 24px}.profile-opening>.editorial-blocks{min-width:0}.profile-opening .editorial-blocks>*{width:100%;margin-top:32px!important}.profile-opening .block-images img{height:70svh}.profile-opening .block-heading{font-size:clamp(32px,4vw,54px)}
-.profile-book{padding-block:40px;background:#e3d3b4}.profile-book>.editorial-blocks{max-width:1240px;margin:auto}.profile-book .imported-pair .block-images img{height:60svh;object-fit:contain!important}.wild-wonders-story>.imported-pair{max-width:1240px;padding:0 24px;margin:80px auto}.wild-wonders-story>.imported-pair img{object-fit:contain!important;background:#eaf5fa;height:65svh;padding:30px}
 .profile-contact,.profile-art,.editorial-related{max-width:1240px;margin:100px auto;padding:0 var(--enc-page-padding)}.profile-contact{display:flex;flex-wrap:wrap;gap:24px}.profile-art h2,.editorial-related h2{margin-bottom:40px}.editorial-related>a{display:block;margin-block:20px;font:28px var(--font-display);text-decoration:underline}
 .editorial-loading{padding:200px var(--enc-page-padding) 100px}.editorial-loading h1{font-size:clamp(36px,5vw,70px)}.editorial-loading button{margin-top:24px}
 @keyframes editorial-rise{from{transform:translate3d(0,14%,0) scale(1.05);opacity:0}to{transform:none;opacity:1}}
@@ -109,7 +108,7 @@ body:has(.crew-page,.profile-page) .editorial-nav nav a[aria-current=page]{box-s
 @media(max-width:759px){.editorial-nav{grid-template-columns:1fr;grid-template-areas:'c' 'l' 'r';padding:14px 16px;row-gap:14px}.editorial-nav nav{justify-content:center;font-size:10px;letter-spacing:.1em;gap:6px 16px}.editorial-nav nav a{min-height:24px}.art-hero{padding-top:185px;padding-bottom:80px}.art-hero h1{font-size:clamp(5rem,23vw,9rem)}.category-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.category-tile{height:48svh}.category-carousel .editorial-slide{flex-basis:84vw}.category-tile>span{font-size:9px;letter-spacing:.15em}.art-grid{grid-template-columns:1fr}.art-card{grid-column:1/-1!important}.art-category-section{padding-block:70px}.collection-page{padding-top:160px}.image-pair{grid-template-columns:1fr}.image-pair img{height:46svh}.block-images img{height:65svh}.editorial-slide{flex-basis:84vw}.editorial-slide figure img{height:58svh}.hero-copy{padding-top:180px}.editorial-breadcrumbs{font-size:11px}.quick-facts{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.editorial-page *,.editorial-nav{animation:none!important;transition:none!important;scroll-behavior:auto!important}.editorial-page [data-seq]{opacity:1!important;transform:none!important;filter:none!important}.editorial-page [data-scribble] path,.art-signature path{stroke-dashoffset:0!important}.hero-image{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.nav-roll{animation:none!important}}
-@media(max-width:759px){.profile-opening,.imported-pair>.editorial-blocks{grid-template-columns:1fr}.profile-opening{margin-block:60px}.profile-opening .block-images img,.imported-pair .block-images img{height:55svh}}
+@media(max-width:759px){.imported-pair>.editorial-blocks{grid-template-columns:1fr}.imported-pair .block-images img{height:55svh}}
 
 /* Crew/profile: restore the current HTML's 240vh pin and paper overlap. */
 .hero-motion{position:absolute;inset:0}
@@ -140,7 +139,7 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 .photo-hero-pin .hero-copy>span{margin:0}
 .crew-opening{max-width:1240px;margin:0 auto;padding:clamp(110px,30vh,320px) var(--enc-page-padding) clamp(90px,24vh,260px);display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
 .crew-opening h2{max-width:16ch;font-size:clamp(2rem,7vw,5.4rem);line-height:1;letter-spacing:.01em;text-transform:uppercase;color:var(--enc-ink-strong)}
-.crew-page .editorial-scribble{overflow:visible;opacity:1}
+:is(.crew-page,.profile-page) :is(.crew-opening,.crew-heading) .editorial-scribble{overflow:visible;opacity:1}
 .crew-opening .editorial-scribble{width:min(440px,62%);margin-left:clamp(-10px,1vw,20px);color:rgba(14,42,56,.55)}
 .crew-row{max-width:1240px;margin:0 auto;padding:0 var(--enc-page-padding);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--enc-grid-gap)}
 .crew-row>div{grid-column:4/7;display:flex;flex-direction:column;gap:22px}
@@ -189,3 +188,33 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 /* The pair pin is released like the hero pin: phones and reduced motion read it in flow. */
 @media(max-width:759px),(prefers-reduced-motion:reduce){.crew-pair-pin{height:auto}.crew-pair{position:static}}
 @media(prefers-reduced-motion:reduce){.editorial-page [data-pair]{opacity:1!important;transform:none!important;filter:none!important}}
+
+/* Crew profile template, following Wild Wonders.dc.html. It reuses the Crew listing rows, pair pin and dark section. */
+.profile-opening h2{text-transform:none}
+.profile-page .crew-row p{font-size:clamp(15px,1.15vw,17px);color:rgba(14,42,56,.86)}
+.profile-page .crew-row .crew-lead{font-size:clamp(19px,2.1vw,30px);color:var(--enc-ink-strong)}
+.profile-page .crew-row .crew-voice{font-size:clamp(17px,1.8vw,24px);color:var(--enc-ink-strong)}
+.crew-pair-single{grid-template-columns:minmax(0,1fr)}
+.crew-pair .profile-natural{display:flex;align-items:center;justify-content:center}
+.crew-pair .profile-natural img{width:auto;height:auto;max-width:100%;max-height:100%}
+.profile-chapter-title{display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
+.profile-chapter-title h2{text-transform:none}
+.profile-chapter-title span{font-family:var(--font-display),Georgia,serif;font-size:clamp(1.9rem,6vw,4.4rem);line-height:1;letter-spacing:.06em;text-transform:uppercase;color:var(--enc-marea)}
+.profile-link{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--enc-marea)}
+.profile-covers{padding-bottom:clamp(90px,24vh,260px);row-gap:clamp(40px,10vh,110px);align-items:end}
+.profile-covers figure{grid-column:1/-1;display:flex;flex-direction:column;gap:12px}
+.profile-covers figure>div{position:relative;width:min(100%,424px);aspect-ratio:3/4;overflow:hidden;background:var(--enc-marea)}
+.profile-covers img{position:absolute;inset:0;width:100%;height:100%}
+.profile-covers figcaption{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.1em;color:rgba(14,42,56,.6)}
+@media(min-width:1081px){.crew-row>.profile-chapter-title,.profile-covers figure:nth-child(odd){grid-column:1/4}.profile-covers figure:nth-child(even){grid-column:4/7}}
+.profile-gallery .crew-heading h2{max-width:24ch;font-size:clamp(1.6rem,5vw,3.6rem);line-height:1.08;letter-spacing:.01em;text-transform:none;text-wrap:pretty}
+.profile-gallery>div:not(.crew-heading){display:flex;flex-direction:column}
+.profile-drafts{gap:clamp(22px,5vh,50px)}
+.profile-drafts .editorial-kicker{letter-spacing:.3em;color:#8fd9ea}
+.profile-tiles figure{position:relative;height:clamp(340px,70vh,720px);overflow:hidden;background:var(--enc-espuma)}
+.profile-tiles-compact figure{height:clamp(260px,56vh,560px)}
+.profile-tiles img{position:absolute;inset:0;width:100%;height:100%;padding:clamp(18px,4%,48px)}
+.profile-tiles figcaption{position:absolute;inset:auto 0 0;padding:clamp(14px,1.8vw,26px);font-size:9px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--enc-ink)}
+@media(max-width:759px){.profile-tiles{grid-template-columns:minmax(0,1fr)}.profile-tiles-compact{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* The prototype has no breadcrumb bar: the trail stays in the document and appears on keyboard focus. */
+.profile-page .editorial-breadcrumbs:not(:focus-within){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;padding:0}
