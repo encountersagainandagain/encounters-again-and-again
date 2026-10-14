@@ -4,6 +4,10 @@
 
 **Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
 
+**Art completo y claridad del CMS (2026-10-14):** [detalle, auditorías y ejemplos](art-module.md). Art (`/art`, categoría y obra) según `Art.dc.html`, con previews del CMS sobre las mismas plantillas. Entradas del admin por tipo y tipo fijo al crear; página personal desde la ficha de Crew; créditos por tipo (autores, facilitadores, participantes); selector visual de relacionados; SEO con vistas previas; JSON-LD de obras y categorías; descripción de imágenes corregida. Ejemplos demo idempotentes solo en Supabase local, con plan, limpieza y conservación. Verificado técnicamente en local. **Prueba manual de Juani pendiente; sin aprobación.**
+
+**Forma de trabajo (2026-10-14):** módulos completos (diseño público, CMS contextual, relaciones y ejemplos locales) en este orden: Art → Expeditions y resultados → Workshops y resultados → Messages → About/Contact/Newsletter → Home v2. Sin pedir aprobación entre subpáginas de un módulo.
+
 **Decisiones de Juani (2026-10-14):** Wild Wonders aprobado visualmente. Segundo perfil aceptado como formato inicial, a ajustar más adelante. **Admin NO aprobado**: había que mejorar diseño y usabilidad antes de probar sus funciones.
 
 **Admin (2026-10-14):** [detalle](phase4-review.md). Rediseñado con armazón propio, cards, miniaturas, listados con estado en texto y editor por secciones; misma lógica de guardado, publicación, duplicación y preview. Corregido el guardado de medios, que fallaba siempre. Verificación técnica en local con límites de tiempo. **Esperando la prueba manual de Juani; no validado por el usuario.**
@@ -16,7 +20,7 @@
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASO 4.0–4.2; `/crew` y Wild Wonders aprobados visualmente; plantilla de perfil aceptada como formato inicial. Admin rediseñado y esperando la prueba manual de Juani. Art no se inició.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
+**Foco actual: módulo Art entregado (pendiente de la prueba manual de Juani); siguiente módulo: Expeditions y sus resultados. `/crew` y Wild Wonders aprobados visualmente; plantilla de perfil aceptada como base inicial; organización y validación manual del admin pendientes.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
 
 
 ## Cómo actualizarlo
@@ -277,6 +281,14 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
 Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-14 — módulo Art y claridad del CMS
+
+- Art público completo según el prototipo: landing con tiles, chips y secciones por formato; página de categoría; página de obra con autores enlazados; obras en los perfiles. Estados vacíos y privacidad de borradores conservados.
+- CMS: entradas por tipo, tipo inmutable, card de página personal en Crew, créditos con nombre según el contenido, relaciones sin Ctrl/Cmd ni duplicados, SEO con vistas previas, previews de obra y categoría con las plantillas públicas.
+- Auditados avisos, news, estados *upcoming* y destacados de Home; documentado el modelo sin duplicar contenido. Auditados SEO e imágenes; corregida la descripción por defecto de las subidas.
+- Ejemplos demo solo en local, con imágenes sintéticas e IDs estables; seed idempotente, plan, limpieza segura y `keep`. Sin migraciones nuevas.
+- Verificado en local con tiempos límite. Pendiente: prueba manual de Juani.
 
 ### 2026-10-14 — decisiones de Juani y rediseño del admin
 

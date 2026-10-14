@@ -24,6 +24,9 @@ export function artworkPath(post: Row, artworks: Row[], categories: Row[]) {
   const category = categories.find(c => c.id === art?.category_id && c.status === 'published');
   return category && post.status === 'published' ? `/art/${category.slug}/${post.slug}` : null;
 }
+export function publishedWorks(data: { posts: Row[]; artworks: Row[]; categories: Row[] }) {
+  return data.posts.filter(p => p.kind === 'artwork' && artworkPath(p, data.artworks, data.categories)).sort((a, b) => Number(b.featured) - Number(a.featured) || byOrder(a, b));
+}
 export function duplicateContent(record: Row, id: string) {
   const copy = { ...record, id, slug: `${record.slug}-copy-${id.slice(0, 8)}`, status: 'draft', title: `${record.title || record.name} (copy)`, published_at: null };
   for (const key of ['updated_at', 'created_at', 'created_by', 'source_id', 'source_url', 'source_hash', 'source_metadata', 'source_role', 'imported_at']) delete (copy as Row)[key];

@@ -18,5 +18,7 @@ export function PhotoHero({title,kicker,meta,cover,media,fallback,pinned=false}:
   return pinned?<section className="photo-hero-pin" data-hero-pin>{hero}</section>:hero;
 }
 export function Breadcrumbs({items}:{items:{label:string;href:string}[]}) {return <><nav className="editorial-breadcrumbs" aria-label="Breadcrumb"><ol>{items.map((item,i)=><li key={item.href}>{i===items.length-1?<span aria-current="page">{item.label}</span>:<Link href={item.href}>{item.label}</Link>}</li>)}</ol></nav><JsonLd id="breadcrumbs" data={{'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:items.map((item,i)=>({'@type':'ListItem',position:i+1,name:item.label,item:siteUrl+item.href}))}}/></>;}
+// Dark closing used by Art: a title with a loop scribble above the shared footer.
+export function DarkClosing({title}:{title:string}) {return <section className="art-closing"><div className="crew-heading"><h2 data-seq="1.1,0.5">{title}</h2><Scribble variant="loop"/></div></section>;}
 export function Closing({line='again and again'}:{line?:string}) {return <div className="editorial-closing"><p>{line}</p><Scribble/></div>;}
 export function EmptyState({children}:{children:React.ReactNode}) {return <div className="editorial-empty"><p>{children}</p><Scribble/></div>;}

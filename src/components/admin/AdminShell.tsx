@@ -14,7 +14,7 @@ export const adminSections=[
   {href:'/admin/content?table=posts',label:'Pages and publications',icon:FileText,group:'Content',enabled:modules.cms},
   {href:'/admin/content?table=crew_members',label:'Crew',icon:Users,group:'Content',enabled:modules.crew},
   {href:'/admin/content?table=art_categories',label:'Art categories',icon:Palette,group:'Content',enabled:modules.art},
-  {href:'/admin/content?table=upcoming_items',label:'Upcoming',icon:CalendarDays,group:'Content',enabled:modules.upcoming},
+  {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:CalendarDays,group:'Content',enabled:modules.upcoming},
   {href:'/admin/content?table=expedition_cards',label:'Expedition cards',icon:Ship,group:'Content',enabled:modules.expeditions},
   {href:'/admin/content?table=media',label:'Media library',icon:ImageIcon,group:'Content',enabled:modules.media},
   {href:'/admin/settings',label:'Site settings',icon:Settings,group:'Site',enabled:modules.cms},

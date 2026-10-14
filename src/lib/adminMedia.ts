@@ -310,7 +310,7 @@ export async function uploadMediaFile(
   if (error) throw error;
 
   const image=await loadImage(uploadFile);
-  const saved=await client.from('media').insert({id,storage_path:filePath,sha256,mime_type:uploadFile.type,bytes:uploadFile.size,alt:uploadFile.name,width:image.naturalWidth,height:image.naturalHeight});
+  const saved=await client.from('media').insert({id,storage_path:filePath,sha256,mime_type:uploadFile.type,bytes:uploadFile.size,alt:'',width:image.naturalWidth,height:image.naturalHeight});
   if(saved.error)throw saved.error;
   return `/api/media/${id}`;
 }

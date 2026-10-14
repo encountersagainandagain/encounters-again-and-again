@@ -68,3 +68,31 @@ export const help:Record<string,string>={
   theme:'Light or dark card.',
   social_links:'Optional links shown on the profile.',
 };
+
+// Entries for creating content: each opens the editor with its type fixed.
+export const newKinds:[string,string][]=[['artwork','New artwork'],['expedition','New expedition'],['workshop','New workshop'],['message','New message'],['news','New news post'],['expedition_report','New expedition report'],['workshop_report','New workshop report']];
+export const tableLabels:Record<string,string>={posts:'Pages and publications',crew_members:'Crew',art_categories:'Art categories',upcoming_items:'Announcements',expedition_cards:'Expedition cards',media:'Media library'};
+export const tableLabel=(table:string)=>tableLabels[table]||table;
+
+// How people credited on a content are named, and where that credit shows.
+export const creditLabels:Record<string,{title:string;lead:string;role:string}>={
+  artwork:{title:'Authors',lead:'Shown on the work page with links to their pages. The work also appears on the personal page of each author once both are published.',role:'Contribution, e.g. Illustration'},
+  workshop:{title:'Facilitators',lead:'Shown with the workshop. It also appears on each facilitator’s personal page.',role:'e.g. Facilitator'},
+  expedition:{title:'Participants',lead:'Crew who took part. The expedition appears on each participant’s personal page.',role:'e.g. Captain, Photography'},
+  message:{title:'Credits',lead:'People who made this message. It appears on their personal pages.',role:'e.g. Illustration'},
+};
+export const defaultCredit={title:'Credited crew',lead:'People credited for this content. It appears on their personal pages.',role:'Role (optional)'};
+
+// Help that changes with the type of content.
+export const kindHelp:Record<string,Record<string,string>>={
+  artwork:{title:'Name of the work.',slug:'Last part of the address: /art/category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',show_index:'Lists the headings of the text at the top. Rarely needed for a work.'},
+  expedition:{title:'Name of the expedition.',excerpt:'Short summary used in the Expeditions list and when shared.'},
+  workshop:{title:'Name of the workshop.',excerpt:'Short summary used in the Workshops list and when shared.'},
+  message:{title:'Title of the message.'},
+  news:{title:'Headline of the news post.',excerpt:'Short summary used in lists and when shared.'},
+  page:{slug:'Address of this permanent page. Changing it can break existing links.'},
+  crew_member:{title:'Internal title of the personal page. The page shows the person’s artistic name or name.',slug:'Internal address of the page content. The public address uses the person’s slug: /crew/…'},
+};
+help.featured='Publishing makes it visible on its own page. It does not put it first on Home; tick this to feature it there.';
+help.home_rank='Order among the featured items on Home. Lower numbers appear first. Empty: after the numbered ones.';
+help.post_id='Content this notice points to, such as an expedition or workshop. Its title and dates are used, so nothing is duplicated.';

@@ -1,3 +1,5 @@
+> Continuación (2026-10-14): el módulo Art completo, las mejoras comunes del CMS, los ejemplos locales y el orden de los módulos siguientes están en [art-module.md](art-module.md).
+
 # Decisiones de Juani — 2026-10-14
 
 - **Wild Wonders (`/crew/wild-wonders`): aprobado visualmente.**

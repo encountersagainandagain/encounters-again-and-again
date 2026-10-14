@@ -72,6 +72,13 @@ export function Carousel({children,label,compact=false}:{children:ReactNode[];la
   return <section className={`editorial-carousel ${compact?'category-carousel':''}`} aria-label={label}><div ref={rail} className="editorial-rail" tabIndex={0} onScroll={()=>{const r=rail.current;if(!r)return;const center=r.scrollLeft+r.clientWidth/2;let best=0,distance=Infinity;Array.from(r.children).forEach((el,i)=>{const item=el as HTMLElement;const d=Math.abs(item.offsetLeft+item.clientWidth/2-center);if(d<distance){distance=d;best=i;}});setIndex(best);}}>{children.map((child,i)=><div className="editorial-slide" key={i}>{child}</div>)}</div><div className="carousel-controls"><button type="button" aria-label={`Previous ${label}`} disabled={index===0} onClick={()=>move(-1)}>←</button><output aria-live="polite">{String(index+1).padStart(2,'0')} / {String(children.length).padStart(2,'0')}</output><button type="button" aria-label={`Next ${label}`} disabled={index===children.length-1} onClick={()=>move(1)}>→</button></div></section>;
 }
 
+// Video work: the still image with a play button; the YouTube player loads only after the click.
+export function VideoFrame({id,title,children}:{id:unknown;title:string;children?:ReactNode}) {
+  const [open,setOpen]=useState(false);
+  if(typeof id!=='string'||!/^[\w-]{11}$/.test(id))return <>{children}</>;
+  if(open)return <iframe className="art-video" title={title} src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>;
+  return <button type="button" className="art-play" onClick={()=>setOpen(true)} aria-label={`Play ${title}`}>{children}<span aria-hidden="true">▶</span></button>;
+}
 export function MediaEmbed({kind,id}:{kind:unknown;id:unknown}) {
   const [open,setOpen]=useState(false);
   if(typeof id!=='string')return null;

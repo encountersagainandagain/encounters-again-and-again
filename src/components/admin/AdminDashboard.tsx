@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
-import {FilePlus2,ImagePlus,UserRound} from 'lucide-react';
+import {CalendarDays,FilePlus2,ImagePlus,Megaphone,Palette,Ship,UserRound} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 import {modules} from '@/config/modules';
 import {AdminHeader,AdminThumb,StatusBadge,adminSections} from './AdminShell';
@@ -12,7 +12,7 @@ const descriptions:Record<string,string>={
   'Pages and publications':'Site pages, expeditions, workshops, artworks, messages and news.',
   Crew:'People in the collective, their portraits and profile pages.',
   'Art categories':'Collections that group artworks on the Art page.',
-  Upcoming:'Short announcements of what is coming next.',
+  Announcements:'Short notices for Home that can point to an expedition or workshop.',
   'Expedition cards':'Presentation cards shown on the Expeditions page.',
   'Media library':'Every uploaded image, with its description and focus point.',
   'Site settings':'Contact details, social links, Home sections and page covers.',
@@ -28,9 +28,15 @@ export function AdminDashboard(){
     <AdminHeader kicker="Administration" title="Welcome back" lead="Edit what the site shows, prepare drafts and publish when they are ready. Drafts stay private until you publish them."/>
     <section className="adm-card"><div className="adm-card-head"><h2 className="adm-card-title">Quick actions</h2></div>
       <div className="adm-tiles">
-        <Link className="adm-tile" href="/admin/content?table=posts&new=1"><span className="adm-tile-icon"><FilePlus2 aria-hidden="true"/></span><strong>New content</strong><span>Start a page, story, expedition or artwork as a draft.</span></Link>
-        {modules.media&&<Link className="adm-tile" href="/admin/content?table=media"><span className="adm-tile-icon"><ImagePlus aria-hidden="true"/></span><strong>Upload images</strong><span>Add photos or artwork to the media library.</span></Link>}
-        {modules.crew&&<Link className="adm-tile" href="/admin/content?table=crew_members"><span className="adm-tile-icon"><UserRound aria-hidden="true"/></span><strong>Edit the crew</strong><span>Update portraits, roles and biographies.</span></Link>}
+        {[
+          [modules.art,'/admin/content?table=posts&new=artwork',Palette,'New artwork','A work inside an Art category, with its authors.'],
+          [modules.expeditions,'/admin/content?table=posts&new=expedition',Ship,'New expedition','An expedition with its dates, needs and results.'],
+          [modules.workshops,'/admin/content?table=posts&new=workshop',CalendarDays,'New workshop','A workshop with its sessions and facilitators.'],
+          [modules.messages,'/admin/content?table=posts&new=message',FilePlus2,'New message','A Meaningful Message with its illustration.'],
+          [modules.upcoming,'/admin/content?table=upcoming_items&new=1',Megaphone,'New announcement','A short notice for Home, linked to an activity.'],
+          [modules.crew,'/admin/content?table=crew_members&new=1',UserRound,'New crew member','A person; their personal page is created from their card.'],
+          [modules.media,'/admin/content?table=media',ImagePlus,'Upload images','Add photos or artwork to the media library.'],
+        ].filter(([on])=>on).map(([,href,Icon,title,text])=>{const I=Icon as typeof Palette;return <Link key={String(href)} className="adm-tile" href={String(href)}><span className="adm-tile-icon"><I aria-hidden="true"/></span><strong>{String(title)}</strong><span>{String(text)}</span></Link>;})}
       </div>
     </section>
     <section className="adm-card"><div className="adm-card-head"><h2 className="adm-card-title">Recently edited</h2><Link href="/admin/content?table=posts">See all content</Link></div>
