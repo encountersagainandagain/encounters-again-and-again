@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AdminNewsletter } from '@/components/admin/AdminNewsletter';
 import { ProtectedAdminRoute } from '@/components/admin/ProtectedAdminRoute';
+import { AdminShell } from '@/components/admin/AdminShell';
 
 export const metadata: Metadata = {
   title: 'Admin Newsletter',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function AdminNewsletterPage() {
   return (
     <ProtectedAdminRoute>
-      <AdminNewsletter />
+      <AdminShell><AdminNewsletter /></AdminShell>
     </ProtectedAdminRoute>
   );
 }

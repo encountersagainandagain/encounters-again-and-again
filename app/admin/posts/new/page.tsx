@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AdminPostForm } from '@/components/admin/AdminPostForm';
 import { ProtectedAdminRoute } from '@/components/admin/ProtectedAdminRoute';
+import { AdminShell } from '@/components/admin/AdminShell';
 
 export const metadata: Metadata = {
   title: 'New Post',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function NewAdminPostPage() {
   return (
     <ProtectedAdminRoute>
-      <AdminPostForm />
+      <AdminShell><AdminPostForm /></AdminShell>
     </ProtectedAdminRoute>
   );
 }

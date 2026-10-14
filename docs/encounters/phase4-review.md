@@ -1,3 +1,66 @@
+# Decisiones de Juani — 2026-10-14
+
+- **Wild Wonders (`/crew/wild-wonders`): aprobado visualmente.**
+- **Segundo perfil (plantilla con estructura distinta): aceptado como formato inicial**; se ajustará más adelante.
+- **Admin: NO aprobado.** Su presentación cambió mucho respecto del admin original y resulta poco amigable. Antes de probar sus funcionalidades hay que mejorar diseño y usabilidad. La revisión manual de Juani sigue pendiente; nada del admin figura como validado por el usuario.
+
+## Entrega de diseño y usabilidad del admin — 2026-10-14
+
+Estado: **implementada y esperando la prueba manual de Juani. No validada por el usuario.** Solo administración; sin cambios en páginas públicas, esquema, RLS, Auth, servicios ni datos remotos.
+
+Revisar en `http://127.0.0.1:3219/admin` (app local aislada contra Supabase local; credenciales locales en `.encounters-work/local-cms.json`, fuera de Git). Si no responde: `colima start`, `npm run cms:local:prepare`, `npm run cms:local:dev`.
+
+### Qué había cambiado y por qué
+
+- La base de Katie tenía un admin de blog con estilo propio: `AdminPosts` y `AdminPostForm`, fondo claro, cards con borde, etiquetas pequeñas en mayúsculas y botones `btn-ocean`, con su propio encabezado.
+- Para cubrir el modelo de Encounters (tipos de contenido, Crew, categorías, medios, anuncios, tarjetas de expediciones, responsables, relaciones, bloques, borrador/publicación y preview), se creó `EncountersCms` en `/admin/content`, y el inicio del admin pasó a enlazar ahí. **El cambio funcional era necesario**; el visual no se diseñó: formularios crudos sin agrupar, botones como texto plano y, al quitar el encabezado heredado, el admin quedó dentro del header y el footer públicos oscuros, con poco contraste. El inicio era una lista de tres enlaces.
+- El editor detallado heredado de Katie (`/admin/posts/[id]/edit`) se conserva para los bloques que el editor simple no cubre.
+
+### Implementado
+
+| Área | Cambio |
+| --- | --- |
+| Estructura | Armazón propio del admin (`AdminShell`): barra lateral Abismo con grupos Overview / Content / Site, sección activa marcada, «View site» y «Sign out»; en pantallas pequeñas pasa a barra superior con navegación horizontal. Skip link al contenido. El admin ya no hereda el header ni el footer públicos. Solo aparecen los módulos habilitados en `modules.ts`. |
+| Estilo | `src/styles/admin.css`, todo bajo `.adm`: fondo Espuma suave, cards blancas, tinta y Marea para texto y botones, Laguna solo sobre fondo oscuro, Alga/Oro para estados. EB Garamond en títulos, Archivo en la interfaz. Sin animaciones. |
+| Inicio | Acciones frecuentes (nueva publicación, subir imágenes, editar el Crew), contenido editado recientemente desde la base (6 últimos, con estado) y cards de todas las secciones habilitadas. Sin métricas inventadas. |
+| Listados | Publicaciones en tabla con miniatura de portada, título y dirección, tipo, estado con texto y color, última edición y «Edit»; búsqueda y filtros por tipo y estado. Crew y categorías en cards con retrato o portada. Medios en grilla de miniaturas con descripción, tamaño y ajuste, más zona de subida. Anuncios y tarjetas de expediciones en tabla. |
+| Miniaturas | Los medios siguen privados: se piden a `/api/media/[id]` con el token del administrador y se muestran con URLs temporales. |
+| Editor de contenido | Barra fija con estado real (Draft/Published), «Unsaved changes»/«All changes saved», Duplicate as draft, Visual preview, Full preview (ruta), Save y «Save and publish»/«Unpublish». Secciones: información general, bloques, detalles del tipo, responsables (con retratos), relacionados, hijos (necesidades/sesiones), búsqueda y sharing; a la derecha publicación y portada con miniatura. Todos los campos anteriores se conservan, agrupados. |
+| Bloques | Cada bloque en una card con número, tipo, Up/Down (antes solo había subir), Duplicate y Remove; imagen con miniatura; botones «+ tipo» para agregar. Enlace al editor detallado para tipos no cubiertos. |
+| Crew, categorías, medios, anuncios, tarjetas | Mismo lenguaje: datos en «Details», estado/orden/página de perfil en «Publication», imágenes con miniatura. Crew enlaza a «Edit profile page» (este editor) y conserva el enlace al editor detallado. |
+| Settings | General y contacto, presentación de Art/Crew y secciones de Home en cards, con ayuda en cada campo. Misma lógica de guardado. |
+| Login y permisos | Pantalla de acceso y mensajes de permisos con la paleta; misma lógica. |
+| Ayudas | Textos que explican para qué sirve cada campo, sin detalles internos (`adminLabels.ts`). |
+
+Comportamiento agregado sin cambiar datos: «Save and publish»/«Unpublish» usan el mismo guardado con el estado correspondiente; al salir del editor con cambios sin guardar se pide confirmación; los enlaces del inicio abren una publicación concreta o una nueva (`?edit=` / `?new=1`).
+
+**Corrección funcional encontrada:** guardar un medio fallaba siempre. `save_entity` inserta la fila antes de resolver el conflicto, y `storage_path` y demás columnas obligatorias no forman parte del formulario. Error comprobado en local: «null value in column "storage_path"…». Sin tocar el esquema, la interfaz actualiza los campos editables del medio con una actualización directa bajo los permisos de administrador. Las demás entidades siguen usando `save_entity`.
+
+### Verificación técnica (no reemplaza la prueba manual)
+
+Todas las escrituras en Supabase local (`127.0.0.1:54321`), cada comprobación con límite de tiempo.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `npx tsc --noEmit`, eslint de `src/components/admin`, `app/admin` y `SiteChrome`, `npm test` | Sin errores. |
+| Recorrido en navegador | Login → inicio; «New content» abre un borrador; título, slug, párrafo y encabezado; Up/Down reordena; indicador «Unsaved changes»; Save → «Saved.» y «Draft»; Visual preview muestra el contenido; Full preview abre la ruta con el contenido y el aviso de borrador; «Save and publish» → «Published.»; «Unpublish» → «Moved back to draft.»; Duplicate → copia con slug nuevo, guardada como Draft; volver a la lista con búsqueda; subir imagen (de 6 a 7 medios); editar descripción y foco del medio → «Saved.» (tras la corrección; antes fallaba); editar el rol de un integrante → «Saved.» y restaurado. |
+| Teclado | Tab llega al skip link (antes, solo el indicador de desarrollo de Next), Enter lleva el foco a `admin-main`; luego marca, inicio y secciones con contorno visible (Laguna sobre la barra oscura). |
+| Contraste (WCAG) | Texto secundario 6,0:1; encabezados de tabla y direcciones 6,56:1; estados Draft 6,51:1 y Published 6,91:1; botón 12:1. |
+| Móvil 390px | Inicio, listado, Crew y editor sin desbordamiento horizontal. |
+| Páginas públicas | `/crew` (8762px), `/crew/wild-wonders` (7654px, mismos elementos) y `/art` con su navbar y footer, sin estilos del admin. |
+
+Datos de prueba creados en local: «Local Admin Flow Test» y su copia (borradores) y una imagen sintética. No existen en la base real.
+
+### Pendiente
+
+- **Prueba manual de Juani** con el checklist de la entrega.
+- El editor detallado heredado (`/admin/posts/[id]/edit`), Newsletter y el listado heredado `/admin/posts` quedan dentro del armazón, pero conservan su estilo interno de Katie.
+- El selector de «Related content» sigue siendo una lista múltiple nativa.
+- Estados de error del servidor o de red no simulados.
+- No ejecutados: build, lint completo y `cms:local:verify`.
+
+Capturas: [inicio](verification/review-2026-10-14-admin/dashboard.jpg) · [inicio antes](verification/review-2026-10-14-admin/before-dashboard.jpg) · [listado](verification/review-2026-10-14-admin/content-list.jpg) · [editor](verification/review-2026-10-14-admin/editor.jpg) · [editor antes](verification/review-2026-10-14-admin/before-editor.jpg) · [preview integrado](verification/review-2026-10-14-admin/editor-inline-preview.jpg) · [Crew](verification/review-2026-10-14-admin/crew-list.jpg) · [editor de Crew](verification/review-2026-10-14-admin/crew-editor.jpg) · [medios](verification/review-2026-10-14-admin/media-list.jpg) · [editor de medio](verification/review-2026-10-14-admin/media-editor.jpg) · [settings](verification/review-2026-10-14-admin/settings.jpg) · móvil: [inicio](verification/review-2026-10-14-admin/mobile-dashboard.jpg), [listado](verification/review-2026-10-14-admin/mobile-list.jpg), [Crew](verification/review-2026-10-14-admin/mobile-crew.jpg), [editor](verification/review-2026-10-14-admin/mobile-editor.jpg).
+
 # Revisión local de Art/Crew — 2026-10-09
 
 Estado: preparada para revisión del usuario; no implica aprobación visual. Continúa exclusivamente PASO 4.0–4.2.
@@ -10,7 +73,7 @@ Checkpoint técnico 2026-10-12: el avance se conserva en Git y se publica única
 
 ## Entrega del perfil `/crew/[slug]` — 2026-10-13
 
-Estado: **implementada y esperando revisión visual de Juani. No está aprobada.** Caso real: `/crew/wild-wonders`. `/crew` se mantiene como fue aprobada. Sin cambios en CMS, datos, migraciones, Auth, RLS, Storage, correos ni despliegues.
+Estado: **aprobada visualmente por Juani el 2026-10-14** (ver decisiones al inicio). Caso real: `/crew/wild-wonders`. `/crew` se mantiene como fue aprobada. Sin cambios en CMS, datos, migraciones, Auth, RLS, Storage, correos ni despliegues.
 
 Revisar en `http://127.0.0.1:3218/crew/wild-wonders`. Prototipo: `http://127.0.0.1:3220/Wild%20Wonders.dc.html` (si no responde: `cd docs/encounters/handoff-current && python3 -m http.server 3220 --bind 127.0.0.1`).
 

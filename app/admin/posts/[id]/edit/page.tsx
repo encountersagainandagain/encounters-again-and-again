@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AdminPostForm } from '@/components/admin/AdminPostForm';
 import { ProtectedAdminRoute } from '@/components/admin/ProtectedAdminRoute';
+import { AdminShell } from '@/components/admin/AdminShell';
 
 type EditAdminPostRouteProps = {
   params: Promise<{
@@ -21,7 +22,7 @@ export default async function EditAdminPostPage({ params }: EditAdminPostRoutePr
 
   return (
     <ProtectedAdminRoute>
-      <AdminPostForm id={id} />
+      <AdminShell><AdminPostForm id={id} /></AdminShell>
     </ProtectedAdminRoute>
   );
 }

@@ -23,5 +23,5 @@ export function ProtectedAdminRoute({children}: {children?:ReactNode}) {
     return()=>{live=false;subscription?.data.subscription.unsubscribe();};
   },[router]);
   if(state==='allowed')return <>{children}</>;
-  return <section className="enc-preparation"><p role="status">{state}</p><button onClick={()=>{void supabase?.auth.signOut().then(()=>router.replace('/admin/login'));}}>Sign out</button></section>;
+  return <section className="adm adm-login" style={{display:'grid'}}><div className="adm-login-card"><p role="status">{state}</p><button className="adm-btn adm-btn--ghost" onClick={()=>{void supabase?.auth.signOut().then(()=>router.replace('/admin/login'));}}>Sign out</button></div></section>;
 }

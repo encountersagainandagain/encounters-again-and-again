@@ -1,8 +1,12 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-13.
+Última actualización: 2026-10-14.
 
 **Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
+
+**Decisiones de Juani (2026-10-14):** Wild Wonders aprobado visualmente. Segundo perfil aceptado como formato inicial, a ajustar más adelante. **Admin NO aprobado**: había que mejorar diseño y usabilidad antes de probar sus funciones.
+
+**Admin (2026-10-14):** [detalle](phase4-review.md). Rediseñado con armazón propio, cards, miniaturas, listados con estado en texto y editor por secciones; misma lógica de guardado, publicación, duplicación y preview. Corregido el guardado de medios, que fallaba siempre. Verificación técnica en local con límites de tiempo. **Esperando la prueba manual de Juani; no validado por el usuario.**
 
 **Perfil `/crew/[slug]` (2026-10-13):** [detalle](phase4-review.md). Recarga continua de Wild Wonders resuelta: caché de Turbopack obsoleta tras mover el repositorio de carpeta; servidor 3218 reiniciado con caché limpia. Plantilla genérica de perfil implementada según `Wild Wonders.dc.html`, sin contenido fijo de Georgia. Verificado con límites de tiempo: estabilidad, navegación, desktop/móvil contra prototipo, teclado, reduced motion, imágenes, enlaces, consola, TypeScript, eslint y tests. Después: preview del CMS (integrado y por ruta) unificado con la página pública mediante `ProfileView`, y plantilla verificada con un segundo perfil sintético en Supabase local, con obras relacionadas en dos categorías; se corrigieron supuestos que solo valían para Wild Wonders sin cambiar a Georgia ni `/crew`. Pendiente: build, lint completo, anchos intermedios y un segundo perfil real. **Esperando revisión visual de Juani; sin aprobación.**
 
@@ -12,7 +16,7 @@
 
 Documento de seguimiento del checklist de 22 pasos acordado. El detalle funcional y técnico se mantiene en `encounters-arquitectura-y-plan.md` (versión 2). Este archivo registra avances, pendientes y decisiones de ejecución. Para el arranque local, `INSTRUCCIONES_ASTRA_ENCOUNTERS.md` incorpora las decisiones del 30/09 y prevalece sobre referencias anteriores cuando difieran. La integración del handoff se documenta en `encounters-handoff-review-y-arranque.md`; las rutas y disposiciones propuestas, en `encounters-redirects-plan.json`.
 
-**Foco actual: PASO 4.0–4.2; `/crew` aprobada visualmente; perfil `/crew/[slug]` implementado y detenido para revisión visual de Juani. Art espera esa respuesta.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
+**Foco actual: PASO 4.0–4.2; `/crew` y Wild Wonders aprobados visualmente; plantilla de perfil aceptada como formato inicial. Admin rediseñado y esperando la prueba manual de Juani. Art no se inició.** PASOS 1–3 conservados. Base visual, recorridos y CMS ampliados; migración 14 aplicada con pruebas SQL revertidas. Art sin categorías/obras curadas; no se inventó contenido. Ver phase4-art-crew.md y bootstrap-status. No continuar con otras páginas ni Home. Resend, WordPress, DNS y Vercel sin cambios.
 
 
 ## Cómo actualizarlo
@@ -55,7 +59,7 @@ La cuenta `encounters.services@outlook.com` se usará para registrar y administr
 - [ ] **6. Configurar tres administradores — PARCIAL.** Dos fundadores confirmados registrados en admin_users con RLS. Tercero pendiente de alta; mecanismo aditivo documentado en sql-runbook. Crew independiente de Auth.
 - [x] **7. Reemplazar la identidad anterior — BASE IMPLEMENTADA.** Marca/URL/defaults/metadata/JSON-LD/emails/manifest/assets propios en aplicación activa; código histórico fuera de rutas. Contenido editorial real y diseño final pendientes.
 - [x] **8. Organizar y documentar módulos — BASE IMPLEMENTADA.** Registro central, rechazo de rutas/consultas, admin core, scripts/cron/integraciones ajenos aislados y código archivado con reactivación documentada.
-- [ ] **9. Adaptar el CMS compartido — BASE IMPLEMENTADA.** Posts/bloques y campos específicos, categorías, responsables, borradores, preview textual, duplicación y guardado atómico. Preview visual completo y revisión final durante PASO 4.
+- [ ] **9. Adaptar el CMS compartido — BASE IMPLEMENTADA.** 2026-10-14: diseño y usabilidad del admin rediseñados; prueba manual de Juani pendiente. Posts/bloques y campos específicos, categorías, responsables, borradores, preview textual, duplicación y guardado atómico. Preview visual completo y revisión final durante PASO 4.
 - [ ] **10. Completar Art y Crew — IMPLEMENTADO, REVISIÓN VISUAL PENDIENTE.** Recorridos visuales/CMS/SEO y relaciones implementados; escritura, preview, publicación, duplicación y privacidad probadas desde navegador contra Supabase local aislado. Capturas desktop/móvil y evidencia del CMS disponibles. Curación de Art y aprobación visual pendientes; ver phase4-review.md. 2026-10-13: `/crew` rehecha con mayor fidelidad al prototipo, esperando revisión; aprobada visualmente por Juani. Bucle de `/crew/wild-wonders` resuelto (caché de desarrollo) y perfil rehecho como plantilla genérica, esperando revisión; Art sin revisar, por lo que el recorrido no se da por cerrado.
 - [ ] **11. Construir Expeditions — BASE IMPLEMENTADA.** Esquema/CMS de presentación, fichas, responsables y necesidades pendiente/conseguido. Visual pendiente.
 - [ ] **12. Construir Workshops — BASE IMPLEMENTADA.** Campos opcionales, sesiones y estados independientes probados. Visual pendiente.
@@ -273,6 +277,13 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
 Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-14 — decisiones de Juani y rediseño del admin
+
+- Juani aprobó visualmente Wild Wonders; aceptó el segundo perfil como formato inicial; **no aprobó el admin**.
+- Admin rediseñado sobre la lógica existente: navegación lateral, inicio con accesos y contenido reciente, listados con miniaturas y estados, editor por secciones con guardar/preview/publicar visibles, ayudas por campo y estilos aislados. Sin cambios de esquema, RLS, Auth ni páginas públicas.
+- Corregido el guardado de medios desde el CMS, que fallaba por cómo `save_entity` inserta filas.
+- Verificado en local: recorrido crear → publicar → duplicar → medios → Crew, teclado, contraste y móvil. Pendiente: prueba manual de Juani.
 
 ### 2026-10-13 — preview unificado y segundo perfil
 
