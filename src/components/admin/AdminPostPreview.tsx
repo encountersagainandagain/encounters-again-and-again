@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BlogPostPageContent } from '@/components/public/BlogPostPageContent';
+import { ScrollStage } from '@/components/public/EditorialInteractive';
+import { EditorialPreview } from '@/components/admin/EditorialPreview';
+import { supabase } from '@/lib/supabase';
 import {
   fetchAdminPost,
   fetchAdminPostBlocks,
@@ -17,6 +20,8 @@ type AdminPostPreviewProps = {
 export function AdminPostPreview({ id }: AdminPostPreviewProps) {
   const [post, setPost] = useState<AdminPost | null>(null);
   const [blocks, setBlocks] = useState<AdminPostBlock[]>([]);
+  // Crew profiles preview with the public profile template instead of the article layout.
+  const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -33,9 +38,20 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
           fetchAdminPostBlocks(id),
         ]);
 
+        let nextProfile = null;
+        if ((nextPost as { kind?: string }).kind === 'crew_member' && supabase) {
+          const [crew, media] = await Promise.all([
+            supabase.from('crew_members').select('*').eq('page_post_id', id),
+            supabase.from('media').select('*').limit(1000),
+          ]);
+          if (crew.error || media.error) throw crew.error || media.error;
+          nextProfile = { crew: crew.data || [], media: media.data || [] };
+        }
+
         if (!isMounted) return;
         setPost(nextPost);
         setBlocks(nextBlocks);
+        setProfile(nextProfile);
       } catch (error) {
         if (!isMounted) return;
         setErrorMessage(error instanceof Error ? error.message : 'Unable to load preview.');
@@ -103,6 +119,11 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
         </div>
       </div>
 
+      {profile ? (
+        <ScrollStage>
+          <EditorialPreview record={post} blocks={blocks} detail={{}} media={profile.media} crew={profile.crew} />
+        </ScrollStage>
+      ) : (
       <BlogPostPageContent
         initialPost={post}
         initialBlocks={blocks.map((block) => ({
@@ -113,6 +134,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
         }))}
         initialRelatedPosts={[]}
       />
+      )}
     </div>
   );
 }

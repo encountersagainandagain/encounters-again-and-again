@@ -4,7 +4,7 @@
 
 **Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
 
-**Perfil `/crew/[slug]` (2026-10-13):** [detalle](phase4-review.md). Recarga continua de Wild Wonders resuelta: caché de Turbopack obsoleta tras mover el repositorio de carpeta; servidor 3218 reiniciado con caché limpia. Plantilla genérica de perfil implementada según `Wild Wonders.dc.html`, sin contenido fijo de Georgia. Verificado con límites de tiempo: estabilidad, navegación, desktop/móvil contra prototipo, teclado, reduced motion, imágenes, enlaces, consola, TypeScript, eslint y tests. Pendiente: build, vista previa del CMS con la plantilla, perfil con obras relacionadas reales. **Esperando revisión visual de Juani; sin aprobación.**
+**Perfil `/crew/[slug]` (2026-10-13):** [detalle](phase4-review.md). Recarga continua de Wild Wonders resuelta: caché de Turbopack obsoleta tras mover el repositorio de carpeta; servidor 3218 reiniciado con caché limpia. Plantilla genérica de perfil implementada según `Wild Wonders.dc.html`, sin contenido fijo de Georgia. Verificado con límites de tiempo: estabilidad, navegación, desktop/móvil contra prototipo, teclado, reduced motion, imágenes, enlaces, consola, TypeScript, eslint y tests. Después: preview del CMS (integrado y por ruta) unificado con la página pública mediante `ProfileView`, y plantilla verificada con un segundo perfil sintético en Supabase local, con obras relacionadas en dos categorías; se corrigieron supuestos que solo valían para Wild Wonders sin cambiar a Georgia ni `/crew`. Pendiente: build, lint completo, anchos intermedios y un segundo perfil real. **Esperando revisión visual de Juani; sin aprobación.**
 
 **Fidelidad visual de `/crew` (2026-10-13):** [detalle, verificaciones y capturas](phase4-review.md). Implementado: relato, par de fotos pineado, tarjetas, «More about us», tira, navbar, footer y cue según `The Crew.dc.html`, con contenido del CMS. Verificado con límites de tiempo: TypeScript y eslint de lo modificado, desktop y móvil de `/crew`, pines contra el prototipo, teclado, reduced motion, navbar/footer en `/art` y `/review/art`. Pendiente: recarga en bucle de `/crew/wild-wonders` en desarrollo (anterior a esta entrega, sin investigar), tests/lint/build completos y anchos intermedios. **Aprobada visualmente por Juani el 2026-10-13 (commit `cbea565`): «No vi diferencias, lo hizo muy bien», incluidas sus decisiones visuales. El bucle de Wild Wonders quedó resuelto después; tests/lint/build completos y anchos intermedios de `/crew` siguen sin ejecutar.**
 
@@ -273,6 +273,12 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 - Preparadas las siguientes acciones de WordPress y el brief inicial para Claude Design.
 
 Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
+
+### 2026-10-13 — preview unificado y segundo perfil
+
+- Página pública, preview integrado y preview por ruta usan la misma vista de perfil. Autenticación del preview y privacidad de borradores sin cambios; comprobado que un anónimo no ve el borrador, sus bloques ni sus medios.
+- Segundo perfil sintético en Supabase local con otra estructura y obras relacionadas: enlaces y agrupación por categoría correctos. Corregidos siete supuestos ligados a Wild Wonders; Georgia y `/crew` comprobadas sin cambios.
+- Sin escrituras remotas, correos ni despliegues. Perfil sin aprobación visual; no se avanza con Art.
 
 ### 2026-10-13 — aprobación de `/crew` y perfil de Crew
 

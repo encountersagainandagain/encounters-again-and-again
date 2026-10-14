@@ -14,6 +14,51 @@ Estado: **implementada y esperando revisión visual de Juani. No está aprobada.
 
 Revisar en `http://127.0.0.1:3218/crew/wild-wonders`. Prototipo: `http://127.0.0.1:3220/Wild%20Wonders.dc.html` (si no responde: `cd docs/encounters/handoff-current && python3 -m http.server 3220 --bind 127.0.0.1`).
 
+### Preview unificado y segundo perfil sintético — 2026-10-13
+
+El perfil sigue **pendiente de aprobación visual de Juani**. Todo lo que escribió datos se hizo en Supabase local (`127.0.0.1:54321`, app `127.0.0.1:3219`); no hubo escrituras remotas ni correos.
+
+**Una sola plantilla para página pública y preview.** `ProfileView` (en `ProfileStory.tsx`) arma portada + contenido del perfil y lo usan los tres contextos, cada uno con sus datos:
+
+| Contexto | Datos | Acceso |
+| --- | --- | --- |
+| Página pública `/crew/[slug]` | Lecturas anónimas de contenido publicado, sin cambios. Agrega migas y relacionados. | Público; sin cambios en lo que ve un visitante. |
+| Preview integrado en `/admin/content` («Visual preview») | Estado del editor, incluso sin guardar; integrante vinculado al post. | Sesión de administrador existente. Sin motor de scroll: plantilla en reposo. |
+| Preview por ruta `/admin/posts/[id]/preview` | Post y bloques guardados; integrante y medios leídos con la sesión. | `ProtectedAdminRoute`, sin cambios. Con motor de scroll. Antes mostraba los perfiles con el layout de artículo heredado. |
+
+Las imágenes de borrador siguen llegando por `/api/media/[id]` con el token del administrador y URLs temporales. La portada (título, antetítulo, imagen) se calcula en `profileHero`, compartida.
+
+**Segundo perfil, distinto de Georgia** («Local Test Person C», solo local): sin alias, sin encabezado de apertura, un párrafo inicial, dos imágenes grandes al inicio, dos capítulos de un solo encabezado, una cita entre capítulos, tres portadas (una con pie), un bloque `link`, sin galería oscura; con enlaces de contacto y dos obras publicadas en dos categorías.
+
+Supuestos que solo valían para Wild Wonders, corregidos sin cambiar a Georgia:
+
+- Un texto de una línea seguido de imágenes al principio se tomaba como galería oscura y el perfil quedaba sin apertura ni par. Ahora la apertura toma los textos e imágenes iniciales; las galerías solo se detectan después.
+- Un encabezado posterior al primer texto se usaba como título de apertura y quedaba antes que ese texto. Ahora solo es título de apertura si precede a todo texto; si no, abre un capítulo.
+- Un texto de una línea que abre un capítulo y va seguido de imágenes se convertía en galería oscura. Ahora queda como capítulo con portadas.
+- Los bloques `link` del editor simple no se adjuntaban al capítulo (solo los `source`).
+- El antetítulo de portada «meet georgia» estaba fijo en el código para Wild Wonders. Ahora sale de `kicker` del post, o del encabezado de apertura, o del rol. Para Georgia el resultado es el mismo.
+- Sin título de apertura, el primer texto quedaba pegado a la portada; ahora recibe el espacio superior.
+- Las portadas se alinean arriba, para que una con pie y otra sin pie no queden desparejas.
+
+Sigue siendo específico de Wild Wonders, a propósito: su banner de diseño (`/design/ww-banner.webp`) mientras la portada del CMS sea el retrato.
+
+Comprobaciones, todas con límite de tiempo y terminadas:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Borrador ante anónimo | 0 filas del post, de sus bloques y de sus medios exclusivos; página pública 404; `/api/media` del medio 404; el preview por ruta redirige a `/admin/login` y su HTML no contiene texto del perfil. |
+| Preview por ruta y preview integrado, con sesión local | Ambos renderizan la plantilla con la misma estructura: portada, fila de apertura, par de 2, 2 capítulos, 3 portadas con su pie, cita, enlace de capítulo, sin galería. 6 imágenes servidas como `blob:` autenticadas. Aviso «This draft is not public yet». |
+| Perfil publicado en local, 1440 y 390 | HTTP 200, misma estructura que el preview, sin desbordamiento, imágenes cargadas, sin errores de consola. |
+| Relacionados | Contacto: Website e Instagram. Dos grupos por categoría con sus enlaces `/art/local-test-gallery/local-test-work-c1` y `/art/local-test-prints/local-test-work-c2`; la obra responde 200 y enlaza de vuelta al perfil. |
+| Georgia y `/crew` (3218) | Georgia: misma altura (7654px), antetítulo «meet georgia», banner de diseño, 3 párrafos, par de 2, 1 capítulo, 2 portadas, 2 grupos con 4 fichas. `/crew`: 8762px, 6 tarjetas, 6 retratos. Sin errores. |
+| `npx tsc --noEmit`, eslint de lo modificado, `npm test` | Sin errores. |
+
+Observaciones: en el preview aparece un 404 de consola cuando una imagen de borrador se pide sin token antes de que llegue su URL autenticada; ya ocurría y es la protección funcionando. Las capturas de preview son anteriores a los dos últimos ajustes (espacio superior y alineación de portadas). No se ejecutó `npm run cms:local:verify`; los datos anteriores del entorno local no se tocaron.
+
+Para revisar el segundo perfil: `http://127.0.0.1:3219/crew/local-test-person-c` (quedó publicado solo en local). Preview: iniciar sesión en `http://127.0.0.1:3219/admin/login` con las credenciales locales y abrir `/admin/posts/20000000-0000-4000-8000-000000000003/preview`, o «Visual preview» en `/admin/content`.
+
+Capturas: [perfil sintético](verification/review-2026-10-13-profile-preview/synthetic-profile-desktop.jpg) · [relacionados en móvil](verification/review-2026-10-13-profile-preview/synthetic-profile-mobile-related.jpg) · [preview por ruta](verification/review-2026-10-13-profile-preview/preview-route-top.jpg) · [preview, portadas](verification/review-2026-10-13-profile-preview/preview-route-covers.jpg) · [preview integrado](verification/review-2026-10-13-profile-preview/preview-inline.jpg) · [Georgia sin cambios](verification/review-2026-10-13-profile-preview/georgia-unchanged.jpg).
+
 ### Recarga continua de Wild Wonders: resuelta
 
 - **Causa comprobada:** caché de desarrollo de Turbopack obsoleta en `.next/dev`. Se había creado el 6/10, cuando el repositorio estaba en `Desktop/developer/…`; hoy está en `Desktop/Codigo/…` y la caché conservaba rutas absolutas viejas. Al suscribirse al chunk de `/crew/[slug]`, el servidor respondía por el websocket de HMR `reloadPage` con `TurbopackInternalError: Failed to write app endpoint /crew/[slug]/page — Next.js package not found`, y el navegador recargaba sin fin.
@@ -61,7 +106,7 @@ Chrome headless con Playwright fuera del repositorio, solo lectura contra 3218, 
 | Reduced motion | Portada y par sin pin, 14 de 14 elementos animados en reposo, garabatos completos, sin animación del cue, sin desbordamiento. |
 | `/crew` sin cambios | Altura 8762px, igual que la aprobada; tres garabatos, activo en Laguna, cuerpo del relato a 18px, 6 tarjetas y 6 retratos. |
 
-No ejecutado: build, lint completo del repositorio, anchos intermedios, vista previa del CMS para perfiles (sigue usando el renderizador genérico, no esta plantilla), un perfil con obras relacionadas publicadas (no existe contenido real) y un segundo perfil real que confirme la plantilla con otro contenido.
+No ejecutado: build, lint completo del repositorio y anchos intermedios. El preview del CMS y un segundo perfil con obras relacionadas se cubrieron después con datos sintéticos locales (subsección anterior); sigue sin existir un segundo perfil real.
 
 Capturas: [prototipo desktop](verification/review-2026-10-13-profile/prototype-desktop.jpg) · [prototipo, 12 posiciones](verification/review-2026-10-13-profile/prototype-scroll-states.jpg) · [perfil, 12 posiciones](verification/review-2026-10-13-profile/profile-scroll-states.jpg) · [antes de esta entrega](verification/review-2026-10-13-profile/profile-desktop-before.jpg) · [prototipo móvil](verification/review-2026-10-13-profile/prototype-mobile.jpg) · [perfil móvil](verification/review-2026-10-13-profile/profile-mobile.jpg) · [reduced motion](verification/review-2026-10-13-profile/profile-reduced-pair.jpg) · [migas con foco](verification/review-2026-10-13-profile/profile-keyboard-breadcrumb.jpg) · [`/crew` sin cambios](verification/review-2026-10-13-profile/crew-unchanged-story.jpg).
 

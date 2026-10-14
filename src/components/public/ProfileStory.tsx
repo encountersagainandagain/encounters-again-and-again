@@ -1,8 +1,8 @@
 import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
-import {safeHref,string,type Row} from '@/features/encounters/presentation';
+import {profileHero,safeHref,string,type Row} from '@/features/encounters/presentation';
 import {EditorialBlocks} from './EditorialBlocks';
-import {Scribble} from './EditorialPieces';
+import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
 
 // Crew profile template (Wild Wonders.dc.html): the block sequence of any profile is read as
@@ -22,18 +22,19 @@ const plain=(b:ContentBlock)=>!['lead','title','items','faqItems','accordionItem
 function kind(b:ContentBlock){
   if(b.type==='heading')return title(b)?'heading':'other';
   if(b.type==='image'||b.type==='image-pair')return pictures(b).length?'image':'other';
-  // A source block with links shows only its links, as in the shared block renderer.
-  if(b.type==='source'&&links(b).length)return 'link';
+  // A link or source block with links shows only its links, as in the shared block renderer.
+  if((b.type==='source'||b.type==='link')&&links(b).length)return 'link';
   if(!plain(b)||pictures(b).length)return 'other';
   return (b.type==='paragraph'||b.type==='text')&&paragraphs(b).length&&!links(b).length?'text':'other';
 }
 function compose(blocks:ContentBlock[]){
   const kinds=blocks.map(kind);let i=0;
-  // A one-line text directly above two or more images introduces a gallery.
-  const gallery=(at:number)=>kinds[at]==='text'&&paragraphs(blocks[at]).length===1&&kinds[at+1]==='image'&&(kinds[at+2]==='image'||pictures(blocks[at+1]).length>1);
+  // A one-line text directly above two or more images introduces a gallery, unless it opens a chapter.
+  const gallery=(at:number)=>kinds[at]==='text'&&kinds[at-1]!=='heading'&&paragraphs(blocks[at]).length===1&&kinds[at+1]==='image'&&(kinds[at+2]==='image'||pictures(blocks[at+1]).length>1);
   const intro:{title?:ContentBlock;texts:string[];images:Picture[]}={texts:[],images:[]};
-  for(;i<blocks.length&&!gallery(i);i++){
-    if(kinds[i]==='heading'){if(intro.title)break;intro.title=blocks[i];}
+  // The opening takes the leading texts and images. A heading is its title only when it comes before any text; otherwise it starts a chapter.
+  for(;i<blocks.length;i++){
+    if(kinds[i]==='heading'){if(intro.title||intro.texts.length)break;intro.title=blocks[i];}
     else if(kinds[i]==='text')intro.texts.push(...paragraphs(blocks[i]));
     else if(kinds[i]==='image')intro.images.push(...pictures(blocks[i]));
     else break;
@@ -59,6 +60,11 @@ function compose(blocks:ContentBlock[]){
   }
   return {intro,segments};
 }
+// One profile view for the public page and the CMS preview; each context supplies its own records and media.
+export function ProfileView({member,post,blocks,media,trail,children}:{member:Row;post:Row;blocks:ContentBlock[];media:Row[];trail?:ReactNode;children?:ReactNode}){
+  const hero=profileHero(member,post,blocks);
+  return <><PhotoHero pinned title={hero.title} kicker={hero.kicker} cover={hero.cover} fallback={hero.fallback} media={media}/><div id="editorial-content">{trail}<ProfileStory blocks={blocks} media={media} kicker={string(member.alias)||string(member.name)}/>{children}</div></>;
+}
 export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
   const {intro,segments}=compose(blocks);
   // The pair shows the portrait beside a work: with a single opening image, the last image of the first chapter joins it.
@@ -76,7 +82,7 @@ export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:
   });
   return <>
     {intro.title&&<section className="crew-opening profile-opening"><h2 data-seq="0.95,0.5" id={anchor(intro.title)}>{title(intro.title)}</h2><Scribble variant="title"/></section>}
-    {intro.texts.length>0&&<section className="crew-row crew-origin"><div data-seq="1.42,0.6">{kicker&&<span className="editorial-kicker">{kicker}</span>}{intro.texts.map((text,i)=><p key={i} className={i===0?'crew-lead':undefined}>{text}</p>)}</div></section>}
+    {intro.texts.length>0&&<section className={`crew-row crew-origin${intro.title?'':' profile-untitled'}`}><div data-seq={intro.title?'1.42,0.6':'0.95,0.5'}>{kicker&&<span className="editorial-kicker">{kicker}</span>}{intro.texts.map((text,i)=><p key={i} className={i===0?'crew-lead':undefined}>{text}</p>)}</div></section>}
     {pair.length>0&&<section className="crew-pair-pin" data-pair-pin><div className={`crew-pair${pair.length===1?' crew-pair-single':''}`}>{pair.map((picture,i)=><div key={i} data-pair={i?'b':'a'} className={small(picture)?'profile-natural':undefined}><MediaImage id={picture.id} media={media}/></div>)}</div></section>}
     {covers(intro.images.slice(2),'opening-covers')}
     {rendered}

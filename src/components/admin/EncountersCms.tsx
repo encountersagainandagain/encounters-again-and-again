@@ -84,7 +84,7 @@ export function EncountersCms(){
           <div className="flex flex-wrap gap-4">{['paragraph','heading','image','quote','divider','link','youtube','toc'].map(type=><button key={type} type="button" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}>Add {type}</button>)}</div>
           {!!record.updated_at&&<Link href={`/admin/posts/${record.id}/edit`}>Open detailed block editor</Link>}
         </fieldset>
-        {preview&&<EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]}/>}
+        {preview&&<EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]}/>}
       </>}
       <button disabled={busy} className="btn-ocean">{busy?'Saving…':'Save'}</button>
     </form>}
