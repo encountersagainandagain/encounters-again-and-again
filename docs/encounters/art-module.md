@@ -112,22 +112,20 @@ npm run demo:local:clean -- --confirm    # borra los ejemplos del plan
 npm run demo:local:keep -- <id>          # conserva un ejemplo editado como propio
 ```
 
-Contenido (todo con «(demo)» en el nombre y las obras con `source_metadata.demo = true`):
+Contenido (todo con «(demo)» en el nombre y las obras con `source_metadata.demo = true`). Ampliado el 2026-10-16 para recorrer `/art` como en el prototipo:
 
-- **Personas ficticias** «Demo Maker Marea» (alias «Marea Studio (demo)») y «Demo Maker Coral», con páginas personales publicadas. No se atribuye nada a personas reales.
-- **Imágenes sintéticas:** 10 dibujos SVG de línea generados por el script, rotulados «DEMO». No se usan fotos reales para no atribuir trabajo real a autores ficticios.
-- **Categorías:**
-  - «Wire art (demo)»: arte con alambre, gallery.
-  - «Illustrated book (demo)»: feature, tapa y contratapa.
-  - «Short films (demo)»: video, sin video cargado.
-  - «Field photography (demo)»: gallery sin crédito, lead ni texto, para el caso sin datos opcionales.
-  - «Sound notes (demo draft)»: audio, en borrador.
-- **10 obras:**
-  - una con **dos responsables** con roles distintos («Manta ray in wire»);
-  - una **en borrador**;
-  - una sin imagen, resumen ni autores;
-  - una publicada dentro de una categoría en borrador, que no se ve;
-  - formatos gallery, feature y video.
+- **Las cuatro categorías de `Art.dc.html`, con su contenido real y sus créditos tal como figuran en el prototipo.** Para estas no se crean registros de personas: el crédito es texto de la categoría y de la obra.
+  - «Books (demo)»: feature. La obra «Encounters (demo)» es una presentación completa del libro: banner con el guepardo, autores, encabezados, tapa y contratapa, cómo se hizo, cita, imagen y enlace a encountersagainandagain.org. Además, la contratapa como segunda obra.
+  - «Films (demo)»: video, con el corto real de YouTube; el reproductor carga recién al click.
+  - «Drawings (demo)»: el guepardo, el logo y el boceto descartado.
+  - «Photography (demo)»: el apneísta, la raya y los lobos marinos.
+- **Casos sintéticos con personas ficticias** («Demo Maker Marea», alias «Marea Studio (demo)», y «Demo Maker Coral», con páginas personales). Usan solo dibujos SVG generados y rotulados «DEMO», para no atribuir trabajo real a autores inventados.
+  - «Wire art (demo)»: arte con alambre, con una obra de **dos responsables** con roles distintos y **un borrador**.
+  - «Field notes (demo)»: sin crédito, lead ni texto, y una obra sin imagen, resumen ni autores, para los casos sin datos opcionales.
+  - «Sound notes (demo draft)»: categoría de audio en borrador, con una obra publicada que no se ve.
+- Imágenes del handoff idénticas a otras ya existentes en local se reutilizan y no pasan a ser «demo».
+
+El cambio de definición se aplicó con `demo:local:clean -- --confirm` y un nuevo seed. Antes se comprobó que no hubiera ediciones locales posteriores al seed anterior (ninguna en contenidos, categorías, Crew ni medios). Resultado: 43 registros creados; el seed repetido crea 0 y conserva 43.
 
 **Identificadores estables** con prefijo `de000000-`. Volver a ejecutar el seed no crea ni sobrescribe nada; comprobado con 0 creados y 29 conservados. Si una imagen idéntica ya existe, se reutiliza y no pasa a ser «demo».
 
@@ -152,7 +150,8 @@ Los dos registros creados por la prueba del admin se eliminaron después; el set
 
 ## Diferencias y pendientes
 
-- En local hay 6 categorías publicadas, 4 de demo y 2 de pruebas anteriores, así que `/art` muestra el **carrusel** (>4, decisión del handoff) en lugar de la grilla de 4 del prototipo. Con 4 o menos se ve la grilla.
+- En local hay 8 categorías publicadas: 6 de demo y 2 fixtures de la verificación anterior del CMS, «Local Test Gallery» y «Local Test Prints». La primera tiene una imagen privada de 1 px, por eso su tile se ve vacío. `/art` muestra entonces la **fila desplazable**, porque son más de 4 (decisión del handoff); con 4 o menos se ve la grilla del prototipo.
+- **Fila de categorías (2026-10-16, feedback de Juani):** el carrusel genérico centraba el primer tile (empezaba «en la posición 2») y mostraba la barra de scroll. Ahora es una fila propia de Art que arranca alineada como la grilla y muestra 4 tiles (3 en tablet, 1 y parte del siguiente en móvil). No tiene barra visible. Lleva flechas circulares sobre los bordes, que aparecen solo cuando hay más hacia ese lado (la de avanzar se mueve suavemente para invitar a desplazarse), un degradado en ese borde y un contador «01–04 / 08». Verificado: primer tile alineado, barra de 0 px, flechas y contador al avanzar, flecha accesible por teclado, sin desbordamiento a 1440 y 390 px.
 - La columna doble de dibujos del prototipo (una obra grande y dos apiladas) no se reproduce automáticamente: se compone con `span` y `full_height`.
 - Los bloques del cuerpo de la obra usan el renderizador compartido. La fidelidad completa a `Post.dc.html` (imagen 95vw con parallax, etiquetas de bloque) queda para el módulo de publicaciones.
 - Caché de imágenes públicas y tamaños responsivos: ver medios.
@@ -165,8 +164,9 @@ Servidores: CMS aislado `http://127.0.0.1:3219` (Supabase local, credenciales en
 
 - Art con ejemplos: `http://127.0.0.1:3219/art`
 - Categoría: `http://127.0.0.1:3219/art/demo-wire-art`
+- Presentación del libro: `http://127.0.0.1:3219/art/demo-books/demo-encounters-book`
 - Obra con dos autores: `http://127.0.0.1:3219/art/demo-wire-art/demo-wire-manta`
 - Perfil de autor: `http://127.0.0.1:3219/crew/demo-maker-coral`
 - Admin: `http://127.0.0.1:3219/admin`
 
-Capturas en `verification/review-2026-10-14-art/`: [inicio del admin](verification/review-2026-10-14-art/admin-dashboard.jpg), [editor de obra](verification/review-2026-10-14-art/admin-artwork-editor.jpg), [preview de obra](verification/review-2026-10-14-art/admin-artwork-preview.jpg), [relacionados](verification/review-2026-10-14-art/admin-related-picker.jpg), [página personal en Crew](verification/review-2026-10-14-art/admin-crew-page.jpg), [preview de categoría](verification/review-2026-10-14-art/admin-category-preview.jpg), [descripción de medios](verification/review-2026-10-14-art/admin-media-needs-description.jpg), [obras en perfil](verification/review-2026-10-14-art/profile-works.jpg), [Art en móvil](verification/review-2026-10-14-art/art-mobile.jpg), [Art: prototipo](verification/review-2026-10-14-art/prototype-art.jpg) y [Art: implementación](verification/review-2026-10-14-art/art-scroll-states.jpg).
+Capturas en `verification/review-2026-10-14-art/`: [inicio del admin](verification/review-2026-10-14-art/admin-dashboard.jpg), [editor de obra](verification/review-2026-10-14-art/admin-artwork-editor.jpg), [preview de obra](verification/review-2026-10-14-art/admin-artwork-preview.jpg), [relacionados](verification/review-2026-10-14-art/admin-related-picker.jpg), [página personal en Crew](verification/review-2026-10-14-art/admin-crew-page.jpg), [preview de categoría](verification/review-2026-10-14-art/admin-category-preview.jpg), [descripción de medios](verification/review-2026-10-14-art/admin-media-needs-description.jpg), [obras en perfil](verification/review-2026-10-14-art/profile-works.jpg), [Art en móvil](verification/review-2026-10-14-art/art-mobile.jpg), [Art: prototipo](verification/review-2026-10-14-art/prototype-art.jpg) y [Art: implementación](verification/review-2026-10-14-art/art-scroll-states.jpg), [fila de categorías](verification/review-2026-10-14-art/art-rail-desktop.jpg), [fila en móvil](verification/review-2026-10-14-art/art-rail-mobile.jpg), [Art con ejemplos ampliados](verification/review-2026-10-14-art/art-examples.jpg) y [libro Encounters](verification/review-2026-10-14-art/book-encounters.jpg).

@@ -282,6 +282,12 @@ Preparar desktop y móvil. Mostrar el comportamiento de perfiles con mucho y poc
 
 Próxima actualización: revisión visual de checkpoints 4.0–4.2. No avanzar automáticamente con páginas restantes/Home v2. SQL/RLS/Storage, importación y CMS conservados; deploy/DNS y entrega de email siguen pendientes.
 
+### 2026-10-16 — ajustes de Art tras la revisión de Juani
+
+- La fila de categorías de `/art` arranca alineada (antes el primer tile quedaba centrado), sin barra de scroll visible y con flechas circulares que indican que hay más.
+- Ejemplos locales ampliados con las cuatro categorías del prototipo y su contenido real (Books con la presentación completa del libro Encounters, Films, Drawings, Photography), además de los casos sintéticos. Seed idempotente: 43 registros.
+- Prueba manual de Juani pendiente.
+
 ### 2026-10-14 — módulo Art y claridad del CMS
 
 - Art público completo según el prototipo: landing con tiles, chips y secciones por formato; página de categoría; página de obra con autores enlazados; obras en los perfiles. Estados vacíos y privacidad de borradores conservados.
