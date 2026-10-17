@@ -170,3 +170,19 @@ Servidores: CMS aislado `http://127.0.0.1:3219` (Supabase local, credenciales en
 - Admin: `http://127.0.0.1:3219/admin`
 
 Capturas en `verification/review-2026-10-14-art/`: [inicio del admin](verification/review-2026-10-14-art/admin-dashboard.jpg), [editor de obra](verification/review-2026-10-14-art/admin-artwork-editor.jpg), [preview de obra](verification/review-2026-10-14-art/admin-artwork-preview.jpg), [relacionados](verification/review-2026-10-14-art/admin-related-picker.jpg), [página personal en Crew](verification/review-2026-10-14-art/admin-crew-page.jpg), [preview de categoría](verification/review-2026-10-14-art/admin-category-preview.jpg), [descripción de medios](verification/review-2026-10-14-art/admin-media-needs-description.jpg), [obras en perfil](verification/review-2026-10-14-art/profile-works.jpg), [Art en móvil](verification/review-2026-10-14-art/art-mobile.jpg), [Art: prototipo](verification/review-2026-10-14-art/prototype-art.jpg) y [Art: implementación](verification/review-2026-10-14-art/art-scroll-states.jpg), [fila de categorías](verification/review-2026-10-14-art/art-rail-desktop.jpg), [fila en móvil](verification/review-2026-10-14-art/art-rail-mobile.jpg), [Art con ejemplos ampliados](verification/review-2026-10-14-art/art-examples.jpg) y [libro Encounters](verification/review-2026-10-14-art/book-encounters.jpg).
+
+## Validación y errores comprensibles en el admin — 2026-10-16
+
+Pedido de Juani: que al crear algo los campos que faltan, sobre todo los obligatorios, se marquen en rojo y digan qué falta, y que no aparezcan errores técnicos como `insert or update on table "artworks" violates foreign key constraint "artworks_category_id_fkey"`.
+
+- **Antes de guardar:** se comprueban los campos obligatorios de cada tipo (título, dirección y categoría en una obra; nombre y dirección en Crew y categorías; los de necesidades y sesiones), el formato de la dirección y que las opciones elegidas sigan existiendo. Si falta algo, no se envía nada: el aviso general dice cuántos campos necesitan atención y cada campo queda con borde, etiqueta y mensaje en rojo («Required: add the title.»). El foco va al primero. Los obligatorios llevan asterisco, y los lectores de pantalla anuncian «(required)». El error de un campo desaparece al corregirlo.
+- **Dirección automática:** mientras el contenido es nuevo, la dirección se completa sola a partir del título o del nombre, por ejemplo «Validation test (demo)» → `validation-test-demo`. Deja de seguirlo en cuanto se edita a mano.
+- **Si la base rechaza el guardado:** el error se traduce a lenguaje claro y se marca el campo afectado; el texto técnico queda plegado en «Technical detail» para soporte. Casos cubiertos:
+  - opción que ya no existe (categoría, imagen, página, persona o relacionado): además se recargan las listas;
+  - dirección repetida o con caracteres no permitidos;
+  - contenido guardado por otra persona mientras estaba abierto;
+  - sesión vencida o sin permiso;
+  - falta de conexión.
+- **El error que vio Juani:** la obra apuntaba a una categoría que ya no existía. Casi seguro fue porque el set demo se regeneró con el admin abierto y la lista de categorías del formulario quedó desactualizada. Reproducido en local con una categoría temporal borrada mientras el formulario estaba abierto. Ahora el mensaje es «Not saved. The chosen category no longer exists. The list has been refreshed: choose a category again.», el campo queda en rojo y la categoría borrada desaparece de la lista. Con otra categoría el guardado funcionó.
+
+Verificado en 3219 con tiempo límite; la categoría temporal y la obra de prueba se borraron después. TypeScript y eslint sin errores. Capturas: [campos obligatorios](verification/review-2026-10-16-admin-errors/required-fields.jpg) y [error explicado](verification/review-2026-10-16-admin-errors/friendly-error.jpg).

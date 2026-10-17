@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Plus,Trash2,Upload} from 'lucide-react';
@@ -8,6 +8,7 @@ import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
 import {duplicateContent} from '@/features/encounters/presentation';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
+import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,StatusBadge} from './AdminShell';
@@ -23,18 +24,22 @@ const optionLabel=(r:Row)=>String(r.name||r.title||r.alt||r.id);
 const needsAlt=(m:Row)=>!String(m.alt||'').trim()||/\.(jpe?g|png|webp|gif|svg)$/i.test(String(m.alt))||/^(img|dsc|whatsapp|screenshot|photo)[\s_-]?\d/i.test(String(m.alt));
 const date=(v:unknown)=>v?new Date(String(v)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
 
-function Fields({fields,value,onChange,options,notes=help}:{fields:Field[];value:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>;notes?:Record<string,string>}) {
+// Problems found before or while saving, keyed by field (children rows use a prefix).
+const FieldErrors=createContext<{errors:Record<string,string>;clear:(key:string)=>void}>({errors:{},clear:()=>{}});
+function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fields:Field[];value:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>;notes?:Record<string,string>;prefix?:string}) {
+  const {errors,clear}=useContext(FieldErrors);
   return <div className="adm-fields">{fields.map(field=>{
+    const problem=errors[prefix+field.key];const onChange=(next:Row)=>{if(problem)clear(prefix+field.key);change(next);};
     const raw=value[field.key]; const val=raw==null?'':String(raw);const id=`field-${field.key}`;
-    const note=notes[field.key]?<small id={`${id}-help`}>{notes[field.key]}</small>:null;
-    const props={id,required:field.required,'aria-describedby':notes[field.key]?`${id}-help`:undefined};
+    const note=<>{problem?<strong className="adm-field-error" id={`${id}-error`} role="alert">{problem}</strong>:null}{notes[field.key]?<small id={`${id}-help`}>{notes[field.key]}</small>:null}</>;
+    const props={id:prefix?`${id}-${prefix.replace(/\W/g,'')}`:id,required:field.required,'aria-invalid':problem?true:undefined,'aria-describedby':[problem?`${id}-error`:'',notes[field.key]?`${id}-help`:''].filter(Boolean).join(' ')||undefined};
     if(field.type==='links'){const links=(raw||{}) as Row;return <fieldset key={field.key} className="adm-field adm-field--wide"><legend>{field.label}</legend>{note}<div className="adm-fields">{['Website','Instagram','YouTube','Email','Other'].map(label=><label className="adm-field" key={label}>{label}<input value={String(links[label]||'')} placeholder={label==='Email'?'mailto:…':'https://…'} onChange={e=>onChange({...value,[field.key]:{...links,[label]:e.target.value}})}/></label>)}</div></fieldset>;}
     if(field.type==='checkbox')return <label key={field.key} className="adm-check adm-field--wide"><input type="checkbox" {...props} checked={raw===true} onChange={e=>onChange({...value,[field.key]:e.target.checked})}/><span>{field.label}{note}</span></label>;
     const wide=field.type==='textarea'||field.reference==='media';
     const control=field.type==='textarea'?<textarea {...props} rows={4} value={val} onChange={e=>onChange({...value,[field.key]:e.target.value})}/>:
       field.type==='select'?<select {...props} value={val} onChange={e=>onChange({...value,[field.key]:e.target.value||null})}><option value="">—</option>{field.reference?(options[field.reference]||[]).map(r=><option key={String(r.id)} value={String(r.id)}>{optionLabel(r)}</option>):field.options?.map(o=><option key={o} value={o}>{optionText(o)}</option>)}</select>:
       <input {...props} type={field.type||'text'} step={field.type==='number'?'any':undefined} value={field.type==='date'?val.slice(0,10):val} onChange={e=>onChange({...value,[field.key]:field.type==='number'?(e.target.value===''?null:Number(e.target.value)):field.type==='date'?(e.target.value||null):e.target.value})}/>;
-    return <label key={field.key} htmlFor={id} className={`adm-field${wide?' adm-field--wide':''}`}>{field.label}{field.required?' *':''}{field.reference==='media'?<span className="adm-media-field"><AdminThumb id={raw} size={64}/>{control}</span>:control}{note}</label>;
+    return <label key={field.key} htmlFor={props.id} className={`adm-field${wide?' adm-field--wide':''}${problem?' adm-field--error':''}`}><span>{field.label}{field.required?<span className="adm-required"> *<span className="sr-only"> (required)</span></span>:''}</span>{field.reference==='media'?<span className="adm-media-field"><AdminThumb id={raw} size={64}/>{control}</span>:control}{note}</label>;
   })}</div>;
 }
 function Card({title,lead,children,actions}:{title:string;lead?:string;children:ReactNode;actions?:ReactNode}){
@@ -50,6 +55,8 @@ export function EncountersCms(){
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [preview,setPreview]=useState(false);
+  const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
+  const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
   const [loaded,setLoaded]=useState(false);const [scope,setScope]=useState('publications');const [query,setQuery]=useState('');const [kindFilter,setKindFilter]=useState('');const [statusFilter,setStatusFilter]=useState('');
   // Unsaved changes are detected against the state captured after loading or saving.
   const snapshot=useMemo(()=>JSON.stringify([record,specific,blocks,contributors,contributorRoles,related,childRows]),[record,specific,blocks,contributors,contributorRoles,related,childRows]);
@@ -65,8 +72,8 @@ export function EncountersCms(){
     if(!live)return;const error=results.find(r=>r.error)?.error;if(error){setMessage(error.message);return;}
     setRows(results[0].data||[]);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
   }void load();return()=>{live=false;};},[table,revision]);
-  function start(newKind?:string){setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setPreview(false);setMessage('');setMarkClean(true);}
-  async function edit(row:Row){if(!supabase)return;setBusy(true);setMessage('');setPreview(false);
+  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setPreview(false);setMessage('');setMarkClean(true);}
+  async function edit(row:Row){if(!supabase)return;setErrors({});setErrorDetail('');setBusy(true);setMessage('');setPreview(false);
     try{if(table==='posts'){
       const k=String(row.kind);const result=await Promise.all([
         supabase.from('post_blocks').select('*').eq('post_id',row.id).order('position'),
@@ -83,7 +90,22 @@ export function EncountersCms(){
     if(params.get('new'))start(params.get('new')!);else if(params.get('edit')){const row=rows.find(r=>r.id===params.get('edit'));if(row)void edit(row);}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[loaded,table,params,rows]);
-  async function save(event?:FormEvent,patch:Row={}){event?.preventDefault();if(!supabase||!record)return;const current={...record,...patch};setBusy(true);setMessage('');
+  // Required fields, address format and choices that no longer exist, checked before anything is sent.
+  function validate(current:Row){
+    const found:Record<string,string>={};const exists=(ref:string|undefined,v:unknown)=>!ref||!v||(options[ref]||[]).some(r=>r.id===v);
+    const check=(fields:Field[],value:Row,prefix='')=>fields.forEach(f=>{const v=value[f.key];
+      if(f.required&&(v==null||String(v).trim()===''))found[prefix+f.key]=`Required: add the ${f.label.toLowerCase()}.`;
+      else if(f.key==='slug'&&slugProblem(v))found[prefix+f.key]=slugProblem(v);
+      else if(f.reference&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
+    if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
+    else check(entities[table].fields,current);
+    return found;
+  }
+  async function save(event?:FormEvent,patch:Row={}){event?.preventDefault();if(!supabase||!record)return;const current={...record,...patch};
+    const problems=validate(current);setErrorDetail('');
+    if(Object.keys(problems).length){setErrors(problems);const n=Object.keys(problems).length;setMessage(`Not saved yet: ${n===1?'one field needs':`${n} fields need`} attention. ${n===1?'It is':'They are'} marked in red below.`);
+      const first=Object.keys(problems)[0];requestAnimationFrame(()=>{const el=document.getElementById(first.startsWith('child-')?`field-${first.replace(/^child-\d+-/,'')}-${first.replace(/-[^-]+$/,'').replace(/\W/g,'')}`:`field-${first}`);el?.scrollIntoView({block:'center'});el?.focus();});return;}
+    setErrors({});setBusy(true);setMessage('');
     try{
       const allowed=table==='posts'?commonFields:entities[table].fields;
       const payload:Row={id:current.id,...Object.fromEntries(allowed.filter(f=>current[f.key]!==undefined).map(f=>[f.key,current[f.key]]))};
@@ -98,7 +120,9 @@ export function EncountersCms(){
       }else{const r=await supabase.rpc('save_entity',{entity:table,payload});if(r.error)throw r.error;}
       const fresh=await supabase.from(table).select('*').eq('id',current.id).single();if(fresh.error)throw fresh.error;setRecord(fresh.data);setRevision(x=>x+1);await requestAdminRevalidation({scope:'posts'});setMarkClean(true);
       setMessage(patch.status==='published'?'Published.':patch.status==='draft'?'Moved back to draft.':'Saved.');
-    }catch(e){setMessage(e instanceof Error?e.message:(e as {message?:string}).message||'Could not save');}finally{setBusy(false);}}
+    }catch(e){const ex=explainError(e);setMessage(ex.message);setErrorDetail(ex.detail);if(ex.field&&ex.fieldMessage)setErrors({[ex.field]:ex.fieldMessage});if(ex.refresh)setRevision(x=>x+1);}finally{setBusy(false);}}
+  // While a record is new, its address follows the title until someone edits the address by hand.
+  function autoSlug(prev:Row,next:Row,source:string){if(prev.updated_at||!(source in next))return next;const following=!prev.slug||prev.slug===slugify(String(prev[source]||''));if(!following||next[source]===prev[source])return next;const slug=slugify(String(next[source]||''));if(slug&&errors.slug)errorContext.clear('slug');return {...next,slug};}
   function duplicate(){if(!record)return;setRecord(duplicateContent(record,crypto.randomUUID()));setBlocks(blocks.map(b=>({...b,id:crypto.randomUUID(),source_block_id:undefined})));setChildRows(childRows.map(c=>({...c,id:crypto.randomUUID()})));setMessage('New draft copy. Save when ready.');}
   async function createProfile(){if(!supabase||!record?.updated_at)return;setBusy(true);try{const r=await supabase.rpc('create_crew_profile',{member_id:record.id});if(r.error)throw r.error;setRecord({...record,page_post_id:r.data,has_page:true});setRevision(x=>x+1);setMessage('Draft profile created. Open its blocks to edit and publish.');}catch(e){setMessage((e as {message?:string}).message||'Could not create profile');}finally{setBusy(false);}}
   async function upload(file:File){setBusy(true);try{const url=await uploadMediaFile(file,'posts');setRevision(x=>x+1);setMessage(`Image uploaded: ${url}`);}catch{setMessage('Image upload failed.');}finally{setBusy(false);}}
@@ -107,7 +131,7 @@ export function EncountersCms(){
   const label=tableLabel(table);
   // Artworks keep their image in the artwork details; use it as thumbnail when there is no cover.
   const withImage=(p:Row)=>({...p,cover_id:p.cover_id||(options.artworks||[]).find(a=>a.id===p.id)?.media_id});
-  const notice=message&&<p role="status" className={`adm-notice ${/^(Saved|Published|Moved|New draft|Draft profile|Image uploaded)/.test(message)?'adm-notice--ok':'adm-notice--error'}`}>{message}</p>;
+  const notice=message&&<div className={`adm-notice ${/^(Saved|Published|Moved|New draft|Draft profile|Image uploaded)/.test(message)?'adm-notice--ok':'adm-notice--error'}`}><p role="status">{message}</p>{errorDetail&&<details className="adm-detail"><summary>Technical detail</summary><code>{errorDetail}</code></details>}</div>;
 
   if(!record){
     const scoped=table==='posts'?rows.filter(r=>postScopes[scope](r.kind)):rows;
@@ -158,12 +182,12 @@ export function EncountersCms(){
     const seoKeys=table==='art_categories'?['seo_title','meta_description']:[];
     const side=pick(fields,entitySide);const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
     const bytes=Number(record.bytes)||0;
-    return <form onSubmit={save} className="adm-stack">
+    return <FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
       <AdminHeader kicker={tableLabel(table)} title={title}/>
       {toolbar}{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
         {table==='media'&&<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>}
-        <Card title="Details"><Fields fields={main} value={record} onChange={setRecord} options={options}/></Card>
+        <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={options}/></Card>
         {table==='art_categories'&&<Card title="Search and sharing" lead="How the category page is presented by search engines and when its link is shared."><SeoPanel value={record} onChange={setRecord} path={publicPath(table,record,{},options)} fallbackTitle={String(record.title||record.name||'')} fallbackDescription={String(record.lead||'')} image={record.cover_id}/></Card>}
         {table==='art_categories'&&preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">The category section as it appears on the Art page and on its own page.</span></header><div className="adm-preview-frame"><CategoryPreview record={record} media={options.media||[]} posts={options.posts||[]} artworks={options.artworks||[]} categories={options.art_categories||[]} crew={options.crew_members||[]}/></div></section>}
       </div><aside>
@@ -172,16 +196,16 @@ export function EncountersCms(){
         {side.length>0&&<Card title="Publication"><Fields fields={side} value={record} onChange={setRecord} options={options}/></Card>}
         {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options}/></Card>}
       </aside></div>
-    </form>;
+    </form></FieldErrors.Provider>;
   }
 
   const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{})};const credit=creditLabels[kind]||defaultCredit;const path=publicPath('posts',record,specific,options);
-  return <form onSubmit={save} className="adm-stack">
+  return <FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}{notice}
     <div className="adm-split"><div className="adm-stack">
       <Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
-        <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
+        <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
       <Card title="Content blocks" lead="The page is built from these blocks, in this order.">
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{blockLabel(b.type)}</span><div className="adm-block-tools">
@@ -210,7 +234,7 @@ export function EncountersCms(){
       <Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':'Shown as related content on this page.'}>
         <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:undefined}/>
       </Card>
-      {children[kind]&&<Card title={children[kind].label}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
+      {children[kind]&&<Card title={children[kind].label}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} prefix={`child-${i}-`} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
         <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setChildRows([...childRows,{id:crypto.randomUUID(),sort:childRows.length,...(kind==='expedition'?{status:'pending'}:{})}])}><Plus aria-hidden="true"/>Add {kind==='expedition'?'need':'session'}</button></div></div></Card>}
       <Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>
       {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))}/></div></section>}
@@ -218,5 +242,5 @@ export function EncountersCms(){
       <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
       <Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
     </aside></div>
-  </form>;
+  </form></FieldErrors.Provider>;
 }

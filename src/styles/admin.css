@@ -223,3 +223,13 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-facts{display:grid;gap:8px;margin:0}
 .adm-facts div{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--adm-line)}
 .adm-facts dt{color:var(--adm-muted);font-size:14px}.adm-facts dd{margin:0;font-weight:600;font-size:14px}
+/* Fields that need attention: red border, message and label in red, always with text. */
+.adm-required{color:var(--adm-danger)}
+.adm-field--error{color:var(--adm-danger)}
+.adm-field--error :is(input,select,textarea){border-color:var(--adm-danger)!important;background:#fffafa;outline:2px solid rgba(155,44,31,.18)}
+.adm-field-error{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--adm-danger)}
+.adm-field-error::before{content:'!';display:grid;place-items:center;width:16px;height:16px;flex:none;border-radius:50%;background:var(--adm-danger);color:#fff;font-size:11px}
+.adm-notice p{margin:0}
+.adm-detail{margin-top:8px;font-size:12px;color:var(--adm-muted)}
+.adm-detail summary{cursor:pointer}
+.adm-detail code{display:block;margin-top:6px;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,monospace}
