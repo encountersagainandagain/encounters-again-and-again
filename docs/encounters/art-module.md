@@ -186,3 +186,26 @@ Pedido de Juani: que al crear algo los campos que faltan, sobre todo los obligat
 - **El error que vio Juani:** la obra apuntaba a una categoría que ya no existía. Casi seguro fue porque el set demo se regeneró con el admin abierto y la lista de categorías del formulario quedó desactualizada. Reproducido en local con una categoría temporal borrada mientras el formulario estaba abierto. Ahora el mensaje es «Not saved. The chosen category no longer exists. The list has been refreshed: choose a category again.», el campo queda en rojo y la categoría borrada desaparece de la lista. Con otra categoría el guardado funcionó.
 
 Verificado en 3219 con tiempo límite; la categoría temporal y la obra de prueba se borraron después. TypeScript y eslint sin errores. Capturas: [campos obligatorios](verification/review-2026-10-16-admin-errors/required-fields.jpg) y [error explicado](verification/review-2026-10-16-admin-errors/friendly-error.jpg).
+
+## Crew en el admin y `/crew` local — 2026-10-17
+
+Consultas de Juani al crear un integrante («Flaquito»):
+
+- **«Profile content: Local Test Person A»**: era el campo interno que vincula a la persona con su página personal (`page_post_id`) y no debía verse como un selector editable. «Flaquito» es el registro sintético «Local Test Person A» renombrado, por eso su página seguía titulada así. Se quitó del formulario; la página personal se crea, abre y previsualiza solo desde la card «Personal page». El dato se conserva igual al guardar.
+- **«No muestra la foto»**: la foto sí se mostraba. Era la imagen elegida, un fondo azul sin descripción subido en una prueba anterior, que en el selector aparecía como un código. No había ninguna foto de Flaco subida en local. Todos los campos de imagen (retrato, portada, imagen principal, imágenes de anuncios y tarjetas) pasan a un **selector visual**:
+  - muestra la imagen elegida grande;
+  - «Choose from library» abre una grilla de miniaturas con buscador;
+  - «Upload new image» sube desde el mismo campo, la deja elegida y pide la descripción en el momento;
+  - «Remove» la quita.
+- **`/crew` local distinto del prototipo**: la base local no tenía la página «Team», que contiene el relato de `/crew`, así que entre la portada y las tarjetas no había nada. El seed local agrega «The Crew (demo page)» con los textos y las dos fotos de `The Crew.dc.html` (grupo a bordo y carta náutica). Ahora 3219 muestra la misma estructura que el prototipo y que el `/crew` aprobado de 3218. Las tarjetas muestran las personas locales (sintéticas y Flaquito), no las seis reales. El seed solo creó lo nuevo (3 registros) y conservó los 43 existentes y los cambios hechos a mano.
+- En desarrollo, `/api/media` tarda algunos segundos por imagen y no usa caché, así que las tarjetas pueden aparecer un momento sin foto.
+
+Verificado en 3219 con tiempos límite:
+
+- el formulario nuevo de Crew no muestra el campo interno;
+- la subida desde el campo con descripción funciona;
+- la biblioteca lista 27 imágenes con miniatura;
+- guardar da «Saved.» y la foto nueva carga en `/crew` (1400 px);
+- `/crew` muestra el relato completo.
+
+La ficha y la imagen de prueba se borraron después. TypeScript y eslint sin errores. Capturas en [verification/review-2026-10-17-crew-admin/](verification/review-2026-10-17-crew-admin/).

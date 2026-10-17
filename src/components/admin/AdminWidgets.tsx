@@ -69,3 +69,26 @@ export function CrewPagePanel({member,posts,busy,onCreate}:{member:Row;posts:Row
     </div>:<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={onCreate}><Plus aria-hidden="true"/>Create personal page (draft)</button>}
   </div>;
 }
+
+// Image field: shows the chosen image, lets you pick another one by sight or upload a new one in place.
+export function MediaPicker({id,value,media,onChange,folder,onUploaded,describedBy}:{id:string;value:unknown;media:Row[];onChange:(id:string|null)=>void;folder:string;onUploaded:()=>void;describedBy?:string}){
+  const [open,setOpen]=useState(false);const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [note,setNote]=useState('');const [alt,setAlt]=useState('');const [fresh,setFresh]=useState('');
+  const chosen=media.find(m=>m.id===value);const label=text(chosen?.alt);
+  const found=media.filter(m=>!query||text(m.alt).toLowerCase().includes(query.toLowerCase()));
+  async function upload(file:File){setBusy(true);setNote('');try{const {uploadMediaFile}=await import('@/lib/adminMedia');const url=await uploadMediaFile(file,folder);const newId=url.split('/').pop()!;onChange(newId);setFresh(newId);setAlt('');setOpen(false);onUploaded();setNote('Image uploaded. Describe it below so everyone can understand it.');}catch{setNote('The image could not be uploaded. Use a JPG, PNG, WebP or GIF under 10 MB.');}finally{setBusy(false);}}
+  async function describe(){const {supabase}=await import('@/lib/supabase');if(!supabase||!fresh||!alt.trim())return;const r=await supabase.from('media').update({alt:alt.trim()}).eq('id',fresh);setNote(r.error?'The description could not be saved. You can add it later in Media library.':'Description saved.');if(!r.error){setFresh('');onUploaded();}}
+  return <div className="adm-picker" id={id} aria-describedby={describedBy}>
+    <div className="adm-picker-current"><AdminThumb id={value} size="100%"/><div className="adm-stack" style={{gap:8}}>
+      <span>{value?label||<em>Image without a description</em>:'No image chosen'}</span>
+      <div className="adm-actions">
+        <button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setOpen(!open)} aria-expanded={open}>{open?'Close library':'Choose from library'}</button>
+        <label className={`adm-btn adm-btn--ghost adm-btn--small${busy?' is-busy':''}`}>{busy?'Uploading…':'Upload new image'}<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f);e.target.value='';}}/></label>
+        {value?<button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>onChange(null)}>Remove</button>:null}
+      </div>
+    </div></div>
+    {note&&<p className="adm-help" role="status">{note}</p>}
+    {fresh&&<div className="adm-picker-describe"><input value={alt} onChange={e=>setAlt(e.target.value)} placeholder="e.g. Flaco smiling on the boat at sunset" aria-label="Description of the new image"/><button type="button" className="adm-btn adm-btn--small" disabled={!alt.trim()} onClick={()=>void describe()}>Save description</button></div>}
+    {open&&<div className="adm-picker-panel"><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by description" aria-label="Search images"/>
+      <ul>{found.map(m=>{const on=m.id===value;return <li key={text(m.id)}><button type="button" aria-pressed={on} onClick={()=>{onChange(text(m.id));setOpen(false);}}><AdminThumb id={m.id} size="100%"/><span>{text(m.alt)||'No description'}</span></button></li>;})}</ul></div>}
+  </div>;
+}

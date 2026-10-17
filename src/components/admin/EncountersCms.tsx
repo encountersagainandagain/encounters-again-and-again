@@ -9,7 +9,7 @@ import {children,commonFields,details,entities,kinds,type Field} from '@/feature
 import {duplicateContent} from '@/features/encounters/presentation';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
 import {explainError,slugProblem,slugify} from './adminErrors';
-import {CrewPagePanel,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
+import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,StatusBadge} from './AdminShell';
 import {blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
@@ -26,8 +26,10 @@ const date=(v:unknown)=>v?new Date(String(v)).toLocaleDateString('en-GB',{day:'n
 
 // Problems found before or while saving, keyed by field (children rows use a prefix).
 const FieldErrors=createContext<{errors:Record<string,string>;clear:(key:string)=>void}>({errors:{},clear:()=>{}});
+// Lets image fields refresh the media list after an upload.
+const ReloadOptions=createContext<()=>void>(()=>{});
 function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fields:Field[];value:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>;notes?:Record<string,string>;prefix?:string}) {
-  const {errors,clear}=useContext(FieldErrors);
+  const {errors,clear}=useContext(FieldErrors);const reload=useContext(ReloadOptions);
   return <div className="adm-fields">{fields.map(field=>{
     const problem=errors[prefix+field.key];const onChange=(next:Row)=>{if(problem)clear(prefix+field.key);change(next);};
     const raw=value[field.key]; const val=raw==null?'':String(raw);const id=`field-${field.key}`;
@@ -39,7 +41,9 @@ function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fie
     const control=field.type==='textarea'?<textarea {...props} rows={4} value={val} onChange={e=>onChange({...value,[field.key]:e.target.value})}/>:
       field.type==='select'?<select {...props} value={val} onChange={e=>onChange({...value,[field.key]:e.target.value||null})}><option value="">—</option>{field.reference?(options[field.reference]||[]).map(r=><option key={String(r.id)} value={String(r.id)}>{optionLabel(r)}</option>):field.options?.map(o=><option key={o} value={o}>{optionText(o)}</option>)}</select>:
       <input {...props} type={field.type||'text'} step={field.type==='number'?'any':undefined} value={field.type==='date'?val.slice(0,10):val} onChange={e=>onChange({...value,[field.key]:field.type==='number'?(e.target.value===''?null:Number(e.target.value)):field.type==='date'?(e.target.value||null):e.target.value})}/>;
-    return <label key={field.key} htmlFor={props.id} className={`adm-field${wide?' adm-field--wide':''}${problem?' adm-field--error':''}`}><span>{field.label}{field.required?<span className="adm-required"> *<span className="sr-only"> (required)</span></span>:''}</span>{field.reference==='media'?<span className="adm-media-field"><AdminThumb id={raw} size={64}/>{control}</span>:control}{note}</label>;
+    const title=<span>{field.label}{field.required?<span className="adm-required"> *<span className="sr-only"> (required)</span></span>:''}</span>;
+    if(field.reference==='media')return <div key={field.key} role="group" aria-labelledby={`${props.id}-label`} className={`adm-field adm-field--wide${problem?' adm-field--error':''}`}><span id={`${props.id}-label`}>{title}</span><MediaPicker id={props.id} value={raw} media={options.media||[]} folder={field.key==='portrait_id'?'crew':'posts'} onUploaded={reload} describedBy={props['aria-describedby']} onChange={id=>onChange({...value,[field.key]:id})}/>{note}</div>;
+    return <label key={field.key} htmlFor={props.id} className={`adm-field${wide?' adm-field--wide':''}${problem?' adm-field--error':''}`}>{title}{control}{note}</label>;
   })}</div>;
 }
 function Card({title,lead,children,actions}:{title:string;lead?:string;children:ReactNode;actions?:ReactNode}){
@@ -55,6 +59,7 @@ export function EncountersCms(){
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [preview,setPreview]=useState(false);
+  const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
   const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
   const [loaded,setLoaded]=useState(false);const [scope,setScope]=useState('publications');const [query,setQuery]=useState('');const [kindFilter,setKindFilter]=useState('');const [statusFilter,setStatusFilter]=useState('');
@@ -96,7 +101,7 @@ export function EncountersCms(){
     const check=(fields:Field[],value:Row,prefix='')=>fields.forEach(f=>{const v=value[f.key];
       if(f.required&&(v==null||String(v).trim()===''))found[prefix+f.key]=`Required: add the ${f.label.toLowerCase()}.`;
       else if(f.key==='slug'&&slugProblem(v))found[prefix+f.key]=slugProblem(v);
-      else if(f.reference&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
+      else if(f.reference&&f.reference!=='media'&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
     if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
     else check(entities[table].fields,current);
     return found;
@@ -180,9 +185,9 @@ export function EncountersCms(){
 
   if(table!=='posts'){
     const seoKeys=table==='art_categories'?['seo_title','meta_description']:[];
-    const side=pick(fields,entitySide);const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
+    const side=pick(fields,entitySide).filter(f=>f.key!=='page_post_id');const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
     const bytes=Number(record.bytes)||0;
-    return <FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
+    return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
       <AdminHeader kicker={tableLabel(table)} title={title}/>
       {toolbar}{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
@@ -196,11 +201,11 @@ export function EncountersCms(){
         {side.length>0&&<Card title="Publication"><Fields fields={side} value={record} onChange={setRecord} options={options}/></Card>}
         {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options}/></Card>}
       </aside></div>
-    </form></FieldErrors.Provider>;
+    </form></FieldErrors.Provider></ReloadOptions.Provider>;
   }
 
   const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{})};const credit=creditLabels[kind]||defaultCredit;const path=publicPath('posts',record,specific,options);
-  return <FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
+  return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}{notice}
     <div className="adm-split"><div className="adm-stack">
@@ -242,5 +247,5 @@ export function EncountersCms(){
       <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
       <Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
     </aside></div>
-  </form></FieldErrors.Provider>;
+  </form></FieldErrors.Provider></ReloadOptions.Provider>;
 }

@@ -52,6 +52,8 @@ const files=[
   ['ww-banner.webp',1600,1067,'Freediver over the seabed','cover'],
   ['about-ray.webp',1500,1000,'Spotted eagle ray over the sand','cover'],
   ['about-sealions.webp',1500,1000,'Two sea lions underwater','cover'],
+  ['crew-group.jpg',1536,2048,'Part of the crew on board','cover'],
+  ['crew-crossing.jpg',550,408,'Nautical chart of the Heron and Wistari Reefs marine park','cover'],
 ];
 for(const [i,[file,w,h,alt,fit]] of files.entries())media.push({id:id(11,i+1),name:file,file,spec:{w,h},alt,fit,body:await readFile(`${handoff}/${file}`)});
 const F=i=>id(11,i);
@@ -96,7 +98,14 @@ const works=[
   {n:9,slug:'demo-untitled-study',title:'Untitled study (demo)',cat:4,span:3,authors:[]},
   {n:10,slug:'demo-tide-sound',title:'Tide sound note (demo)',cat:5,media:M(6),authors:[[1,'Recording']],excerpt:'Published, but its category is a draft, so it is not public yet.'},
 ].map(w=>({...w,id:id(50,w.n)}));
-const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[...crew.map(c=>c.page),...works.map(w=>w.id)],categories:categories.map(c=>c.id)};
+const teamPage={id:id(31,1),blocks:[
+  ['team_002','paragraph',{text:'FOLLOWING OUR NATURE: Through our encounters in life.'}],
+  ['team_004','paragraph',{paragraphs:['We encountered in one of the most extraordinary places on the Earth.','— The Great Barrier Reef.','In a little patch of sand in the middle of the vast ocean.','Among sea turtles, whales and manta rays, we discovered a shared passion for the animals, the ocean, art and for protecting the living world around us.','That encounter brought us together.']}],
+  ['team_003','image',{media_id:F(9),src:`/api/media/${F(9)}`}],
+  ['team_005','image',{media_id:F(10),src:`/api/media/${F(10)}`}],
+  ['team_006','paragraph',{paragraphs:['A project dedicated to supporting conservation, storytelling and a deeper relationship to the ocean and the animals that live within it.','A project to unite them all.']}],
+]};
+const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id)],categories:categories.map(c=>c.id)};
 
 async function exists(table,ids){const rows=await ok(db.from(table).select('id').in('id',ids));return new Set(rows.map(r=>r.id));}
 async function seed(){
@@ -125,6 +134,8 @@ async function seed(){
   const catHave=await exists('art_categories',demoIds.categories);
   for(const c of categories){if(catHave.has(c.id)){report.kept.push(c.id);continue;}
     await ok(db.rpc('save_entity',{entity:'art_categories',payload:{...c,cover_id:remap(c.cover_id)??null}}));report.created.push(c.id);}
+  if(postsHave.has(teamPage.id))report.kept.push(teamPage.id);else{
+    await ok(db.rpc('save_content',{p_post:{id:teamPage.id,kind:'page',title:'The Crew (demo page)',slug:'demo-team',source_role:'team',status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:0},p_blocks:teamPage.blocks.map(([source,type,content],position)=>({type,position,source_block_id:source,content:{...content,...(content.media_id?{media_id:mid(content.media_id),src:`/api/media/${mid(content.media_id)}`}:{})}})),p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(teamPage.id);}
   for(const w of works){if(postsHave.has(w.id)){report.kept.push(w.id);continue;}
     const blocks=(w.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
     await ok(db.rpc('save_content',{p_post:{id:w.id,kind:'artwork',title:w.title,slug:w.slug,cover_id:w.hero?mid(w.hero):null,status:w.status||'published',published_at:w.status==='draft'?null:new Date().toISOString(),excerpt:w.excerpt||'',meta_line:w.meta||'',show_index:false,sort:w.n,source_metadata:{demo:true}},p_blocks:blocks,p_details:{category_id:C(w.cat),media_id:w.media?mid(w.media):null,caption:w.caption||null,span:w.span||3,full_height:!!w.tall,external_url:w.external||null,...(w.embed?{embed_kind:'youtube',embed_id:w.embed}:{})},p_contributors:(w.authors||[]).map(([person,role],position)=>({crew_member_id:crew[person-1].id,position,role})),p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(w.id);}
