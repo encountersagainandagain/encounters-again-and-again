@@ -35,9 +35,59 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
 | 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
-| 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; criaturas desde 2026-10-18 | Todo el scroll 2026-10-18 | **Sí**: banner, descenso, arrecife, proyectos, About y newsletter usan textos del diseño o de ejemplo. **No es contenido editorial confirmado** | Pendiente; el agua es la **alternativa de degradado** del handoff, pendiente de aprobación | — |
+| 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; **fidelidad de Home 2026-10-18** (agua WebGL del prototipo, fórmulas y tiempos portados) | Comparación controlada con el prototipo (capturas y videos, desktop y móvil) | **Sí**: banner, descenso, arrecife, proyectos, About y newsletter usan textos del diseño o de ejemplo; **no es contenido editorial confirmado** | Pendiente | — |
 
 Las aprobaciones de Crew (`cbea565`) y Wild Wonders (2026-10-14) se conservan. Lo cambiado después se marca solo en su parte: secciones editables de Crew, editor de secciones del perfil, cuerpo de las obras.
+
+### Home v2 — fidelidad (2026-10-18)
+
+Referencia visual y de movimiento: `docs/encounters/handoff-current/Abismo Home v2.dc.html`. Escenario de comparación **solo local**: `http://127.0.0.1:3219/review/home` (plantilla real de Home con los textos, imágenes y cantidades del prototipo; rotulado «LOCAL VISUAL REFERENCE»; cerrado fuera de desarrollo y de localhost; las imágenes salen de la carpeta del handoff por una ruta solo de desarrollo). Variante con listas cortas y secciones vacías: `?variant=sparse`.
+
+**Diferencias corregidas**
+
+| Área | Antes | Ahora (igual al prototipo) |
+|---|---|---|
+| Agua | Degradado con textura de cáusticas | **Shader WebGL original**, sin cambios (verificado por diff), con sus parámetros (Azul Encounters, olas 1, cáusticas 0,85, rayos 0,75, sol 0,66), su reloj y su resolución (dpr ≤ 1,75; ≤ 1,25 en teléfonos). El degradado queda como **fallback** si WebGL falta o se pierde el contexto. Movimiento reducido: el shader se dibuja quieto (tiempo 0) según el scroll |
+| Ilustración de fondo | `translate3d` antes que `scale` | `scale(…) translate3d(…)` (orden del prototipo; seguía invertido) |
+| Nieve marina | Estela hacia arriba al bajar, alfa completo | Estela hacia abajo y alfa × 0,8; la velocidad se sigue en cada cuadro aunque la nieve no se vea |
+| Burbujas | Tamaños y duraciones fijos, borde 0,6 sin relleno | 30 (16 en teléfono) al azar: 3–12 px, 11–27 s, demora negativa, borde 0,4 y relleno radial |
+| Entradas de Home | Desenfoque y escala 0,965 | Sin desenfoque, escala 0,972 → 1, desplazamiento 60 px y tramo 0,3 por defecto; los elementos ya pasados quedan en su estado final |
+| Garabatos | El de Ongoing projects no se dibujaba; el del cierre con corrección de pie | Proyectos: se traza al 40 % visible en 1700 ms; cierre: atado al scroll con el tramo del prototipo |
+| Marca del navbar | Origen de escala arriba | Origen centrado; logo grande del banner oculto en pantallas bajas (h < 700, o móvil con h < 800) |
+| Navbar en Home | Velo 140 px, links blancos, filas móviles de 24 px | Velo 170 px (210 en móvil) con el degradado del prototipo, links #EAF5FA, transición 500 ms, filas móviles de 12 px con 18 px entre filas (objetivos separados 30 px) |
+| Descenso en móvil | Texto a ancho completo (151 px más bajo) | Columnas 3–6 como el prototipo |
+| Interlineado | Heredado del sitio | `normal`, como el prototipo (diferencias de 5–12 px por sección) |
+| Tripulación | Separación 5vh | 4,5vh |
+| Cierre y pie | Pie con 90–220 px abajo | Separación y cierre del prototipo |
+| Carrusel de arte | Flechas desactivadas en los extremos | Siempre activas, como el prototipo |
+| Agenda | Etiquetas recalculadas fuera de pantalla | Solo los eventos visibles actualizan su etiqueta; progreso con los límites del prototipo |
+| Rendimiento | Se buscaban nodos y se leía la geometría entre escrituras en cada cuadro (p95 33 ms) | Nodos guardados, lecturas antes que escrituras, tamaños medidos al redimensionar; imágenes `decoding="async"`. Igual que el prototipo: 9,9 s vs 9,9 s para el mismo scroll, p95 16,8 ms |
+| Scroll programático | `scroll-behavior: smooth` | Nativo en Home, como el prototipo |
+| Texto del descenso | Sin itálica | Campo nuevo **«Words in italics»** (Page presentation → Home → The descent), como «Again and again.»; vive en `site_settings`, sin cambio de base |
+
+Criaturas: los SVG ya eran los del prototipo; se compararon tamaño, trayectoria, entrada, salida y aletas (capturas y video `desktop-creatures`) y coinciden. La única corrección fue de rendimiento (anchos medidos al redimensionar).
+
+**Comparaciones** (Chrome con GPU, mismo viewport y densidad, `Math.random` con semilla en ambos, reloj de Playwright para el mismo tiempo transcurrido):
+
+- Posiciones de sección: iguales en desktop (0–5 px) y en 390 px (0–3 px). Navbar móvil 121 vs 120 px.
+- Capturas lado a lado (prototipo a la izquierda): 13 puntos en 1440×900 y 9 en 390×844.
+- Videos lado a lado, alineados al inicio del scroll: descenso lento, scroll rápido, scroll inverso, agenda, criaturas y pausas (desktop); descenso y agenda (móvil).
+- Robustez: sin WebGL (fallback), movimiento reducido, datos reales del CMS local, variante con listas cortas y secciones vacías: sin errores ni desbordamiento.
+- The Crew (8762 px) y Wild Wonders (7654 px) en 3218: sin cambios.
+
+Evidencia: [verification/review-2026-10-18-home/](verification/review-2026-10-18-home/).
+
+**Diferencias que todavía existen**
+
+- El dibujo de las cáusticas y el giro de los links del navbar dependen del momento en que monta cada página; en capturas con el mismo tiempo transcurrido el patrón no coincide punto a punto (mismo shader, distinto origen de tiempo).
+- Pie: el prototipo dice «© 2026 Encounters again and again · Write to us»; el sitio usa el pie común con el texto y los enlaces de Settings.
+- Con movimiento reducido el banner queda visible y el agua quieta (decisión de accesibilidad, no del prototipo).
+- Durante la grabación de video el servidor de desarrollo dibuja algo menos de cuadros que el HTML estático del prototipo (942 vs 1106 en 21 s); sin grabación la medición es igual. Conviene repetirlo sobre un build de producción.
+- Diferencias menores de 1–3 px en móvil (proyectos, navbar).
+
+**Pendientes editoriales** (no visuales): confirmar o reemplazar los textos de diseño de Home (banner, descenso con sus palabras en itálica, arrecife, estados y textos de los proyectos, About, newsletter) y el texto del pie, en la base real.
+
+**Pendientes visuales**: aprobación de Juani de Home completa, incluida el agua.
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

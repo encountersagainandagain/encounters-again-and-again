@@ -1,0 +1,29 @@
+{
+ "W": 1440,
+ "H": 900,
+ "protoHeight": 14221,
+ "implHeight": 14224,
+ "protoWebGL": true,
+ "implWebGL": true,
+ "frames": [
+  0,
+  0.3,
+  0.6,
+  0.9,
+  1.2,
+  2.2,
+  3.6,
+  5.1,
+  7,
+  9.6,
+  11,
+  13.3,
+  14.8
+ ],
+ "logs": {
+  "proto": [
+   "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "impl": []
+ }
+}
