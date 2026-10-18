@@ -1,0 +1,6 @@
+{'label': 'prod-run1', 'dpr': '2', 'scale': '1.00', 'frames': 890, 'median': 16.7, 'p95': 16.8, 'p99': 16.8, 'over20': 8, 'over34': 4, 'loaf': 4, 'loafMs': 247, 'scriptMs': 373, 'layoutMs': 48, 'styleMs': 465, 'layouts': 633}
+{'label': 'prod-run2', 'dpr': '2', 'scale': '1.00', 'frames': 888, 'median': 16.7, 'p95': 16.8, 'p99': 16.8, 'over20': 1, 'over34': 0, 'loaf': 0, 'loafMs': 0, 'scriptMs': 333, 'layoutMs': 47, 'styleMs': 422, 'layouts': 634}
+{'label': 'prod-run3', 'dpr': '2', 'scale': '1.00', 'frames': 849, 'median': 16.7, 'p95': 16.8, 'p99': 50, 'over20': 14, 'over34': 9, 'loaf': 8, 'loafMs': 1075, 'scriptMs': 346, 'layoutMs': 44, 'styleMs': 422, 'layouts': 616}
+{'label': 'prod-slow', 'dpr': '2', 'scale': '1.00', 'frames': 575, 'median': 16.7, 'p95': 16.8, 'p99': 116.7, 'over20': 25, 'over34': 13, 'loaf': 8, 'loafMs': 1266, 'scriptMs': 223, 'layoutMs': 34, 'styleMs': 253, 'layouts': 546}
+{'label': 'prod-return', 'dpr': '2', 'scale': '1.00', 'frames': 865, 'median': 16.7, 'p95': 16.8, 'p99': 33.3, 'over20': 9, 'over34': 5, 'loaf': 4, 'loafMs': 735, 'scriptMs': 339, 'layoutMs': 45, 'styleMs': 433, 'layouts': 623}
+{'label': 'prod-return', 'dpr': '2', 'scale': '1.00', 'frames': 469, 'median': 33.2, 'p95': 33.4, 'p99': 33.4, 'over20': 236, 'over34': 0, 'loaf': 0, 'loafMs': 0, 'scriptMs': 195, 'layoutMs': 28, 'styleMs': 247, 'layouts': 415}

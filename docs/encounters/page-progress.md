@@ -35,7 +35,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
 | 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
-| 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; **fidelidad de Home 2026-10-18** (agua WebGL del prototipo, fórmulas y tiempos portados) | Comparación controlada con el prototipo (capturas y videos, desktop y móvil) | **Sí**: banner, descenso, arrecife, proyectos, About y newsletter usan textos del diseño o de ejemplo; **no es contenido editorial confirmado** | Pendiente | — |
+| 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; fidelidad (`a4f98a6`) y rendimiento (2026-10-18, ver abajo) | Comparación controlada con el prototipo; mediciones de rendimiento sin video en desarrollo y producción local | **Sí**: textos de diseño o de ejemplo; **aprobación editorial pendiente** | **Conformidad visual de Juani (2026-10-18) sobre `5762076`, con rendimiento pendiente.** La revisión de rendimiento está hecha; falta que Juani confirme la fluidez y decida sobre la resolución adaptativa del agua | — |
 
 Las aprobaciones de Crew (`cbea565`) y Wild Wonders (2026-10-14) se conservan. Lo cambiado después se marca solo en su parte: secciones editables de Crew, editor de secciones del perfil, cuerpo de las obras.
 
@@ -88,6 +88,76 @@ Evidencia: [verification/review-2026-10-18-home/](verification/review-2026-10-18
 **Pendientes editoriales** (no visuales): confirmar o reemplazar los textos de diseño de Home (banner, descenso con sus palabras en itálica, arrecife, estados y textos de los proyectos, About, newsletter) y el texto del pie, en la base real.
 
 **Pendientes visuales**: aprobación de Juani de Home completa, incluida el agua.
+
+### Home v2 — rendimiento (2026-10-18)
+
+Juani registró **conformidad visual** de Home (versión `5762076`) y notó lentitud al hacer scroll. Revisión hecha antes de seguir con Expeditions.
+
+**Método.** Mismo Chrome y ventana (1440×900) para prototipo (3220), desarrollo (3219) y **producción local** (3221, `npm run cms:local:prod`). Sin grabar video. Mismo scroll con rueda (descenso lento, o recorrido completo ida y vuelta) y `Math.random` con semilla. Por cuadro: intervalos de rAF (mediana, p95, p99, cuadros > 20 y > 34 ms), tareas largas, *long animation frames* con atribución de scripts, y contadores de Chrome (tiempo de script, layout y estilo). Densidad de píxeles 1 y **2 (pantallas Retina)**.
+
+**Qué se encontró**
+
+1. A densidad 1 todo va a 60 fps (prototipo, desarrollo y producción). La lentitud aparece a **densidad 2**, y también en el **prototipo** (p95 83 ms).
+2. Sin tareas largas de JavaScript: el script ocupa ~2 % del tiempo. Los cuadros lentos son de **GPU**.
+3. Apagando una capa por vez en producción, la única que explica el costo es el **shader del agua**: sin él, p95 16,7 ms y 1 cuadro lento en vez de 113. Filtros del navbar y del HUD, nieve, burbujas, fondo y tarjetas cambian poco.
+4. El shader se dibuja a hasta **1,75×** (≈ 4 millones de píxeles a densidad 2) y el prototipo **lo sigue dibujando** (junto con fondo, burbujas, velo y tortuga) cuando las secciones opacas ya lo tapan, desde Ongoing projects hasta el final.
+5. Había un **segundo bucle de animación** en Home (el de las páginas editoriales), que en Home no tenía nada que hacer.
+6. Renders de React: ninguno por scroll (el bucle trabaja con refs; solo el carrusel cambia estado al deslizarlo). Lecturas de layout: ya agrupadas antes de las escrituras (entrega anterior).
+
+**Qué se cambió**
+
+- Las capas de fondo fijas (shader, ilustración, burbujas, velo, tortuga) **dejan de dibujarse** cuando no pueden verse: fuera del banner, el descenso, el arrecife y el 12 % superior de Ongoing projects. La imagen es la misma (ver la comparación del borde).
+- Home usa **un solo bucle** de animación.
+- **Resolución adaptativa del agua — compromiso visual a decidir por Juani:**
+  - el shader arranca en la resolución del prototipo (1,75× o la densidad de la pantalla, la menor);
+  - si los cuadros no llegan a 60 fps, baja (como mínimo a 1×, un píxel por píxel de pantalla), calculando el paso con el costo medido;
+  - recuerda el nivel que funciona y prueba subir una sola vez;
+  - con `?water=full` se mantiene siempre la resolución del prototipo.
+
+  A 1× sobre pantalla de densidad 2, las líneas finas de las cáusticas quedan apenas más suaves (captura `water-resolution-*`). En pantallas de densidad 1, y en GPUs que sostienen 60 fps, no cambia nada.
+
+**Mediciones (recorrido completo ida y vuelta; densidad 2 salvo indicación)**
+
+| Versión | p95 | p99 | Cuadros > 20 ms | Long animation frames (ms) |
+|---|---|---|---|---|
+| Prototipo | 83 ms | 133 ms | 320 | 8753 |
+| Producción antes | 100 ms | 150 ms | 259 | 10991 |
+| Producción después, agua del prototipo (`?water=full`) | 67 ms | 117 ms | 141 | 4115 |
+| **Producción después (adaptativa)** | **16,7 ms** | **16,8 ms** | **0** | **0** |
+| Producción después, Home con datos del CMS local | 16,8 ms | 16,8 ms | 1 | 0 |
+| Desarrollo después | 16,8 ms | 50 ms | 25 | 939 |
+| Prototipo, densidad 1 | 16,7 ms | 16,8 ms | 5 | 102 |
+| Producción después, densidad 1 | 16,7 ms | 16,8 ms | 0 | 0 |
+
+Descenso lento solo (densidad 2):
+
+| Versión | p95 | Cuadros > 20 ms |
+|---|---|---|
+| Prototipo | 83 ms | 134 |
+| Producción antes | 117 ms | 159 |
+| **Producción después** | **16,8 ms** | **26** (la única prueba de subir de nivel) |
+
+Costo del agua en el descenso según resolución (densidad 2): 1,75× p95 117 ms · 1,5× 83 ms · 1,25× 50 ms · 1× 16,7 ms.
+
+Los cuadros lentos que quedan en desarrollo son propios del modo desarrollo.
+
+Cierre (después de corregir el ancho del logotipo del navbar y de impedir que se reintente un nivel que ya falló), producción, densidad 2, recorrido completo, tres corridas en primera visita: p95 16,8 ms en las tres; cuadros > 20 ms: 8, 1 y 14, todos del ajuste inicial del agua. Visita siguiente, con el nivel recordado: 9.
+
+Durante el cierre la Mac pasó a batería (20 %) con modo de bajo consumo, y Chrome quedó limitado a 30 fps: el prototipo y Home midieron 33,3 ms planos, sin cuadros largos. Esas corridas no miden la página y no se usan. Conviene que Juani pruebe con la Mac enchufada y sin modo de bajo consumo.
+
+**Corrección adicional:** en producción el logotipo del navbar quedaba recortado («ENCOUNTER»), porque su ancho se medía antes de que cargara la fuente. Ahora se mide de nuevo cuando las fuentes están listas y al cambiar el tamaño de la ventana.
+
+**Producción local para probar la fluidez:**
+
+- `http://127.0.0.1:3221/` — Home con el contenido del CMS local.
+- `http://127.0.0.1:3221/review/home` — escenario de referencia.
+- `http://127.0.0.1:3221/review/home?water=full` — agua siempre a la resolución del prototipo.
+
+Se levanta con `npm run cms:local:prod` (build y `next start` contra Supabase local). La ruta de referencia se abre en producción solo con la bandera local `ENCOUNTERS_LOCAL_REVIEW`. La base local se acepta en un build de producción solo con `ENCOUNTERS_LOCAL_PRODUCTION_CHECK`. Ambas banderas las pone únicamente ese script, y siguen limitadas a localhost y a Supabase local.
+
+Evidencia: [verification/review-2026-10-18-home-performance/](verification/review-2026-10-18-home-performance/).
+
+**Pendiente:** que Juani confirme la fluidez en su pantalla y decida si acepta la resolución adaptativa o prefiere la del prototipo siempre. Expeditions espera ese cierre. La aprobación editorial de Home sigue pendiente.
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

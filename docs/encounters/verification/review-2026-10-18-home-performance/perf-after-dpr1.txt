@@ -1,0 +1,2 @@
+{'label': 'proto', 'dpr': '1', 'scale': None, 'frames': 889, 'median': 16.7, 'p95': 16.7, 'p99': 16.8, 'over20': 5, 'over34': 2, 'loaf': 2, 'loafMs': 102, 'scriptMs': 345, 'layoutMs': 50, 'styleMs': 218, 'layouts': 1015}
+{'label': 'prod', 'dpr': '1', 'scale': '1.00', 'frames': 891, 'median': 16.7, 'p95': 16.7, 'p99': 16.8, 'over20': 0, 'over34': 0, 'loaf': 0, 'loafMs': 0, 'scriptMs': 329, 'layoutMs': 45, 'styleMs': 428, 'layouts': 636}
