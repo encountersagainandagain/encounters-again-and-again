@@ -7,13 +7,21 @@ export function profileVisible(member: Row, posts: Row[]) {
 }
 // Hero of a crew profile, shared by the public page and the CMS preview.
 export function profileHero(member: Row, post: Row, blocks: { type: string; content: Row }[]) {
-  // The opening title, when the profile starts with one, doubles as the hero kicker; otherwise the role does.
+  const name = string(member.alias) || string(member.name) || string(post.title);
+  // Explicit profiles (blocks with sections): the kicker is the page kicker or the opening title; the cover is
+  // the chosen cover, else a design image saved as the cover image, else the portrait.
+  if (blocks.some(b => string(b.content.section))) {
+    const opening = blocks.find(b => b.content.section === 'opening' && b.type === 'heading');
+    const design = string(post.cover_image).startsWith('/design/') ? string(post.cover_image) : undefined;
+    return { title: name, kicker: string(post.kicker) || string(opening?.content.text) || string(member.role), cover: post.cover_id || (design ? undefined : member.portrait_id), fallback: design };
+  }
+  // Profiles not yet converted keep the previous reading: an opening heading doubles as the kicker, and
+  // Wild Wonders keeps its design banner while its cover is the portrait (approved 2026-10-14).
   const opening = blocks.find(b => b.type === 'heading' || b.type === 'paragraph');
   const heading = opening?.type === 'heading' ? opening : undefined;
-  // Wild Wonders keeps its design banner until a cover other than the portrait is chosen.
   const designBanner = member.slug === 'wild-wonders';
   return {
-    title: string(member.alias) || string(member.name) || string(post.title),
+    title: name,
     kicker: string(post.kicker) || string(heading?.content.text) || string(heading?.content.title) || string(member.role),
     cover: designBanner && post.cover_id === member.portrait_id ? undefined : post.cover_id || member.portrait_id,
     fallback: designBanner ? '/design/ww-banner.webp' : undefined,

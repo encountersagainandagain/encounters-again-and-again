@@ -156,6 +156,27 @@ const sitePosts=[
   {id:P(10),kind:'message',slug:'demo-smallest-ripple',title:'The smallest ripple (demo)',sort:1,detail:{message:'Even the smallest ripple can change tides.',body:'Even a small effort goes a long way. Even a small action can create something bigger.',illustration_id:D(6)},blocks:[]},
   {id:P(11),kind:'message',slug:'demo-grow',title:'Grow into so much more (demo)',sort:2,detail:{message:'Even something small can grow into so much more.',body:'Meeting new opportunities, people. Participating in markets, running workshops, creating a short film, spreading awareness.',illustration_id:D(7)},blocks:[{type:'paragraph',content:{text:'Demonstration message with a page of its own.'}}]},
   {id:P(12),kind:'message',slug:'demo-own-ripple',title:'Our own ripple (demo)',sort:3,detail:{message:'Our own ripple, and welcoming the tides.',body:'These are just a few personal experiences from creating our own ripple and welcoming the tides.',illustration_id:D(8),credit:'Demo credit line, shown in italics.'},blocks:[]},
+  // Every block of the Post template (Post.dc.html), with the prototype texts, to compare the renderer.
+  {id:P(14),kind:'expedition_report',slug:'demo-post-blocks',title:'All post blocks (demo)',kicker:'an expedition that already happened',meta_line:'Coqui · 11 days | March 2026',excerpt:'Every block of the Post template, for visual review.',cover:F(6),show_index:true,blocks:[
+    {type:'image',content:{media_id:D(2),src:`/api/media/${D(2)}`,caption:'Third morning out. She stayed with us for most of the dive.'}},
+    {type:'toc',content:{}},
+    {type:'heading',anchor:'leaving',content:{number:'01',kicker:'Leaving late',text:'We left two weeks later than planned'}},
+    {type:'paragraph',content:{lead:'The engine needed a part that took eleven days to arrive, which is how we learned that the boat decides the calendar.',text:'We spent that time fixing things we had been ignoring: the bilge pump, the second reef line, the way the fridge drained into the wrong place.'}},
+    {type:'quick_facts',content:{quickFactItems:[{label:'Days at sea',value:'11'},{label:'Crew',value:'4'},{label:'Species logged',value:'23'},{label:'Water temp',value:'21°'}]}},
+    {type:'heading',anchor:'days',content:{number:'02',kicker:'Eleven days',text:'Eleven days of water'}},
+    {type:'image-pair',content:{images:[{media_id:F(7),src:`/api/media/${F(7)}`,caption:'A ray crossing the sand patch at dawn.'},{media_id:F(8),src:`/api/media/${F(8)}`,caption:'The sea lions found us before we found them.'}]}},
+    {type:'list',content:{text:'What we actually did every day',items:['Two dives before lunch, photo ID on everything with a marking we could read.','Afternoons for logging, backing up cards and fixing whatever broke that morning.','Drawing after dinner, because it is the only way any of us remember detail properly.']}},
+    {type:'quote',content:{text:'Nobody on board had crossed before. That is why it counted.',attribution:'Demo attribution'}},
+    {type:'carousel',content:{images:[D(1),D(3),D(4),D(5)].map((m,i)=>({media_id:m,src:`/api/media/${m}`,caption:`Demo slide ${i+1}`}))}},
+    {type:'divider',content:{}},
+    {type:'youtube',content:{youtubeUrl:'https://www.youtube.com/watch?v=Vur6vJ2ulHM',caption:'A short film from the expeditions.'}},
+    {type:'heading',anchor:'what',content:{number:'03',kicker:'Costs',text:'What it cost'}},
+    {type:'costs',content:{text:'What eleven days cost us (demo figures)',costItems:[{label:'Diesel and marina fees',note:'two refuels',amount:'AU$ 740'},{label:'Food for four',note:'11 days',amount:'AU$ 610'}],total_label:'Total',total_amount:'AU$ 1,350',note:'Demo figures, not real costs.'}},
+    {type:'link',content:{label:'Read how the expeditions work',href:'/expeditions'}},
+    {type:'heading',anchor:'asked',content:{number:'04',kicker:'Questions',text:'What people asked us'}},
+    {type:'faq',content:{text:'What people asked us after',faqItems:[{question:'Can someone without experience come along?',answer:'Demo answer.'},{question:'Do you pay for the spots?',answer:'Demo answer.'}]}},
+    {type:'accordion',content:{accordionItems:[{title:'The route, leg by leg',text:'Demo text.'},{title:'Everything that broke',text:'Demo text.'}]}},
+  ]},
   {id:P(13),kind:'news',slug:'demo-colony-came-to-us',title:'The colony came to us (demo)',kicker:'Field note',excerpt:'What photo ID looks like when the animals are the curious ones.',cover:D(2),blocks:[{type:'paragraph',content:{text:'Demonstration news post. It appears on Home in “What already happened”.'}}]},
 ];
 const cards=[
@@ -203,7 +224,7 @@ async function seed(){
   const postsHave=await exists('posts',demoIds.posts);
   for(const c of crew){if(postsHave.has(c.page)){report.kept.push(c.page);continue;}
     const first=c.name.split(' ').pop().toLowerCase();
-    await ok(db.rpc('save_content',{p_post:{id:c.page,kind:'crew_member',title:`${c.name} — page (demo)`,slug:`${c.slug}-page`,status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:90},p_blocks:[{type:'image',position:0,content:{media_id:mid(media[c.portrait-1].id),src:`/api/media/${mid(media[c.portrait-1].id)}`}},{type:'heading',position:1,content:{text:`meet ${first}`}},{type:'paragraph',position:2,content:{text:`Demonstration personal page for ${c.name}. The works credited to this person below are added automatically.`}}],p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(c.page);}
+    await ok(db.rpc('save_content',{p_post:{id:c.page,kind:'crew_member',title:`${c.name} — page (demo)`,slug:`${c.slug}-page`,status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:90},p_blocks:[{type:'image',position:0,content:{media_id:mid(media[c.portrait-1].id),src:`/api/media/${mid(media[c.portrait-1].id)}`,section:'pair'}},{type:'heading',position:1,content:{text:`meet ${first}`,section:'opening'}},{type:'paragraph',position:2,content:{text:`Demonstration personal page for ${c.name}. The works credited to this person below are added automatically.`,section:'intro'}}],p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(c.page);}
   const crewHave=await exists('crew_members',demoIds.crew);
   for(const c of crew){if(crewHave.has(c.id)){report.kept.push(c.id);continue;}
     await ok(db.rpc('save_entity',{entity:'crew_members',payload:{id:c.id,name:c.name,slug:c.slug,alias:c.alias,role:c.role,bio:c.bio,highlight:c.highlight,favourite_animal:c.favourite,portrait_id:mid(media[c.portrait-1].id),status:'published',sort:90+crew.indexOf(c),has_page:true,page_post_id:c.page}}));report.created.push(c.id);}
@@ -223,7 +244,7 @@ async function seed(){
     if(p.kind==='page'&&roles.has(p.source_role)){report.kept.push(`${p.id} (site already has a ${p.source_role} page)`);continue;}
     const blocks=(p.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
     const detail=p.detail?Object.fromEntries(Object.entries(p.detail).map(([k,v])=>[k,remap(v)])):null;
-    await ok(db.rpc('save_content',{p_post:{id:p.id,kind:p.kind,title:p.title,slug:p.slug,kicker:p.kicker||'',subtitle:p.subtitle||'',excerpt:p.excerpt||'',meta_line:p.meta_line||'',cover_id:p.cover?mid(p.cover):null,source_role:p.source_role||null,status:'published',published_at:new Date().toISOString(),show_index:false,sort:p.sort||0,source_metadata:{demo:true}},p_blocks:blocks,p_details:detail,p_contributors:[],p_relations:(p.relations||[]).map((related_post_id,sort)=>({related_post_id,relation:'result',sort})),p_children:p.children?p.children.map(c=>c.media_id?{...c,media_id:remap(c.media_id)}:c):null,expected_updated_at:null}));report.created.push(p.id);
+    await ok(db.rpc('save_content',{p_post:{id:p.id,kind:p.kind,title:p.title,slug:p.slug,kicker:p.kicker||'',subtitle:p.subtitle||'',excerpt:p.excerpt||'',meta_line:p.meta_line||'',cover_id:p.cover?mid(p.cover):null,source_role:p.source_role||null,status:'published',published_at:new Date().toISOString(),show_index:!!p.show_index,sort:p.sort||0,source_metadata:{demo:true}},p_blocks:blocks,p_details:detail,p_contributors:[],p_relations:(p.relations||[]).map((related_post_id,sort)=>({related_post_id,relation:'result',sort})),p_children:p.children?p.children.map(c=>c.media_id?{...c,media_id:remap(c.media_id)}:c):null,expected_updated_at:null}));report.created.push(p.id);
   }
   const cardsHave=await exists('expedition_cards',demoIds.cards);
   if(await ok(db.from('posts').select('id').eq('id',P(1))).then(r=>r.length))for(const c of cards){if(cardsHave.has(c.id)){report.kept.push(c.id);continue;}await ok(db.rpc('save_entity',{entity:'expedition_cards',payload:{...c,media_id:remap(c.media_id)}}));report.created.push(c.id);}
