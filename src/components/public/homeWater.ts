@@ -82,7 +82,9 @@ void main(){
   gl_FragColor = vec4(col * a, a);
 }`;
 const VERT=`attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
-export type Water={draw:(time:number,dive:number)=>void;resize:()=>void;dispose:()=>void};
+export type Water={draw:(time:number,dive:number)=>void;resize:()=>void;dispose:()=>void;setScale:(scale:number)=>void;maxScale:()=>number;scale:()=>number};
+// Prototype resolution: up to 1.75 device pixels per CSS pixel (1.25 on phones).
+export const waterMaxScale=()=>Math.min(devicePixelRatio||1,innerWidth<760?1.25:1.75);
 // Returns null when WebGL is not available or the shader does not compile: the page then keeps its gradient.
 export function createWater(canvas:HTMLCanvasElement):Water|null{
   let gl:WebGLRenderingContext|null=null;
@@ -98,10 +100,12 @@ export function createWater(canvas:HTMLCanvasElement):Water|null{
   const loc=g.getAttribLocation(prog,'a');g.enableVertexAttribArray(loc);g.vertexAttribPointer(loc,2,g.FLOAT,false,0,0);
   const u=Object.fromEntries(['uRes','uTime','uDive','uCaustic','uRays','uSun','uWaves','uDeep','uShallow'].map(n=>[n,g.getUniformLocation(prog,n)]));
   // The shader is expensive: phones render it at a lower resolution.
-  const resize=()=>{const dpr=Math.min(devicePixelRatio||1,innerWidth<760?1.25:1.75);const w=Math.round(canvas.clientWidth*dpr),h=Math.round(canvas.clientHeight*dpr);if(w===canvas.width&&h===canvas.height)return;canvas.width=w;canvas.height=h;g.viewport(0,0,w,h);};
+  let scale=waterMaxScale();
+  const resize=()=>{const dpr=Math.min(scale,waterMaxScale());const w=Math.round(canvas.clientWidth*dpr),h=Math.round(canvas.clientHeight*dpr);if(w===canvas.width&&h===canvas.height)return;canvas.width=w;canvas.height=h;g.viewport(0,0,w,h);};
   resize();
   return {
     resize,
+    setScale(next){scale=next;resize();},maxScale:waterMaxScale,scale:()=>Math.min(scale,waterMaxScale()),
     draw(time,dive){resize();g.uniform2f(u.uRes,canvas.width,canvas.height);g.uniform1f(u.uTime,time);g.uniform1f(u.uDive,dive);g.uniform1f(u.uCaustic,WATER.caustics);g.uniform1f(u.uRays,WATER.godRays);g.uniform1f(u.uSun,WATER.sunPosition);g.uniform1f(u.uWaves,WATER.waves);g.uniform3fv(u.uShallow,WATER.palette.shallow);g.uniform3fv(u.uDeep,WATER.palette.deep);g.drawArrays(g.TRIANGLES,0,3);},
     dispose(){g.deleteBuffer(buf);g.deleteProgram(prog);g.deleteShader(vs);g.deleteShader(fs);g.getExtension('WEBGL_lose_context')?.loseContext();},
   };

@@ -10,8 +10,21 @@ import {Picture} from './MediaImage';
 import {NewsletterSignup} from './NewsletterSignup';
 import {clamp01,useFrame} from './useFrame';
 import {creatures} from '@/features/encounters/home-creatures';
-import {createWater,type Water} from './homeWater';
+import {createWater,waterMaxScale,type Water} from './homeWater';
 
+// Water resolution governor. The prototype draws the shader at up to 1.75× on dense screens; on GPUs that
+// cannot hold 60 fps there, the scale drops (to no less than 1×, one device pixel per CSS pixel) while frames
+// miss their budget. Shader cost grows with the square of the scale, so the step is sized from the measured
+// frame time. The level that holds is remembered for this browser (local storage, best effort) and a higher
+// one is retried once at most. ?water=full keeps the prototype resolution always, for comparison.
+const KEY='encounters.water.scale';
+type Governor={dt:number;bad:number;good:number;ceiling:number;since:number;off:boolean;tried:boolean};
+function govern(g:Governor,water:Water,dt:number,now:number){
+  if(g.off)return;g.dt+=(dt-g.dt)*.15;const max=waterMaxScale(),cur=water.scale();
+  if(g.dt>20){g.bad+=dt;g.good=0;}else if(g.dt<17.5){g.good+=dt;g.bad=0;}
+  if(g.bad>250&&cur>1){const next=Math.max(1,Math.min(cur-.25,Math.round(cur*Math.sqrt(16/g.dt)*.95*4)/4));water.setScale(next);g.ceiling=Math.min(g.ceiling,next);g.since=now;g.bad=0;g.dt=16.7;try{localStorage.setItem(KEY,String(next));}catch{/* storage unavailable */}}
+  else if(g.good>4000&&!g.tried&&cur+.25<=Math.min(g.ceiling,max)+1e-6){g.tried=true;water.setScale(cur+.25);g.since=now;g.good=0;}
+}
 const smooth=(v:number,a:number,b:number)=>{const k=clamp01((v-a)/(b-a));return k*k*(3-2*k);};
 // Words chosen in the editor to show in italics (Garamond), like the prototype's descent text.
 const emphasize=(text:string,words:string)=>{const at=words?text.lastIndexOf(words):-1;return at<0?text:<>{text.slice(0,at)}<em>{words}</em>{text.slice(at+words.length)}</>;};
@@ -58,20 +71,25 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   const root=useRef<HTMLDivElement>(null),snow=useRef<HTMLCanvasElement>(null);const flakes=useMemo(()=>makeSnow(),[]);
   const state=useRef({eased:0,brandWidth:0});
   const bubbles=useRef<HTMLDivElement>(null),waterCanvas=useRef<HTMLCanvasElement>(null),water=useRef<Water|null>(null);
+  const governor=useRef<Governor>({dt:16.7,bad:0,good:0,ceiling:99,since:0,off:false,tried:false});const lastFrame=useRef(0);
   useEffect(()=>{
     // Water: the prototype shader when WebGL works; otherwise the gradient fallback with its caustic texture.
-    const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;
+    const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;governor.current.off=new URLSearchParams(location.search).get('water')==='full';
+    if(water.current&&!governor.current.off){try{const saved=Number(localStorage.getItem(KEY));if(saved>=1&&saved<water.current.maxScale()){water.current.setScale(saved);governor.current.ceiling=saved;}}catch{/* storage unavailable */}}
     if(root.current)root.current.dataset.water=water.current?'webgl':'fallback';
     if(!water.current){const layer=root.current?.querySelector<HTMLElement>('[data-caustics]');if(layer&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const u=causticTexture();layer.style.backgroundImage=`url(${u}), url(${u})`;}}
     const lost=(e:Event)=>{e.preventDefault();water.current=null;if(root.current)root.current.dataset.water='fallback';};canvas?.addEventListener('webglcontextlost',lost);
     let mobile=-1;const build=()=>{const box=bubbles.current;const m=innerWidth<760?1:0;if(!box||m===mobile)return;mobile=m;box.innerHTML='';for(let i=0,n=m?16:30;i<n;i++){const b=document.createElement('div');const size=3+Math.random()*9,dur=11+Math.random()*16;b.style.cssText=`left:${(Math.random()*100).toFixed(2)}%;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;animation-duration:${dur.toFixed(1)}s;animation-delay:-${(Math.random()*dur).toFixed(1)}s`;box.appendChild(b);}};build();addEventListener('resize',build);
     const resize=()=>flakes.setup(snow.current);resize();addEventListener('resize',resize);
     const header=document.querySelector<HTMLElement>('.editorial-nav');const brandText=header?.querySelector<HTMLElement>('.editorial-brand>span');
-    if(brandText){brandText.style.maxWidth='none';state.current.brandWidth=brandText.offsetWidth;}
+    // Wordmark width for the logo morph, measured without its limit; again once the web fonts have loaded
+    // (in production they arrive after mount) and on resize.
+    const measureWord=()=>{if(!brandText)return;const prev=brandText.style.maxWidth;brandText.style.maxWidth='none';state.current.brandWidth=brandText.scrollWidth;brandText.style.maxWidth=prev;};
+    measureWord();void document.fonts?.ready.then(measureWord);addEventListener('resize',measureWord);
     // Projects title scribble: traced once when 40% visible, 1700ms (prototype armScribble).
     const ps=root.current?.querySelector<SVGSVGElement>('[data-pscribble]');let io:IntersectionObserver|null=null;
     if(ps&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const path=ps.querySelector('path')!;path.style.strokeDasharray='1';path.style.strokeDashoffset='1';path.style.transition='stroke-dashoffset 1700ms cubic-bezier(.25,.75,.25,1)';io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){path.style.strokeDashoffset='0';io?.disconnect();}}),{threshold:.4});io.observe(ps);}
-    return()=>{io?.disconnect();removeEventListener('resize',resize);removeEventListener('resize',build);canvas?.removeEventListener('webglcontextlost',lost);water.current?.dispose();water.current=null;if(header){header.style.background='';header.style.backdropFilter='';header.style.borderBottomColor='';const b=header.querySelector<HTMLElement>('.editorial-brand');b?.removeAttribute('style');b?.querySelector('img')?.removeAttribute('style');brandText?.removeAttribute('style');}};},[flakes]);
+    return()=>{io?.disconnect();removeEventListener('resize',resize);removeEventListener('resize',measureWord);removeEventListener('resize',build);canvas?.removeEventListener('webglcontextlost',lost);water.current?.dispose();water.current=null;if(header){header.style.background='';header.style.backdropFilter='';header.style.borderBottomColor='';const b=header.querySelector<HTMLElement>('.editorial-brand');b?.removeAttribute('style');b?.querySelector('img')?.removeAttribute('style');brandText?.removeAttribute('style');}};},[flakes]);
   // Nodes the frame loop touches, found once per render instead of every frame (the prototype keeps refs too).
   const nodes=useRef<ReturnType<typeof collect>|null>(null);
   function collect(el:HTMLElement){
@@ -79,7 +97,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     const header=document.querySelector<HTMLElement>('.editorial-nav');const brandEl=header?.querySelector<HTMLElement>('.editorial-brand')||null;
     const creature=(name:string,fins:string[])=>{const svg=q<SVGSVGElement>(`[data-creature=${name}]`);return svg?{svg,box:svg.parentElement as HTMLElement,fins:fins.map(f=>svg.querySelector<SVGElement>(f))}:null;};
     return {
-      art:q('[data-home-bg]'),fallback:q('[data-water]'),caustics:q('[data-caustics]'),rays:q('[data-rays]'),veil:q('[data-deep]'),bubbles:q('[data-bubbles]'),block:q('[data-hero-block]'),cue:q('[data-cue]'),mark:q('.home-hero-mark'),
+      art:q('[data-home-bg]'),back:all('[data-back]'),clear:all('[data-clear]'),projects:q('#projects'),fallback:q('[data-water]'),caustics:q('[data-caustics]'),rays:q('[data-rays]'),veil:q('[data-deep]'),bubbles:q('[data-bubbles]'),block:q('[data-hero-block]'),cue:q('[data-cue]'),mark:q('.home-hero-mark'),
       gauge:q('[data-gauge]'),gaugeText:q('[data-gauge] span'),hud:q('[data-hud]'),hudDepth:q('[data-hud-depth]'),o2:q('[data-o2]'),tank:q('[data-tank]'),
       header,brand:brandEl,navImg:brandEl?.querySelector<HTMLElement>('img')||null,navWord:brandEl?.querySelector<HTMLElement>(':scope>span')||null,
       descent:document.getElementById('descenso'),reefImg:q('[data-reef] img'),
@@ -89,7 +107,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       hudA:q('[data-nxhud]'),fill:q('[data-nxfill]'),markA:q('[data-nxmark]'),labels:all('[data-nxlabel]'),
       seq:all('[data-hseq]'),scribbles:all<SVGPathElement>('[data-hscribble] path'),
       // Sizes read on resize only.
-      size:{turtle:0,dolphin:0,whale:0,dolphinPad:120,line:0,word:0},
+      size:{turtle:0,dolphin:0,whale:0,dolphinPad:120,line:0,word:0,backVisible:true},
     };
   }
   useEffect(()=>{const el=root.current;if(!el)return;const n=collect(el);n.size.word=state.current.brandWidth;nodes.current=n;
@@ -102,8 +120,15 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     const dr=rect(n.descent),fr=rect(n.fish?.box),br=rect(n.dolphin?.box),wr=rect(n.whale?.box),reefR=rect(n.reefImg?.closest('section')),stageR=rect(n.stage);
     const cardR=n.cards.map(c=>c.el.getBoundingClientRect()),eventR=n.events.map(e=>e.el.getBoundingClientRect()),seqR=n.seq.map(e=>e.getBoundingClientRect()),scribR=n.scribbles.map(p=>p.ownerSVGElement!.getBoundingClientRect());
     const docH=document.documentElement.scrollHeight;
+    // The fixed back layers (shader, illustration, bubbles, veil, turtle) only show through the hero, the
+    // descent and the reef, and through the top 12% of Ongoing projects (its background turns opaque there).
+    // Everywhere else opaque sections cover them: they stop drawing, which gives the same image.
+    const pr=rect(n.projects);const seen=(r:DOMRect)=>r.top<H&&r.bottom>0;
+    const backVisible=n.clear.some(c=>seen(c.getBoundingClientRect()))||(!!pr&&pr.top<H&&pr.top+pr.height*.12>0);
+    if(backVisible!==n.size.backVisible){n.size.backVisible=backVisible;n.back.forEach(l=>{l.style.visibility=backVisible?'':'hidden';});}
     // ---- write
-    water.current?.draw(t,d);
+    const now=performance.now(),dt=lastFrame.current?now-lastFrame.current:16.7;lastFrame.current=now;
+    if(n.size.backVisible&&water.current){water.current.draw(t,d);if(!reduced&&dt<250)govern(governor.current,water.current,dt,now);if(root.current)root.current.dataset.waterScale=water.current.scale().toFixed(2);}
     const k=Math.min(1,d/.8);if(n.art){n.art.style.transform=`scale(${(1+k*.14).toFixed(3)}) translate3d(0,${(-k*5).toFixed(2)}%,0)`;n.art.style.filter=`blur(${(k*11).toFixed(1)}px) brightness(${(1-k*.5).toFixed(3)}) saturate(${(1+k*.2).toFixed(2)})`;}
     if(n.fallback&&!water.current){const line=.12+(1.22-.12)*d;n.fallback.style.clipPath=`inset(${Math.max(0,(1-line)*100).toFixed(2)}% 0 0 0)`;n.fallback.style.opacity=String(.5+d*.5);
       if(n.caustics){n.caustics.style.backgroundPosition=`${(t*9)%512}px ${(t*5)%512}px, ${(-t*6)%512}px ${(t*8)%512}px`;n.caustics.style.opacity=String((.18+.27*Math.min(1,d*1.4))*(1-clamp01((y-vh*1.6)/(vh*2))*.6));}
@@ -122,7 +147,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     if(n.header){const c=clamp01((d-.08)/.25);n.header.style.background=`rgba(6,24,38,${(c*.5).toFixed(3)})`;n.header.style.backdropFilter=c>.05?`blur(${(c*14).toFixed(1)}px)`:'none';n.header.style.borderBottomColor=`rgba(255,255,255,${(c*.14).toFixed(3)})`;
       const e=smooth(clamp01((d-.05)/.3),0,1);
       if(n.navImg){n.navImg.style.transform=`scale(${(1+(1-e)*(vw<760?.45:.85)).toFixed(3)})`;n.navImg.style.transformOrigin='center';}
-      if(n.navWord){n.navWord.style.opacity=e.toFixed(3);n.navWord.style.transform=`translateX(${((1-e)*-12).toFixed(1)}px)`;n.navWord.style.maxWidth=`${(e*(n.size.word||s.brandWidth||220)).toFixed(1)}px`;n.navWord.style.overflow='hidden';}
+      if(n.navWord){n.navWord.style.opacity=e.toFixed(3);n.navWord.style.transform=`translateX(${((1-e)*-12).toFixed(1)}px)`;n.navWord.style.maxWidth=`${(e*(s.brandWidth||n.size.word||220)).toFixed(1)}px`;n.navWord.style.overflow='hidden';}
       if(n.brand)n.brand.style.pointerEvents=e<.5?'none':'';}
     // Creatures (10-home § 4.7): t-driven fins keep moving while the page is still.
     const place=(c:typeof n.turtle,r:[number,number,number,number]|null,fins:number[])=>{if(!c)return;if(reduced||!r){c.svg.style.opacity='0';return;}const [x,yy,rot,op]=r;c.svg.style.opacity=op.toFixed(3);c.svg.style.transform=`translate3d(${x.toFixed(1)}px,${yy.toFixed(1)}px,0) rotate(${rot.toFixed(2)}deg)`;c.fins.forEach((f,i)=>{if(f)f.style.transform=`rotate(${fins[i].toFixed(2)}deg)`;});};
@@ -157,8 +182,8 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     n.scribbles.forEach((path,i)=>{const p=reduced?1:clamp01((vh-scribR[i].top)/(vh*.4));path.style.strokeDasharray='1';path.style.strokeDashoffset=String(1-p);});
   });
   const blocks:Record<string,ReactNode>={
-    descent:(string(descent.title)||string(descent.body))?<section key="descent" id="descenso" className="home-descent"><h2>{string(descent.title)}</h2>{string(descent.body)&&<p>{emphasize(string(descent.body),string(descent.emphasis))}</p>}</section>:null,
-    reef:<section key="reef" className="home-reef" data-reef><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp"/><Creature name="fish"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
+    descent:(string(descent.title)||string(descent.body))?<section key="descent" id="descenso" className="home-descent" data-clear><h2>{string(descent.title)}</h2>{string(descent.body)&&<p>{emphasize(string(descent.body),string(descent.emphasis))}</p>}</section>:null,
+    reef:<section key="reef" className="home-reef" data-reef data-clear><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp"/><Creature name="fish"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
     projects:<section key="projects" id="projects" className="home-projects"><h2>{string(home.projects_title)||'Ongoing projects'}</h2><svg className="home-projects-scribble" data-pscribble viewBox="0 0 600 130" aria-hidden="true"><path pathLength="1" d="M10 92 C 96 26, 188 20, 244 56 C 296 90, 256 118, 218 100 C 172 78, 214 40, 306 38 C 420 36, 522 56, 590 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
       <div className="home-pcards">{projects.map((p,i)=><Link key={p.key} href={p.href} data-pcard={i} className="home-pcard"><div data-pimg><Picture id={p.media_id} media={media} fallback={p.fallback}/></div><div className="home-pcard-shade"/><div data-pray className="home-pcard-rays" aria-hidden="true"/><div className="home-pcard-copy"><span className="home-pcard-title">{lines(p.title)}</span><div>{string(p.status_label)&&<span className="home-pcard-status">{string(p.status_label).split('|').map((part,n)=><span key={n}>{n>0&&<i>|</i>}{part.trim()}</span>)}</span>}{string(p.body)&&<p>{string(p.body)}</p>}</div></div></Link>)}</div></section>,
     upcoming:agenda.length?<section key="upcoming" id="next" className="home-agenda pin-section" data-agenda>
@@ -176,16 +201,16 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   };
   return <div ref={root} className="home-root">
     <span data-nav-theme="dark" hidden/>
-    <div className="home-bg" aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src="/design/home-background.jpg" alt="" fill priority sizes="100vw"/></div></div>
-    <canvas ref={waterCanvas} className="home-water-gl" aria-hidden="true"/>
-    <div className="home-water" data-water aria-hidden="true"><div className="home-caustics" data-caustics/></div>
-    <div className="home-rays" data-rays aria-hidden="true"/>
-    <div ref={bubbles} className="home-bubbles" data-bubbles aria-hidden="true"/>
-    <div className="home-deep" data-deep aria-hidden="true"/>
-    <div className="home-creatures-fixed" aria-hidden="true"><Creature name="turtle"/></div>
+    <div className="home-bg" data-back aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src="/design/home-background.jpg" alt="" fill priority sizes="100vw"/></div></div>
+    <canvas ref={waterCanvas} className="home-water-gl" data-back aria-hidden="true"/>
+    <div className="home-water" data-water data-back aria-hidden="true"><div className="home-caustics" data-caustics/></div>
+    <div className="home-rays" data-rays data-back aria-hidden="true"/>
+    <div ref={bubbles} className="home-bubbles" data-bubbles data-back aria-hidden="true"/>
+    <div className="home-deep" data-deep data-back aria-hidden="true"/>
+    <div className="home-creatures-fixed" data-back aria-hidden="true"><Creature name="turtle"/></div>
     <canvas ref={snow} className="home-snow" aria-hidden="true"/>
     <div className="home-hud" data-hud aria-hidden="true"><div className="home-tank"><i/><span><span data-tank/></span></div><div><strong data-hud-depth>30.0 m</strong><small>Depth</small><em>O₂ <span data-o2>100</span>%</em></div></div>
-    <section className="home-hero pin-section" aria-label={brand.name}>
+    <section className="home-hero pin-section" data-clear aria-label={brand.name}>
       <div className="home-hero-sticky">
         <div className="home-gauge" data-gauge aria-hidden="true"><span>0 m</span><small>Descending</small></div>
         <div className="home-hero-block" data-hero-block><div className="home-hero-glow"/>

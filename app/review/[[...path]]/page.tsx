@@ -13,7 +13,7 @@ const prefix='/review';
 
 export default async function ReviewPage({params,searchParams}:{params:Promise<{path?:string[]}>;searchParams:Promise<{variant?:string}>}) {
   // Fail closed in production, including next start on localhost.
-  if(process.env.NODE_ENV!=='development')notFound();
+  if(process.env.NODE_ENV!=='development'&&process.env.ENCOUNTERS_LOCAL_REVIEW!=='true')notFound();
   const host=(await headers()).get('host')||'';
   if(!/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host))notFound();
   const {reviewData:data,reviewBlocks:blocks}=await import('@/features/encounters/review-fixtures');
@@ -29,7 +29,7 @@ export default async function ReviewPage({params,searchParams}:{params:Promise<{
     // ?variant=sparse: fewer items and missing sections, to check other list sizes with the same template.
     const sparse=(await searchParams).variant==='sparse';
     const view=sparse?{...referenceView,home:{...referenceView.home,descent:{},about:{}},sections:referenceView.sections.filter(k=>k!=='descent'&&k!=='about'),agenda:referenceView.agenda.slice(0,2),happened:referenceView.happened.slice(0,1),art:referenceView.art.slice(0,2),crew:referenceView.crew.slice(0,3)}:referenceView;
-    return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><ScrollStage className="editorial-page home-page"><HomeView view={view} media={referenceMedia} closing="May the ocean be with you" newsletter={false}/></ScrollStage></>;
+    return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><div className="editorial-page home-page"><HomeView view={view} media={referenceMedia} closing="May the ocean be with you" newsletter={false}/></div></>;
   }
   if(route==='/art') {
     screen=<ArtLanding data={data} works={works} pathPrefix={prefix}/>;
