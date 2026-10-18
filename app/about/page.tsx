@@ -1,6 +1,6 @@
 import {AboutView} from '@/components/public/AboutView';
 import {contactOf} from '@/features/encounters/contact';
-import {EditorialBlocks} from '@/components/public/EditorialBlocks';
+import {PostBlocks} from '@/components/public/PostBlocks';
 import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {Closing,PhotoHero} from '@/components/public/EditorialPieces';
 import {editorialMetadata} from '@/features/encounters/editorial-data';
@@ -15,5 +15,5 @@ export default async function Page(){
   const data=await siteData();const s=settingsOf(data);
   if(string(s.hero_title))return <ScrollStage className="editorial-page about-page"><AboutView settings={s} contact={contactOf(data.settings)} media={data.media}/></ScrollStage>;
   const page=pageFor(data,'about');const blocks=page?await readBlocks(page.id):[];
-  return <ScrollStage className="editorial-page about-page"><PhotoHero pinned title={string(page?.title)||'About us'} kicker={string(page?.kicker)} cover={page?.cover_id} media={data.media} fallback="/design/about-1-turtle-web.jpg"/><div id="editorial-content"><EditorialBlocks blocks={blocks} media={data.media}/><Closing/></div></ScrollStage>;
+  return <ScrollStage className="editorial-page about-page"><PhotoHero pinned title={string(page?.title)||'About us'} kicker={string(page?.kicker)} cover={page?.cover_id} media={data.media} fallback="/design/about-1-turtle-web.jpg"/><div id="editorial-content"><PostBlocks blocks={blocks} media={data.media}/><Closing/></div></ScrollStage>;
 }

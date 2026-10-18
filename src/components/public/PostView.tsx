@@ -3,7 +3,7 @@ import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {countLabel,dateLabel,isFinished,lines,pad,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
-import {EditorialBlocks} from './EditorialBlocks';
+import {PostBlocks} from './PostBlocks';
 import {MediaEmbed} from './EditorialInteractive';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
@@ -15,7 +15,7 @@ export function PostView({post,blocks,media,detail={},trail,children,before}:{po
   return <>
     <PhotoHero title={string(post.title)} kicker={string(post.kicker)} meta={string(post.meta_line)} cover={post.cover_id||detail.media_id} media={media}/>
     {trail}
-    <div id="editorial-content" className="post-body">{before}<MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><EditorialBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>{children}</div>
+    <div id="editorial-content" className="post-body">{before}<MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>{children}</div>
   </>;
 }
 export type People={name:string;role:string;href:string|null}[];

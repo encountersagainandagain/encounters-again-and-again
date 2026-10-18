@@ -6,7 +6,7 @@ import type {EditorialData} from '@/features/encounters/editorial-data';
 import {MediaImage} from './MediaImage';
 import {Breadcrumbs,DarkClosing,EmptyState,PhotoHero,Scribble} from './EditorialPieces';
 import {MediaEmbed,VideoFrame} from './EditorialInteractive';
-import {EditorialBlocks} from './EditorialBlocks';
+import {PostBlocks} from './PostBlocks';
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
 export type Person={member:Row;role:string;href:string|null};
@@ -63,7 +63,7 @@ export function ArtworkView({post,art,category,number,people,blocks,media,pathPr
         {(post.excerpt||art.caption||safeHref(art.external_url))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{safeHref(art.external_url)?<a className="art-cta" href={safeHref(art.external_url)}>View the work ↗</a>:null}</div>:null}
       </div></section>
       {art.embed_kind==='youtube'?<div className="art-section art-embed"><div className="art-frame art-work--tall"><VideoFrame id={art.embed_id} title={title}>{art.media_id?<MediaImage id={art.media_id} media={media} alt=""/>:null}</VideoFrame></div></div>:<MediaEmbed kind={art.embed_kind} id={art.embed_id}/>}
-      {blocks.length>0&&<EditorialBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>}
+      {blocks.length>0&&<PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>}
       {related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{related.map(r=><Link key={r.href} href={r.href}>{r.title} →</Link>)}</section>}
       {more}
     </div>

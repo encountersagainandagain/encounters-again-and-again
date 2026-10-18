@@ -4,7 +4,7 @@ import {useEffect,useRef} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {string,type Row} from '@/features/encounters/presentation';
 import {countLabel,dateLabel,isFinished,pad,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
-import {EditorialBlocks} from './EditorialBlocks';
+import {PostBlocks} from './PostBlocks';
 import {PhotoHero} from './EditorialPieces';
 import {MediaImage,Picture} from './MediaImage';
 
@@ -47,7 +47,7 @@ export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:
     <PhotoHero title={string(page?.title)||'Workshops'} kicker={string(settings.kicker)||string(page?.kicker)||'artsy animals'} cover={settings.cover_id||page?.cover_id} media={media} fallback="/design/ww-banner.webp"/>
     <div id="editorial-content" className="ws-list">
       {ordered.map((a,i)=><Workshop key={string(a.post.id)} activity={a} index={i} sessions={sessions.filter(s=>s.workshop_id===a.post.id)} media={media}/>)}
-      {!ordered.length&&blocks.length>0&&<div className="ws-blocks"><EditorialBlocks blocks={blocks} media={media}/></div>}
+      {!ordered.length&&blocks.length>0&&<div className="ws-blocks"><PostBlocks blocks={blocks} media={media}/></div>}
     </div>
     <section className="ws-closing"><h2 data-seq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Link data-seq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>
   </>;

@@ -6,7 +6,7 @@ import {dateLabel,isFinished,pad,statusLabels,lines,type Activity} from '@/featu
 import {Picture} from './MediaImage';
 import {pinProgress,ramp,useFrame} from './useFrame';
 import {DarkClosing} from './EditorialPieces';
-import {EditorialBlocks} from './EditorialBlocks';
+import {PostBlocks} from './PostBlocks';
 import type {ContentBlock} from '@/features/encounters/public-content';
 
 const ORDER=[0,2,4,1,3,5];
@@ -56,7 +56,7 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
       </div>
     </section>
     <div id="expeditions-content" className="exp-after">
-      {!cards.length&&blocks.length?<div className="exp-blocks"><EditorialBlocks blocks={blocks} media={media} showIndex={false}/></div>:null}
+      {!cards.length&&blocks.length?<div className="exp-blocks"><PostBlocks blocks={blocks} media={media}/></div>:null}
       {!!list.length&&<section className="activity-list" aria-labelledby="expedition-list-title">
         <div className="activity-list-head" data-seq="0.96,0.4"><h2 id="expedition-list-title">{string(settings.list_title)||'On the water'}</h2><span>{string(settings.list_note)||'where we are going, and where we have been'}</span></div>
         <div className="activity-cards">{[...upcoming,...finished].map((a,i)=><ActivityCard key={string(a.post.id)} activity={a} media={media} seq={0.94-(i%3)*.04}/>)}</div>

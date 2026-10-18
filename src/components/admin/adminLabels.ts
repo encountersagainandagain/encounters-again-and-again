@@ -4,7 +4,7 @@ export const kindLabel=(kind:unknown)=>kindLabels[String(kind)]||String(kind||'â
 // Singular names for create buttons and new-record titles.
 export const singular:Record<string,string>={posts:'content',crew_members:'crew member',art_categories:'art category',upcoming_items:'announcement',expedition_cards:'expedition card',media:'image'};
 export const optionText=(value:string)=>value.charAt(0).toUpperCase()+value.slice(1).replace(/_/g,' ');
-export const blockLabels:Record<string,string>={paragraph:'Paragraph',heading:'Heading',image:'Image','image-pair':'Image pair',quote:'Quote',divider:'Divider',link:'Link',youtube:'YouTube video',toc:'Table of contents',carousel:'Carousel',source:'Source links'};
+export const blockLabels:Record<string,string>={paragraph:'Paragraph',heading:'Heading',image:'Image','image-pair':'Two images',quote:'Quote',divider:'Divider',link:'Simple link',youtube:'YouTube video',toc:'Post index',carousel:'Carousel',source:'Source links',list:'Title + list',quick_facts:'Quick facts',costs:'Cost breakdown',faq:'FAQs',accordion:'Accordion'};
 export const blockLabel=(type:unknown)=>blockLabels[String(type)]||String(type);
 
 export const postGroups={

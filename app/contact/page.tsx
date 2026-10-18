@@ -1,6 +1,6 @@
 import {ContactView} from '@/components/public/ContactView';
 import {ContactLines} from '@/components/public/AboutView';
-import {EditorialBlocks} from '@/components/public/EditorialBlocks';
+import {PostBlocks} from '@/components/public/PostBlocks';
 import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {PhotoHero} from '@/components/public/EditorialPieces';
 import {contactOf} from '@/features/encounters/contact';
@@ -16,5 +16,5 @@ export default async function Page(){
   const data=await siteData();const s=settingsOf(data);const contact=contactOf(data.settings);
   if(Array.isArray(s.topics)&&s.topics.length)return <ScrollStage className="editorial-page contact-page"><ContactView settings={s} contact={contact} media={data.media}/></ScrollStage>;
   const page=pageFor(data,'contact');const blocks=page?await readBlocks(page.id):[];
-  return <ScrollStage className="editorial-page contact-page"><PhotoHero title={string(page?.title)||'Contact'} kicker={string(page?.kicker)} cover={page?.cover_id} media={data.media} fallback="/design/reef-turtle-web.jpg"/><div id="editorial-content" className="contact-legacy"><EditorialBlocks blocks={blocks} media={data.media}/><div className="contact-legacy-lines"><ContactLines contact={contact}/></div></div></ScrollStage>;
+  return <ScrollStage className="editorial-page contact-page"><PhotoHero title={string(page?.title)||'Contact'} kicker={string(page?.kicker)} cover={page?.cover_id} media={data.media} fallback="/design/reef-turtle-web.jpg"/><div id="editorial-content" className="contact-legacy"><PostBlocks blocks={blocks} media={data.media}/><div className="contact-legacy-lines"><ContactLines contact={contact}/></div></div></ScrollStage>;
 }

@@ -12,6 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,StatusBadge} from './AdminShell';
+import {hasSections,profileSections,toSections} from '@/features/encounters/profile-sections';
 import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
@@ -46,6 +47,48 @@ function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fie
     if(field.reference==='media')return <div key={field.key} role="group" aria-labelledby={`${props.id}-label`} className={`adm-field adm-field--wide${problem?' adm-field--error':''}`}><span id={`${props.id}-label`}>{title}</span><MediaPicker id={props.id} value={raw} media={options.media||[]} folder={field.key==='portrait_id'?'crew':'posts'} onUploaded={reload} describedBy={props['aria-describedby']} onChange={id=>onChange({...value,[field.key]:id})}/>{note}</div>;
     return <label key={field.key} htmlFor={props.id} className={`adm-field${wide?' adm-field--wide':''}${problem?' adm-field--error':''}`}>{title}{control}{note}</label>;
   })}</div>;
+}
+// Blocks of the Post template (handoff 04-editor-de-bloques.md). Keys match what the public renderer reads.
+const postBlockTypes=['paragraph','heading','image','image-pair','carousel','youtube','quote','list','quick_facts','costs','faq','accordion','link','divider','toc'];
+const blockRows:Record<string,{key:string;label:string;columns:[string,string,boolean?][];max:number;add:string}>={
+  quick_facts:{key:'quickFactItems',label:'Facts',columns:[['label','Label'],['value','Value']],max:4,add:'Add fact'},
+  costs:{key:'costItems',label:'Rows',columns:[['label','Concept'],['note','Detail'],['amount','Amount']],max:20,add:'Add row'},
+  faq:{key:'faqItems',label:'Questions',columns:[['question','Question'],['answer','Answer',true]],max:20,add:'Add question'},
+  accordion:{key:'accordionItems',label:'Panels',columns:[['title','Label'],['text','Text',true]],max:20,add:'Add panel'},
+};
+const blockText:Record<string,[string,string,(boolean|string)?,string?][]>={
+  paragraph:[['lead','Lead (optional, larger serif)',true],['text','Text',true,'Leave an empty line between paragraphs.']],
+  heading:[['number','Number','','e.g. 01'],['kicker','Kicker','','Small line before the title, e.g. Leaving late'],['text','Title',true]],
+  youtube:[['youtubeUrl','YouTube address'],['caption','Caption']],
+  quote:[['text','Quote',true],['attribution','Attribution']],
+  list:[['text','Title']],
+  costs:[['text','Title'],['total_label','Total label','','Default: Total'],['total_amount','Total amount'],['note','Note in italics']],
+  faq:[['text','Title (optional)']],
+  link:[['label','Link text'],['href','Link','','A page such as /expeditions, or a full address.']],
+  toc:[['title','Title','','Default: In this post. Lists the headings that have an index name.']],
+};
+function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index:number;max:number;media:Row[];onChange:(content:Row)=>void}){
+  const c=block.content;const list:Row[]=Array.isArray(c.images)?(c.images as Row[]):c.media_id||c.src?[{media_id:c.media_id||String(c.src||'').split('/').pop(),caption:c.caption,alt:c.alt}]:[];
+  const save=(images:Row[])=>onChange({...c,media_id:undefined,src:undefined,caption:max===1?images[0]?.caption:undefined,alt:max===1?images[0]?.alt:undefined,images:images.map(img=>({...img,src:img.media_id?`/api/media/${img.media_id}`:undefined}))});
+  return <div className="adm-stack" style={{gap:10}}>{list.map((img,n)=><div key={n} className="adm-block-image"><AdminThumb id={img.media_id} size="100%"/><div className="adm-stack" style={{gap:8}}><label className="adm-field">Image {max>1?n+1:''}<select aria-label={`Block ${index+1} image ${n+1}`} value={String(img.media_id||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,media_id:e.target.value||null}:x))}><option value="">Choose image</option>{media.map(m=><option key={String(m.id)} value={String(m.id)}>{String(m.alt||m.id)}</option>)}</select></label>
+    <label className="adm-field">Caption<input value={String(img.caption||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,caption:e.target.value}:x))}/></label><label className="adm-field">Image description<input value={String(img.alt||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,alt:e.target.value}:x))}/><small>For people who cannot see it. Empty: the description of the library is used.</small></label>
+    {max>1&&<button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>save(list.filter((_,k)=>k!==n))}>Remove image</button>}</div></div>)}
+    {list.length<max&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>save([...list,{media_id:null,caption:''}])}><Plus aria-hidden="true"/>Add image</button>}</div>;
+}
+function BlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
+  const c=block.content;const set=(content:Row)=>onChange({...block,content} as never);const rowsSpec=blockRows[block.type];
+  return <div className="adm-stack" style={{gap:10}}>
+    {block.type==='image'&&<><BlockImages block={block} index={index} max={1} media={media} onChange={set}/><label className="adm-field">Number<input value={String(c.number||'')} placeholder="Automatic" onChange={e=>set({...c,number:e.target.value})}/><small>Shown before the caption. Empty: images are numbered in order.</small></label></>}
+    {block.type==='image-pair'&&<BlockImages block={block} index={index} max={2} media={media} onChange={set}/>}
+    {block.type==='carousel'&&<BlockImages block={block} index={index} max={8} media={media} onChange={set}/>}
+    {block.type==='divider'&&<p className="adm-help">A line with a small diamond. Nothing to fill in.</p>}
+    <div className="adm-fields">{(blockText[block.type]||[]).map(([key,label,wide,hint])=><label key={key} className={`adm-field${wide?' adm-field--wide':''}`}>{label}{wide?<textarea aria-label={`Block ${index+1} ${label}`} rows={key==='text'?4:2} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value,...(key==='text'?{paragraphs:undefined}:{})})}/>:<input aria-label={`Block ${index+1} ${label}`} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value})}/>}{hint?<small>{hint}</small>:null}</label>)}
+      {block.type==='heading'&&<label className="adm-field">Index name<input value={String(block.anchor||'')} placeholder="e.g. leaving-late" onChange={e=>onChange({...block,anchor:e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+/,'')||undefined} as never)}/><small>Lowercase words joined with hyphens. The “In this post” index links here.</small></label>}
+      {block.type==='list'&&<label className="adm-field adm-field--wide">Items<textarea rows={4} value={Array.isArray(c.items)?(c.items as unknown[]).map(x=>typeof x==='string'?x:String((x as Row).text||'')).join('\n'):''} onChange={e=>set({...c,items:e.target.value.split('\n')})}/><small>One item per line.</small></label>}</div>
+    {rowsSpec&&(()=>{const items:Row[]=Array.isArray(c[rowsSpec.key])?(c[rowsSpec.key] as Row[]):[];const save=(next:Row[])=>set({...c,[rowsSpec.key]:next});
+      return <fieldset className="adm-group"><legend>{rowsSpec.label}</legend>{items.map((row,n)=><div key={n} className="adm-list-item"><div className="adm-fields">{rowsSpec.columns.map(([key,label,wide])=><label key={key} className={`adm-field${wide?' adm-field--wide':''}`}>{label}{wide?<textarea rows={3} value={String(row[key]||'')} onChange={e=>save(items.map((x,k)=>k===n?{...x,[key]:e.target.value}:x))}/>:<input value={String(row[key]??row.value??'')} onChange={e=>save(items.map((x,k)=>k===n?{...x,[key]:e.target.value}:x))}/>}</label>)}</div><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>save(items.filter((_,k)=>k!==n))}>Remove</button></div>)}
+        {items.length<rowsSpec.max&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>save([...items,{}])}><Plus aria-hidden="true"/>{rowsSpec.add}</button>}</fieldset>;})()}
+  </div>;
 }
 function Card({title,lead,children,actions}:{title:string;lead?:string;children:ReactNode;actions?:ReactNode}){
   return <section className="adm-card"><div className="adm-card-head"><div><h2 className="adm-card-title">{title}</h2>{lead&&<p>{lead}</p>}</div>{actions}</div>{children}</section>;
@@ -91,7 +134,14 @@ export function EncountersCms(){
         details[k]?supabase.from(details[k].table).select('*').eq('id',row.id).maybeSingle():Promise.resolve({data:null,error:null}),
         children[k]?supabase.from(children[k].table).select('*').eq(children[k].foreignKey,row.id).order('sort'):Promise.resolve({data:[],error:null}),
       ]);const e=result.find(r=>r.error)?.error;if(e)throw e;
-      setBlocks((result[0].data||[]) as Block[]);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
+      // A profile without sections gets them filled in with its current layout (profile-sections.ts); saving keeps them.
+      let loaded=(result[0].data||[]) as Block[];
+      if(k==='crew_member'&&loaded.length&&!hasSections(loaded as never)){loaded=toSections(loaded as never) as unknown as Block[];
+        const member=(await supabase.from('crew_members').select('slug,portrait_id').eq('page_post_id',row.id).maybeSingle()).data;
+        // The approved Wild Wonders banner, chosen until now by its name, becomes an explicit design cover.
+        if(member?.slug==='wild-wonders'&&(!row.cover_id||row.cover_id===member.portrait_id))row={...row,cover_id:null,cover_image:'/design/ww-banner.webp'};
+        setMessage('This page had no explicit sections yet. They were filled in with its current layout, so it looks the same; save to keep them.');}
+      setBlocks(loaded);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
     }setRecord(row);setMarkClean(true);}catch(e){setMessage(e instanceof Error?e.message:'Could not load content');}finally{setBusy(false);}}
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
   const handled=useRef('');
@@ -219,7 +269,8 @@ export function EncountersCms(){
     <div className="adm-split"><div className="adm-stack">
       <Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
         <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
-      <Card title={isCrewPage?'Sections of The Crew page':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':'The page is built from these blocks, in this order.'}>
+      <Card title={isCrewPage?'Sections of The Crew page':kind==='crew_member'?'Sections of the personal page':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':'The page is built from these blocks, in this order.'}>
+        {kind==='crew_member'&&<ul className="adm-section-guide">{profileSections.slice(0,7).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}</ul>}
         {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in People.</small></li></ul>}
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{blockLabel(b.type)}</span><div className="adm-block-tools">
@@ -228,20 +279,19 @@ export function EncountersCms(){
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>setBlocks([...blocks.slice(0,i+1),{...b,id:crypto.randomUUID(),source_block_id:undefined},...blocks.slice(i+1)])} aria-label={`Duplicate block ${i+1}`}><Copy aria-hidden="true"/>Duplicate</button>
             <button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setBlocks(blocks.filter((_,j)=>j!==i))} aria-label={`Remove block ${i+1}`}><Trash2 aria-hidden="true"/>Remove</button></div></div>
           <div className="adm-block-body">
+            {kind==='crew_member'&&<div className="adm-fields"><label className="adm-field">Place on the page<select aria-label={`Block ${i+1} place on the page`} value={String(b.content.section||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,section:e.target.value||undefined}}:v))}>{profileSections.map(([key,text])=><option key={key} value={key}>{text}</option>)}</select><small>{(profileSections.find(([key])=>key===String(b.content.section||''))||profileSections[7])[2]}</small></label>
+              {b.type==='image'&&b.content.section==='chapter'&&<label className="adm-check"><input type="checkbox" checked={b.content.in_pair===true} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,in_pair:e.target.checked||undefined}}:v))}/><span>Also show its last image in the photo pair<small>Used when the pair has only one photo.</small></span></label>}</div>}
             {isCrewPage&&<div className="adm-fields"><label className="adm-field">Place on the page<select aria-label={`Block ${i+1} place on the page`} value={String(b.content.section||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,section:e.target.value||undefined}}:v))}>{crewSections.map(([key,text])=><option key={key} value={key}>{text}</option>)}</select><small>{(crewSections.find(([key])=>key===String(b.content.section||''))||crewSections[5])[2]}</small></label>
               {b.type==='paragraph'&&['story','project'].includes(String(b.content.section))&&<label className="adm-field">Text style<select aria-label={`Block ${i+1} text style`} value={String(b.content.style||'body')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,style:e.target.value}}:v))}>{crewStyles.map(([key,text])=><option key={key} value={key}>{text}</option>)}</select></label>}</div>}
-            {b.type!=='divider'&&<label className="adm-field">{b.type==='heading'?'Heading text':b.type==='image'?'Text (optional)':'Text'}<textarea aria-label={`Block ${i+1} text`} rows={b.type==='heading'?2:4} value={String(b.content.text||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,text:e.target.value,paragraphs:undefined}}:v))}/></label>}
-            {b.type==='image'&&(()=>{const imageId=String(b.content.media_id||(b.content.images as Row[]|undefined)?.[0]?.media_id||'');return <div className="adm-block-image"><AdminThumb id={imageId} size="100%"/><div className="adm-stack" style={{gap:12}}><label className="adm-field">Image<select aria-label={`Block ${i+1} image`} value={imageId} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,images:undefined,media_id:e.target.value,src:`/api/media/${e.target.value}`}}:v))}><option value="">Choose image</option>{(options.media||[]).map(m=><option key={String(m.id)} value={String(m.id)}>{String(m.alt||m.id)}</option>)}</select></label>
-              <Fields notes={{caption:'Optional text shown under the image.',alt:'Describe the image for people who cannot see it.'}} fields={[{key:'caption',label:'Caption'},{key:'alt',label:'Image description'}]} value={b.content} onChange={content=>setBlocks(blocks.map((v,j)=>j===i?{...v,content}:v))} options={options}/></div></div>;})()}
-            {['quote','link','youtube','heading'].includes(b.type)&&<Fields notes={{kicker:'Optional small line above the heading.'}} fields={b.type==='quote'?[{key:'attribution',label:'Attribution'}]:b.type==='youtube'?[{key:'youtubeUrl',label:'YouTube URL'}]:b.type==='link'?[{key:'href',label:'Link URL'},{key:'label',label:'Link label'}]:[{key:'kicker',label:'Kicker'}]} value={b.content} onChange={content=>setBlocks(blocks.map((v,j)=>j===i?{...v,content}:v))} options={options}/>}
+            {isCrewPage?<>{b.type!=='divider'&&<label className="adm-field">{b.type==='heading'?'Heading text':b.type==='image'?'Text (optional)':'Text'}<textarea aria-label={`Block ${i+1} text`} rows={b.type==='heading'?2:4} value={String(b.content.text||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,text:e.target.value,paragraphs:undefined}}:v))}/></label>}
+              {b.type==='image'&&<BlockImages block={b} index={i} max={1} media={options.media||[]} onChange={content=>setBlocks(blocks.map((v,j)=>j===i?{...v,content}:v))}/>}</>
+            :<BlockFields block={b} index={i} media={options.media||[]} onChange={next=>setBlocks(blocks.map((v,j)=>j===i?next:v))}/>}
           </div></div>)}
           {blocks.length===0&&<p className="adm-empty">No blocks yet. Add the first one below.</p>}
         </div>
-        <div className="adm-add" role="group" aria-label="Add a block">{['paragraph','heading','image','quote','divider','link','youtube','toc'].map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:isCrewPage?{section:'story'}:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
-        {!!record.updated_at&&<p className="adm-help" style={{marginTop:12}}>More block types (carousels, FAQs, costs…) are available in the <Link href={`/admin/posts/${record.id}/edit`}>detailed block editor</Link>.</p>}
+        <div className="adm-add" role="group" aria-label="Add a block">{(isCrewPage?['paragraph','heading','image']:postBlockTypes).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:isCrewPage?{section:'story'}:kind==='crew_member'?{section:'extra'}:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
       </Card>
-      {details[kind]&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields} value={specific} onChange={setSpecific} options={options}/>
-        {kind==='workshop'&&<label className="adm-field" style={{marginTop:16}}>Materials (one per line)<textarea value={Array.isArray(specific.materials)?specific.materials.join('\n'):''} onChange={e=>setSpecific({...specific,materials:e.target.value.split('\n')})}/></label>}</Card>}
+      {details[kind]&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields} value={specific} onChange={setSpecific} options={options}/></Card>}
       {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>
         {crew.length===0?<p className="adm-help">There are no crew members yet.</p>:<div className="adm-people">{crew.map(c=>{const on=contributors.includes(String(c.id));return <div className="adm-person" data-on={on} key={String(c.id)}>
           <label className="adm-check"><input type="checkbox" checked={on} onChange={e=>setContributors(e.target.checked?[...contributors,String(c.id)]:contributors.filter(id=>id!==c.id))}/><span style={{display:'flex',alignItems:'center',gap:10}}><AdminThumb id={c.portrait_id} size={36}/>{String(c.name)}</span></label>
