@@ -9,14 +9,22 @@ import {kindLabel} from './adminLabels';
 
 type Row=Record<string,unknown>;
 const descriptions:Record<string,string>={
-  'Pages and publications':'Site pages, expeditions, workshops, artworks, messages and news.',
-  Crew:'People in the collective, their portraits and profile pages.',
-  'Art categories':'Collections that group artworks on the Art page.',
-  Announcements:'Short notices for Home that can point to an expedition or workshop.',
-  'Expedition cards':'Presentation cards shown on the Expeditions page.',
-  'Media library':'Every uploaded image, with its description and focus point.',
-  'Site settings':'Contact details, social links, Home sections and page covers.',
-  Newsletter:'Subscribers and campaign tools.',
+  '/admin/content?table=posts&kind=artwork':'Works shown on the Art page, with their authors.',
+  '/admin/content?table=art_categories':'Collections that group the works on the Art page.',
+  '/admin/content?table=posts&kind=expedition':'Expeditions with dates, needs and results.',
+  '/admin/content?table=posts&kind=expedition_report':'Reports that tell what came out of an expedition.',
+  '/admin/content?table=expedition_cards':'Presentation cards shown on the Expeditions page.',
+  '/admin/content?table=posts&kind=workshop':'Workshops with their sessions and facilitators.',
+  '/admin/content?table=posts&kind=workshop_report':'Reports that tell what came out of a workshop.',
+  '/admin/content?table=posts&kind=message':'Meaningful Messages and their illustrations.',
+  '/admin/content?table=posts&kind=news':'News and stories with their own page.',
+  '/admin/content?table=upcoming_items':'Short notices for Home that can point to an expedition or workshop.',
+  '/admin/content?table=crew_members':'People in the collective and their personal pages.',
+  '/admin/content?table=posts&page=team':'The texts and photos of The Crew page.',
+  '/admin/content?table=posts&scope=pages':'Permanent pages such as Home, About and Contact.',
+  '/admin/content?table=media':'Every uploaded image, with its description and focus point.',
+  '/admin/settings':'Contact details, social links, Home sections and page covers.',
+  '/admin/newsletter':'Subscribers and campaign tools.',
 };
 
 export function AdminDashboard(){
@@ -46,7 +54,7 @@ export function AdminDashboard(){
         <td>{kindLabel(row.kind)}</td><td><StatusBadge status={row.status}/></td><td>{row.updated_at?new Date(String(row.updated_at)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'}</td></tr>)}</tbody></table>}
     </section>
     <section className="adm-card"><div className="adm-card-head"><h2 className="adm-card-title">Sections</h2></div>
-      <div className="adm-tiles">{adminSections.filter(s=>s.href!=='/admin').map(({href,label,icon:Icon})=><Link key={href} className="adm-tile" href={href}><span className="adm-tile-icon"><Icon aria-hidden="true"/></span><strong>{label}</strong><span>{descriptions[label]}</span></Link>)}</div>
+      <div className="adm-tiles">{adminSections.filter(s=>s.href!=='/admin').map(({href,label,group,icon:Icon})=><Link key={href} className="adm-tile" href={href}><span className="adm-tile-icon"><Icon aria-hidden="true"/></span><strong>{group===label?label:`${group} · ${label}`}</strong><span>{descriptions[href]}</span></Link>)}</div>
     </section>
   </div>;
 }

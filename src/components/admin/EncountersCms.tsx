@@ -12,7 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,StatusBadge} from './AdminShell';
-import {blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
+import {kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
 const tables=['posts',...Object.keys(entities)];
@@ -54,6 +54,9 @@ const postScopes:Record<string,(k:unknown)=>boolean>={publications:k=>k!=='page'
 export function EncountersCms(){
   const params=useSearchParams();
   const table=tables.includes(params.get('table')||'')?params.get('table')!:'posts';
+  // A menu entry can narrow the list to one type of content, or to the permanent pages.
+  const kindParam=table==='posts'&&kinds.includes(params.get('kind')||'')?params.get('kind')!:'';
+  const pagesOnly=table==='posts'&&params.get('scope')==='pages';const pageRole=table==='posts'?params.get('page')||'':'';
   const [rows,setRows]=useState<Row[]>([]);const [options,setOptions]=useState<Record<string,Row[]>>({});
   const [record,setRecord]=useState<Row|null>(null);const [specific,setSpecific]=useState<Row>({});const [blocks,setBlocks]=useState<Block[]>([]);
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
@@ -69,7 +72,7 @@ export function EncountersCms(){
   useEffect(()=>{if(markClean){setBaseline(snapshot);setMarkClean(false);}},[markClean,snapshot]);
   const dirty=!!record&&baseline!==''&&baseline!==snapshot;
   const kind=String(record?.kind||'news');
-  useEffect(()=>{setRecord(null);setMessage('');setLoaded(false);},[table]);
+  useEffect(()=>{setRecord(null);setMessage('');setLoaded(false);},[table,kindParam,pagesOnly,pageRole]);
   useEffect(()=>{let live=true;async function load(){if(!supabase)return;
     const client=supabase;
     const lists=['posts','crew_members','art_categories','media','artworks'];
@@ -92,7 +95,8 @@ export function EncountersCms(){
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
   const handled=useRef('');
   useEffect(()=>{if(!loaded)return;const key=`${table}:${params.get('new')}:${params.get('edit')}`;if(handled.current===key)return;handled.current=key;
-    if(params.get('new'))start(params.get('new')!);else if(params.get('edit')){const row=rows.find(r=>r.id===params.get('edit'));if(row)void edit(row);}
+    if(params.get('new'))start(params.get('new')!);
+    else if(pageRole){const row=rows.find(r=>r.kind==='page'&&r.source_role===pageRole);if(row)void edit(row);}else if(params.get('edit')){const row=rows.find(r=>r.id===params.get('edit'));if(row)void edit(row);}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[loaded,table,params,rows]);
   // Required fields, address format and choices that no longer exist, checked before anything is sent.
@@ -133,13 +137,13 @@ export function EncountersCms(){
   async function upload(file:File){setBusy(true);try{const url=await uploadMediaFile(file,'posts');setRevision(x=>x+1);setMessage(`Image uploaded: ${url}`);}catch{setMessage('Image upload failed.');}finally{setBusy(false);}}
   function back(){if(dirty&&!window.confirm('Leave without saving your changes?'))return;setRecord(null);setMessage('');}
   function moveBlock(i:number,step:number){const n=[...blocks];[n[i+step],n[i]]=[n[i],n[i+step]];setBlocks(n);}
-  const label=tableLabel(table);
+  const label=kindParam?kindListLabels[kindParam]||kindLabel(kindParam):pagesOnly?'Pages':tableLabel(table);
   // Artworks keep their image in the artwork details; use it as thumbnail when there is no cover.
   const withImage=(p:Row)=>({...p,cover_id:p.cover_id||(options.artworks||[]).find(a=>a.id===p.id)?.media_id});
   const notice=message&&<div className={`adm-notice ${/^(Saved|Published|Moved|New draft|Draft profile|Image uploaded)/.test(message)?'adm-notice--ok':'adm-notice--error'}`}><p role="status">{message}</p>{errorDetail&&<details className="adm-detail"><summary>Technical detail</summary><code>{errorDetail}</code></details>}</div>;
 
   if(!record){
-    const scoped=table==='posts'?rows.filter(r=>postScopes[scope](r.kind)):rows;
+    const scoped=table!=='posts'?rows:kindParam?rows.filter(r=>r.kind===kindParam):pagesOnly?rows.filter(r=>r.kind==='page'):rows.filter(r=>postScopes[scope](r.kind));
     const filtered=scoped.filter(r=>(!query||optionLabel(r).toLowerCase().includes(query.toLowerCase())||String(r.slug||'').includes(query.toLowerCase()))&&(!kindFilter||r.kind===kindFilter)&&(!statusFilter||r.status===statusFilter));
     const editButton=(row:Row)=><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={()=>void edit(row)}>Edit</button>;
     const lists:Record<string,ReactNode>={
@@ -152,7 +156,9 @@ export function EncountersCms(){
       <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
       </AdminHeader>
-      {table==='posts'&&<div className="adm-stack" style={{gap:14}}>
+      {table==='posts'&&kindParam&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
+      {table==='posts'&&pagesOnly&&<p className="adm-help">Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.</p>}
+      {table==='posts'&&!kindParam&&!pagesOnly&&<div className="adm-stack" style={{gap:14}}>
         <div className="adm-tabs" role="group" aria-label="Show">{[['publications','Activities and publications'],['pages','Site pages'],['profiles','Crew pages']].map(([key,text])=><button key={key} type="button" aria-pressed={scope===key} onClick={()=>{setScope(key);setKindFilter('');}}>{text}</button>)}</div>
         {scope==='publications'?<div className="adm-newbar">{newKinds.map(([k,text])=><button key={k} type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={()=>start(k)}><Plus aria-hidden="true"/>{text}</button>)}</div>:
          <p className="adm-help">{scope==='pages'?'Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.':<>Personal pages are created and opened from each person in <Link href="/admin/content?table=crew_members">Crew</Link>.</>}</p>}
@@ -161,7 +167,7 @@ export function EncountersCms(){
       {table==='media'&&<label className="adm-upload"><Upload aria-hidden="true"/><span><strong>Upload an image</strong><br/><small className="adm-help">JPG, PNG, WebP or GIF. It is optimised automatically and stays private until it is used in published content.</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f);}}/></label>}
       <section className="adm-card">
         <div className="adm-filters"><label className="adm-field">Search<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={table==='media'?'Image description':'Title or name'}/></label>
-          {table==='posts'&&scope==='publications'&&<label className="adm-field">Type<select value={kindFilter} onChange={e=>setKindFilter(e.target.value)}><option value="">All types</option>{kinds.filter(k=>postScopes.publications(k)).map(k=><option key={k} value={k}>{kindLabel(k)}</option>)}</select></label>}
+          {table==='posts'&&!kindParam&&!pagesOnly&&scope==='publications'&&<label className="adm-field">Type<select value={kindFilter} onChange={e=>setKindFilter(e.target.value)}><option value="">All types</option>{kinds.filter(k=>postScopes.publications(k)).map(k=><option key={k} value={k}>{kindLabel(k)}</option>)}</select></label>}
           {table!=='media'&&<label className="adm-field">State<select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="">All states</option><option value="published">Published</option><option value="draft">Draft</option></select></label>}</div>
         {!loaded?<p className="adm-help" role="status">Loading…</p>:filtered.length===0?<p className="adm-empty">{rows.length?'Nothing matches these filters.':'Nothing here yet.'}</p>:
           lists[table]||<table className="adm-table"><thead><tr><th scope="col">Item</th><th scope="col">State</th><th scope="col">Order</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=><tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={row.media_id} size={52}/><span><strong>{optionLabel(row)}</strong>{row.starts_on?<small>{date(row.starts_on)}</small>:null}</span></span></td><td>{row.status?<StatusBadge status={row.status}/>:'—'}</td><td>{String(row.sort??'—')}</td><td>{editButton(row)}</td></tr>)}</tbody></table>}
