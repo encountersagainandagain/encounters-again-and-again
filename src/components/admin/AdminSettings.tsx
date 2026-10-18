@@ -2,15 +2,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { defaultSiteSettings, fetchSiteSettings, updateSiteSettings } from '@/lib/siteSettings';
 import { requestAdminRevalidation } from '@/lib/adminRevalidation';
-import {HomeSettings} from './HomeSettings';
 import {EditorialSettings} from './EditorialSettings';
 import {AdminHeader} from './AdminShell';
-const notes: Record<string,string> = { name:'Shown in the browser tab and when pages are shared.', tagline:'Short phrase that accompanies the name.', description:'One or two sentences used when the site is shared or found in search.', email:'Address shown to visitors who want to write to you. Leave empty to hide it.', instagram:'Full address of the profile, starting with https://.', youtube:'Full address of the channel, starting with https://.', homeAboutTitle:'Title of the About section on Home.', homeAboutParagraph1:'Short introduction for the About section on Home.' };
+const notes: Record<string,string> = { name:'Shown in the browser tab and when pages are shared.', tagline:'Short phrase that accompanies the name.', description:'One or two sentences used when the site is shared or found in search.', email:'Address shown to visitors who want to write to you, and where the contact form opens an email. Leave empty to hide it.', phone:'Shown on About as written, e.g. +61 451 544 843. Leave empty to hide it.', instagram:'Full address of the profile, starting with https://.', youtube:'Full address of the channel, starting with https://.', homeAboutTitle:'Title of the About section on Home.', homeAboutParagraph1:'Short introduction for the About section on Home.' };
 const fields = [
   ['name', 'Site name'], ['tagline', 'Tagline'], ['description', 'Description'],
-  ['email', 'Public contact email'], ['instagram', 'Instagram'], ['youtube', 'YouTube'],
-  ['homeAboutTitle', 'About title'], ['homeAboutParagraph1', 'About introduction'],
-] as const;
+  ['email', 'Public contact email'], ['phone', 'Public phone'], ['instagram', 'Instagram'], ['youtube', 'YouTube'],
+  ] as const;
 export function AdminSettings() {
   const [settings, setSettings] = useState(defaultSiteSettings);
   const [ready, setReady] = useState(false);
@@ -27,9 +25,9 @@ export function AdminSettings() {
   }
   return <div className="adm-stack"><AdminHeader kicker="Site" title="Site settings" lead="General information, contact details and how some pages are presented."/>
     <form onSubmit={save} className="adm-card"><div className="adm-card-head"><div><h2 className="adm-card-title">General and contact</h2><p>Used across the whole site.</p></div></div>
-      <div className="adm-fields">{fields.map(([key,label]) => <label key={key} className={`adm-field${key==='description'||key==='homeAboutParagraph1'?' adm-field--wide':''}`}>{label}
+      <div className="adm-fields">{fields.map(([key,label]) => <label key={key} className={`adm-field${key==='description'?' adm-field--wide':''}`}>{label}
       <input type={key === 'email' ? 'email' : 'text'} value={settings[key]} onChange={event => setSettings({...settings, [key]:event.target.value})} aria-describedby={`setting-${key}`} />
       <small id={`setting-${key}`}>{notes[key]}</small></label>)}</div>
-      <div className="adm-actions" style={{marginTop:18}}><button disabled={!ready} className="adm-btn" type="submit">Save settings</button><p role="status" className="adm-help">{message}</p></div></form><EditorialSettings/><HomeSettings/>
+      <div className="adm-actions" style={{marginTop:18}}><button disabled={!ready} className="adm-btn" type="submit">Save settings</button><p role="status" className="adm-help">{message}</p></div></form><EditorialSettings/><p className="adm-help">Home, About, Contact and the program pages are presented from <a href="/admin/page-settings?page=home">Page presentation</a>.</p>
   </div>;
 }

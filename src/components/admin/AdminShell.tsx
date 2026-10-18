@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {useEffect,useState,type ReactNode} from 'react';
-import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Newspaper,Palette,Settings,Shapes,Ship,UserRound,Users} from 'lucide-react';
+import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Newspaper,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users} from 'lucide-react';
 import {brand} from '@/config/brand';
 import {modules} from '@/config/modules';
 import {supabase} from '@/lib/supabase';
@@ -12,20 +12,26 @@ import {supabase} from '@/lib/supabase';
 // The menu follows the modules of the site. Content lives in /admin/content: ?table= picks the table,
 // ?kind= one type of content, ?scope=pages the permanent pages and ?page=team the Crew page itself.
 export const adminSections=[
-  {href:'/admin',label:'Home',icon:Home,group:'Overview',enabled:modules.cms},
+  {href:'/admin',label:'Dashboard',icon:Home,group:'Overview',enabled:modules.cms},
+  {href:'/admin/page-settings?page=home',label:'Home page',icon:LayoutPanelTop,group:'Overview',enabled:modules.cms},
   {href:'/admin/content?table=posts&kind=artwork',label:'Works',icon:Palette,group:'Art',enabled:modules.art},
   {href:'/admin/content?table=art_categories',label:'Categories',icon:Shapes,group:'Art',enabled:modules.art},
   {href:'/admin/content?table=posts&kind=expedition',label:'Expeditions',icon:Ship,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/content?table=posts&kind=expedition_report',label:'Results',icon:FileText,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/content?table=expedition_cards',label:'Presentation cards',icon:LayoutPanelTop,group:'Expeditions',enabled:modules.expeditions},
+  {href:'/admin/page-settings?page=expeditions',label:'Expeditions page',icon:PanelsTopLeft,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/content?table=posts&kind=workshop',label:'Workshops',icon:CalendarDays,group:'Workshops',enabled:modules.workshops},
   {href:'/admin/content?table=posts&kind=workshop_report',label:'Results',icon:FileText,group:'Workshops',enabled:modules.workshops},
+  {href:'/admin/page-settings?page=workshops',label:'Workshops page',icon:PanelsTopLeft,group:'Workshops',enabled:modules.workshops},
   {href:'/admin/content?table=posts&kind=message',label:'Messages',icon:Feather,group:'Meaningful Messages',enabled:modules.messages},
+  {href:'/admin/page-settings?page=messages',label:'Messages page',icon:PanelsTopLeft,group:'Meaningful Messages',enabled:modules.messages},
   {href:'/admin/content?table=posts&kind=news',label:'News',icon:Newspaper,group:'News and announcements',enabled:modules.stories},
   {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'News and announcements',enabled:modules.upcoming},
   {href:'/admin/content?table=crew_members',label:'People',icon:Users,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&page=team',label:'Crew page',icon:UserRound,group:'Crew',enabled:modules.crew},
-  {href:'/admin/content?table=posts&scope=pages',label:'Pages',icon:FileText,group:'Site',enabled:modules.cms},
+  {href:'/admin/page-settings?page=about',label:'About page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
+  {href:'/admin/page-settings?page=contact',label:'Contact page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
+  {href:'/admin/content?table=posts&scope=pages',label:'Imported pages',icon:FileText,group:'Site',enabled:modules.cms},
   {href:'/admin/content?table=media',label:'Media library',icon:ImageIcon,group:'Site',enabled:modules.media},
   {href:'/admin/settings',label:'Settings',icon:Settings,group:'Site',enabled:modules.cms},
   {href:'/admin/newsletter',label:'Newsletter',icon:Mail,group:'Site',enabled:modules.newsletter},
@@ -35,7 +41,7 @@ const groups=[...new Set(adminSections.map(s=>s.group))];
 function useCurrent(){
   const pathname=usePathname();const params=useSearchParams();
   return (href:string)=>{const [path,query]=href.split('?');if(path!==pathname)return false;if(!query)return true;const want=new URLSearchParams(query);
-    return ['table','kind','scope','page'].every(key=>(want.get(key)||'')===(key==='table'?params.get(key)||'posts':params.get(key)||''));};
+    return ['table','kind','scope','page'].filter(key=>path==='/admin/content'||key==='page').every(key=>(want.get(key)||'')===(key==='table'?params.get(key)||'posts':params.get(key)||''));};
 }
 
 export function AdminShell({children}:{children:ReactNode}){

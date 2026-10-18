@@ -38,6 +38,7 @@ export type SiteSettings = {
   tagline: string;
   description: string;
   email: string;
+  phone: string;
   logoLight: string;
   logoDark: string;
   logoFooter: string;
@@ -99,6 +100,7 @@ export const defaultSiteSettings: SiteSettings = {
   tagline: siteConfig.tagline,
   description: siteConfig.description,
   email: '',
+  phone: '',
   logoLight: '/images/brand/encounters-logo.png',
   logoDark: '/images/brand/encounters-logo.png',
   logoFooter: '/images/brand/encounters-logo.png',
@@ -278,6 +280,12 @@ export const fetchSiteSettings = cache(async function fetchSiteSettings() {
   return normalizeSiteSettings(data?.value as Partial<SiteSettings> | null | undefined);
 });
 
+function withoutPages(settings: SiteSettings) {
+  const own = { ...settings } as Record<string, unknown>;
+  delete own.pages; delete own.home;
+  return own;
+}
+
 export async function updateSiteSettings(settings: SiteSettings) {
   if (!modules.commerce && settings.shopEnabled) throw new Error('Commerce is disabled.');
   const client = requireSupabase();
@@ -285,7 +293,8 @@ export async function updateSiteSettings(settings: SiteSettings) {
   if(existing.error)throw existing.error;
   const { data, error } = await client
     .from('site_settings')
-    .upsert({ key: 'site', value: {...existing.data?.value,...settings} }, { onConflict: 'key' })
+    // Page presentation (pages, home) is saved by its own editor; a stale copy here must not overwrite it.
+    .upsert({ key: 'site', value: {...existing.data?.value,...withoutPages(settings)} }, { onConflict: 'key' })
     .select('value')
     .single();
 
