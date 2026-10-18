@@ -10,14 +10,18 @@ import {safeHref,string,type Row} from '@/features/encounters/presentation';
 
 export function SiteChrome({children,settings}:{children:ReactNode;settings:Row}) {
   const pathname=usePathname();const path=pathname.startsWith('/review/')?pathname.slice('/review'.length):pathname;const header=useRef<HTMLElement>(null);
-  const editorial=path.startsWith('/art')||path.startsWith('/crew');
+  // Every public page uses the editorial navbar (Navbar options.dc.html); legacy store routes keep the old header.
+  const editorial=!/^\/(shop|cart|gear|blog|category|destinations|videos|gallery|unsubscribe|r)(\/|$)/.test(path);
   useEffect(()=>{
     if(!editorial)return;
     const el=header.current;if(!el)return;
-    const update=()=>{const hero=document.querySelector('[data-photo-hero]');
+    const update=()=>{
+      // Dark pages (Home, Workshops) keep the dark navbar; the others turn light once their banner is gone.
+      const theme=document.querySelector<HTMLElement>('[data-nav-theme]')?.dataset.navTheme;
+      const hero=document.querySelector('[data-nav-hero]')||document.querySelector('[data-photo-hero]');
       // A pinned hero stays on screen while the paper covers it: the nav turns light with the paper, at 95% of a viewport.
       const pinned=!!hero&&getComputedStyle(hero).position==='sticky';
-      el.dataset.light=String(path.startsWith('/art')&&!hero || !!hero&&(pinned?scrollY>innerHeight*.95:hero.getBoundingClientRect().bottom<150));el.dataset.scrolled=String(scrollY>40);el.style.setProperty('--nav-k',String(Math.min(1,scrollY/240)));};
+      el.dataset.light=String(theme!=='dark'&&(theme==='light'&&!hero || path.startsWith('/art')&&!hero || !!hero&&(pinned?scrollY>innerHeight*.95:hero.getBoundingClientRect().bottom<150)));el.dataset.scrolled=String(scrollY>40);el.style.setProperty('--nav-k',String(Math.min(1,scrollY/240)));};
     update();window.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);return()=>{window.removeEventListener('scroll',update);window.removeEventListener('resize',update);};
   },[path,editorial]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} / ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span><span>{alternate}</span></span></span>:label}</Link>;

@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/JsonLd';
 import '@/index.css';
 import '@/styles/encounters-tokens.css';
 import '@/styles/editorial.css';
+import '@/styles/site.css';
 import '@/styles/admin.css';
 const heading = localFont({ src: [{path:'../public/fonts/eb-garamond.ttf',weight:'400 500',style:'normal'},{path:'../public/fonts/eb-garamond-italic.ttf',weight:'400 500',style:'italic'}], variable: '--font-display', display: 'swap' });
 const body = localFont({ src: '../public/fonts/archivo.ttf', weight: '400 700', variable: '--font-body', display: 'swap' });

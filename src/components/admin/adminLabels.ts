@@ -69,6 +69,18 @@ export const help:Record<string,string>={
   media_side:'Side of the card where the image goes.',
   theme:'Light or dark card.',
   social_links:'Optional links shown on the profile.',
+  activity_status:'Upcoming and running activities show their date, place and contact button; finished ones link to their result.',
+  outcome:'Two or three lines on how it went. Shown on the card once the activity is finished, before the link to its result.',
+  note_title:'Title of the note in the left column, e.g. “Who it is for” or “A note about the stall”.',
+  audience_note:'Short text under the note title.',
+  materials:'One item per line. Shown in the workshop page under “What to bring”.',
+  date_label:'Date as it should read, e.g. “October 2026”. If empty, the dates are used.',
+  availability_label:'Short state, e.g. “Two spots left” or “Free · drop in”. Shown on Home.',
+  underwater_id:'Second image of the Expeditions banner, revealed in strips while scrolling.',
+  bullets:'One item per line. Shown as a numbered list instead of the text.',
+  registration_status:'Open shows the registration button when there is a registration email.',
+  signup_email:'Address that receives registrations. The button opens the visitor’s email app.',
+  place:'Where it happens.',
 };
 
 // Entries for creating content: each opens the editor with its type fixed.

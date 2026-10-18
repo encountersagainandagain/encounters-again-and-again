@@ -40,6 +40,15 @@ let media=[
   ['lions',{from:'#eaf5fa',to:'#8fd9ea',ink:'#08222f',line:'lions',label:'SEA LIONS'},'Demo study: two sea lions drawn as simple lines'],
   ['marea',{w:1000,h:1200,from:'#d6ebe2',to:'#4e8a72',ink:'#08222f',line:'face',label:'MAKER MAREA'},'Demo portrait: abstract line face'],
   ['coral',{w:1000,h:1200,from:'#f6dccf',to:'#e08a6e',ink:'#08222f',line:'face',label:'MAKER CORAL'},'Demo portrait: abstract line face'],
+  // Activities and messages of the site demo set (ids de000000-…1011 to …1018).
+  ['crossing',{from:'#0f3b4c',to:'#04111e',ink:'#8fd9ea',line:'wave',label:'DEMO CROSSING'},'Demo drawing: waves for a fictional crossing'],
+  ['reef-survey',{from:'#bfe3ee',to:'#0f3b4c',ink:'#eaf5fa',line:'turtle',label:'DEMO REEF SURVEY'},'Demo drawing: a turtle over blue water'],
+  ['session-look',{from:'#eaf5fa',to:'#bfe3ee',ink:'#0e2a38',line:'ray',label:'LOOKING FIRST'},'Demo drawing for a workshop session: a ray'],
+  ['session-draw',{from:'#f3ead6',to:'#e3d3b4',ink:'#0f3b4c',line:'seahorse',label:'DRAWING TOGETHER'},'Demo drawing for a workshop session: a seahorse'],
+  ['session-wall',{from:'#d6ebe2',to:'#4e8a72',ink:'#08222f',line:'manta',label:'PUTTING IT UP'},'Demo drawing for a workshop session: a manta'],
+  ['message-1',{w:1000,h:1400,from:'#eaf5fa',to:'#8fd9ea',ink:'#08222f',line:'wave',label:'RIPPLE'},'Demo illustration for a message: a ripple'],
+  ['message-2',{w:1000,h:1400,from:'#f6dccf',to:'#e08a6e',ink:'#08222f',line:'turtle',label:'GROW'},'Demo illustration for a message: a turtle'],
+  ['message-3',{w:1000,h:1400,from:'#0f3b4c',to:'#061826',ink:'#e3d3b4',line:'lions',label:'TIDES'},'Demo illustration for a message: two sea lions'],
 ].map(([name,spec,alt],i)=>({id:id(10,i+1),name,spec,alt,body:Buffer.from(svg(spec))}));
 // Real works from the design handoff, used with the same credits as Art.dc.html (no crew records are invented for them).
 const handoff='docs/encounters/handoff-current/assets';
@@ -111,7 +120,61 @@ const teamPage={id:id(31,1),blocks:[
   ['team_006','paragraph',{text:'A project dedicated to supporting conservation, storytelling and a deeper relationship to the ocean and the animals that live within it.',section:'project',style:'body'}],
   ['team_006_1','heading',{text:'A project to unite them all.',section:'project'}],
 ]};
-const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id)],categories:categories.map(c=>c.id)};
+// ---- Site demo set: program pages, activities, results, messages, news and announcements ----------
+// Texts of the program pages come from the prototypes. Activities and messages are fictional and marked
+// "(demo)". No email, phone or donation link is invented: those actions stay hidden until filled in.
+const D=n=>media[10+n-1].id;// synthetic drawings 11–18
+const P=n=>id(32,n);
+const sitePosts=[
+  {id:P(1),kind:'page',source_role:'encounters_expeditions',slug:'demo-expeditions',title:'Expeditions',kicker:'following our nature',excerpt:'What the expeditions are: the sailboat, the purpose, the work, the equipment and how to help.'},
+  {id:P(2),kind:'page',source_role:'artsy_animals',slug:'demo-workshops',title:'Workshops',kicker:'artsy animals',excerpt:'Artsy Animals workshops: what they are, when, where, with which sessions and how to join.'},
+  {id:P(3),kind:'expedition_report',slug:'demo-first-crossing',title:'The first crossing (demo)',kicker:'How it went',meta_line:'Coqui · 11 days | March 2026',excerpt:'Eleven days, four of us, and a part that took two weeks to arrive.',cover:D(1),blocks:[
+    {type:'paragraph',content:{text:'Demonstration result of a finished expedition. It is linked from the expedition as its result, so the expedition card says “See how it went”.'}},
+    {type:'heading',content:{text:'What we saw'}},
+    {type:'paragraph',content:{text:'Edit this text from the admin: Expeditions → Results.'}},
+    {type:'image',content:{media_id:D(2),src:`/api/media/${D(2)}`,caption:'Demo drawing.'}},
+  ]},
+  {id:P(4),kind:'workshop_report',slug:'demo-coledale-result',title:'Wild wonders at Coledale (demo result)',kicker:'Workshop result',meta_line:'Two afternoons | August 2026',excerpt:'Forty-one drawings and a wall that stayed up for a month.',cover:D(5),blocks:[
+    {type:'paragraph',content:{text:'Demonstration result of a finished workshop, linked from the workshop as its result.'}},
+    {type:'image',content:{images:[{media_id:D(3),src:`/api/media/${D(3)}`,caption:'Looking first'},{media_id:D(4),src:`/api/media/${D(4)}`,caption:'Drawing together'}]}},
+  ]},
+  {id:P(5),kind:'expedition',slug:'demo-ningaloo-crossing',title:'Ningaloo crossing (demo)',excerpt:'A fictional upcoming expedition with needs still pending and one already obtained.',cover:D(1),sort:1,
+    detail:{activity_status:'upcoming',starts_on:'2026-11-10',ends_on:'2026-11-24',place:'Exmouth, Western Australia',availability_label:'Crew by invitation',cta_label:'Ask to join'},
+    children:[{id:id(61,1),title:'Binoculars for spotting animals',body:'Two pairs, waterproof.',status:'pending',sort:1},{id:id(61,2),title:'Camera gear for photo ID',body:'A housing for a mirrorless camera.',status:'pending',sort:2},{id:id(61,3),title:'Marine radio',status:'obtained',sort:3}],
+    blocks:[{type:'paragraph',content:{text:'Demonstration expedition. Its needs are listed below; pending ones show “Still needed”. Change its status to Finished and choose a result to see how the card changes.'}}]},
+  {id:P(6),kind:'expedition',slug:'demo-first-crossing-expedition',title:'The first crossing (demo)',excerpt:'The fictional first crossing of the demo set.',cover:D(2),sort:2,relations:[P(3)],
+    detail:{activity_status:'finished',starts_on:'2026-03-02',ends_on:'2026-03-13',place:'Heron Island',outcome:'Eleven days, four of us, and a part that took two weeks to arrive.'},blocks:[]},
+  {id:P(7),kind:'workshop',slug:'demo-draw-the-ocean',title:'Draw the ocean (demo)',excerpt:'A fictional running workshop in three sessions.',cover:D(3),sort:1,
+    detail:{activity_status:'running',registration_status:'open',date_label:'Every Saturday in November',place:'Coledale community hall',availability_label:'Free · drop in',note_title:'Who it is for',audience_note:'Schools and community groups, no drawing experience needed. We bring the materials and the stories.',materials:['Something to lean on','Your favourite pencil']},
+    children:[{id:id(62,1),title:'Looking first',body:'We open with photographs and the stories behind them. Nobody draws yet.',media_id:D(3),sort:1},{id:id(62,2),title:'Drawing together',body:'Everyone picks one animal and stays with it until the page is full.',media_id:D(4),sort:2},{id:id(62,3),title:'Putting it up',body:'Every drawing goes on the wall, with the name of the animal and one line about why it was chosen.',media_id:D(5),sort:3}],
+    blocks:[{type:'paragraph',content:{text:'Demonstration workshop. Registration is open but no registration email is set, so the button leads to the contact page.'}}]},
+  {id:P(8),kind:'workshop',slug:'demo-encounters-market',title:'Encounters at the market (demo)',excerpt:'A fictional upcoming workshop with registration full.',cover:D(4),sort:2,
+    detail:{activity_status:'upcoming',registration_status:'full',starts_on:'2026-12-06',place:'Thirroul market',availability_label:'Full',note_title:'A note about the stall',audience_note:'It travels: a table, the book, the prints and whatever we can carry.'},
+    children:[{id:id(62,4),title:'The stall',body:'We set up early with the book, the prints and a stack of blank paper.',media_id:D(4),sort:1},{id:id(62,5),title:'The reading',body:'Late in the afternoon we read a few pages out loud for whoever is around.',media_id:D(1),sort:2}],blocks:[]},
+  {id:P(9),kind:'workshop',slug:'demo-wild-wonders-coledale',title:'Wild wonders at Coledale (demo)',excerpt:'A fictional finished workshop with its result.',cover:D(5),sort:3,relations:[P(4)],subtitle:'two afternoons',
+    detail:{activity_status:'finished',registration_status:'closed',starts_on:'2026-08-08',ends_on:'2026-08-15',place:'Coledale',note_title:'What stayed',audience_note:'Forty-one drawings, a wall that stayed up for a month, and three families who came back for the second afternoon.',outcome:'Two afternoons at the markets, one long table, and more people than chairs.'},blocks:[]},
+  {id:P(10),kind:'message',slug:'demo-smallest-ripple',title:'The smallest ripple (demo)',sort:1,detail:{message:'Even the smallest ripple can change tides.',body:'Even a small effort goes a long way. Even a small action can create something bigger.',illustration_id:D(6)},blocks:[]},
+  {id:P(11),kind:'message',slug:'demo-grow',title:'Grow into so much more (demo)',sort:2,detail:{message:'Even something small can grow into so much more.',body:'Meeting new opportunities, people. Participating in markets, running workshops, creating a short film, spreading awareness.',illustration_id:D(7)},blocks:[{type:'paragraph',content:{text:'Demonstration message with a page of its own.'}}]},
+  {id:P(12),kind:'message',slug:'demo-own-ripple',title:'Our own ripple (demo)',sort:3,detail:{message:'Our own ripple, and welcoming the tides.',body:'These are just a few personal experiences from creating our own ripple and welcoming the tides.',illustration_id:D(8),credit:'Demo credit line, shown in italics.'},blocks:[]},
+  {id:P(13),kind:'news',slug:'demo-colony-came-to-us',title:'The colony came to us (demo)',kicker:'Field note',excerpt:'What photo ID looks like when the animals are the curious ones.',cover:D(2),blocks:[{type:'paragraph',content:{text:'Demonstration news post. It appears on Home in “What already happened”.'}}]},
+];
+const cards=[
+  [1,'The boat','A small sailboat called Coqui','We bought her to turn her into a platform: supporting conservation projects, documenting marine life, and helping the people already working to protect our seas.',{signature:'Fabri, Juli, Majita and Hugo.',media_id:F(6)}],
+  [2,'How it started','A purpose that connected us','It brought us together in Australian waters — to experience the beauty of this world and try to help it. We love the sea. We love animals and people. We want to protect our nature.',{media_id:F(9)}],
+  [3,'The work','Alongside the people doing it','Over the last years we have moved around the world taking part in conservation efforts: working alongside scientists and researchers, crewing on research and conservation vessels.',{media_id:F(10)}],
+  [4,'On board','What the boat needs to carry','',{bullets:['Binoculars for spotting animals','Camera gear for photo ID and documentation','Marine equipment'],media_id:D(1)}],
+  // The fundraiser link is left empty on purpose: the card hides its button until a real link is entered.
+  [5,'Help','Help our sailboat help the ocean','A project based on kindness, soundness and pure intentions. Every fund raised goes solely into running it — keeping the boat, the work and the stories moving us through the seas.',{theme:'dark',media_id:F(7),cta_label:'Support the expeditions'}],
+].map(([n,kicker,title,body,extra])=>({id:id(63,n),post_id:P(1),kicker,title,body,sort:n,...extra}));
+const announcements=[{id:id(70,1),title:'Open studio day (demo)',body:'A fictional announcement without linked content: it shows its own title and text on Home.',starts_on:'2026-11-30',media_id:D(7),status:'published',sort:1},{id:id(70,2),title:'Draft announcement (demo)',body:'Private until published.',status:'draft',sort:2}];
+// Page presentation kept in Settings. Written only where the key is still empty; never overwrites edits.
+const siteSettings={pages:{
+  messages:{kicker:'a few words',intro:'You never know what encounter could change your life',credit_line:'Illustrated by Georgia Webb, inspired by Julian Lange',closing:'More to come'},
+  workshops:{closing:'Want one of these in your room?',closing_cta:'Write to us'},
+  about:{hero_kicker:'What is our mission?',hero_title:'To connect people with nature.',gallery:[F(6),F(7),F(8),F(9)],credit:'Demo photos from the design handoff',columns:[{label:'Our mission',text:'To connect people with nature — and to keep that connection alive long after the encounter is over.'},{label:'Our stories',text:'We tell them with different art media: filmography and photography, writing and illustration.'},{label:'Our actions',text:'Sea expeditions, beach cleanups, research assistance, animal workshops, conservation and communication efforts.'}],manifesto:{first:'Our world is evolving into the palm of our hands, showing us and teaching us everything we know.',second:'So why not show what is all around us instead, and try to give awareness to what is,',label:'What is',big:'Our nature'},how:{kicker:'How?',title:'Through telling our stories and through our actions'},rows:[{title:'Through storytelling',intro:'with different art media:',items:['Filmography and photography','Writing','Illustration'],media_id:F(7),link_label:'See our art',link_url:'/art'},{title:'Through actions',intro:'We help and support animals and nature through a range of different actions:',items:['Sea expeditions','Beach cleanups','Research assistance','Animal workshops','Conservation and communication efforts'],media_id:F(8),link_label:'explore here to join the expeditions',link_url:'/expeditions'}],belief:'We believe that every action, no matter how small, makes a difference.',belief_emphasis:'makes a difference',talk_title:'Talk to us',talk_body:'Have any questions? We are always open to talk about the environment, new projects, creative opportunities and how you — or we — can help.'},
+  contact:{title:'Get in touch',lead:'we write back ourselves — usually within a couple of days, unless we are out at sea',topics:[{title:'Joining an expedition',hint:'Crew, science, film or simply curiosity.',reply:'We will tell you what the next crossing needs.'},{title:'Workshops & talks',hint:'For schools, groups and markets.',reply:'We will send you what a workshop looks like in your room.'},{title:'The book & the art',hint:'Copies, prints and the drawings.',reply:'We will tell you where to find the book.'},{title:'Making something together',hint:'An idea, a film, a collaboration.',reply:'We love these. We will write back soon.'}],note:'We read everything. Start with an interesting animal fact.'},
+},home:{about:{kicker:'About us',line:'To connect people with nature, again and again.',body:'Demo text for the About block of Home. Edit it in Site → Home.'}}};
+const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id),...sitePosts.map(p=>p.id)],categories:categories.map(c=>c.id),cards:cards.map(c=>c.id),upcoming:announcements.map(a=>a.id)};
 
 async function exists(table,ids){const rows=await ok(db.from(table).select('id').in('id',ids));return new Set(rows.map(r=>r.id));}
 async function seed(){
@@ -145,12 +208,30 @@ async function seed(){
   for(const w of works){if(postsHave.has(w.id)){report.kept.push(w.id);continue;}
     const blocks=(w.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
     await ok(db.rpc('save_content',{p_post:{id:w.id,kind:'artwork',title:w.title,slug:w.slug,cover_id:w.hero?mid(w.hero):null,status:w.status||'published',published_at:w.status==='draft'?null:new Date().toISOString(),excerpt:w.excerpt||'',meta_line:w.meta||'',show_index:false,sort:w.n,source_metadata:{demo:true}},p_blocks:blocks,p_details:{category_id:C(w.cat),media_id:w.media?mid(w.media):null,caption:w.caption||null,span:w.span||3,full_height:!!w.tall,external_url:w.external||null,...(w.embed?{embed_kind:'youtube',embed_id:w.embed}:{})},p_contributors:(w.authors||[]).map(([person,role],position)=>({crew_member_id:crew[person-1].id,position,role})),p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(w.id);}
+  // Site demo set. A program page is only created when the site has none for that role.
+  const roles=new Set((await ok(db.from('posts').select('source_role').eq('kind','page'))).map(p=>p.source_role));
+  const reports=sitePosts.filter(p=>p.kind.endsWith('_report')),rest=sitePosts.filter(p=>!p.kind.endsWith('_report'));
+  for(const p of [...reports,...rest]){
+    if(postsHave.has(p.id)){report.kept.push(p.id);continue;}
+    if(p.kind==='page'&&roles.has(p.source_role)){report.kept.push(`${p.id} (site already has a ${p.source_role} page)`);continue;}
+    const blocks=(p.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
+    const detail=p.detail?Object.fromEntries(Object.entries(p.detail).map(([k,v])=>[k,remap(v)])):null;
+    await ok(db.rpc('save_content',{p_post:{id:p.id,kind:p.kind,title:p.title,slug:p.slug,kicker:p.kicker||'',subtitle:p.subtitle||'',excerpt:p.excerpt||'',meta_line:p.meta_line||'',cover_id:p.cover?mid(p.cover):null,source_role:p.source_role||null,status:'published',published_at:new Date().toISOString(),show_index:false,sort:p.sort||0,source_metadata:{demo:true}},p_blocks:blocks,p_details:detail,p_contributors:[],p_relations:(p.relations||[]).map((related_post_id,sort)=>({related_post_id,relation:'result',sort})),p_children:p.children?p.children.map(c=>c.media_id?{...c,media_id:remap(c.media_id)}:c):null,expected_updated_at:null}));report.created.push(p.id);
+  }
+  const cardsHave=await exists('expedition_cards',demoIds.cards);
+  if(await ok(db.from('posts').select('id').eq('id',P(1))).then(r=>r.length))for(const c of cards){if(cardsHave.has(c.id)){report.kept.push(c.id);continue;}await ok(db.rpc('save_entity',{entity:'expedition_cards',payload:{...c,media_id:remap(c.media_id)}}));report.created.push(c.id);}
+  const upHave=await exists('upcoming_items',demoIds.upcoming);
+  for(const a of announcements){if(upHave.has(a.id)){report.kept.push(a.id);continue;}await ok(db.rpc('save_entity',{entity:'upcoming_items',payload:{...a,media_id:a.media_id?remap(a.media_id):null}}));report.created.push(a.id);}
+  const row=(await ok(db.from('site_settings').select('value').eq('key','site')))[0];
+  if(row){const value=structuredClone(row.value||{});const added=[];
+    const fill=(target,source,path)=>{for(const [k,v] of Object.entries(source)){if(target[k]==null||target[k]===''){target[k]=JSON.parse(JSON.stringify(v,(key,x)=>typeof x==='string'&&mediaIds.has(x)?mediaIds.get(x):x));added.push(path+k);}else if(v&&typeof v==='object'&&!Array.isArray(v)&&typeof target[k]==='object'&&!Array.isArray(target[k]))fill(target[k],v,`${path}${k}.`);}};
+    fill(value,siteSettings,'');if(added.length){await ok(db.from('site_settings').update({value}).eq('key','site'));report.created.push(`settings: ${added.join(', ')}`);}}
   return report;
 }
 
 // ---- Cleanup plan: only demo ids, never kept ones, never anything still used by other content.
 async function plan(){
-  const all=[...demoIds.media,...demoIds.crew,...demoIds.posts,...demoIds.categories];
+  const all=[...demoIds.media,...demoIds.crew,...demoIds.posts,...demoIds.categories,...demoIds.cards,...demoIds.upcoming];
   const present={posts:await exists('posts',demoIds.posts),crew:await exists('crew_members',demoIds.crew),categories:await exists('art_categories',demoIds.categories),media:await exists('media',demoIds.media)};
   const del={posts:[...present.posts].filter(i=>!keep.has(i)),crew:[...present.crew].filter(i=>!keep.has(i)),categories:[...present.categories].filter(i=>!keep.has(i)),media:[...present.media].filter(i=>!keep.has(i))};
   const blocked=[];
@@ -161,15 +242,25 @@ async function plan(){
   const crewStay=(await ok(db.from('crew_members').select('id,portrait_id,page_post_id'))).filter(c=>!del.crew.includes(c.id));
   const catsStay=(await ok(db.from('art_categories').select('id,cover_id'))).filter(c=>!del.categories.includes(c.id));
   const blocks=JSON.stringify((await ok(db.from('post_blocks').select('post_id,content'))).filter(b=>stayIds.includes(b.post_id)));
-  const settings=JSON.stringify(await ok(db.from('site_settings').select('value')));
+  // Demo settings are removed only while they still hold the demo value; edited ones stay.
+  const settingsRow=(await ok(db.from('site_settings').select('value').eq('key','site')))[0]?.value||{};const settingsAfter=structuredClone(settingsRow);const demoKeys=[];
+  const prune=(target,source,path)=>{for(const [k,v] of Object.entries(source)){if(target?.[k]===undefined)continue;if(JSON.stringify(target[k])===JSON.stringify(v)){delete target[k];demoKeys.push(path+k);}else if(v&&typeof v==='object'&&!Array.isArray(v))prune(target[k],v,`${path}${k}.`);}};
+  prune(settingsAfter,siteSettings,'');
+  const settings=JSON.stringify(settingsAfter);
   del.crew=del.crew.filter(i=>{const used=credits.some(c=>c.crew_member_id===i);if(used)blocked.push(`${i}: crew member credited on content that stays`);return !used;});
   del.posts=del.posts.filter(i=>{const page=crewStay.some(c=>c.page_post_id===i);if(page)blocked.push(`${i}: personal page of a crew member that stays`);return !page;});
   del.categories=del.categories.filter(i=>{const used=artworks.some(a=>a.category_id===i);if(used)blocked.push(`${i}: category of a work that stays`);return !used;});
   del.media=del.media.filter(i=>{const used=staying.some(p=>p.cover_id===i&&!del.posts.includes(p.id))||artworks.some(a=>a.media_id===i)||crewStay.some(c=>c.portrait_id===i)||catsStay.some(c=>c.cover_id===i)||blocks.includes(i)||settings.includes(i);if(used)blocked.push(`${i}: image used by content that stays`);return !used;});
-  return {delete:del,kept:all.filter(i=>keep.has(i)),blocked};
+  del.cards=[...await exists('expedition_cards',demoIds.cards)].filter(i=>!keep.has(i));
+  del.upcoming=[...await exists('upcoming_items',demoIds.upcoming)].filter(i=>!keep.has(i));
+  del.settings=demoKeys;
+  return {delete:del,kept:all.filter(i=>keep.has(i)),blocked,settingsAfter};
 }
 async function clean(){
   const p=await plan();
+  if(p.delete.cards.length)await ok(db.from('expedition_cards').delete().in('id',p.delete.cards));
+  if(p.delete.upcoming.length)await ok(db.from('upcoming_items').delete().in('id',p.delete.upcoming));
+  if(p.delete.settings.length)await ok(db.from('site_settings').update({value:p.settingsAfter}).eq('key','site'));
   if(p.delete.crew.length)await ok(db.from('crew_members').delete().in('id',p.delete.crew));
   if(p.delete.posts.length)await ok(db.from('posts').delete().in('id',p.delete.posts));
   if(p.delete.categories.length)await ok(db.from('art_categories').delete().in('id',p.delete.categories));
@@ -179,8 +270,8 @@ async function clean(){
 
 const [command,arg]=process.argv.slice(2);
 if(command==='seed')console.log(JSON.stringify(await seed(),null,2));
-else if(command==='plan')console.log(JSON.stringify(await plan(),null,2));
-else if(command==='clean'){if(arg!=='--confirm'){console.log('Dry run. Review the plan below, then run: npm run demo:local:clean -- --confirm');console.log(JSON.stringify(await plan(),null,2));}else console.log(JSON.stringify({deleted:(await clean()).delete},null,2));}
+else if(command==='plan'){const {settingsAfter:_,...shown}=await plan();console.log(JSON.stringify(shown,null,2));}
+else if(command==='clean'){if(arg!=='--confirm'){console.log('Dry run. Review the plan below, then run: npm run demo:local:clean -- --confirm');const {settingsAfter:_,...shown}=await plan();console.log(JSON.stringify(shown,null,2));}else console.log(JSON.stringify({deleted:(await clean()).delete},null,2));}
 else if(command==='keep'){
   assert(arg&&arg.startsWith('de000000-'),'Pass the id of a demo record (it starts with de000000-).');
   keep.add(arg);await mkdir('.encounters-work',{recursive:true});await writeFile(keepPath,JSON.stringify([...keep],null,2)+'\n');
