@@ -11,7 +11,7 @@ export const dynamic='force-dynamic';
 export const metadata={title:'LOCAL TEST DATA · Art visual review',robots:{index:false,follow:false}};
 const prefix='/review';
 
-export default async function ReviewPage({params}:{params:Promise<{path?:string[]}>}) {
+export default async function ReviewPage({params,searchParams}:{params:Promise<{path?:string[]}>;searchParams:Promise<{variant?:string}>}) {
   // Fail closed in production, including next start on localhost.
   if(process.env.NODE_ENV!=='development')notFound();
   const host=(await headers()).get('host')||'';
@@ -22,6 +22,15 @@ export default async function ReviewPage({params}:{params:Promise<{path?:string[
   const works=data.posts.filter(p=>p.kind==='artwork');
   const group=(id:unknown)=>works.filter(p=>data.artworks.some(a=>a.id===p.id&&a.category_id===id));
   let screen;
+  if(route==='/home'){
+    // Visual reference of Home v2: the real template with the prototype's texts, images and counts.
+    const {referenceView,referenceMedia}=await import('@/features/encounters/home-reference');
+    const {HomeView}=await import('@/components/public/HomeView');
+    // ?variant=sparse: fewer items and missing sections, to check other list sizes with the same template.
+    const sparse=(await searchParams).variant==='sparse';
+    const view=sparse?{...referenceView,home:{...referenceView.home,descent:{},about:{}},sections:referenceView.sections.filter(k=>k!=='descent'&&k!=='about'),agenda:referenceView.agenda.slice(0,2),happened:referenceView.happened.slice(0,1),art:referenceView.art.slice(0,2),crew:referenceView.crew.slice(0,3)}:referenceView;
+    return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><ScrollStage className="editorial-page home-page"><HomeView view={view} media={referenceMedia} closing="May the ocean be with you" newsletter={false}/></ScrollStage></>;
+  }
   if(route==='/art') {
     screen=<ArtLanding data={data} works={works} pathPrefix={prefix}/>;
   }else if(path[0]==='art'&&path.length===2){
