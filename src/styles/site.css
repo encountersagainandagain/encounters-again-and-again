@@ -443,3 +443,5 @@ body:has(.home-page) .editorial-footer{position:relative;z-index:3}
 .home-caustics{position:absolute;inset:0;background-size:620px 620px,940px 940px;mix-blend-mode:screen;opacity:.3;filter:blur(2.4px)}
 .home-caustics{background-image:none}
 .home-rays{position:fixed;inset:-10% -20% 0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen;background:repeating-linear-gradient(100deg,rgba(190,235,250,0) 0,rgba(190,235,250,0) 80px,rgba(190,235,250,.07) 110px,rgba(190,235,250,0) 150px,rgba(190,235,250,0) 260px);-webkit-mask-image:linear-gradient(to bottom,#000,transparent 75%);mask-image:linear-gradient(to bottom,#000,transparent 75%)}
+/* Long one-word banner titles (EXPEDITIONS, WORKSHOPS) stay on one line on phones. */
+@media (max-width:759px){.exp-copy h1{font-size:clamp(2.2rem,11.4vw,11rem);overflow-wrap:normal}}
