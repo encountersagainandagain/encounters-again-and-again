@@ -16,6 +16,66 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Desde el 2026-10-17 (entrega «web completa»)** todas las rutas públicas usan su plantilla del prototipo; ya no queda ninguna página provisoria. Detalle por página más abajo.
 
+## Estado al 2026-10-18
+
+Categorías: **Implementado** (el código existe) · **Verificado** (comprobado en local con capturas o recorridos) · **Pendiente de contenido** (falta cargar datos reales; lo que se ve son textos del diseño o ejemplos locales) · **Pendiente de aprobación visual** (solo Juani aprueba) · **Pendiente en la base remota** (migración o datos por aplicar con aprobación).
+
+| # | Ruta | Prototipo | Implementado | Verificado | Pendiente de contenido | Aprobación visual | Pendiente en remoto |
+|---|---|---|---|---|---|---|---|
+| 1 | `/crew` | `The Crew.dc.html` | Sí; secciones explícitas | 2026-10-17; 3218 sin cambios (8762 px) el 2026-10-18 | — | **Aprobada** la versión `cbea565` (2026-10-13). Las secciones editables (`ed1322d`) no cambian el aspecto y esperan revisión del editor | `20261017000100` |
+| 2 | `/crew/[slug]` | `Wild Wonders.dc.html` | Sí; **secciones explícitas** desde 2026-10-18 (`e673a7a`) | Equivalencia con la lectura aprobada sobre los bloques de Wild Wonders del snapshot + 5 casos (`npm test`); 3218 idéntico (7654 px, mismo HTML); perfiles locales convertidos con el mismo HTML | — | Wild Wonders **aprobado** (2026-10-14, con la plantilla anterior a las secciones explícitas). El editor de secciones del perfil es nuevo: **revisar el editor**, no el aspecto | Convertir el perfil real (abrir y guardar en el admin, o script) |
+| 3 | `/art`, categoría, obra | `Art.dc.html` (+ `Post.dc.html`) | Sí; el cuerpo de la obra usa ahora los bloques de Post | 2026-10-16; obra con bloques 2026-10-18 | Obras reales | Pendiente (cambió el cuerpo de la obra: revisar esa parte) | — |
+| 4 | `/expeditions` | `Expeditions.dc.html` | Sí | 2026-10-17 | Cards reales del programa | Pendiente | `20261017000200` (opcional para la página) |
+| 4b | `/expeditions/[slug]` | Plantilla Post | Sí | 2026-10-17; Full preview 2026-10-18 | Expediciones reales | Pendiente | `20261017000200` (`outcome`) |
+| 5 | `/workshops` | `Workshops.dc.html` | Sí | 2026-10-17 | Workshops reales | Pendiente | `20261017000200` (`note_title`, `outcome`) |
+| 5b | `/workshops/[slug]` | Plantilla Post | Sí | 2026-10-17; Full preview 2026-10-18 | Ídem | Pendiente | Ídem |
+| 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí | 2026-10-17 | Intro y crédito reales (Page presentation) | Pendiente | — |
+| 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí | 2026-10-17 | — | Pendiente | — |
+| 7 | `/posts/[slug]` | `Post.dc.html` | Sí; **todos los bloques del alcance** desde 2026-10-18 | Comparación con el prototipo (post demo con todos los bloques) | Noticias y resultados reales | Pendiente | — |
+| 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
+| 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
+| 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
+| 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; criaturas desde 2026-10-18 | Todo el scroll 2026-10-18 | **Sí**: banner, descenso, arrecife, proyectos, About y newsletter usan textos del diseño o de ejemplo. **No es contenido editorial confirmado** | Pendiente; el agua es la **alternativa de degradado** del handoff, pendiente de aprobación | — |
+
+Las aprobaciones de Crew (`cbea565`) y Wild Wonders (2026-10-14) se conservan. Lo cambiado después se marca solo en su parte: secciones editables de Crew, editor de secciones del perfil, cuerpo de las obras.
+
+### Migraciones pendientes en la base remota (en orden; no aplicadas)
+
+Las 14 primeras (hasta `20261006000100_art_crew_publication.sql`) ya están en la base real. Faltan, solo probadas en local:
+
+1. `supabase/migrations/20261017000100_crew_page_sections.sql` — campos `crew_members.highlight` y `favourite_animal`, conversión única de los textos importados y secciones explícitas de los bloques de la página Team.
+2. `supabase/migrations/20261017000200_activity_presentation.sql` — `workshops.note_title`, `workshops.outcome` y `expeditions.outcome` (textos opcionales; no convierte ni borra nada).
+
+La conversión del perfil real a secciones explícitas no es una migración: se hace al abrir y guardar la página en el admin, o con `scripts/profile-sections-local.mjs` adaptado al destino, siempre con aprobación.
+
+### Cierre 2026-10-18
+
+- **Full preview** (`/admin/posts/[id]/preview`): carga el detalle del tipo, necesidades o sesiones, créditos y resultado con la sesión de admin y usa las plantillas públicas. Recorrido local: borrador → editar necesidad/sesión → guardar → público 404 → Full preview muestra el cambio → publicar → público igual → restaurado (expedición y workshop).
+- **Plantilla Post** (`PostBlocks`): imagen grande con parallax y número, dos imágenes, carrusel, YouTube al click, heading con número y antetítulo, párrafo con lead, título + lista, cita, quick facts, costos con total, FAQs, acordeón, link simple, divisor e índice. Fuera de alcance: tour/centro de buceo, alojamiento y afiliados (módulos desactivados). El editor del admin crea y edita todos. Los perfiles y The Crew conservan su renderer aprobado. Los bloques importados con varias imágenes se muestran como par o carrusel según su cantidad (compatibilidad con datos importados).
+- **Perfil:** `profile-sections.ts`. Secciones: título de apertura, texto de apertura, par de fotos, fila de fotos, capítulo, galería oscura, contenido extra, no se muestra; opción «también en el par». El banner de Wild Wonders deja de depender del nombre en perfiles convertidos (portada de diseño explícita).
+- **Home:** tortuga, pez payaso, delfín y ballena con los SVG y fórmulas del prototipo; cáusticas con deformación ondulada. Sin recursos faltantes.
+- Verificación: TypeScript, lint, `npm test` (incluye la equivalencia de perfiles), build; 3218 sin cambios en `/crew` y Wild Wonders.
+
+| Página | Implementación | Prototipo | Qué revisar | Diferencias conocidas |
+|---|---|---|---|---|
+| Home | http://127.0.0.1:3219/ | http://127.0.0.1:3220/Abismo%20Home%20v2.dc.html | Descenso, agua, criaturas, agenda, carrusel | Agua por degradado (no WebGL); textos de diseño o ejemplo |
+| Expeditions | http://127.0.0.1:3219/expeditions | http://127.0.0.1:3220/Expeditions.dc.html | Disolución y cards; lista | La lista de expediciones no está en el prototipo |
+| Expedición | http://127.0.0.1:3219/expeditions/demo-ningaloo-crossing | Post.dc.html | Datos, necesidades, contacto | Sin prototipo propio |
+| Workshops | http://127.0.0.1:3219/workshops | http://127.0.0.1:3220/Workshops.dc.html | Riel de sesiones, terminado | Imágenes demo sintéticas |
+| Workshop | http://127.0.0.1:3219/workshops/demo-draw-the-ocean | Post.dc.html | Sesiones, qué llevar | Sin prototipo propio |
+| Messages | http://127.0.0.1:3219/meaningful-messages | http://127.0.0.1:3220/Meaningful%20Messages.dc.html | Cruce de mensajes | Enlace «Read the message» agregado |
+| Post | http://127.0.0.1:3219/posts/demo-post-blocks | http://127.0.0.1:3220/Post.dc.html | Todos los bloques | Sin tour, alojamiento ni afiliados |
+| Resultado | http://127.0.0.1:3219/posts/demo-first-crossing | Post.dc.html | Vuelta a su expedición | — |
+| About | http://127.0.0.1:3219/about | http://127.0.0.1:3220/About.dc.html | Foto que se encoge, filas | Contacto oculto sin email/teléfono |
+| Contact | http://127.0.0.1:3219/contact | http://127.0.0.1:3220/Contact.dc.html | Temas, validación | El envío abre el email del visitante; sin email, desactivado |
+| The Crew | http://127.0.0.1:3219/crew | http://127.0.0.1:3220/The%20Crew.dc.html | Sin cambios visuales | — |
+| Perfil | http://127.0.0.1:3218/crew/wild-wonders y http://127.0.0.1:3219/crew/local-test-person-c | http://127.0.0.1:3220/Wild%20Wonders.dc.html | Igual que lo aprobado; editor de secciones | — |
+| Art | http://127.0.0.1:3219/art | http://127.0.0.1:3220/Art.dc.html | Cuerpo de la obra con bloques de Post | Obra sin prototipo propio |
+
+Capturas: [verification/review-2026-10-18-close/](verification/review-2026-10-18-close/).
+
+### Historial 2026-10-17
+
 | # | Ruta | Prototipo | Diseño | CMS y datos | Navegación | Verificación | Pendiente | Aprobación de Juani |
 |---|---|---|---|---|---|---|---|---|
 | 1 | `/crew` | `The Crew.dc.html` | Fiel | Secciones explícitas (migración `…0100`, solo local) | Navbar, tira → perfiles | 2026-10-17 | Migración en la base real | **Aprobada visualmente** (2026-10-13). Secciones editables: pendiente |
