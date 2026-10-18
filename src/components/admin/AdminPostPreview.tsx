@@ -21,7 +21,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
   const [post, setPost] = useState<AdminPost | null>(null);
   const [blocks, setBlocks] = useState<AdminPostBlock[]>([]);
   // Crew profiles and artworks preview with their public templates instead of the article layout.
-  const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[]; categories: Record<string, unknown>[]; detail: Record<string, unknown>; contributors: { id: string; role: string }[]; posts: Record<string, unknown>[] } | null>(null);
+  const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[]; categories: Record<string, unknown>[]; detail: Record<string, unknown>; contributors: { id: string; role: string }[]; posts: Record<string, unknown>[]; children: Record<string, unknown>[]; related: string[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -39,20 +39,26 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
         ]);
 
         let nextProfile = null;
-        const kind = (nextPost as { kind?: string }).kind;
+        const kind = (nextPost as { kind?: string }).kind || '';
         const crewPage = kind === 'page' && (nextPost as { source_role?: string }).source_role === 'team';
-        if ((kind === 'crew_member' || kind === 'artwork' || crewPage) && supabase) {
-          const [crew, media, categories, detail, contributors, posts] = await Promise.all([
+        // Every editorial type previews with its public template and the same rows the public page reads:
+        // the detail of its type, needs or sessions, credited crew and the chosen result.
+        const detailTable = ({ artwork: 'artworks', expedition: 'expeditions', workshop: 'workshops', message: 'messages' } as Record<string, string>)[kind];
+        const childTable = kind === 'expedition' ? ['expedition_needs', 'expedition_id'] : kind === 'workshop' ? ['workshop_sessions', 'workshop_id'] : null;
+        if ((kind !== 'page' || crewPage) && supabase) {
+          const [crew, media, categories, detail, contributors, posts, children, relations] = await Promise.all([
             supabase.from('crew_members').select('*'),
             supabase.from('media').select('*').limit(1000),
             supabase.from('art_categories').select('*').order('sort'),
-            supabase.from('artworks').select('*').eq('id', id).maybeSingle(),
+            detailTable ? supabase.from(detailTable).select('*').eq('id', id).maybeSingle() : Promise.resolve({ data: {}, error: null }),
             supabase.from('post_contributors').select('*').eq('post_id', id).order('position'),
-            supabase.from('posts').select('id,kind,status'),
+            supabase.from('posts').select('id,kind,status,slug,title,cover_id,excerpt'),
+            childTable ? supabase.from(childTable[0]).select('*').eq(childTable[1], id).order('sort') : Promise.resolve({ data: [], error: null }),
+            supabase.from('post_relations').select('*').eq('post_id', id).order('sort'),
           ]);
-          const failed = [crew, media, categories, detail, contributors, posts].find((r) => r.error);
+          const failed = [crew, media, categories, detail, contributors, posts, children, relations].find((r) => r.error);
           if (failed?.error) throw failed.error;
-          nextProfile = { crew: crew.data || [], media: media.data || [], categories: categories.data || [], detail: (detail.data || {}) as Record<string, unknown>, contributors: (contributors.data || []).map((c: Record<string, unknown>) => ({ id: String(c.crew_member_id), role: String(c.role || '') })), posts: posts.data || [] };
+          nextProfile = { crew: crew.data || [], media: media.data || [], categories: categories.data || [], detail: (detail.data || {}) as Record<string, unknown>, contributors: (contributors.data || []).map((c: Record<string, unknown>) => ({ id: String(c.crew_member_id), role: String(c.role || '') })), posts: posts.data || [], children: (children.data || []) as Record<string, unknown>[], related: (relations.data || []).map((r: Record<string, unknown>) => String(r.related_post_id)) };
         }
 
         if (!isMounted) return;
@@ -128,7 +134,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
 
       {profile ? (
         <ScrollStage>
-          <EditorialPreview record={post} blocks={blocks} detail={profile.detail} media={profile.media} crew={profile.crew} categories={profile.categories} contributors={profile.contributors} posts={profile.posts} />
+          <EditorialPreview record={post} blocks={blocks} detail={profile.detail} media={profile.media} crew={profile.crew} categories={profile.categories} contributors={profile.contributors} posts={profile.posts} children={profile.children} related={profile.related} />
         </ScrollStage>
       ) : (
       <BlogPostPageContent
