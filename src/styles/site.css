@@ -38,10 +38,13 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .exp-card-cta{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#0f3b4c}
 .exp-after{position:relative;z-index:2;background:var(--enc-espuma)}
 .exp-blocks{padding:var(--enc-section-gap) 0}
-@media (max-width:759px){
-  .exp-card{width:calc(100vw - 32px);margin-left:calc(-50vw + 16px);top:max(12%,96px);height:80%;grid-template-columns:1fr!important;grid-template-rows:38% 1fr;grid-template-areas:'media' 'text'!important}
-  .exp-card-text{justify-content:flex-start;padding:22px 20px;gap:12px;overflow:auto}
-  .exp-card h2{font-size:clamp(1.5rem,7vw,2rem)!important}
+/* Phone and tablet cards: the prototype's own rules (Expeditions.dc.html helmet). */
+@media (max-width:1080px){.exp-card{width:86vw;margin-left:-43vw;top:max(13%,112px)}}
+@media (max-width:760px){
+  .exp-card{width:92vw;margin-left:-46vw;top:max(12%,116px);bottom:4%;height:auto;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:34% minmax(0,1fr);grid-template-areas:'media' 'text'!important}
+  .exp-card-text{padding:clamp(18px,5vw,28px);gap:10px}
+  .exp-card h2{font-size:clamp(1.4rem,6vw,2rem)!important}
+  .exp-card p{font-size:14px!important;line-height:1.6!important}
 }
 @media (prefers-reduced-motion:reduce){
   .exp-dissolve{height:auto!important}.exp-sticky{position:relative;height:auto;overflow:visible}
@@ -444,7 +447,7 @@ body:has(.home-page) .editorial-footer{position:relative;z-index:3}
 .home-caustics{background-image:none}
 .home-rays{position:fixed;inset:-10% -20% 0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen;background:repeating-linear-gradient(100deg,rgba(190,235,250,0) 0,rgba(190,235,250,0) 80px,rgba(190,235,250,.07) 110px,rgba(190,235,250,0) 150px,rgba(190,235,250,0) 260px);-webkit-mask-image:linear-gradient(to bottom,#000,transparent 75%);mask-image:linear-gradient(to bottom,#000,transparent 75%)}
 /* Long one-word banner titles (EXPEDITIONS, WORKSHOPS) stay on one line on phones. */
-@media (max-width:759px){.exp-copy h1{font-size:clamp(2.2rem,11.4vw,11rem);overflow-wrap:normal}}
+@media (max-width:759px){.exp-copy h1{overflow-wrap:normal}}
 
 /* ── Post blocks (Post.dc.html, 04-editor-de-bloques.md): widths 680 reading, 760 lists, 900 quotes, 1240 video, 95vw images ── */
 .post-blocks{padding-bottom:clamp(60px,12vh,140px)}
@@ -554,6 +557,7 @@ body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
 .home-crew-section .home-inner{gap:clamp(26px,4.5vh,50px)}
 .home-descent p em{font-family:var(--font-display),Georgia,serif;font-style:italic}
 /* Home navbar on phones: link rows 12px tall as in the prototype (the 18px row gap keeps targets spaced 30px apart). */
-@media (max-width:759px){body:has(.home-page) .editorial-nav nav a{display:block;padding-block:0;min-height:0;height:12px;line-height:12px}}
+/* Phone navbar link rows: 12px boxes as in every prototype (row gap 14px, 18px on Home); targets stay ≥ 26px apart. */
+@media (max-width:759px){.editorial-nav nav a{display:block;padding-block:0;min-height:0;height:12px;line-height:12px}}
 /* The prototype scrolls natively: anchors and jumps are instant on Home. */
 html:has(.home-page){scroll-behavior:auto}

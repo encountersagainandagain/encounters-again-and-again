@@ -1,5 +1,5 @@
 'use client';
-import {createContext,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
+import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Plus,Trash2,Upload} from 'lucide-react';
@@ -90,6 +90,14 @@ function BlockFields({block,index,media,onChange}:{block:{type:string;content:Ro
         {items.length<rowsSpec.max&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>save([...items,{}])}><Plus aria-hidden="true"/>{rowsSpec.add}</button>}</fieldset>;})()}
   </div>;
 }
+// Presentation card: the public Expeditions page in a frame, scrolled to this card, with the unsaved draft.
+function CardPreview({record}:{record:Row}){
+  const frame=useRef<HTMLIFrameElement>(null);
+  const send=useCallback(()=>frame.current?.contentWindow?.postMessage({type:'card-draft',value:record},location.origin),[record]);
+  useEffect(()=>{const t=setTimeout(send,250);return()=>clearTimeout(t);},[send]);
+  useEffect(()=>{const ready=(e:MessageEvent)=>{if(e.origin===location.origin&&e.data?.type==='page-preview-ready')send();};addEventListener('message',ready);return()=>removeEventListener('message',ready);},[send]);
+  return <section className="adm-preview adm-page-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">The Expeditions page at the moment this card is fully in. Scroll inside it to see the others.</span></header><iframe ref={frame} title="Preview of the Expeditions page" src="/admin/page-preview?page=expeditions&mode=card" onLoad={send}/></section>;
+}
 function Card({title,lead,children,actions}:{title:string;lead?:string;children:ReactNode;actions?:ReactNode}){
   return <section className="adm-card"><div className="adm-card-head"><div><h2 className="adm-card-title">{title}</h2>{lead&&<p>{lead}</p>}</div>{actions}</div>{children}</section>;
 }
@@ -124,7 +132,9 @@ export function EncountersCms(){
     if(!live)return;const error=results.find(r=>r.error)?.error;if(error){setMessage(error.message);return;}
     setRows(results[0].data||[]);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
   }void load();return()=>{live=false;};},[table,revision]);
-  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setPreview(false);setMessage('');setMarkClean(true);}
+  // Presentation cards are shown only on the Expeditions program page.
+  const programPages=(options.posts||[]).filter(p=>p.kind==='page'&&p.source_role==='encounters_expeditions');
+  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0,...(table==='expedition_cards'?{post_id:programPages[0]?.id||null,sort:(rows.length+1)}:{})});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setPreview(false);setMessage('');setMarkClean(true);}
   async function edit(row:Row){if(!supabase)return;setErrors({});setErrorDetail('');setBusy(true);setMessage('');setPreview(false);
     try{if(table==='posts'){
       const k=String(row.kind);const result=await Promise.all([
@@ -180,6 +190,8 @@ export function EncountersCms(){
       }else{const r=await supabase.rpc('save_entity',{entity:table,payload});if(r.error)throw r.error;}
       const fresh=await supabase.from(table).select('*').eq('id',current.id).single();if(fresh.error)throw fresh.error;setRecord(fresh.data);setRevision(x=>x+1);await requestAdminRevalidation({scope:'posts'});setMarkClean(true);
       setMessage(patch.status==='published'?'Published.':patch.status==='draft'?'Moved back to draft.':'Saved.');
+      // Keep the saved record in the address, so a reload reopens it.
+      {const url=new URL(location.href);url.searchParams.delete('new');url.searchParams.set('edit',String(current.id));history.replaceState(history.state,'',url);}
     }catch(e){const ex=explainError(e);setMessage(ex.message);setErrorDetail(ex.detail);if(ex.field&&ex.fieldMessage)setErrors({[ex.field]:ex.fieldMessage});if(ex.refresh)setRevision(x=>x+1);}finally{setBusy(false);}}
   // While a record is new, its address follows the title until someone edits the address by hand.
   function autoSlug(prev:Row,next:Row,source:string){if(prev.updated_at||!(source in next))return next;const following=!prev.slug||prev.slug===slugify(String(prev[source]||''));if(!following||next[source]===prev[source])return next;const slug=slugify(String(next[source]||''));if(slug&&errors.slug)errorContext.clear('slug');return {...next,slug};}
@@ -233,7 +245,7 @@ export function EncountersCms(){
     <div className="adm-toolbar-state"><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={back}><ArrowLeft aria-hidden="true"/>Back to list</button>{hasStatus&&<StatusBadge status={record.status}/>}{dirty?<span className="adm-badge adm-badge--dirty">Unsaved changes</span>:saved?<span>All changes saved</span>:<span>Not saved yet</span>}</div>
     <div className="adm-actions">
       {table==='posts'&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={duplicate} disabled={busy}><Copy aria-hidden="true"/>Duplicate as draft</button>}
-      {(table==='posts'||table==='art_categories')&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button>}
+      {(table==='posts'||table==='art_categories'||table==='expedition_cards')&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button>}
       {saved&&published&&['posts','art_categories','crew_members'].includes(table)&&(table!=='posts'||record.kind!=='crew_member')&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={publicPath(table,record,specific,options)} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
       {table==='posts'&&saved&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${record.id}/preview`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Full preview</a>}
       <button type="submit" className="adm-btn" disabled={busy}>{busy?'Saving…':'Save'}</button>
@@ -249,8 +261,9 @@ export function EncountersCms(){
       {toolbar}{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
         {table==='media'&&<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>}
-        <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={options}/></Card>
+        <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={table==='expedition_cards'?{...options,posts:programPages}:options}/></Card>
         {table==='art_categories'&&<Card title="Search and sharing" lead="How the category page is presented by search engines and when its link is shared."><SeoPanel value={record} onChange={setRecord} path={publicPath(table,record,{},options)} fallbackTitle={String(record.title||record.name||'')} fallbackDescription={String(record.lead||'')} image={record.cover_id}/></Card>}
+        {table==='expedition_cards'&&preview&&<CardPreview record={record}/>}
         {table==='art_categories'&&preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">The category section as it appears on the Art page and on its own page.</span></header><div className="adm-preview-frame"><CategoryPreview record={record} media={options.media||[]} posts={options.posts||[]} artworks={options.artworks||[]} categories={options.art_categories||[]} crew={options.crew_members||[]}/></div></section>}
       </div><aside>
         {table==='crew_members'&&<Card title="Personal page"><CrewPagePanel member={record} posts={options.posts||[]} busy={busy} onCreate={()=>void createProfile()}/></Card>}

@@ -21,7 +21,7 @@ export function SiteChrome({children,settings}:{children:ReactNode;settings:Row}
       const hero=document.querySelector('[data-nav-hero]')||document.querySelector('[data-photo-hero]');
       // A pinned hero stays on screen while the paper covers it: the nav turns light with the paper, at 95% of a viewport.
       const pinned=!!hero&&getComputedStyle(hero).position==='sticky';
-      el.dataset.light=String(theme!=='dark'&&(theme==='light'&&!hero || path.startsWith('/art')&&!hero || !!hero&&(pinned?scrollY>innerHeight*.95:hero.getBoundingClientRect().bottom<150)));el.dataset.scrolled=String(scrollY>40);el.style.setProperty('--nav-k',String(Math.min(1,scrollY/240)));};
+      el.dataset.light=String(theme!=='dark'&&(theme==='light'&&!hero || path.startsWith('/art')&&!hero || !!hero&&(pinned?scrollY>innerHeight*.95:hero.getBoundingClientRect().bottom<(hero.classList.contains('exp-dissolve')?120:150))));el.dataset.scrolled=String(scrollY>40);el.style.setProperty('--nav-k',String(Math.min(1,scrollY/240)));};
     update();window.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);return()=>{window.removeEventListener('scroll',update);window.removeEventListener('resize',update);};
   },[path,editorial]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} / ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span><span>{alternate}</span></span></span>:label}</Link>;

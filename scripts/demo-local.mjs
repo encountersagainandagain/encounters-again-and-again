@@ -3,19 +3,22 @@
 //   npm run demo:local:plan            list what a cleanup would delete, and what it keeps
 //   npm run demo:local:clean -- --confirm   delete the demo records listed by the plan
 //   npm run demo:local:keep -- <id>    keep one demo record as your own content (excluded from cleanup)
+//   npm run demo:local:adopt -- <id>   make content created from the admin a local example (included in plan/clean)
 // Every record uses a stable id starting with de000000-, so re-running is safe and cleanup is exact.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createClient} from '@supabase/supabase-js';
 
-const statePath='.encounters-work/local-cms.json',keepPath='.encounters-work/demo-keep.json';
+const statePath='.encounters-work/local-cms.json',keepPath='.encounters-work/demo-keep.json',adoptPath='.encounters-work/demo-adopted.json';
 const state=JSON.parse(await readFile(statePath,'utf8'));
 assert(['http://127.0.0.1:54321','http://localhost:54321'].includes(new URL(state.url).origin),'Refusing a non-local Supabase target.');
 const db=createClient(state.url,state.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
 const ok=async query=>{const r=await query;if(r.error)throw r.error;return r.data;};
 const id=(group,n)=>`de000000-0000-4000-8000-00000000${group}${String(n).padStart(2,'0')}`;
 const keep=new Set(JSON.parse(await readFile(keepPath,'utf8').catch(()=>'[]')));
+// Content created from the admin for a walkthrough and adopted as a local example (demo:local:adopt).
+const adopted=JSON.parse(await readFile(adoptPath,'utf8').catch(()=>'[]'));
 
 // ---- Demo set ----------------------------------------------------------------------------
 // Synthetic line drawings generated here: no real photograph or artwork is credited to the demo makers.
@@ -142,7 +145,7 @@ const sitePosts=[
     detail:{activity_status:'upcoming',starts_on:'2026-11-10',ends_on:'2026-11-24',place:'Exmouth, Western Australia',availability_label:'Crew by invitation',cta_label:'Ask to join'},
     children:[{id:id(61,1),title:'Binoculars for spotting animals',body:'Two pairs, waterproof.',status:'pending',sort:1},{id:id(61,2),title:'Camera gear for photo ID',body:'A housing for a mirrorless camera.',status:'pending',sort:2},{id:id(61,3),title:'Marine radio',status:'obtained',sort:3}],
     blocks:[{type:'paragraph',content:{text:'Demonstration expedition. Its needs are listed below; pending ones show “Still needed”. Change its status to Finished and choose a result to see how the card changes.'}}]},
-  {id:P(6),kind:'expedition',slug:'demo-first-crossing-expedition',title:'The first crossing (demo)',excerpt:'The fictional first crossing of the demo set.',cover:D(2),sort:2,relations:[P(3)],
+  {id:P(6),kind:'expedition',slug:'demo-first-crossing-expedition',title:'The first crossing (demo)',excerpt:'The fictional first crossing of the demo set.',cover:D(2),sort:2,relations:[P(3)],credits:[[1,'Captain (demo)'],[2,'Photography (demo)']],
     detail:{activity_status:'finished',starts_on:'2026-03-02',ends_on:'2026-03-13',place:'Heron Island',outcome:'Eleven days, four of us, and a part that took two weeks to arrive.'},blocks:[]},
   {id:P(7),kind:'workshop',slug:'demo-draw-the-ocean',title:'Draw the ocean (demo)',excerpt:'A fictional running workshop in three sessions.',cover:D(3),sort:1,
     detail:{activity_status:'running',registration_status:'open',date_label:'Every Saturday in November',place:'Coledale community hall',availability_label:'Free · drop in',note_title:'Who it is for',audience_note:'Schools and community groups, no drawing experience needed. We bring the materials and the stories.',materials:['Something to lean on','Your favourite pencil']},
@@ -183,7 +186,7 @@ const cards=[
   [1,'The boat','A small sailboat called Coqui','We bought her to turn her into a platform: supporting conservation projects, documenting marine life, and helping the people already working to protect our seas.',{signature:'Fabri, Juli, Majita and Hugo.',media_id:F(6)}],
   [2,'How it started','A purpose that connected us','It brought us together in Australian waters — to experience the beauty of this world and try to help it. We love the sea. We love animals and people. We want to protect our nature.',{media_id:F(9)}],
   [3,'The work','Alongside the people doing it','Over the last years we have moved around the world taking part in conservation efforts: working alongside scientists and researchers, crewing on research and conservation vessels.',{media_id:F(10)}],
-  [4,'On board','What the boat needs to carry','',{bullets:['Binoculars for spotting animals','Camera gear for photo ID and documentation','Marine equipment'],media_id:D(1)}],
+  [4,'On board','What the boat needs to carry','',{bullets:['Binoculars for spotting animals','Camera gear for photo ID and documentation','Marine equipment'],media_id:F(8)}],
   // The fundraiser link is left empty on purpose: the card hides its button until a real link is entered.
   [5,'Help','Help our sailboat help the ocean','A project based on kindness, soundness and pure intentions. Every fund raised goes solely into running it — keeping the boat, the work and the stories moving us through the seas.',{theme:'dark',media_id:F(7),cta_label:'Support the expeditions'}],
 ].map(([n,kicker,title,body,extra])=>({id:id(63,n),post_id:P(1),kicker,title,body,sort:n,...extra}));
@@ -202,7 +205,7 @@ const siteSettings={pages:{
   projects:{expeditions:{status_label:'Sail boat | In refit',body:'We take people to the sea, document what lives there and support the crews already protecting it.'},messages:{status_label:'Books & films | Free to read',body:'Little big books, short films and fanzines — made to be given away, not sold.'}},
   about:{kicker:'About us',line:'To connect people with nature, again and again.',body:'Demo text for the About block of Home. Edit it in Site → Home.'},
   newsletter:{title:'Letters from the water',body:'Demo text. Subscriptions are only recorded; no email is sent from the site.'}}};
-const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id),...sitePosts.map(p=>p.id)],categories:categories.map(c=>c.id),cards:cards.map(c=>c.id),upcoming:announcements.map(a=>a.id)};
+const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id),...sitePosts.map(p=>p.id),...adopted],categories:categories.map(c=>c.id),cards:cards.map(c=>c.id),upcoming:announcements.map(a=>a.id)};
 
 async function exists(table,ids){const rows=await ok(db.from(table).select('id').in('id',ids));return new Set(rows.map(r=>r.id));}
 async function seed(){
@@ -244,7 +247,7 @@ async function seed(){
     if(p.kind==='page'&&roles.has(p.source_role)){report.kept.push(`${p.id} (site already has a ${p.source_role} page)`);continue;}
     const blocks=(p.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
     const detail=p.detail?Object.fromEntries(Object.entries(p.detail).map(([k,v])=>[k,remap(v)])):null;
-    await ok(db.rpc('save_content',{p_post:{id:p.id,kind:p.kind,title:p.title,slug:p.slug,kicker:p.kicker||'',subtitle:p.subtitle||'',excerpt:p.excerpt||'',meta_line:p.meta_line||'',cover_id:p.cover?mid(p.cover):null,source_role:p.source_role||null,status:'published',published_at:new Date().toISOString(),show_index:!!p.show_index,sort:p.sort||0,source_metadata:{demo:true}},p_blocks:blocks,p_details:detail,p_contributors:[],p_relations:(p.relations||[]).map((related_post_id,sort)=>({related_post_id,relation:'result',sort})),p_children:p.children?p.children.map(c=>c.media_id?{...c,media_id:remap(c.media_id)}:c):null,expected_updated_at:null}));report.created.push(p.id);
+    await ok(db.rpc('save_content',{p_post:{id:p.id,kind:p.kind,title:p.title,slug:p.slug,kicker:p.kicker||'',subtitle:p.subtitle||'',excerpt:p.excerpt||'',meta_line:p.meta_line||'',cover_id:p.cover?mid(p.cover):null,source_role:p.source_role||null,status:'published',published_at:new Date().toISOString(),show_index:!!p.show_index,sort:p.sort||0,source_metadata:{demo:true}},p_blocks:blocks,p_details:detail,p_contributors:(p.credits||[]).map(([person,role],position)=>({crew_member_id:id(20,person),role,position})),p_relations:(p.relations||[]).map((related_post_id,sort)=>({related_post_id,relation:'result',sort})),p_children:p.children?p.children.map(c=>c.media_id?{...c,media_id:remap(c.media_id)}:c):null,expected_updated_at:null}));report.created.push(p.id);
   }
   const cardsHave=await exists('expedition_cards',demoIds.cards);
   if(await ok(db.from('posts').select('id').eq('id',P(1))).then(r=>r.length))for(const c of cards){if(cardsHave.has(c.id)){report.kept.push(c.id);continue;}await ok(db.rpc('save_entity',{entity:'expedition_cards',payload:{...c,media_id:remap(c.media_id)}}));report.created.push(c.id);}
@@ -300,9 +303,16 @@ const [command,arg]=process.argv.slice(2);
 if(command==='seed')console.log(JSON.stringify(await seed(),null,2));
 else if(command==='plan'){const {settingsAfter:_,...shown}=await plan();console.log(JSON.stringify(shown,null,2));}
 else if(command==='clean'){if(arg!=='--confirm'){console.log('Dry run. Review the plan below, then run: npm run demo:local:clean -- --confirm');const {settingsAfter:_,...shown}=await plan();console.log(JSON.stringify(shown,null,2));}else console.log(JSON.stringify({deleted:(await clean()).delete},null,2));}
-else if(command==='keep'){
-  assert(arg&&arg.startsWith('de000000-'),'Pass the id of a demo record (it starts with de000000-).');
+else if(command==='adopt'){
+  // Marks content created from the admin as a local example: it is labelled demo and the plan and clean
+  // commands include it (keep still protects it).
+  assert(arg,'Pass the id of the content to adopt.');const post=(await ok(db.from('posts').select('id,title,source_metadata').eq('id',arg)))[0];assert(post,'No content with that id in the local CMS.');
+  await ok(db.from('posts').update({source_metadata:{...(post.source_metadata||{}),demo:true,adopted:true}}).eq('id',arg));
+  if(!adopted.includes(arg))adopted.push(arg);await mkdir('.encounters-work',{recursive:true});await writeFile(adoptPath,JSON.stringify(adopted,null,2)+'\n');
+  console.log(`Adopted “${post.title}” (${arg}) as a local example.`);
+}else if(command==='keep'){
+  assert(arg&&(arg.startsWith('de000000-')||adopted.includes(arg)),'Pass the id of a demo record (it starts with de000000-) or of adopted content.');
   keep.add(arg);await mkdir('.encounters-work',{recursive:true});await writeFile(keepPath,JSON.stringify([...keep],null,2)+'\n');
   const post=await db.from('posts').select('source_metadata').eq('id',arg).maybeSingle();if(post.data)await ok(db.from('posts').update({source_metadata:{...post.data.source_metadata,demo:false}}).eq('id',arg));
   console.log(`Kept ${arg}. It will not be deleted by demo:local:clean. Rename it so it no longer says “demo”.`);
-}else{console.error('Usage: node scripts/demo-local.mjs seed|plan|clean [--confirm]|keep <id>');process.exit(1);}
+}else{console.error('Usage: node scripts/demo-local.mjs seed|plan|clean [--confirm]|keep <id>|adopt <id>');process.exit(1);}

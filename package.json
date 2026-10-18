@@ -19,6 +19,7 @@
     "demo:local:plan": "node scripts/demo-local.mjs plan",
     "demo:local:clean": "node scripts/demo-local.mjs clean",
     "demo:local:keep": "node scripts/demo-local.mjs keep",
+    "demo:local:adopt": "node scripts/demo-local.mjs adopt",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
     "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs"
   },

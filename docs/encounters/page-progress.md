@@ -159,6 +159,27 @@ Evidencia: [verification/review-2026-10-18-home-performance/](verification/revie
 
 **Pendiente:** que Juani confirme la fluidez en su pantalla y decida si acepta la resolución adaptativa o prefiere la del prototipo siempre. Expeditions espera ese cierre. La aprobación editorial de Home sigue pendiente.
 
+### Expeditions — módulo completo (2026-10-18)
+
+**Implementado**
+- Pin de 660vh con 5 cards (220 + 88vh por card) y la tabla exacta de ventanas del prototipo.
+- El navbar pasa a claro cuando el banner baja de 120 px, como el prototipo.
+- Reglas de cards para móvil y tablet del prototipo, y título a tamaño del prototipo.
+- Filas del navbar móvil de 12 px en todo el sitio, como en todos los prototipos: **revisar en The Crew y Wild Wonders en teléfono**.
+- Preview en vivo de las cards de presentación (la plantilla pública, desplazada a la card). «Shown on» solo ofrece la página del programa y las cards nuevas la traen elegida.
+- Después de guardar, el admin conserva `?edit=<id>`.
+- Comando `demo:local:adopt` para contenido creado desde el admin.
+- El seed agrega participantes a la expedición terminada.
+
+**Verificado técnicamente**
+- Comparación con el prototipo en 1440 y 390 px, cuadro a cuadro: igual. Diferencias de contenido: la imagen de la card 1, y el botón de donación oculto porque no hay enlace real.
+- Recorrido desde el admin, completo y en verde: crear, borrador privado, recargar, editar, preview visual y Full preview, publicar sin destacar, página pública, listado, agenda de Home, perfil del participante, terminada con resultado (enlaces en los dos sentidos), y al despublicar desaparece de todo.
+- Ejemplos adoptados: «UI journey crossing (demo)» (publicada, terminada, con resultado y participante) y «UI journey crossing 1607 (demo)» (borrador).
+
+**Aprobado por Juani:** pendiente.
+
+**Siguiente:** Workshops, después Messages, Art, About/Contact/Newsletter y la revisión integrada.
+
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
 Las 14 primeras (hasta `20261006000100_art_crew_publication.sql`) ya están en la base real. Faltan, solo probadas en local:

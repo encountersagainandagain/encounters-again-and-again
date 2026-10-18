@@ -10,10 +10,17 @@ import {PostBlocks} from './PostBlocks';
 import type {ContentBlock} from '@/features/encounters/public-content';
 
 const ORDER=[0,2,4,1,3,5];
-// Card windows (02-animations.md § 9): spread evenly between 0.42 and 1.0; each card enters while the
-// previous one starts to leave, and the last one stays until the pin is released.
-export function cardWindows(n:number){const s=.58/Math.max(1,n);return Array.from({length:n},(_,i)=>{const from=.42+i*s,next=from+s;return i===n-1?[from,from+s*.62,1.4,1.5]:[from,from+s*.62,next,next+s*.57];});}
-
+// Card windows (02-animations.md § 9). Five cards use the executable prototype's exact table; other counts
+// spread the starts the same way between 0.42 and 0.91, each card entering as the previous one starts to
+// leave; the last one stays until the pin is released.
+const PROTOTYPE_WINDOWS=[[.42,.50,.55,.62],[.55,.62,.67,.74],[.67,.74,.79,.86],[.79,.86,.91,.97],[.91,.97,1.4,1.5]];
+export function cardWindows(n:number){
+  if(n===5)return PROTOTYPE_WINDOWS;
+  const step=n>1?.49/(n-1):0,enter=(i:number)=>.42+i*step,full=(i:number)=>enter(i)+Math.min(.08,Math.max(.06,step*.6));
+  return Array.from({length:n},(_,i)=>i===n-1?[enter(i),Math.min(.97,full(i)),1.4,1.5]:[enter(i),full(i),enter(i+1),full(i+1)]);
+}
+// Pin length: 660vh with five cards, as in the prototype (220vh + 88vh per card).
+export const pinHeight=(n:number)=>n?220+88*n:240;
 export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:Row;settings:Row;cards:Row[];list:Activity[];media:Row[];blocks:ContentBlock[]}){
   const section=useRef<HTMLElement>(null),sticky=useRef<HTMLDivElement>(null);
   const windows=cardWindows(cards.length);
@@ -36,7 +43,7 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
   const surfaceId=settings.cover_id||page?.cover_id,underwaterId=settings.underwater_id;
   const upcoming=list.filter(a=>!isFinished(a)),finished=list.filter(isFinished);
   return <>
-    <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${cards.length?220+110*cards.length:240}vh`}} aria-label="Expeditions">
+    <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
       <div ref={sticky} className="exp-sticky">
         <div className="exp-surface hero-image"><div data-surface className="exp-fill"><Picture id={surfaceId} media={media} fallback="/design/crew-banner.jpg" priority/></div></div>
         <div className="exp-panels" aria-hidden="true">{[0,1,2,3,4,5].map(i=><div key={i} data-panel={i} style={{clipPath:i%2===0?'inset(100% 0 0 0)':'inset(0 0 100% 0)'}}><div className="exp-strip" style={{left:`${-i*100}%`}}><Picture id={underwaterId} media={media} fallback="/design/reef-turtle-web.jpg"/></div></div>)}</div>
@@ -44,7 +51,7 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
         <div data-copy className="exp-copy"><p>{string(settings.kicker)||string(page?.kicker)||'following our nature'}</p><h1>{string(page?.title)||'Expeditions'}</h1></div>
         <a data-cue href="#expeditions-content" className="scroll-cue">Scroll <span aria-hidden="true"/></a>
         {!!cards.length&&<div className="exp-cards">{cards.map((card,i)=>{const side=string(card.media_side)||(i%2===0?'left':'right');const items=lines(card.bullets);const href=safeHref(card.cta_url);
-          return <article key={string(card.id)} data-card data-side={side} data-theme={card.theme==='dark'?'dark':'light'} className="exp-card">
+          return <article key={string(card.id)} data-card data-card-id={string(card.id)} data-side={side} data-theme={card.theme==='dark'?'dark':'light'} className="exp-card">
             <div className="exp-card-media"><Picture id={card.media_id} media={media}/></div>
             <div className="exp-card-text"><span className="exp-card-kicker"><span>{pad(i+1)}</span>{string(card.kicker)}</span><h2>{string(card.title)}</h2>
               {items.length?<ol className="exp-card-list">{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>:string(card.body)&&<p>{string(card.body)}</p>}
