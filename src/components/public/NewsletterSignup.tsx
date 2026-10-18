@@ -14,7 +14,7 @@ export function NewsletterSignup({title='Stay in touch',body=''}:{title?:string;
     } catch { setOk(false); setMessage('Unable to subscribe. Please try again.'); }
     finally { setPending(false); }
   }
-  return <div className="enc-newsletter"><h2 data-seq="0.96,0.4">{title}</h2>{body&&<p className="enc-newsletter-body">{body}</p>}<form onSubmit={subscribe}>
+  return <div className="enc-newsletter"><h2 data-hseq="0.96,0.4">{title}</h2>{body&&<p className="enc-newsletter-body">{body}</p>}<form onSubmit={subscribe}>
     <label htmlFor={`${id}-email`}>Email address</label><div className="enc-newsletter-row"><input id={`${id}-email`} name="email" type="email" autoComplete="email" required placeholder="you@somewhere.sea"/><button type="submit" disabled={pending}>{pending ? 'Subscribing…' : 'Subscribe'}</button></div>
     <input name="website" type="text" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
     <label className="enc-newsletter-consent"><input type="checkbox" name="consent" required /> <span>I agree to receive the Encounters newsletter. I can unsubscribe at any time.</span></label>

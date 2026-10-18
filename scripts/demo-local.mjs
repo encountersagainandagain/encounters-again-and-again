@@ -197,7 +197,7 @@ const siteSettings={pages:{
 },home:{
   // Texts of Abismo Home v2. The Artsy Animals card has no image or text on purpose: optional fields left empty.
   hero:{kicker:'Welcome to',title:'Encounters',subtitle:'again and again',tagline:'A space for our connection to nature',lead:'A space to feel and create with nature',cue:'follow the current …where will it lead you..'},
-  descent:{title:'Vast, quiet and completely alive — slipping below the surface remains a rare and extraordinary encounter.',body:'We leave on the low tide, cross the break and follow the reef wall down until the blue becomes one single thing. Again and again.'},
+  descent:{title:'Vast, quiet and completely alive — slipping below the surface remains a rare and extraordinary encounter.',body:'We leave on the low tide, cross the break and follow the reef wall down until the blue becomes one single thing. Again and again.',emphasis:'Again and again.'},
   reef:{caption:'This is what we came for.',place:'Heron Island · Great Barrier Reef'},
   projects:{expeditions:{status_label:'Sail boat | In refit',body:'We take people to the sea, document what lives there and support the crews already protecting it.'},messages:{status_label:'Books & films | Free to read',body:'Little big books, short films and fanzines — made to be given away, not sold.'}},
   about:{kicker:'About us',line:'To connect people with nature, again and again.',body:'Demo text for the About block of Home. Edit it in Site → Home.'},

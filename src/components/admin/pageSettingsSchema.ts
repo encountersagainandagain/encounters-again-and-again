@@ -12,7 +12,7 @@ export const pageSchemas:PageSchema[]=[
   {key:'home',label:'Home',path:'/',store:'home',lead:'The descent, the order of the sections and their texts. The lists (what is coming, stories, art, crew) fill themselves with published content; tick “Featured on Home” in a content to put it first.',fields:[
     {key:'sections',label:'Sections, order and visibility',type:'sections',help:'Sections without content are hidden automatically.'},
     group('hero','Banner',[t('kicker','Small line above the title','Default: Welcome to'),t('title','Title','Default: Encounters'),t('subtitle','Line under the title','Default: again and again'),t('tagline','Tagline in capitals','Hidden when empty.'),t('lead','Line under the tagline','Hidden when empty.'),t('cue','Scroll invitation','Default: follow the current …where will it lead you..')]),
-    group('descent','The descent',[area('title','Title','Shown in capitals, aligned to the right. The section is hidden when title and text are empty.'),area('body','Text')]),
+    group('descent','The descent',[area('title','Title','Shown in capitals, aligned to the right. The section is hidden when title and text are empty.'),area('body','Text'),t('emphasis','Words in italics','Part of the text shown in italics, e.g. Again and again.')]),
     group('reef','Reef',[media('media_id','Reef image','Default: the reef of the design.'),t('caption','Caption in italics'),t('place','Place')]),
     t('projects_title','Ongoing projects title','Default: Ongoing projects'),
     group('projects','Ongoing projects cards',[

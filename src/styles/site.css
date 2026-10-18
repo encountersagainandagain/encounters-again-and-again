@@ -437,7 +437,7 @@ body:has(.home-page) .editorial-footer{position:relative;z-index:3}
 .enc-newsletter p[role=status]{font-family:var(--font-display),Georgia,serif;font-style:italic;min-height:1.4em;color:#f2a27e}.enc-newsletter p[data-ok=true]{color:#8fd9ea}
 .home-letters{padding-bottom:0}
 @media (max-width:1080px){.home-stories{grid-template-columns:repeat(2,minmax(0,1fr))}.home-crew{grid-template-columns:repeat(3,minmax(0,1fr))}.home-art-slide{width:44vw}}
-@media (max-width:760px){.home-agenda-tick span{display:none}.home-event h3{font-size:clamp(2rem,11vw,3.4rem)!important}.home-stories{grid-template-columns:1fr}.home-crew{grid-template-columns:repeat(2,minmax(0,1fr))}.home-art-slide{width:76vw}.home-hero-tagline{letter-spacing:.18em!important}.home-cue span{font-size:17px}.home-descent{padding-inline:20px}.home-descent h2,.home-descent p{grid-column:1/-1}}
+@media (max-width:760px){.home-agenda-tick span{display:none}.home-event h3{font-size:clamp(2rem,11vw,3.4rem)!important}.home-stories{grid-template-columns:1fr}.home-crew{grid-template-columns:repeat(2,minmax(0,1fr))}.home-art-slide{width:76vw}.home-hero-tagline{letter-spacing:.18em!important}.home-cue span{font-size:17px}.home-descent{padding-inline:20px}}
 @media (prefers-reduced-motion:reduce){.home-bg,.home-hero-mark,.home-cue span{animation:none}.home-bubbles,.home-snow{display:none}}
 .home-water{background:linear-gradient(to bottom,rgba(43,133,168,.62) 0%,rgba(15,70,96,.82) 40%,rgba(4,23,48,.96) 100%)!important}
 .home-caustics{position:absolute;inset:0;background-size:620px 620px,940px 940px;mix-blend-mode:screen;opacity:.3;filter:blur(2.4px)}
@@ -533,3 +533,27 @@ body:has(.home-page) .editorial-footer{position:relative;z-index:3}
 .home-creature-band{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
 .home-reef .home-creature{z-index:2}
 @media (prefers-reduced-motion:reduce){.home-creature{display:none}}
+/* Home v2 fidelity (2026-10-18): the prototype water shader on a fixed canvas; the gradient layers are only
+   the fallback when WebGL is missing or lost. Bubbles, reveals and navbar as in Abismo Home v2. */
+.home-water-gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
+.home-root:not([data-water=fallback]) :is(.home-water,.home-rays){display:none}
+.home-bubbles>div{position:absolute;bottom:-6vh;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.65),rgba(255,255,255,.04) 60%);animation:home-bubble linear infinite}
+.home-root [data-hseq]{will-change:opacity,transform}
+body:has(.home-page) .editorial-nav{color:#eaf5fa;transition:background .5s ease,backdrop-filter .5s ease,border-color .5s ease}
+body:has(.home-page) .editorial-nav::before{height:170px;background:linear-gradient(to bottom,rgba(4,17,30,.78),rgba(4,17,30,.45) 45%,rgba(4,17,30,0))}
+body:has(.home-page) .editorial-brand img{will-change:transform}
+body:has(.home-page) .editorial-brand>span{will-change:transform,opacity}
+@media (max-width:759px){body:has(.home-page) .editorial-nav{row-gap:18px}body:has(.home-page) .editorial-nav::before{height:210px}}
+@media (prefers-reduced-motion:reduce){.home-bubbles>div{display:none}}
+.review-notice--home{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:60;opacity:.85;font-size:10px}
+/* The prototype root keeps the browser's default line height; Home spacing depends on it. */
+.home-root{line-height:normal}
+/* Closing and footer on Home: the prototype's closing holds the footer row after a 50–150px gap and ends with 40–80px. */
+.home-closing{padding-bottom:clamp(50px,14vh,150px)}
+body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
+.home-crew-section .home-inner{gap:clamp(26px,4.5vh,50px)}
+.home-descent p em{font-family:var(--font-display),Georgia,serif;font-style:italic}
+/* Home navbar on phones: link rows 12px tall as in the prototype (the 18px row gap keeps targets spaced 30px apart). */
+@media (max-width:759px){body:has(.home-page) .editorial-nav nav a{display:block;padding-block:0;min-height:0;height:12px;line-height:12px}}
+/* The prototype scrolls natively: anchors and jumps are instant on Home. */
+html:has(.home-page){scroll-behavior:auto}
