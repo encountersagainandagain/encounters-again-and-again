@@ -36,8 +36,10 @@ export const help:Record<string,string>={
   name:'Name as it should appear on the site.',
   alias:'Project or artist name used as the profile title, if any.',
   role:'Short role, for example “Co-founder”.',
-  bio:'Biography for the Crew page. A sentence starting with “Above all” is shown in italics.',
-  quote:'A “Label: value” line, for example “Favourite animal: Orca”. The value is highlighted.',
+  bio:'Short biography shown on the card of The Crew page.',
+  highlight:'One line shown in italics under the biography, e.g. “Above all, a curious soul always drawn to the sea.”',
+  favourite_animal:'Shown at the bottom of the card as “Favourite animal”, e.g. Orca.',
+  quote:'Not shown on The Crew page. Kept for other uses.',
   portrait_id:'Portrait used on the Crew page.',
   has_page:'Gives this person a profile page. It becomes public once its profile content is published.',
   page_post_id:'Content that holds the blocks of the profile page.',
@@ -84,6 +86,16 @@ export const creditLabels:Record<string,{title:string;lead:string;role:string}>=
 };
 export const defaultCredit={title:'Credited crew',lead:'People credited for this content. It appears on their personal pages.',role:'Role (optional)'};
 
+// Sections of The Crew page (The Crew.dc.html). Blocks of the Team page say where they go.
+export const crewSections:[string,string,string][]=[
+  ['opening','Opening title','The large title under the cover, e.g. “Following our nature”. Use one heading.'],
+  ['story','Story','A heading becomes the small line above the text; paragraphs follow with their style.'],
+  ['pair','Photo pair','Two images shown side by side while the page scrolls.'],
+  ['project','Project','A heading on the left and its text on the right.'],
+  ['extra','Extra content','Any other block, shown after the project section.'],
+  ['','Not shown','Kept in the page but not displayed.'],
+];
+export const crewStyles:[string,string][]=[['lead','Lead (larger serif)'],['body','Body text'],['aside','Continues the previous line, in italics'],['closing','Closing line in italics']];
 // Help that changes with the type of content.
 export const kindHelp:Record<string,Record<string,string>>={
   artwork:{title:'Name of the work.',slug:'Last part of the address: /art/category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',show_index:'Lists the headings of the text at the top. Rarely needed for a work.'},

@@ -1,8 +1,10 @@
 # Encounters Again and Again — checklist de seguimiento
 
-Última actualización: 2026-10-14.
+Última actualización: 2026-10-17.
 
 **Handoff de continuidad:** [estado técnico completo para Claude Code](CLAUDE_CODE_HANDOFF_2026-10-12.md) y [prompt autocontenido](CLAUDE_CODE_PROMPT_2026-10-12.md), preparados en el checkpoint `ad883d8`. Mantener el freno de revisión visual indicado abajo.
+
+**Implementación guiada por prototipos (2026-10-17):** el estado por página vive en [page-progress.md](page-progress.md), única fuente: ruta, prototipo, estado visual, CMS y datos, comprobaciones, diferencias y aprobación. Orden: The Crew → Perfil de Crew → Art → Expeditions → Workshops → Messages → About/Contact → Newsletter → Home v2. Primera entrega: `/crew` auditada (sin cambios visuales) con secciones editables explícitas y la migración `20261017000100` aplicada solo en local. Menú del admin reorganizado por módulo. **Pendiente: revisión de Juani y aprobación para aplicar la migración en la base real.**
 
 **Art completo y claridad del CMS (2026-10-14):** [detalle, auditorías y ejemplos](art-module.md). Art (`/art`, categoría y obra) según `Art.dc.html`, con previews del CMS sobre las mismas plantillas. Entradas del admin por tipo y tipo fijo al crear; página personal desde la ficha de Crew; créditos por tipo (autores, facilitadores, participantes); selector visual de relacionados; SEO con vistas previas; JSON-LD de obras y categorías; descripción de imágenes corregida. Ejemplos demo idempotentes solo en Supabase local, con plan, limpieza y conservación. Verificado técnicamente en local. **Prueba manual de Juani pendiente; sin aprobación.**
 

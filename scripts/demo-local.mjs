@@ -59,8 +59,8 @@ for(const [i,[file,w,h,alt,fit]] of files.entries())media.push({id:id(11,i+1),na
 const F=i=>id(11,i);
 const M=i=>media[i-1].id;
 const crew=[
-  {id:id(20,1),page:id(30,1),name:'Demo Maker Marea',slug:'demo-maker-marea',alias:'Marea Studio (demo)',role:'Wire sculptor (demo)',portrait:9,bio:'Demonstration profile for the local CMS. Bends single lengths of wire into animals of the reef. Above all, an example to edit or delete.',quote:'Favourite animal: Manta ray'},
-  {id:id(20,2),page:id(30,2),name:'Demo Maker Coral',slug:'demo-maker-coral',alias:null,role:'Photographer (demo)',portrait:10,bio:'Demonstration profile for the local CMS. Photographs the works and the animals that inspire them. Above all, an example to edit or delete.',quote:'Favourite animal: Sea lion'},
+  {id:id(20,1),page:id(30,1),name:'Demo Maker Marea',slug:'demo-maker-marea',alias:'Marea Studio (demo)',role:'Wire sculptor (demo)',portrait:9,bio:'Demonstration profile for the local CMS. Bends single lengths of wire into animals of the reef.',highlight:'Above all, an example to edit or delete.',favourite:'Manta ray'},
+  {id:id(20,2),page:id(30,2),name:'Demo Maker Coral',slug:'demo-maker-coral',alias:null,role:'Photographer (demo)',portrait:10,bio:'Demonstration profile for the local CMS. Photographs the works and the animals that inspire them.',highlight:'Above all, an example to edit or delete.',favourite:'Sea lion'},
 ];
 const categories=[
   {id:id(40,6),slug:'demo-books',name:'Books (demo)',layout:'feature',title:'Encounters',credit:'Words by Julian Lange · Illustrations by Georgia Webb',lead:'A little big book about the moments where nature meets you at its fullest.',body:'Written from those encounters and illustrated alongside them, it became the first thing the two of them made together — and the reason everything else started.',cta_label:'Read Encounters',cta_url:'https://www.encountersagainandagain.org/',status:'published',sort:1},
@@ -98,12 +98,18 @@ const works=[
   {n:9,slug:'demo-untitled-study',title:'Untitled study (demo)',cat:4,span:3,authors:[]},
   {n:10,slug:'demo-tide-sound',title:'Tide sound note (demo)',cat:5,media:M(6),authors:[[1,'Recording']],excerpt:'Published, but its category is a draft, so it is not public yet.'},
 ].map(w=>({...w,id:id(50,w.n)}));
+// Team page with the explicit sections of The Crew page (see migration 20261017000100).
 const teamPage={id:id(31,1),blocks:[
-  ['team_002','paragraph',{text:'FOLLOWING OUR NATURE: Through our encounters in life.'}],
-  ['team_004','paragraph',{paragraphs:['We encountered in one of the most extraordinary places on the Earth.','— The Great Barrier Reef.','In a little patch of sand in the middle of the vast ocean.','Among sea turtles, whales and manta rays, we discovered a shared passion for the animals, the ocean, art and for protecting the living world around us.','That encounter brought us together.']}],
-  ['team_003','image',{media_id:F(9),src:`/api/media/${F(9)}`}],
-  ['team_005','image',{media_id:F(10),src:`/api/media/${F(10)}`}],
-  ['team_006','paragraph',{paragraphs:['A project dedicated to supporting conservation, storytelling and a deeper relationship to the ocean and the animals that live within it.','A project to unite them all.']}],
+  ['team_002','heading',{text:'Following our nature',section:'opening'}],
+  ['team_002_kicker','heading',{text:'Through our encounters in life',section:'story'}],
+  ['team_004','paragraph',{text:'We encountered in one of the most extraordinary places on the Earth.',section:'story',style:'lead'}],
+  ['team_004_1','paragraph',{text:'— The Great Barrier Reef.',section:'story',style:'aside'}],
+  ['team_004_2','paragraph',{text:'In a little patch of sand in the middle of the vast ocean. Among sea turtles, whales and manta rays, we discovered a shared passion for the animals, the ocean, art and for protecting the living world around us.',section:'story',style:'body'}],
+  ['team_004_3','paragraph',{text:'That encounter brought us together.',section:'story',style:'closing'}],
+  ['team_003','image',{media_id:F(9),src:`/api/media/${F(9)}`,section:'pair'}],
+  ['team_005','image',{media_id:F(10),src:`/api/media/${F(10)}`,section:'pair'}],
+  ['team_006','paragraph',{text:'A project dedicated to supporting conservation, storytelling and a deeper relationship to the ocean and the animals that live within it.',section:'project',style:'body'}],
+  ['team_006_1','heading',{text:'A project to unite them all.',section:'project'}],
 ]};
 const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id)],categories:categories.map(c=>c.id)};
 
@@ -130,12 +136,12 @@ async function seed(){
     await ok(db.rpc('save_content',{p_post:{id:c.page,kind:'crew_member',title:`${c.name} — page (demo)`,slug:`${c.slug}-page`,status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:90},p_blocks:[{type:'image',position:0,content:{media_id:mid(media[c.portrait-1].id),src:`/api/media/${mid(media[c.portrait-1].id)}`}},{type:'heading',position:1,content:{text:`meet ${first}`}},{type:'paragraph',position:2,content:{text:`Demonstration personal page for ${c.name}. The works credited to this person below are added automatically.`}}],p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(c.page);}
   const crewHave=await exists('crew_members',demoIds.crew);
   for(const c of crew){if(crewHave.has(c.id)){report.kept.push(c.id);continue;}
-    await ok(db.rpc('save_entity',{entity:'crew_members',payload:{id:c.id,name:c.name,slug:c.slug,alias:c.alias,role:c.role,bio:c.bio,quote:c.quote,portrait_id:mid(media[c.portrait-1].id),status:'published',sort:90+crew.indexOf(c),has_page:true,page_post_id:c.page}}));report.created.push(c.id);}
+    await ok(db.rpc('save_entity',{entity:'crew_members',payload:{id:c.id,name:c.name,slug:c.slug,alias:c.alias,role:c.role,bio:c.bio,highlight:c.highlight,favourite_animal:c.favourite,portrait_id:mid(media[c.portrait-1].id),status:'published',sort:90+crew.indexOf(c),has_page:true,page_post_id:c.page}}));report.created.push(c.id);}
   const catHave=await exists('art_categories',demoIds.categories);
   for(const c of categories){if(catHave.has(c.id)){report.kept.push(c.id);continue;}
     await ok(db.rpc('save_entity',{entity:'art_categories',payload:{...c,cover_id:remap(c.cover_id)??null}}));report.created.push(c.id);}
   if(postsHave.has(teamPage.id))report.kept.push(teamPage.id);else{
-    await ok(db.rpc('save_content',{p_post:{id:teamPage.id,kind:'page',title:'The Crew (demo page)',slug:'demo-team',source_role:'team',status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:0},p_blocks:teamPage.blocks.map(([source,type,content],position)=>({type,position,source_block_id:source,content:{...content,...(content.media_id?{media_id:mid(content.media_id),src:`/api/media/${mid(content.media_id)}`}:{})}})),p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(teamPage.id);}
+    await ok(db.rpc('save_content',{p_post:{id:teamPage.id,kind:'page',title:'The Crew (demo page)',slug:'demo-team',source_role:'team',kicker:'Meet the team',status:'published',published_at:new Date().toISOString(),source_metadata:{demo:true},sort:0},p_blocks:teamPage.blocks.map(([source,type,content],position)=>({type,position,source_block_id:source,content:{...content,...(content.media_id?{media_id:mid(content.media_id),src:`/api/media/${mid(content.media_id)}`}:{})}})),p_details:null,p_contributors:[],p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(teamPage.id);}
   for(const w of works){if(postsHave.has(w.id)){report.kept.push(w.id);continue;}
     const blocks=(w.blocks||[]).map((b,position)=>({...b,position,content:{...b.content,...(b.content.media_id?{media_id:remap(b.content.media_id),src:`/api/media/${remap(b.content.media_id)}`}:{}),...(b.content.images?{images:b.content.images.map(img=>({...img,media_id:remap(img.media_id),src:`/api/media/${remap(img.media_id)}`}))}:{})}}));
     await ok(db.rpc('save_content',{p_post:{id:w.id,kind:'artwork',title:w.title,slug:w.slug,cover_id:w.hero?mid(w.hero):null,status:w.status||'published',published_at:w.status==='draft'?null:new Date().toISOString(),excerpt:w.excerpt||'',meta_line:w.meta||'',show_index:false,sort:w.n,source_metadata:{demo:true}},p_blocks:blocks,p_details:{category_id:C(w.cat),media_id:w.media?mid(w.media):null,caption:w.caption||null,span:w.span||3,full_height:!!w.tall,external_url:w.external||null,...(w.embed?{embed_kind:'youtube',embed_id:w.embed}:{})},p_contributors:(w.authors||[]).map(([person,role],position)=>({crew_member_id:crew[person-1].id,position,role})),p_relations:[],p_children:null,expected_updated_at:null}));report.created.push(w.id);}

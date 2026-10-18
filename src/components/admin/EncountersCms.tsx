@@ -12,7 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,StatusBadge} from './AdminShell';
-import {kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
+import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
 const tables=['posts',...Object.keys(entities)];
@@ -210,14 +210,16 @@ export function EncountersCms(){
     </form></FieldErrors.Provider></ReloadOptions.Provider>;
   }
 
-  const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{})};const credit=creditLabels[kind]||defaultCredit;const path=publicPath('posts',record,specific,options);
+  const isCrewPage=kind==='page'&&record.source_role==='team';
+  const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above “The Crew” on the cover, e.g. “Meet the team”.',title:'Name of this page in the admin. The cover always says “The Crew”.'}:{})};const credit=creditLabels[kind]||defaultCredit;const path=publicPath('posts',record,specific,options);
   return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}{notice}
     <div className="adm-split"><div className="adm-stack">
       <Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
         <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
-      <Card title="Content blocks" lead="The page is built from these blocks, in this order.">
+      <Card title={isCrewPage?'Sections of The Crew page':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':'The page is built from these blocks, in this order.'}>
+        {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in People.</small></li></ul>}
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{blockLabel(b.type)}</span><div className="adm-block-tools">
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===0} onClick={()=>moveBlock(i,-1)} aria-label={`Move block ${i+1} up`}><ArrowUp aria-hidden="true"/>Up</button>
@@ -225,6 +227,8 @@ export function EncountersCms(){
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>setBlocks([...blocks.slice(0,i+1),{...b,id:crypto.randomUUID(),source_block_id:undefined},...blocks.slice(i+1)])} aria-label={`Duplicate block ${i+1}`}><Copy aria-hidden="true"/>Duplicate</button>
             <button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setBlocks(blocks.filter((_,j)=>j!==i))} aria-label={`Remove block ${i+1}`}><Trash2 aria-hidden="true"/>Remove</button></div></div>
           <div className="adm-block-body">
+            {isCrewPage&&<div className="adm-fields"><label className="adm-field">Place on the page<select aria-label={`Block ${i+1} place on the page`} value={String(b.content.section||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,section:e.target.value||undefined}}:v))}>{crewSections.map(([key,text])=><option key={key} value={key}>{text}</option>)}</select><small>{(crewSections.find(([key])=>key===String(b.content.section||''))||crewSections[5])[2]}</small></label>
+              {b.type==='paragraph'&&['story','project'].includes(String(b.content.section))&&<label className="adm-field">Text style<select aria-label={`Block ${i+1} text style`} value={String(b.content.style||'body')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,style:e.target.value}}:v))}>{crewStyles.map(([key,text])=><option key={key} value={key}>{text}</option>)}</select></label>}</div>}
             {b.type!=='divider'&&<label className="adm-field">{b.type==='heading'?'Heading text':b.type==='image'?'Text (optional)':'Text'}<textarea aria-label={`Block ${i+1} text`} rows={b.type==='heading'?2:4} value={String(b.content.text||'')} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,text:e.target.value,paragraphs:undefined}}:v))}/></label>}
             {b.type==='image'&&(()=>{const imageId=String(b.content.media_id||(b.content.images as Row[]|undefined)?.[0]?.media_id||'');return <div className="adm-block-image"><AdminThumb id={imageId} size="100%"/><div className="adm-stack" style={{gap:12}}><label className="adm-field">Image<select aria-label={`Block ${i+1} image`} value={imageId} onChange={e=>setBlocks(blocks.map((v,j)=>j===i?{...v,content:{...v.content,images:undefined,media_id:e.target.value,src:`/api/media/${e.target.value}`}}:v))}><option value="">Choose image</option>{(options.media||[]).map(m=><option key={String(m.id)} value={String(m.id)}>{String(m.alt||m.id)}</option>)}</select></label>
               <Fields notes={{caption:'Optional text shown under the image.',alt:'Describe the image for people who cannot see it.'}} fields={[{key:'caption',label:'Caption'},{key:'alt',label:'Image description'}]} value={b.content} onChange={content=>setBlocks(blocks.map((v,j)=>j===i?{...v,content}:v))} options={options}/></div></div>;})()}
@@ -232,26 +236,26 @@ export function EncountersCms(){
           </div></div>)}
           {blocks.length===0&&<p className="adm-empty">No blocks yet. Add the first one below.</p>}
         </div>
-        <div className="adm-add" role="group" aria-label="Add a block">{['paragraph','heading','image','quote','divider','link','youtube','toc'].map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
+        <div className="adm-add" role="group" aria-label="Add a block">{['paragraph','heading','image','quote','divider','link','youtube','toc'].map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:isCrewPage?{section:'story'}:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
         {!!record.updated_at&&<p className="adm-help" style={{marginTop:12}}>More block types (carousels, FAQs, costs…) are available in the <Link href={`/admin/posts/${record.id}/edit`}>detailed block editor</Link>.</p>}
       </Card>
       {details[kind]&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields} value={specific} onChange={setSpecific} options={options}/>
         {kind==='workshop'&&<label className="adm-field" style={{marginTop:16}}>Materials (one per line)<textarea value={Array.isArray(specific.materials)?specific.materials.join('\n'):''} onChange={e=>setSpecific({...specific,materials:e.target.value.split('\n')})}/></label>}</Card>}
-      <Card title={credit.title} lead={credit.lead}>
+      {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>
         {crew.length===0?<p className="adm-help">There are no crew members yet.</p>:<div className="adm-people">{crew.map(c=>{const on=contributors.includes(String(c.id));return <div className="adm-person" data-on={on} key={String(c.id)}>
           <label className="adm-check"><input type="checkbox" checked={on} onChange={e=>setContributors(e.target.checked?[...contributors,String(c.id)]:contributors.filter(id=>id!==c.id))}/><span style={{display:'flex',alignItems:'center',gap:10}}><AdminThumb id={c.portrait_id} size={36}/>{String(c.name)}</span></label>
           {on&&<input aria-label={`Contribution of ${c.name}`} placeholder={credit.role} value={contributorRoles[String(c.id)]||''} onChange={e=>setContributorRoles({...contributorRoles,[String(c.id)]:e.target.value})}/>}</div>;})}</div>}
       </Card>
       <Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':'Shown as related content on this page.'}>
         <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:undefined}/>
-      </Card>
+      </Card></>}
       {children[kind]&&<Card title={children[kind].label}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} prefix={`child-${i}-`} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
         <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setChildRows([...childRows,{id:crypto.randomUUID(),sort:childRows.length,...(kind==='expedition'?{status:'pending'}:{})}])}><Plus aria-hidden="true"/>Add {kind==='expedition'?'need':'session'}</button></div></div></Card>}
       <Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>
-      {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))}/></div></section>}
+      {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} posts={options.posts||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))}/></div></section>}
     </div><aside>
       <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
-      <Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
+      {isCrewPage?<Card title="Cover"><p className="adm-help">The cover image of The Crew page is chosen in <Link href="/admin/settings">Settings → Art and Crew presentation</Link>. Its small line comes from “Kicker” above; the title “The Crew” is fixed by the design.</p></Card>:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
     </aside></div>
   </form></FieldErrors.Provider></ReloadOptions.Provider>;
 }

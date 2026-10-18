@@ -21,7 +21,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
   const [post, setPost] = useState<AdminPost | null>(null);
   const [blocks, setBlocks] = useState<AdminPostBlock[]>([]);
   // Crew profiles and artworks preview with their public templates instead of the article layout.
-  const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[]; categories: Record<string, unknown>[]; detail: Record<string, unknown>; contributors: { id: string; role: string }[] } | null>(null);
+  const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[]; categories: Record<string, unknown>[]; detail: Record<string, unknown>; contributors: { id: string; role: string }[]; posts: Record<string, unknown>[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -40,17 +40,19 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
 
         let nextProfile = null;
         const kind = (nextPost as { kind?: string }).kind;
-        if ((kind === 'crew_member' || kind === 'artwork') && supabase) {
-          const [crew, media, categories, detail, contributors] = await Promise.all([
+        const crewPage = kind === 'page' && (nextPost as { source_role?: string }).source_role === 'team';
+        if ((kind === 'crew_member' || kind === 'artwork' || crewPage) && supabase) {
+          const [crew, media, categories, detail, contributors, posts] = await Promise.all([
             supabase.from('crew_members').select('*'),
             supabase.from('media').select('*').limit(1000),
             supabase.from('art_categories').select('*').order('sort'),
             supabase.from('artworks').select('*').eq('id', id).maybeSingle(),
             supabase.from('post_contributors').select('*').eq('post_id', id).order('position'),
+            supabase.from('posts').select('id,kind,status'),
           ]);
-          const failed = [crew, media, categories, detail, contributors].find((r) => r.error);
+          const failed = [crew, media, categories, detail, contributors, posts].find((r) => r.error);
           if (failed?.error) throw failed.error;
-          nextProfile = { crew: crew.data || [], media: media.data || [], categories: categories.data || [], detail: (detail.data || {}) as Record<string, unknown>, contributors: (contributors.data || []).map((c: Record<string, unknown>) => ({ id: String(c.crew_member_id), role: String(c.role || '') })) };
+          nextProfile = { crew: crew.data || [], media: media.data || [], categories: categories.data || [], detail: (detail.data || {}) as Record<string, unknown>, contributors: (contributors.data || []).map((c: Record<string, unknown>) => ({ id: String(c.crew_member_id), role: String(c.role || '') })), posts: posts.data || [] };
         }
 
         if (!isMounted) return;
@@ -126,7 +128,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
 
       {profile ? (
         <ScrollStage>
-          <EditorialPreview record={post} blocks={blocks} detail={profile.detail} media={profile.media} crew={profile.crew} categories={profile.categories} contributors={profile.contributors} />
+          <EditorialPreview record={post} blocks={blocks} detail={profile.detail} media={profile.media} crew={profile.crew} categories={profile.categories} contributors={profile.contributors} posts={profile.posts} />
         </ScrollStage>
       ) : (
       <BlogPostPageContent

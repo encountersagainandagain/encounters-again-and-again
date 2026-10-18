@@ -249,3 +249,6 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-picker-panel button:hover{border-color:rgba(27,93,116,.4)}
 .adm-split>aside .adm-picker-current{grid-template-columns:minmax(0,1fr)}
 @media(max-width:860px){.adm-picker-current{grid-template-columns:minmax(0,1fr)}}
+.adm-section-guide{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:0 0 16px;padding:0;list-style:none}
+.adm-section-guide li{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--adm-line);border-radius:10px;background:#f6fafc;font-size:13px}
+.adm-section-guide small{color:var(--adm-muted)}
