@@ -9,6 +9,7 @@ import {brand} from '@/config/brand';
 import {Picture} from './MediaImage';
 import {NewsletterSignup} from './NewsletterSignup';
 import {clamp01,useFrame} from './useFrame';
+import {creatures} from '@/features/encounters/home-creatures';
 
 const smooth=(v:number,a:number,b:number)=>{const k=clamp01((v-a)/(b-a));return k*k*(3-2*k);};
 const lines=(text:string)=>text.split('\n').map((l,i,all)=><span key={i}>{l}{i<all.length-1&&<br/>}</span>);
@@ -30,8 +31,10 @@ function makeSnow(){
 function causticTexture(){
   const n=256,c=document.createElement('canvas');c.width=c.height=n;const ctx=c.getContext('2d');if(!ctx)return '';
   const pts=Array.from({length:22},()=>[Math.random()*n,Math.random()*n]);const img=ctx.createImageData(n,n);
-  for(let y=0;y<n;y++)for(let x=0;x<n;x++){let f1=1e9,f2=1e9;for(const [px,py] of pts)for(const ox of [-n,0,n])for(const oy of [-n,0,n]){const d=Math.hypot(x-px-ox,y-py-oy);if(d<f1){f2=f1;f1=d;}else if(d<f2)f2=d;}
-    const v=Math.max(0,1-(f2-f1)/9);const a=Math.pow(v,2.4)*235,i=(y*n+x)*4;img.data[i]=190;img.data[i+1]=235;img.data[i+2]=250;img.data[i+3]=a;}
+  // Domain warp (periodic, so the tile still repeats) bends the cell edges into wavy caustic lines.
+  const tau=Math.PI*2/n;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const wx=x+9*Math.sin(y*tau*2)+5*Math.sin((x+y)*tau*3),wy=y+9*Math.sin(x*tau*2+1.3)+5*Math.sin((x-y)*tau*3);let f1=1e9,f2=1e9;for(const [px,py] of pts)for(const ox of [-n,0,n])for(const oy of [-n,0,n]){const d=Math.hypot(wx-px-ox,wy-py-oy);if(d<f1){f2=f1;f1=d;}else if(d<f2)f2=d;}
+    const v=Math.max(0,1-(f2-f1)/6);const a=Math.pow(v,3)*220,i=(y*n+x)*4;img.data[i]=190;img.data[i+1]=235;img.data[i+2]=250;img.data[i+3]=a;}
   ctx.putImageData(img,0,0);return c.toDataURL();
 }
 function ArtRail({items,media}:{items:View['art'];media:Row[]}){
@@ -41,6 +44,9 @@ function ArtRail({items,media}:{items:View['art'];media:Row[]}){
   return <><div ref={rail} className="home-art-rail" onScroll={measure} tabIndex={0} aria-label="New art">{items.map(a=><Link key={a.key} href={a.href} className="home-art-slide"><div className="home-art-image" data-contain={a.contain}><Picture id={a.image} media={media} contain={a.contain}/></div><span>{a.label}</span><strong>{a.title}</strong></Link>)}</div>
     {items.length>1&&<div className="home-art-controls"><button type="button" onClick={()=>go(index-1)} disabled={index===0} aria-label="Previous work">←</button><output aria-live="polite">{pad(index+1)} / {pad(items.length)}</output><button type="button" onClick={()=>go(index+1)} disabled={index===items.length-1} aria-label="Next work">→</button></div>}</>;
 }
+// A creature of the prototype, drawn from its original SVG; the frame loop moves it and its fins.
+function Creature({name,className=''}:{name:keyof typeof creatures;className?:string}){const c=creatures[name];
+  return <svg data-creature={name} className={`home-creature ${className}`} viewBox={c.viewBox} aria-hidden="true" focusable="false" style={{width:c.width,...(name==='fish'?{filter:'drop-shadow(0 6px 10px rgba(2,16,28,0.45))'}:{})}} fill={c.fill||undefined} stroke={c.stroke||undefined} strokeWidth={c.strokeWidth||undefined} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:c.inner}}/>;}
 function Head({title,note,link}:{title:string;note?:string;link?:ReactNode}){return <div className="home-head" data-seq="0.96,0.4"><h2>{title}</h2>{link||(note&&<span>{note}</span>)}</div>;}
 
 export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];closing:string;newsletter:boolean}){
@@ -75,6 +81,16 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       if(img){img.style.transform=`scale(${1+(1-e)*(vw<760?.45:.85)})`;img.style.transformOrigin='center top';}
       if(word){word.style.opacity=String(e);word.style.transform=`translateX(${(1-e)*-12}px)`;word.style.maxWidth=`${e*(s.brandWidth||220)}px`;word.style.overflow='hidden';}
       if(brand)brand.style.pointerEvents=e<.5?'none':'';}
+    // Creatures (10-home § 4.7): t-driven fins keep moving while the page is still.
+    const move=(svg:HTMLElement|SVGElement|null,box:DOMRect|null,place:(w:number)=>[number,number,number,number]|null,fins:[string,number][])=>{if(!svg)return;const el=svg as SVGElement;if(reduced||!box){el.style.opacity='0';return;}const w=(el as unknown as HTMLElement).getBoundingClientRect().width;const r=place(w);if(!r){el.style.opacity='0';return;}const [x,y,rot,op]=r;el.style.opacity=op.toFixed(3);el.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) rotate(${rot.toFixed(2)}deg)`;fins.forEach(([sel,deg])=>{const f=el.querySelector<SVGElement>(sel);if(f)f.style.transform=`rotate(${deg.toFixed(2)}deg)`;});};
+    const descent=document.getElementById('descenso');const dr=descent?.getBoundingClientRect()||null;
+    move(q('[data-creature=turtle]'),dr,w=>{if(!dr||dr.bottom<-vh*.5||dr.top>vh*1.4)return null;const p=clamp01((vh*1.1-dr.top)/(dr.height+vh*.9));return [-w+p*(vw*.78+w),dr.top+dr.height*.1+p*dr.height*.35+Math.sin(t*.9)*10,7+Math.sin(t*.9+1.2)*3,Math.min(1,Math.sin(Math.PI*p)*1.8)*.9];},[["[data-flip='front']",Math.sin(t*1.7)*20-4],["[data-flip='rear']",Math.sin(t*1.7+1.1)*10]]);
+    const fish=q('[data-creature=fish]');const fr=fish?.parentElement?.getBoundingClientRect()||null;
+    move(fish,fr,()=>{if(!fr||fr.bottom<0||fr.top>vh)return null;const p=clamp01((vh-fr.top)/(vh*1.5));return [fr.width*(.9-p*.3)+Math.sin(t*.6)*14,fr.height*(.34+p*.1)+Math.sin(t*1.3)*6,Math.sin(t*1.3+.8)*4,Math.min(1,Math.sin(Math.PI*Math.min(1,p*1.15))*2)];},[["[data-fin='tail']",Math.sin(t*9)*14],["[data-fin='pec']",Math.sin(t*7+1)*22]]);
+    const dolphin=q('[data-creature=dolphin]');const band=dolphin?.parentElement;const br=band?.getBoundingClientRect()||null;
+    move(dolphin,br,w=>{if(!br||br.bottom<0||br.top>vh)return null;const p=clamp01((vh*1.05-br.top)/(vh*.95));const wave=p*Math.PI*3;const top=parseFloat(getComputedStyle(band!.parentElement!).paddingTop)||120;return [-w*1.1+p*(br.width+w*1.2),Math.max(0,top*.5-w*.2)+Math.sin(wave)*top*.18+Math.sin(t*1.1)*4,-Math.cos(wave)*9,Math.min(1,Math.sin(Math.PI*p)*3)*.9];},[["[data-fin='fluke']",Math.sin(t*5)*12],["[data-fin='pec']",Math.sin(t*5+1.4)*8]]);
+    const whale=q('[data-creature=whale]');const wr=whale?.parentElement?.getBoundingClientRect()||null;
+    move(whale,wr,w=>{if(!wr||wr.bottom<0||wr.top>vh)return null;const p=clamp01((vh-wr.top)/(wr.height+vh*.6));return [wr.width-p*(wr.width+w*.9)+Math.sin(t*.25)*10,wr.height*.12+p*wr.height*.18+Math.sin(t*.4)*8,-2+Math.sin(t*.4+1)*1.5,Math.min(1,Math.sin(Math.PI*p)*2.2)*.5];},[["[data-fin='fluke']",Math.sin(t*.9)*9],["[data-fin='pec']",Math.sin(t*.9+1.2)*5]]);
     const reefImg=q<HTMLElement>('[data-reef] img');if(reefImg){const r=reefImg.closest('section')!.getBoundingClientRect();const tt=clamp01(1-r.top/vh);reefImg.style.transform=`translate3d(0,${reduced?0:(1-tt)*60}px,0)`;}
     el.querySelectorAll<HTMLElement>('[data-pcard]').forEach((card,i)=>{const r=card.getBoundingClientRect();if(r.top>vh+120||r.bottom<-120)return;if(reduced){card.style.opacity='1';card.style.transform='none';card.style.filter='none';return;}
       const e=1-Math.pow(1-clamp01((vh-r.top)/(vh*.6)),3),p=clamp01((vh-r.top)/(vh+r.height)),sway=Math.sin(t*.55+i*1.9),side=i%2?1:-1;
@@ -92,7 +108,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   });
   const blocks:Record<string,ReactNode>={
     descent:(string(descent.title)||string(descent.body))?<section key="descent" id="descenso" className="home-descent"><h2>{string(descent.title)}</h2>{string(descent.body)&&<p>{string(descent.body)}</p>}</section>:null,
-    reef:<section key="reef" className="home-reef" data-reef><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
+    reef:<section key="reef" className="home-reef" data-reef><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp"/><Creature name="fish"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
     projects:<section key="projects" id="projects" className="home-projects"><h2>{string(home.projects_title)||'Ongoing projects'}</h2><svg className="home-projects-scribble" viewBox="0 0 600 130" aria-hidden="true"><path d="M10 92 C 96 26, 188 20, 244 56 C 296 90, 256 118, 218 100 C 172 78, 214 40, 306 38 C 420 36, 522 56, 590 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
       <div className="home-pcards">{projects.map((p,i)=><Link key={p.key} href={p.href} data-pcard={i} className="home-pcard"><div data-pimg><Picture id={p.media_id} media={media} fallback={p.fallback}/></div><div className="home-pcard-shade"/><div data-pray className="home-pcard-rays" aria-hidden="true"/><div className="home-pcard-copy"><span className="home-pcard-title">{lines(p.title)}</span><div>{string(p.status_label)&&<span className="home-pcard-status">{string(p.status_label).split('|').map((part,n)=><span key={n}>{n>0&&<i>|</i>}{part.trim()}</span>)}</span>}{string(p.body)&&<p>{string(p.body)}</p>}</div></div></Link>)}</div></section>,
     upcoming:agenda.length?<section key="upcoming" id="next" className="home-agenda pin-section" data-agenda>
@@ -102,10 +118,10 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       {agenda.map((a,i)=><article key={a.key} data-nx={i} className="home-event"><div data-nximg className="home-event-image" aria-hidden="true"><Picture id={a.image} media={media}/></div><div className="home-event-shade"/><div className="home-event-depth" style={{background:`rgba(2,10,20,${Math.min(.3,i*.1)})`}}/><div data-nxray className="home-event-rays" style={{'--ray':Math.max(.02,.08-i*.018)} as React.CSSProperties}/>
         <div data-nxtxt className="home-event-text"><span className="home-event-kicker"><span>{pad(i+1)}</span>{a.type}{a.chip&&<em>{a.chip}</em>}</span>{a.date&&<span className="home-event-date">{a.date}</span>}<h3>{a.title}</h3>{(a.place||a.detail)&&<span className="home-event-place">{a.place}{a.place&&a.detail&&<i>|</i>}{a.detail}</span>}{a.href&&a.cta&&<Link href={a.href} className="home-event-cta">{a.cta} →</Link>}</div></article>)}
     </section>:null,
-    happened:happened.length?<section key="happened" className="home-section"><div className="home-inner"><Head title={string(home.happened_title)||'What already happened'} note={string(home.happened_note)||'the part we bring back'}/><div className="home-stories">{happened.map((p,i)=><Link key={p.key} href={p.href} className="home-story" data-seq={`${.94-i*.04},0.4`}><div className="home-story-image"><Picture id={p.image} media={media}/></div><span className="home-story-kicker">{p.label}{p.date&&<span>{p.date}</span>}</span><strong>{p.title}</strong>{p.excerpt&&<p>{p.excerpt}</p>}</Link>)}</div></div></section>:null,
+    happened:happened.length?<section key="happened" className="home-section"><div className="home-creature-band" aria-hidden="true"><Creature name="dolphin"/></div><div className="home-inner"><Head title={string(home.happened_title)||'What already happened'} note={string(home.happened_note)||'the part we bring back'}/><div className="home-stories">{happened.map((p,i)=><Link key={p.key} href={p.href} className="home-story" data-seq={`${.94-i*.04},0.4`}><div className="home-story-image"><Picture id={p.image} media={media}/></div><span className="home-story-kicker">{p.label}{p.date&&<span>{p.date}</span>}</span><strong>{p.title}</strong>{p.excerpt&&<p>{p.excerpt}</p>}</Link>)}</div></div></section>:null,
     art:art.length?<section key="art" className="home-section home-art"><div className="home-inner"><Head title={string(home.art_title)||'New art'} link={<Link href="/art">Everything we make →</Link>}/></div><ArtRail items={art} media={media}/></section>:null,
     crew:crew.length?<section key="crew" className="home-section"><div className="home-inner"><Head title={string(home.crew_title)||'Who is on board'} link={<Link href="/crew">Meet the crew →</Link>}/><div className="home-crew" data-seq="0.92,0.4">{crew.map(c=>{const body=<><div className="home-crew-image"><Picture id={c.image} media={media}/></div><span>{c.name}</span></>;return c.href?<Link key={c.key} href={c.href}>{body}</Link>:<div key={c.key}>{body}</div>;})}</div></div></section>:null,
-    about:string(about.line)?<section key="about" className="home-section home-about"><div className="home-about-inner">{string(about.kicker)&&<span data-seq="1.0,0.4">{string(about.kicker)}</span>}<p className="home-about-line" data-seq="0.96,0.45">{string(about.line)}</p>{string(about.body)&&<p data-seq="0.92,0.4">{string(about.body)}</p>}<Link href="/about" className="home-about-cta" data-seq="0.88,0.4">{string(about.cta_label)||'Read our story'}</Link></div></section>:null,
+    about:string(about.line)?<section key="about" className="home-section home-about"><div className="home-creature-band" aria-hidden="true"><Creature name="whale"/></div><div className="home-about-inner">{string(about.kicker)&&<span data-seq="1.0,0.4">{string(about.kicker)}</span>}<p className="home-about-line" data-seq="0.96,0.45">{string(about.line)}</p>{string(about.body)&&<p data-seq="0.92,0.4">{string(about.body)}</p>}<Link href="/about" className="home-about-cta" data-seq="0.88,0.4">{string(about.cta_label)||'Read our story'}</Link></div></section>:null,
     newsletter:newsletter?<section key="newsletter" className="home-section home-letters"><div className="home-inner"><NewsletterSignup title={string(letters.title)||'Stay in touch'} body={string(letters.body)}/></div></section>:null,
   };
   return <div ref={root} className="home-root">
@@ -115,6 +131,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     <div className="home-rays" data-rays aria-hidden="true"/>
     <div className="home-bubbles" data-bubbles aria-hidden="true">{bubbles.map((b,i)=><span key={i} data-mobile={b.mobile} style={{left:`${b.left}%`,width:b.size,height:b.size,animationDuration:`${b.dur}s`,animationDelay:`${b.delay}s`}}/>)}</div>
     <div className="home-deep" data-deep aria-hidden="true"/>
+    <div className="home-creatures-fixed" aria-hidden="true"><Creature name="turtle"/></div>
     <canvas ref={snow} className="home-snow" aria-hidden="true"/>
     <div className="home-hud" data-hud aria-hidden="true"><div className="home-tank"><i/><span><span data-tank/></span></div><div><strong data-hud-depth>30.0 m</strong><small>Depth</small><em>O₂ <span data-o2>100</span>%</em></div></div>
     <section className="home-hero pin-section" aria-label={brand.name}>
