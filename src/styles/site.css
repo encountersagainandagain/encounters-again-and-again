@@ -148,3 +148,38 @@ body:has(.workshops-page) .editorial-footer{background-color:#061826}
   .ws-done{grid-template-rows:38vh auto}
 }
 @media (prefers-reduced-motion:reduce){.ws-bar span{transition:none}}
+
+/* ── Meaningful Messages (Meaningful Messages.dc.html, 02-animations § 8) ── */
+
+.mm-content{background:var(--enc-espuma)}
+.mm-intro{max-width:1240px;margin:0 auto;padding:clamp(110px,30vh,320px) clamp(20px,5vw,72px) clamp(20px,5vh,56px);display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
+.mm-intro h2{max-width:20ch;font-size:clamp(2rem,7vw,5.4rem)!important;line-height:1!important;letter-spacing:.01em!important;color:#08222f}
+.mm-intro .editorial-scribble{width:min(520px,70%);color:#0f3b4c}
+.mm-intro>span{margin-top:clamp(10px,2vh,22px);font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
+.mm-stage{position:relative}
+.mm-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+.mm-message{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'media text';align-items:center}
+.mm-message.media-right{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:'text media'}
+.mm-media{grid-area:media;position:relative;height:100%;overflow:hidden;background:#0f3b4c;opacity:0}
+.mm-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mm-text{grid-area:text;display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,2.4vh,26px);padding:clamp(24px,5vw,80px) clamp(20px,4vw,64px);opacity:0}
+.mm-text>span{font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
+.mm-text h2{max-width:22ch;font-size:clamp(1.5rem,3.4vw,2.9rem)!important;line-height:1.14!important;color:#08222f}
+.mm-text p{max-width:46ch;font-size:clamp(14px,1.1vw,17px)!important;line-height:1.75!important;color:rgba(14,42,56,.86)}
+.mm-text em{font-family:var(--font-display),Georgia,serif;font-size:clamp(14px,1.15vw,18px);color:rgba(14,42,56,.7)}
+.mm-link{align-self:flex-start;font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#0f3b4c;text-decoration:none!important}
+.mm-letter{max-width:1000px;margin:0 auto;padding:clamp(60px,12vh,140px) var(--enc-page-padding) 0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,70px);align-items:center}
+.mm-letter img{width:100%;height:auto;max-height:80vh;object-fit:contain}
+.mm-letter h2{font-size:clamp(1.6rem,3.4vw,2.9rem)!important;line-height:1.14!important}
+.mm-letter p{margin-top:18px!important}.mm-letter em{display:block;margin-top:18px;font-family:var(--font-display),Georgia,serif;opacity:.7}
+@media (max-width:759px){
+  .mm-stage{height:auto!important}.mm-sticky{position:relative;height:auto;overflow:visible}
+  .mm-message,.mm-message.media-right{position:relative;inset:auto;grid-template-columns:1fr;grid-template-areas:'media' 'text';margin-bottom:40px}
+  .mm-media,.mm-text{opacity:1!important;transform:none!important;pointer-events:auto!important}.mm-media{height:70svh}
+  .mm-letter{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .mm-stage{height:auto!important}.mm-sticky{position:relative;height:auto;overflow:visible}
+  .mm-message,.mm-message.media-right{position:relative;inset:auto;min-height:100vh}
+}
+.post-links{display:flex;flex-direction:column;gap:10px}
