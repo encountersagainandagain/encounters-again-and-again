@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "cms:local:prepare": "node scripts/local-cms.mjs prepare",
     "cms:local:dev": "node scripts/local-cms.mjs dev",
+    "cms:local:prod": "node scripts/local-cms.mjs prod",
     "cms:local:status": "node scripts/local-cms.mjs status",
     "cms:local:verify": "node scripts/verify-local-cms.mjs",
     "cms:local:stop": "node scripts/local-cms.mjs stop",

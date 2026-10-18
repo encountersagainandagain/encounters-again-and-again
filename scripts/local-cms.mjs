@@ -101,7 +101,15 @@ if(command==='prepare'){
     env:{...process.env,NEXT_DIST_DIR:'.next-cms-local',NEXT_PUBLIC_SUPABASE_URL:state.url,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.anonKey,SUPABASE_SERVICE_ROLE_KEY:state.serviceRoleKey,NEXT_PUBLIC_SITE_URL:state.siteUrl,ENCOUNTERS_ALLOW_LOCAL_SUPABASE:'true',ENCOUNTERS_EMAIL_ENABLED:'false'},
   });
   child.on('exit',(code,signal)=>process.exit(signal?1:(code??1)));
+}else if(command==='prod'){
+  // Local production build against the local Supabase (port 3221), to measure real performance.
+  // ENCOUNTERS_LOCAL_REVIEW opens the local visual reference routes, still limited to localhost.
+  const state=await readState();
+  const env={...process.env,NODE_ENV:'production',NEXT_DIST_DIR:'.next-cms-prod',NEXT_PUBLIC_SUPABASE_URL:state.url,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.anonKey,SUPABASE_SERVICE_ROLE_KEY:state.serviceRoleKey,NEXT_PUBLIC_SITE_URL:'http://127.0.0.1:3221',ENCOUNTERS_ALLOW_LOCAL_SUPABASE:'true',ENCOUNTERS_EMAIL_ENABLED:'false',ENCOUNTERS_LOCAL_REVIEW:'true',ENCOUNTERS_LOCAL_PRODUCTION_CHECK:'true'};
+  if(!process.argv.includes('--no-build')){const built=spawnSync('npm',['run','build'],{stdio:'inherit',env});if(built.status!==0)process.exit(built.status??1);}
+  const child=spawn('npx',['next','start','--hostname','127.0.0.1','--port','3221'],{stdio:'inherit',env});
+  child.on('exit',(code,signal)=>process.exit(signal?1:(code??1)));
 }else{
-  console.error('Usage: node scripts/local-cms.mjs prepare|dev|status|stop');
+  console.error('Usage: node scripts/local-cms.mjs prepare|dev|prod|status|stop');
   process.exit(1);
 }

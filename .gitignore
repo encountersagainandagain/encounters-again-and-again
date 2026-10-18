@@ -10,3 +10,4 @@ backups/
 supabase/.temp/
 supabase/.branches/
 .encounters-work/
+.next-cms-prod/

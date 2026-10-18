@@ -13,7 +13,10 @@ export function isAllowedEncountersSupabaseTarget(rawUrl: string | undefined) {
     return false;
   }
   if (origin === ENCOUNTERS_REMOTE_ORIGIN) return true;
-  return process.env.NODE_ENV !== 'production'
+  // Local Supabase: development only, or a production build served locally for measurements
+  // (scripts/local-cms.mjs prod sets both flags; a real deployment sets neither).
+  const localProductionCheck = process.env.ENCOUNTERS_LOCAL_PRODUCTION_CHECK === 'true';
+  return (process.env.NODE_ENV !== 'production' || localProductionCheck)
     && process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE === 'true'
     && ENCOUNTERS_LOCAL_ORIGINS.has(origin);
 }
