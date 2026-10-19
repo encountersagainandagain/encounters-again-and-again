@@ -34,7 +34,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 7 | `/posts/[slug]` | `Post.dc.html` | Sí; todos los bloques del alcance | 2026-10-19: bloque por bloque contra el prototipo, editor de bloques desde el admin y plantilla compartida en los seis tipos (ver abajo) | Noticias y resultados reales | Pendiente (revisión visual de Juani) | — |
 | 8 | `/about` | `About.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390 y edición desde el admin (ver abajo) | Presentación completa (hoy: texto importado en remoto) | Pendiente (revisión visual de Juani) | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/390 y recorrido sin y con email desde Settings (ver abajo) | Email, WhatsApp, donación y redes reales en Settings | Pendiente (revisión visual de Juani) | — |
-| 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
+| 10 | Newsletter | Sin prototipo | Sí; alta revisada (2026-10-19), envíos bloqueados | 2026-10-19: alta con consentimiento, validación, duplicados, carga, éxito y errores; admin (ver abajo) | Texto | Pendiente (revisión visual de Juani) | — |
 | 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; fidelidad (`a4f98a6`) y rendimiento (2026-10-18, ver abajo) | Comparación controlada con el prototipo; mediciones de rendimiento sin video en desarrollo y producción local | **Sí**: textos de diseño o de ejemplo; **aprobación editorial pendiente** | **Conformidad visual de Juani (2026-10-18) sobre `5762076`, con rendimiento pendiente.** La revisión de rendimiento está hecha; falta que Juani confirme la fluidez y decida sobre la resolución adaptativa del agua | — |
 
 Las aprobaciones de Crew (`cbea565`) y Wild Wonders (2026-10-14) se conservan. Lo cambiado después se marca solo en su parte: secciones editables de Crew, editor de secciones del perfil, cuerpo de las obras.
@@ -379,6 +379,39 @@ Capturas: [verification/review-2026-10-19-about/](verification/review-2026-10-19
 **Aprobado por Juani:** pendiente.
 
 Capturas: [verification/review-2026-10-19-contact/](verification/review-2026-10-19-contact/).
+
+### Newsletter — alta y gestión (2026-10-19)
+
+**Implementado**
+- Cada mensaje describe lo que pasó:
+  - email inválido: «Please enter a valid email address.»;
+  - sin consentimiento: «Please tick the box…»;
+  - alta: «Thank you. Your address is on the list. We do not send a confirmation email: the first newsletter arrives when we write one.»;
+  - sin conexión: «… Nothing was saved.»;
+  - error del servidor: «We could not save your address right now…»;
+  - demasiados intentos: también aclara que no se guardó nada.
+- La API distingue la falta de consentimiento (antes respondía «email inválido»). La validación usa los mensajes de la página, no los globos del navegador. El estado de carga desactiva el botón y marca el formulario como ocupado.
+- Duplicados: la misma respuesta verdadera («Your address is on the list») y una sola fila. No revela si el email ya existía.
+- Admin → Newsletter: aviso visible de que **el envío está apagado** y botón «Sending is turned off» desactivado. Usa la misma bandera `ENCOUNTERS_EMAIL_ENABLED` que la ruta de envío, que sigue ausente; no se habilitó nada.
+
+**Verificado técnicamente** (Home, Supabase local; la dirección de prueba se borró al terminar)
+- Inválido, sin consentimiento, carga («Subscribing…», desactivado), alta con fila `subscribed · home · consent_at` y duplicado (misma respuesta, 1 fila).
+- Red caída y error 502 simulados en el navegador. API sin consentimiento.
+- Ningún correo enviado.
+
+**Qué existe hoy en el admin:** contadores (activos, dados de baja, total), descarga CSV, asunto y cuerpo en texto plano con enlaces markdown, enlace de baja automático y ruta de envío por lotes (Resend), bloqueada.
+
+**Qué falta para que los fundadores redacten y envíen novedades (etapa posterior, no implementado):**
+1. Verificar el dominio de envío y cargar la clave del proveedor; prueba de envío autorizada; recién entonces la bandera de envío.
+2. Guardar borradores (hoy el texto se pierde al salir) y un historial de envíos con fecha, asunto y cantidad.
+3. Preview con la plantilla del correo y envío de prueba a una dirección del equipo antes del envío real.
+4. Opcional: armar la novedad desde contenido publicado (noticia, resultado, actividad) con su enlace.
+5. Decidir si hace falta doble confirmación (double opt-in) y su texto; hoy el alta es directa con consentimiento.
+6. Rediseñar la pantalla con el estilo del admin nuevo (hoy conserva el estilo heredado).
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-newsletter/](verification/review-2026-10-19-newsletter/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

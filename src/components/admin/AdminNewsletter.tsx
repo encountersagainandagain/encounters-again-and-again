@@ -94,7 +94,7 @@ async function fetchAllNewsletterSubscribers() {
   return rows;
 }
 
-export function AdminNewsletter() {
+export function AdminNewsletter({ sendingEnabled = false }: { sendingEnabled?: boolean }) {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [status, setStatus] = useState<SendStatus>('idle');
@@ -245,6 +245,13 @@ export function AdminNewsletter() {
             Write a plain email for active subscribers. Each send includes the unsubscribe link
             automatically.
           </p>
+          {!sendingEnabled && (
+            <p role="note" className="mt-4 max-w-2xl border border-black/15 bg-white/70 p-4 font-body text-sm leading-relaxed text-black/75">
+              Sending is turned off for now. Sign-ups are saved and the list can be downloaded, but no email
+              leaves the site until the sending domain is verified and a test send is approved. You can draft
+              the text here; it is not kept after leaving the page.
+            </p>
+          )}
         </div>
 
 
@@ -357,11 +364,11 @@ export function AdminNewsletter() {
           <div className="flex flex-col gap-4 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="submit"
-              disabled={status === 'sending'}
+              disabled={!sendingEnabled || status === 'sending'}
               className="btn-ocean inline-flex justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Send className="h-4 w-4" aria-hidden="true" />
-              <span>{status === 'sending' ? 'Sending...' : 'Send newsletter'}</span>
+              <span>{!sendingEnabled ? 'Sending is turned off' : status === 'sending' ? 'Sending...' : 'Send newsletter'}</span>
             </button>
 
             <p
