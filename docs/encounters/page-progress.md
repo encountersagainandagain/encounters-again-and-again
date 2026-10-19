@@ -309,7 +309,7 @@ Capturas: [verification/review-2026-10-19-art/](verification/review-2026-10-19-a
   - En teléfono con movimiento reducido: sin desborde, sin contenido oculto, sin enlaces vacíos y sin errores de consola.
 - Crew y perfiles conservan su renderizador aprobado (sin cambios).
 
-**Ejemplos locales:** «Post with every block (demo)», los resultados de ejemplo y «UI journey news (demo)», creada desde el admin y adoptada (en borrador).
+**Ejemplos locales:** «All post blocks (demo)», los resultados de ejemplo y «UI journey news (demo)», creada desde el admin y adoptada (en borrador).
 
 **Aprobado por Juani:** pendiente.
 
