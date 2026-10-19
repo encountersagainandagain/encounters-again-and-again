@@ -144,11 +144,31 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .ws-closing h2{max-width:24ch;font-size:clamp(1.9rem,min(7vw,10vh),5rem)!important;line-height:1!important;text-transform:uppercase;color:#fff}
 .ws-closing-cta{padding:16px clamp(26px,3vw,42px);background:#eaf5fa;color:#08222f!important;font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase}.ws-closing-cta:hover{background:#8fd9ea}
 body:has(.workshops-page) .editorial-footer{background-color:#061826}
+/* Workshops banner (prototype hero): image, shade, title; animated by WorkshopsView. */
+.ws-hero{position:relative;height:100vh;overflow:hidden;background:#061826;color:#fff}
+.ws-hero-image,.ws-fill,.ws-hero-shade{position:absolute;inset:0}
+.ws-fill img{width:100%;height:100%;object-fit:cover;object-position:center 45%}
+.ws-hero-shade{z-index:2;pointer-events:none;background:linear-gradient(to bottom,rgba(4,17,30,.7) 0%,rgba(4,17,30,.46) 44%,rgba(4,17,30,.86) 100%)}
+.ws-hero-copy{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:clamp(8px,1.8vh,18px);padding:clamp(110px,15vh,170px) clamp(20px,5vw,72px) clamp(70px,11vh,130px);text-align:center;pointer-events:none}
+.ws-hero-copy p{font-family:var(--font-display),Georgia,serif;font-style:italic;font-size:clamp(17px,2.2vw,30px)!important;line-height:1.3!important;color:rgba(255,255,255,.94);animation:editorial-fade .9s .42s both}
+.ws-hero-copy h1{font-size:clamp(2.7rem,min(13vw,15vh),10rem);line-height:.95;text-transform:uppercase;animation:editorial-title 1.1s .7s both}
+.ws-hero .scroll-cue{z-index:3}
+/* Navbar on Workshops: dark background up to 0.72; the top shade goes once the banner is past. */
+body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k,0)*.72))}
+.editorial-nav.ws-past-hero::before{opacity:0}
+/* Tablet (prototype ≤1080px): still pinned, one column; the note hides and the finished card grows. */
 @media (max-width:1080px){
-  .ws-wrap,.ws-wrap.is-finished{height:auto}.ws-pin{position:relative;height:auto;display:block;padding:clamp(70px,10vh,110px) clamp(16px,4vw,40px) 30px}
-  .ws-grid{grid-template-columns:1fr;height:auto;gap:24px}
-  .ws-card{grid-template-columns:1fr;grid-template-rows:38vh 58vh;grid-template-areas:'media' 'rail';height:auto}
-  .ws-done{grid-template-rows:38vh auto}
+  .ws-pin{padding-top:110px}
+  .ws-grid{grid-template-columns:minmax(0,1fr);gap:clamp(20px,4vh,40px)}
+  .ws-done{align-self:stretch}.ws-done .ws-static{padding:clamp(18px,3vw,34px);gap:14px}.ws-done .ws-number{display:none}
+  .ws-intro{max-width:42ch}.ws-note{display:none}
+}
+/* Phone (prototype ≤760px): not pinned; image band 38vh above a 58vh rail. */
+@media (max-width:760px){
+  .ws-pin{position:static;height:auto}
+  .ws-wrap,.ws-wrap.is-finished{height:auto;padding-bottom:clamp(40px,10vh,90px)}
+  .ws-card{grid-template-columns:minmax(0,1fr);grid-template-areas:'media' 'rail';height:auto}
+  .ws-media{height:38vh}.ws-rail{height:58vh}.ws-done .ws-rail{height:auto}
 }
 @media (prefers-reduced-motion:reduce){.ws-bar span{transition:none}}
 
@@ -558,6 +578,12 @@ body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
 .home-descent p em{font-family:var(--font-display),Georgia,serif;font-style:italic}
 /* Home navbar on phones: link rows 12px tall as in the prototype (the 18px row gap keeps targets spaced 30px apart). */
 /* Phone navbar link rows: 12px boxes as in every prototype (row gap 14px, 18px on Home); targets stay ≥ 26px apart. */
-@media (max-width:759px){.editorial-nav nav a{display:block;padding-block:0;min-height:0;height:12px;line-height:12px}}
+@media (max-width:759px){
+  .editorial-nav nav a{display:block;position:relative;padding-block:0;min-height:0;height:12px;line-height:12px}
+  /* The touch area is larger than the 12px row: it fills half of the gaps around each link (14px between rows,
+     16px between links), so neighbouring areas meet without overlapping: about 26px tall. */
+  .editorial-nav nav a::after{content:'';position:absolute;inset:-7px -8px}
+  body:has(.home-page) .editorial-nav nav a::after{inset:-9px -8px}
+}
 /* The prototype scrolls natively: anchors and jumps are instant on Home. */
 html:has(.home-page){scroll-behavior:auto}

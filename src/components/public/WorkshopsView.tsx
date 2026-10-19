@@ -5,7 +5,7 @@ import type {ContentBlock} from '@/features/encounters/public-content';
 import {string,type Row} from '@/features/encounters/presentation';
 import {countLabel,dateLabel,isFinished,pad,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
 import {PostBlocks} from './PostBlocks';
-import {PhotoHero} from './EditorialPieces';
+import {ramp,useFrame} from './useFrame';
 import {MediaImage,Picture} from './MediaImage';
 
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
@@ -35,20 +35,37 @@ function Workshop({activity:a,index,sessions,media}:{activity:Activity;index:num
         <div className="ws-note">{(string(detail.note_title)||string(detail.audience_note))&&<><span>{string(detail.note_title)}</span>{string(detail.audience_note)&&<p>{string(detail.audience_note)}</p>}</>}
           <div className="ws-links">{!isFinished(a)&&signup&&<a href={signup} className="ws-button">{string(detail.signup_label)||'Join the workshop'} →</a>}<Link href={a.path} className="ws-more">{[dateLabel(detail),string(detail.place)].filter(Boolean).join(' · ')||'More about it'} →</Link></div></div>
       </div>
-      {finished?<article className="ws-card ws-done" data-seq="0.9,0.4"><div className="ws-rail ws-static"><span className="ws-number">—</span><div><h3>How it went</h3>{(string(detail.outcome)||string(post.excerpt))&&<p>{string(detail.outcome)||string(post.excerpt)}</p>}<Link className="ws-result" href={a.result?`/posts/${string(a.result.slug)}`:a.path}>{a.result?'See the result':'Read about it'} →</Link></div></div><div className="ws-media"><div><Picture id={post.cover_id||a.result?.cover_id} media={media}/></div></div></article>
+      {finished?<article className="ws-card ws-done" data-wseq="0.9,0.4"><div className="ws-rail ws-static"><span className="ws-number">—</span><div><h3>How it went</h3>{(string(detail.outcome)||string(post.excerpt))&&<p>{string(detail.outcome)||string(post.excerpt)}</p>}<Link className="ws-result" href={a.result?`/posts/${string(a.result.slug)}`:a.path}>{a.result?'See the result':'Read about it'} →</Link></div></div><div className="ws-media"><div><Picture id={post.cover_id||a.result?.cover_id} media={media}/></div></div></article>
         :<SessionRail id={string(post.id)} sessions={sessions} media={media}/>}
     </div></div>
   </div>;
 }
 export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:Row;settings:Row;list:Activity[];sessions:Row[];media:Row[];blocks:ContentBlock[]}){
+  // Workshops.dc.html: banner image sinks and darkens with an eased clock, the title rises away; reveals only
+  // fade and lift (70px, span .25); the navbar's top shade goes once the banner is past 160px.
+  const hero=useRef<HTMLElement>(null),eased=useRef(0);
+  useFrame(({vh,reduced})=>{
+    const el=hero.current;if(!el)return;const target=Math.min(1,Math.max(0,scrollY/vh));eased.current=reduced?target:eased.current+(target-eased.current)*.08;const d=eased.current;
+    const img=el.querySelector<HTMLElement>('[data-ws-img]'),copy=el.querySelector<HTMLElement>('[data-ws-copy]'),cue=el.querySelector<HTMLElement>('[data-ws-cue]');
+    const k=reduced?0:ramp(d,0,.9);if(img){img.style.transform=`translate3d(0,${(k*7).toFixed(1)}%,0) scale(${(1+k*.07).toFixed(3)})`;img.style.filter=`brightness(${(1-k*.4).toFixed(3)})`;}
+    const t=reduced?0:ramp(d,.05,.62);if(copy){copy.style.opacity=(1-t).toFixed(3);copy.style.transform=`translate3d(0,${(t*-58).toFixed(1)}px,0)`;}
+    if(cue)cue.style.opacity=String(Math.max(0,1-d*8));
+    document.querySelector('.editorial-nav')?.classList.toggle('ws-past-hero',el.getBoundingClientRect().bottom<160);
+    const root=el.parentElement;root?.querySelectorAll<HTMLElement>('[data-wseq]').forEach(item=>{const r=item.getBoundingClientRect();if(reduced){item.style.opacity='1';item.style.transform='none';return;}const [start=.9,span=.25,shift=70]=(item.dataset.wseq||'').split(',').map(Number);const p=ramp((vh*start-r.top)/(vh*span),0,1,true);item.style.opacity=p.toFixed(3);item.style.transform=`translate3d(0,${((1-p)*shift).toFixed(1)}px,0)`;});
+  });
   const ordered=[...list.filter(a=>!isFinished(a)),...list.filter(isFinished)];
   return <>
     <span data-nav-theme="dark" hidden/>
-    <PhotoHero title={string(page?.title)||'Workshops'} kicker={string(settings.kicker)||string(page?.kicker)||'artsy animals'} cover={settings.cover_id||page?.cover_id} media={media} fallback="/design/ww-banner.webp"/>
+    <section ref={hero} className="ws-hero" data-nav-hero aria-label={string(page?.title)||'Workshops'}>
+      <div className="ws-hero-image hero-image"><div data-ws-img className="ws-fill"><Picture id={settings.cover_id||page?.cover_id} media={media} fallback="/design/ww-banner.webp" priority/></div></div>
+      <div className="ws-hero-shade"/>
+      <div className="ws-hero-copy" data-ws-copy><p>{string(settings.kicker)||string(page?.kicker)||'artsy animals'}</p><h1>{string(page?.title)||'Workshops'}</h1></div>
+      <a href="#editorial-content" className="scroll-cue" data-ws-cue>Scroll <span aria-hidden="true"/></a>
+    </section>
     <div id="editorial-content" className="ws-list">
       {ordered.map((a,i)=><Workshop key={string(a.post.id)} activity={a} index={i} sessions={sessions.filter(s=>s.workshop_id===a.post.id)} media={media}/>)}
       {!ordered.length&&blocks.length>0&&<div className="ws-blocks"><PostBlocks blocks={blocks} media={media}/></div>}
     </div>
-    <section className="ws-closing"><h2 data-seq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Link data-seq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>
+    <section className="ws-closing"><h2 data-wseq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Link data-wseq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>
   </>;
 }

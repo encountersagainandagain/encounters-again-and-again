@@ -24,9 +24,14 @@ export function ActivityView({activity:a,blocks,media,needs,sessions,people,trai
   const meta=string(post.meta_line)||[dateLabel(detail),string(detail.place)].filter(Boolean).join(' · ');
   const signup=a.kind==='workshop'?signupHref(detail,string(post.title)):null;
   // Contact: the workshop registration email, or the contact page; never an invented address.
-  const action=!finished&&(signup||contactHref);const actionLabel=string(a.kind==='workshop'?detail.signup_label:'')||string(detail.cta_label)||(a.kind==='workshop'?'Join the workshop':'Join the expedition');
+  // A workshop only invites to join while its registration is open (or has no registration state);
+  // activity and registration are independent states.
+  const registration=a.kind==='workshop'?string(detail.registration_status):'';
+  const closedRegistration=registration==='full'||registration==='closed';
+  const action=!finished&&!closedRegistration&&(signup||contactHref);const actionLabel=string(a.kind==='workshop'?detail.signup_label:'')||string(detail.cta_label)||(a.kind==='workshop'?'Join the workshop':'Join the expedition');
   const materials=lines(detail.materials);
-  const facts=[['Status',status],['When',dateLabel(detail)],['Where',string(detail.place)],[a.kind==='workshop'?'Sessions':'',a.kind==='workshop'&&sessions.length?countLabel(sessions.length):''],['Availability',finished?'':string(detail.availability_label)]].filter(([k,v])=>k&&v);
+  const facts=[['Status',status],['When',dateLabel(detail)],['Where',string(detail.place)],[a.kind==='workshop'?'Sessions':'',a.kind==='workshop'&&sessions.length?countLabel(sessions.length):''],['Availability',finished?'':string(detail.availability_label)],
+    ...(a.kind==='workshop'?[['Registration',finished?'':({open:'Open',closed:'Closed',full:'Full'} as Record<string,string>)[registration]||''],['Language',string(detail.language)],['Format',string(detail.modality)],['Places',detail.capacity!=null&&detail.capacity!==''?String(detail.capacity):''],['Price',detail.price!=null&&detail.price!==''?`${Number(detail.price)===0?'Free':`${detail.price}${string(detail.currency)?` ${string(detail.currency)}`:''}`}`:'']]:[])].filter(([k,v])=>k&&v);
   return <PostView post={{...post,kicker:string(post.kicker)||`${a.kind==='workshop'?'Workshop':'Expedition'}${status?` · ${status}`:''}`,meta_line:meta}} blocks={blocks} media={media} trail={trail}
     before={<section className="activity-facts" aria-label="Details">
       <dl>{facts.map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
@@ -37,6 +42,7 @@ export function ActivityView({activity:a,blocks,media,needs,sessions,people,trai
     </section>}>
     {a.kind==='workshop'&&(string(detail.note_title)||string(detail.audience_note))&&<section className="activity-note" data-seq="0.94,0.4"><h2>{string(detail.note_title)||'Who it is for'}</h2>{string(detail.audience_note)&&<p>{string(detail.audience_note)}</p>}</section>}
     {sessions.length>0&&<section className="activity-sessions" aria-labelledby="sessions-title"><h2 id="sessions-title" data-seq="0.96,0.4">Sessions</h2><ol>{sessions.map((s,i)=><li key={string(s.id)} data-seq="0.94,0.4"><span className="activity-session-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{(string(s.place)||string(s.held_on))&&<small>{[dateLabel({starts_on:s.held_on}),string(s.place)].filter(Boolean).join(' · ')}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</li>)}</ol></section>}
+    {a.kind==='workshop'&&string(detail.includes)&&<section className="activity-note" data-seq="0.94,0.4"><h2>What is included</h2><p>{string(detail.includes)}</p></section>}
     {materials.length>0&&<section className="activity-list-block"><h2 data-seq="0.96,0.4">What to bring</h2><ol>{materials.map((m,i)=><li key={i}><span>{pad(i+1)}</span>{m}</li>)}</ol></section>}
     {needs.length>0&&<section className="activity-list-block activity-needs"><h2 data-seq="0.96,0.4">What the boat needs</h2><ol>{needs.map((n,i)=>{const href=safeHref(n.contact_url);return <li key={string(n.id)} data-status={string(n.status)}><span>{pad(i+1)}</span><div><strong>{string(n.title)}</strong>{string(n.body)&&<p>{string(n.body)}</p>}</div><em>{n.status==='obtained'?'Obtained':n.status==='closed'?'Closed':'Still needed'}</em>{href&&n.status==='pending'&&<a href={href} className="editorial-link">Offer it →</a>}</li>;})}</ol></section>}
     {people.length>0&&<section className="activity-people"><h2>{a.kind==='workshop'?'With':'On board'}</h2><p>{people.map((p,i)=><span key={p.name+i}>{i>0?', ':''}{p.href?<Link href={p.href}>{p.name}</Link>:p.name}{p.role?` (${p.role})`:''}</span>)}</p></section>}

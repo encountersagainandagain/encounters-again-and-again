@@ -25,10 +25,10 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 1 | `/crew` | `The Crew.dc.html` | Sí; secciones explícitas | 2026-10-17; 3218 sin cambios (8762 px) el 2026-10-18 | — | **Aprobada** la versión `cbea565` (2026-10-13). Las secciones editables (`ed1322d`) no cambian el aspecto y esperan revisión del editor | `20261017000100` |
 | 2 | `/crew/[slug]` | `Wild Wonders.dc.html` | Sí; **secciones explícitas** desde 2026-10-18 (`e673a7a`) | Equivalencia con la lectura aprobada sobre los bloques de Wild Wonders del snapshot + 5 casos (`npm test`); 3218 idéntico (7654 px, mismo HTML); perfiles locales convertidos con el mismo HTML | — | Wild Wonders **aprobado** (2026-10-14, con la plantilla anterior a las secciones explícitas). El editor de secciones del perfil es nuevo: **revisar el editor**, no el aspecto | Convertir el perfil real (abrir y guardar en el admin, o script) |
 | 3 | `/art`, categoría, obra | `Art.dc.html` (+ `Post.dc.html`) | Sí; el cuerpo de la obra usa ahora los bloques de Post | 2026-10-16; obra con bloques 2026-10-18 | Obras reales | Pendiente (cambió el cuerpo de la obra: revisar esa parte) | — |
-| 4 | `/expeditions` | `Expeditions.dc.html` | Sí | 2026-10-17 | Cards reales del programa | Pendiente | `20261017000200` (opcional para la página) |
-| 4b | `/expeditions/[slug]` | Plantilla Post | Sí | 2026-10-17; Full preview 2026-10-18 | Expediciones reales | Pendiente | `20261017000200` (`outcome`) |
-| 5 | `/workshops` | `Workshops.dc.html` | Sí | 2026-10-17 | Workshops reales | Pendiente | `20261017000200` (`note_title`, `outcome`) |
-| 5b | `/workshops/[slug]` | Plantilla Post | Sí | 2026-10-17; Full preview 2026-10-18 | Ídem | Pendiente | Ídem |
+| 4 | `/expeditions` | `Expeditions.dc.html` | Sí; módulo completo (`175a101`) | 2026-10-18: prototipo 1440/390 y recorrido del admin (ver abajo) | Cards reales del programa | Pendiente (revisión visual de Juani) | `20261017000200` (opcional para la página) |
+| 4b | `/expeditions/[slug]` | Plantilla Post | Sí | 2026-10-18 (recorrido del admin) | Expediciones reales | Pendiente (revisión visual de Juani) | `20261017000200` (`outcome`) |
+| 5 | `/workshops` | `Workshops.dc.html` | Sí; módulo completo (2026-10-18) | 2026-10-18: prototipo 1440/1024/390, teclado, movimiento reducido y recorrido del admin (ver abajo) | Workshops reales | Pendiente (revisión visual de Juani) | `20261017000200` (`note_title`, `outcome`) |
+| 5b | `/workshops/[slug]` | Plantilla Post | Sí; inscripción independiente y campos opcionales (2026-10-18) | 2026-10-18 (recorrido del admin) | Ídem | Pendiente (revisión visual de Juani) | Ídem |
 | 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí | 2026-10-17 | Intro y crédito reales (Page presentation) | Pendiente | — |
 | 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí | 2026-10-17 | — | Pendiente | — |
 | 7 | `/posts/[slug]` | `Post.dc.html` | Sí; **todos los bloques del alcance** desde 2026-10-18 | Comparación con el prototipo (post demo con todos los bloques) | Noticias y resultados reales | Pendiente | — |
@@ -165,7 +165,7 @@ Evidencia: [verification/review-2026-10-18-home-performance/](verification/revie
 - Pin de 660vh con 5 cards (220 + 88vh por card) y la tabla exacta de ventanas del prototipo.
 - El navbar pasa a claro cuando el banner baja de 120 px, como el prototipo.
 - Reglas de cards para móvil y tablet del prototipo, y título a tamaño del prototipo.
-- Filas del navbar móvil de 12 px en todo el sitio, como en todos los prototipos: **revisar en The Crew y Wild Wonders en teléfono**.
+- Filas del navbar móvil de 12 px en todo el sitio, como en todos los prototipos. Corregido el 2026-10-18 (ver Workshops): el área táctil ya no queda limitada a esas 12 px.
 - Preview en vivo de las cards de presentación (la plantilla pública, desplazada a la card). «Shown on» solo ofrece la página del programa y las cards nuevas la traen elegida.
 - Después de guardar, el admin conserva `?edit=<id>`.
 - Comando `demo:local:adopt` para contenido creado desde el admin.
@@ -178,7 +178,46 @@ Evidencia: [verification/review-2026-10-18-home-performance/](verification/revie
 
 **Aprobado por Juani:** pendiente.
 
-**Siguiente:** Workshops, después Messages, Art, About/Contact/Newsletter y la revisión integrada.
+**Siguiente:** Workshops (hecho, ver abajo).
+
+### Workshops — módulo completo (2026-10-18)
+
+**Navbar móvil compartido (revisado antes de seguir)**
+- Problema encontrado: con las filas de 12 px del prototipo, el área táctil de cada enlace también era de 12 px.
+- Corrección: la fila visual sigue en 12 px y un `::after` invisible amplía el área a 26 px de alto (30 px en Home, donde las filas están más separadas). Las áreas de enlaces vecinos se tocan sin solaparse. El foco sigue visible (anillo sólido de 2 px #8FD9EA).
+- Comprobado en teléfono (390 px) en The Crew y Wild Wonders (3218, datos reales, solo lectura) y en Home (3219): sin solapamientos ni cambio visual. Capturas en `nav/`. No se rediseñó nada de Crew ni de Wild Wonders.
+
+**Implementado**
+- Hero propio como el prototipo. Al bajar, la imagen se desplaza, crece y se oscurece, y el texto sube y se desvanece con los tiempos del prototipo. El navbar se oscurece sobre el hero y deja de hacerlo al pasarlo.
+- Apariciones con los desplazamientos del prototipo. Reglas de tablet (≤1080) y teléfono (≤760) del prototipo: pin estático en teléfono, imagen de 38vh y riel de 58vh.
+- Estados independientes: actividad (próximo, en curso, terminado) e inscripción (abierta, cerrada, completa). Con inscripción completa o cerrada no hay botón para sumarse y la ficha dice «Full» o «Closed». Publicar no destaca: `featured` sigue en falso.
+- Campos opcionales en el detalle: idioma, formato, plazas, precio (0 se muestra como «Free») y «What is included». Si están vacíos, no aparecen.
+- Ayudas del admin para cada campo del workshop (subtítulo, estados, textos del botón y de disponibilidad, idioma, formato, qué incluye, precio, plazas, email y asunto de inscripción, resultado). Las ayudas de los campos de detalle ahora se muestran.
+
+**Verificado técnicamente**
+- Comparación cuadro a cuadro con el prototipo en 1440, 1024 y 390 px (`d-sheet.jpg`, `t-sheet.jpg`, `m-sheet.jpg`): igual en composición, pin, riel y tiempos. Las únicas diferencias vienen del contenido (ver abajo).
+- Sin desborde horizontal. Con movimiento reducido no queda texto oculto. Con teclado el riel recibe foco y AvPág pasa las sesiones 01 → 02 → 03 con las imágenes en fundido.
+- Recorrido desde la interfaz del admin, completo y en verde (`journey/`): crear un workshop de una sesión, guardar borrador (privado: 404, fuera del listado y de Home), recargar, editar la sesión, preview visual y Full preview, publicar sin destacar, detalle con ficha, botón, sesión, qué llevar y facilitador, listado («ONE SESSION»), agenda de Home, perfil del facilitador, inscripción completa (sin botón, «Full»), terminado con resultado (enlaces en los dos sentidos y sale de la agenda de Home), despublicar (privado en todas partes).
+- TypeScript, lint y `npm test` en verde.
+
+**Ejemplos locales (editables; ninguno se pisa)**
+- Una sesión: «UI journey drawing day (demo)», creado desde el admin y adoptado (`demo:local:adopt`). Publicado, próximo, inscripción abierta.
+- Varias sesiones: «Draw the ocean (demo)», en curso, tres sesiones.
+- Próximo con inscripción completa: «Encounters at the market (demo)», dos sesiones.
+- Terminado con resultado: «Wild wonders at Coledale (demo)» ↔ «Wild wonders at Coledale (demo result)».
+
+**Diferencias conocidas**
+- Los títulos llevan «(demo)», que desplaza algunas líneas respecto del prototipo.
+- Las imágenes de sesiones son dibujos sintéticos de ejemplo.
+- La columna de cada workshop agrega un enlace al detalle, que el prototipo no tiene.
+
+**Sin cambios de esquema.** Todos los campos ya existían.
+
+**Aprobado por Juani:** pendiente.
+
+**Siguiente:** Meaningful Messages, después Art y Post, About/Contact/Newsletter y la revisión integrada.
+
+Capturas: [verification/review-2026-10-18-workshops/](verification/review-2026-10-18-workshops/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
@@ -202,7 +241,7 @@ La conversión del perfil real a secciones explícitas no es una migración: se 
 | Home | http://127.0.0.1:3219/ | http://127.0.0.1:3220/Abismo%20Home%20v2.dc.html | Descenso, agua, criaturas, agenda, carrusel | Agua por degradado (no WebGL); textos de diseño o ejemplo |
 | Expeditions | http://127.0.0.1:3219/expeditions | http://127.0.0.1:3220/Expeditions.dc.html | Disolución y cards; lista | La lista de expediciones no está en el prototipo |
 | Expedición | http://127.0.0.1:3219/expeditions/demo-ningaloo-crossing | Post.dc.html | Datos, necesidades, contacto | Sin prototipo propio |
-| Workshops | http://127.0.0.1:3219/workshops | http://127.0.0.1:3220/Workshops.dc.html | Riel de sesiones, terminado | Imágenes demo sintéticas |
+| Workshops | http://127.0.0.1:3219/workshops | http://127.0.0.1:3220/Workshops.dc.html | Hero, riel de sesiones, terminado | Imágenes demo sintéticas; títulos «(demo)»; enlace al detalle |
 | Workshop | http://127.0.0.1:3219/workshops/demo-draw-the-ocean | Post.dc.html | Sesiones, qué llevar | Sin prototipo propio |
 | Messages | http://127.0.0.1:3219/meaningful-messages | http://127.0.0.1:3220/Meaningful%20Messages.dc.html | Cruce de mensajes | Enlace «Read the message» agregado |
 | Post | http://127.0.0.1:3219/posts/demo-post-blocks | http://127.0.0.1:3220/Post.dc.html | Todos los bloques | Sin tour, alojamiento ni afiliados |
