@@ -29,8 +29,8 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 4b | `/expeditions/[slug]` | Plantilla Post | Sí | 2026-10-18 (recorrido del admin) | Expediciones reales | Pendiente (revisión visual de Juani) | `20261017000200` (`outcome`) |
 | 5 | `/workshops` | `Workshops.dc.html` | Sí; módulo completo (2026-10-18) | 2026-10-18: prototipo 1440/1024/390, teclado, movimiento reducido y recorrido del admin (ver abajo) | Workshops reales | Pendiente (revisión visual de Juani) | `20261017000200` (`note_title`, `outcome`) |
 | 5b | `/workshops/[slug]` | Plantilla Post | Sí; inscripción independiente y campos opcionales (2026-10-18) | 2026-10-18 (recorrido del admin) | Ídem | Pendiente (revisión visual de Juani) | Ídem |
-| 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí | 2026-10-17 | Intro y crédito reales (Page presentation) | Pendiente | — |
-| 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí | 2026-10-17 | — | Pendiente | — |
+| 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390, video, teclado, movimiento reducido, casos 0/1/varios y recorrido del admin (ver abajo) | Intro, crédito e ilustraciones reales | Pendiente (revisión visual de Juani) | — |
+| 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí; plantilla compartida con la preview y créditos visibles (2026-10-19) | 2026-10-19 (recorrido del admin) | — | Pendiente (revisión visual de Juani) | — |
 | 7 | `/posts/[slug]` | `Post.dc.html` | Sí; **todos los bloques del alcance** desde 2026-10-18 | Comparación con el prototipo (post demo con todos los bloques) | Noticias y resultados reales | Pendiente | — |
 | 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
@@ -215,9 +215,41 @@ Evidencia: [verification/review-2026-10-18-home-performance/](verification/revie
 
 **Aprobado por Juani:** pendiente.
 
-**Siguiente:** Meaningful Messages, después Art y Post, About/Contact/Newsletter y la revisión integrada.
+**Siguiente:** Meaningful Messages (hecho, ver abajo).
 
 Capturas: [verification/review-2026-10-18-workshops/](verification/review-2026-10-18-workshops/).
+
+### Meaningful Messages — módulo completo (2026-10-19)
+
+**Implementado**
+- Escenario con la tabla exacta de ventanas del prototipo para 3 mensajes. Abre la columna izquierda: la ilustración en los mensajes impares y el texto en los pares, como el prototipo. Para otra cantidad se usa el mismo ritmo (salidas repartidas de 0.22 a 0.86, entrada 0.06 después, primero en negativo y último hasta 1).
+- Movimiento del prototipo: sube 110 px, crece de 0.97 a 1 y se enfoca (desenfoque de 4 px). La salida sigue subiendo (154 px), se achica y se desenfoca (5 px).
+- Columnas 1.05/1 y desborde lateral del prototipo en los dos lados.
+- Teléfono: el pin de portada de 240vh se conserva solo en Messages, como su prototipo. Crew y perfiles no cambian. El escenario se desarma y cada bloque entra solo, sin salida, con imagen de 68vh.
+- Portada con las ventanas del prototipo de Messages (imagen 0.06–0.82, texto 0.10–0.78). Crew conserva las suyas.
+- Garabato de la introducción con el tamaño y el color del prototipo.
+- Teclado: al enfocar «Read the message» el pin se mueve al momento en que ese mensaje está entero.
+- Detalle (`MessageView`): una sola plantilla para la página pública y la preview del admin. Ahora muestra **Made by** con los créditos, que ya aparecían en los perfiles, y «← All messages».
+- Ayudas del admin para cada campo del mensaje y de la presentación de la página.
+
+**Verificado técnicamente**
+- Comparación con el prototipo en 1440, 1024 y 390 px (`d-sheet.jpg`, `t-sheet.jpg`, `m-sheet.jpg`, `mh-sheet.jpg`) y video lado a lado (`messages-desktop.mp4`): igual en composición, cruce y tiempos.
+- Casos sobre la base local, restaurados al final: 0 mensajes (sin escenario ni huecos), 1 (180vh), 3, orden invertido, sin datos opcionales y texto largo. En todos los casos cada mensaje llega a opacidad 1 y entra en pantalla, sin desborde horizontal ni errores de consola.
+- Movimiento reducido: nada oculto. Teclado: los tres enlaces quedan visibles y con foco al recibirlo.
+- Recorrido desde el admin, en verde: crear con crédito, borrador privado (404 y fuera del escenario), recargar, editar, preview visual y Full preview con «Made by», publicar sin destacar, aparece cuarto (orden 4), detalle con migas, crédito y vuelta, perfil de la persona acreditada, reordenar al primer lugar, despublicar (privado en página, escenario y perfil).
+- Presentación de la página desde **Messages page**: editar la introducción, preview en vivo, la página pública sin cambios antes de guardar, guardar, recargar, página pública actualizada y valor original restaurado.
+
+**Ejemplos locales:** los tres mensajes del seed y «UI journey message (demo)», creado desde el admin, adoptado y en borrador.
+
+**Diferencias conocidas**
+- El enlace «Read the message →» y el detalle no están en el prototipo (función requerida).
+- En teléfono el prototipo corre los mensajes 20 px fuera de la pantalla y corta el borde del texto. La implementación deja el texto dentro del margen.
+- El cierre usa el footer compartido del sitio.
+- Ilustraciones de ejemplo sintéticas.
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-messages/](verification/review-2026-10-19-messages/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

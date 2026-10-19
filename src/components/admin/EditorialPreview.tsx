@@ -7,8 +7,7 @@ import {ArtworkView,CategorySection,type Person} from '@/components/public/ArtVi
 import {CrewView} from '@/components/public/CrewView';
 import {PhotoHero} from '@/components/public/EditorialPieces';
 import {MediaEmbed} from '@/components/public/EditorialInteractive';
-import {ActivityView,PostView} from '@/components/public/PostView';
-import {MediaImage} from '@/components/public/MediaImage';
+import {ActivityView,MessageView,PostView} from '@/components/public/PostView';
 import {string,type Row} from '@/features/encounters/presentation';
 import type {ContentBlock,ContentRow} from '@/features/encounters/public-content';
 import type {EditorialData} from '@/features/encounters/editorial-data';
@@ -44,7 +43,8 @@ export function EditorialPreview({record,blocks,detail,media,crew=[],categories=
     return <section aria-label="Visual preview" className="editorial-page post-page activity-page">{status}<ActivityView activity={activity} blocks={blocks} media={images} needs={record.kind==='expedition'?children:[]} sessions={record.kind==='workshop'?children:[]} people={people} contactHref="/contact"/></section>;
   }
   // A message: its own page (the illustration and the message first); it also appears on Meaningful Messages.
-  if(record.kind==='message')return <section aria-label="Visual preview" className="editorial-page post-page message-page">{status}<PostView post={{...record,kicker:string(record.kicker)||'Meaningful message'}} blocks={blocks} media={images} before={<section className="mm-letter">{detail.illustration_id?<MediaImage id={detail.illustration_id} media={images} contain/>:null}<div><h2>{string(detail.message)||string(record.title)}</h2>{string(detail.body)&&<p>{string(detail.body)}</p>}{string(detail.credit)&&<em>{string(detail.credit)}</em>}</div></section>}/></section>;
+  if(record.kind==='message'){const people=contributors.flatMap(c=>{const m=crew.find(x=>x.id===c.id);return m?[{name:string(m.name),role:c.role,href:null}]:[];});
+    return <section aria-label="Visual preview" className="editorial-page post-page message-page">{status}<MessageView post={record} detail={detail} blocks={blocks} media={images} people={people}/></section>;}
   if(['news','expedition_report','workshop_report'].includes(String(record.kind)))return <section aria-label="Visual preview" className="editorial-page post-page">{status}<PostView post={{...record,kicker:string(record.kicker)||({news:'News',expedition_report:'Expedition result',workshop_report:'Workshop result'} as Record<string,string>)[String(record.kind)]}} blocks={blocks} media={images}/></section>;
   return <section aria-label="Visual preview" className="editorial-page">{status}<PhotoHero title={string(record.title)} kicker={string(record.kicker)} meta={string(record.meta_line)} cover={record.cover_id||detail.media_id} media={images}/><div id="editorial-content"><MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><EditorialBlocks blocks={blocks} media={images} showIndex={!!record.show_index}/></div></section>;
 }

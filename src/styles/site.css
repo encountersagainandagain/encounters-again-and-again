@@ -177,12 +177,12 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .mm-content{background:var(--enc-espuma)}
 .mm-intro{max-width:1240px;margin:0 auto;padding:clamp(110px,30vh,320px) clamp(20px,5vw,72px) clamp(20px,5vh,56px);display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
 .mm-intro h2{max-width:20ch;font-size:clamp(2rem,7vw,5.4rem)!important;line-height:1!important;letter-spacing:.01em!important;color:#08222f}
-.mm-intro .editorial-scribble{width:min(520px,70%);color:#0f3b4c}
+.mm-intro .editorial-scribble{width:min(440px,62%);margin-left:clamp(-10px,1vw,20px);color:rgba(14,42,56,.55)}
 .mm-intro>span{margin-top:clamp(10px,2vh,22px);font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
 .mm-stage{position:relative}
 .mm-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
-.mm-message{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'media text';align-items:center}
-.mm-message.media-right{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:'text media'}
+.mm-message{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'media text';align-items:center;margin-left:calc(clamp(20px,5vw,72px)*-1)}
+.mm-message.media-right{grid-template-areas:'text media';margin-left:0;margin-right:calc(clamp(20px,5vw,72px)*-1)}
 .mm-media{grid-area:media;position:relative;height:100%;overflow:hidden;background:#0f3b4c;opacity:0}
 .mm-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .mm-text{grid-area:text;display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,2.4vh,26px);padding:clamp(24px,5vw,80px) clamp(20px,4vw,64px);opacity:0}
@@ -196,10 +196,16 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .mm-letter h2{font-size:clamp(1.6rem,3.4vw,2.9rem)!important;line-height:1.14!important}
 .mm-letter p{margin-top:18px!important}.mm-letter em{display:block;margin-top:18px;font-family:var(--font-display),Georgia,serif;opacity:.7}
 @media (max-width:759px){
-  .mm-stage{height:auto!important}.mm-sticky{position:relative;height:auto;overflow:visible}
-  .mm-message,.mm-message.media-right{position:relative;inset:auto;grid-template-columns:1fr;grid-template-areas:'media' 'text';margin-bottom:40px}
-  .mm-media,.mm-text{opacity:1!important;transform:none!important;pointer-events:auto!important}.mm-media{height:70svh}
+  .mm-stage{height:auto!important}.mm-sticky{position:static;height:auto;overflow:visible;display:flex;flex-direction:column;gap:clamp(50px,14vh,130px)}
+  .mm-message,.mm-message.media-right{position:relative;inset:auto;grid-template-columns:minmax(0,1fr);grid-template-areas:'media' 'text';margin:0}
+  .mm-media{height:68vh}.mm-text{padding:clamp(22px,6vw,34px) clamp(20px,5vw,32px) 0}
   .mm-letter{grid-template-columns:1fr}
+}
+/* Meaningful Messages keeps the 240vh hero pin on phones too (its prototype does); Crew and profiles don't. */
+@media (max-width:759px) and (prefers-reduced-motion:no-preference){
+  .messages-page .photo-hero-pin{height:240vh}
+  .messages-page .photo-hero-pin>.photo-hero{position:sticky;height:100vh;min-height:0}
+  .messages-page .photo-hero-pin+#editorial-content{margin-top:-100vh}
 }
 @media (prefers-reduced-motion:reduce){
   .mm-stage{height:auto!important}.mm-sticky{position:relative;height:auto;overflow:visible}
@@ -587,3 +593,4 @@ body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
 }
 /* The prototype scrolls natively: anchors and jumps are instant on Home. */
 html:has(.home-page){scroll-behavior:auto}
+.mm-back{max-width:1000px;margin:clamp(30px,6vh,60px) auto 0;padding:0 var(--enc-page-padding);font-size:12px;letter-spacing:.14em;text-transform:uppercase}

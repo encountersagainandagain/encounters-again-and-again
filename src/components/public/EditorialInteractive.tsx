@@ -15,6 +15,10 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
     const shade=pin?.querySelector<HTMLElement>('.hero-shade');
     const cue=pin?.querySelector<HTMLElement>('.scroll-cue');
     const desktop=matchMedia('(min-width: 760px)');
+    // Image and copy windows of the pinned hero; a page can set its prototype's own (data-hero-pin="k0,k1,t0,t1").
+    const heroWindow=(pin?.dataset.heroPin||'').split(',').map(Number).filter(n=>!Number.isNaN(n)).length===4?pin!.dataset.heroPin!.split(',').map(Number):[.02,.5,.06,.42];
+    // Phones keep the pin only where the page's CSS keeps the hero sticky (Meaningful Messages).
+    const pinSticky=()=>!!pin&&getComputedStyle(pin.firstElementChild as HTMLElement).position==='sticky';
     // Sticky image pair: both enter while the section rises and leave, in the same order, during the pin.
     const pairPin=element.querySelector<HTMLElement>('[data-pair-pin]');
     const pairStick=pairPin?.firstElementChild as HTMLElement|null|undefined;
@@ -25,8 +29,8 @@ export function ScrollStage({children,className=''}:{children:ReactNode;classNam
     const paint=(time:number)=>{
       if(motion.matches){reset();return;}
       eased=time-last>140?progress:eased+(progress-eased)*(pin ? .06 : .08);last=time;
-      if(pin&&desktop.matches){
-        const k=ramp(eased,.02,.5,true),t=ramp(eased,.06,.42);
+      if(pin&&(desktop.matches||pinSticky())){
+        const k=ramp(eased,heroWindow[0],heroWindow[1],true),t=ramp(eased,heroWindow[2],heroWindow[3]);
         if(hero){hero.style.transform=`scale(${1+k*.08})`;hero.style.filter=`brightness(${1-k*.45}) saturate(${1-k*.25})`;}
         if(shade)shade.style.opacity=String(1+k*.4);
         if(copy){copy.style.opacity=String(1-t);copy.style.transform=`translate3d(0,${t*-50}px,0) scale(${1+t*.06})`;}

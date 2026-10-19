@@ -18,6 +18,15 @@ export function PostView({post,blocks,media,detail={},trail,children,before}:{po
     <div id="editorial-content" className="post-body">{before}<MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>{children}</div>
   </>;
 }
+// A Meaningful Message on its own page: the illustration and the message first, then its blocks and the
+// people credited for it (the same people whose profiles list it). Shared by the public page and the preview.
+export function MessageView({post,detail,blocks,media,people,trail}:{post:Row;detail:Row;blocks:ContentBlock[];media:Row[];people:People;trail?:ReactNode}){
+  return <PostView post={{...post,kicker:string(post.kicker)||'Meaningful message'}} blocks={blocks} media={media} trail={trail}
+    before={<section className="mm-letter">{detail.illustration_id?<MediaImage id={detail.illustration_id} media={media} contain/>:null}<div><h2 data-seq="0.94,0.4">{string(detail.message)||string(post.title)}</h2>{string(detail.body)&&<p>{string(detail.body)}</p>}{string(detail.credit)&&<em>{string(detail.credit)}</em>}</div></section>}>
+    {people.length>0&&<section className="activity-people"><h2>Made by</h2><p>{people.map((p,i)=><span key={p.name+i}>{i>0?', ':''}{p.href?<Link href={p.href}>{p.name}</Link>:p.name}{p.role?` (${p.role})`:''}</span>)}</p></section>}
+    <p className="mm-back"><Link href="/meaningful-messages" className="editorial-link">← All messages</Link></p>
+  </PostView>;
+}
 export type People={name:string;role:string;href:string|null}[];
 export function ActivityView({activity:a,blocks,media,needs,sessions,people,trail,contactHref}:{activity:Activity;blocks:ContentBlock[];media:Row[];needs:Row[];sessions:Row[];people:People;trail?:ReactNode;contactHref:string|null}){
   const {post,detail}=a;const finished=isFinished(a);const status=statusLabels[string(detail.activity_status)]||'';
