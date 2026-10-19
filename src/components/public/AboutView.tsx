@@ -23,7 +23,7 @@ export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}
 export function AboutView({settings:s,contact,media}:{settings:Row;contact:Contact;media:Row[]}){
   const hero=useRef<HTMLElement>(null),main=useRef<HTMLDivElement>(null);
   const gallery=texts(s.gallery);const frames=gallery.length?gallery:fallbackGallery;
-  const columns=rows(s.columns).slice(0,3);const manifesto=(s.manifesto||{}) as Row;const how=(s.how||{}) as Row;
+  const columns=rows(s.columns).filter(c=>string(c.label)||string(c.text)).slice(0,3);const manifesto=(s.manifesto||{}) as Row;const how=(s.how||{}) as Row;
   useFrame(({vh,vw,reduced})=>{
     const el=hero.current;if(!el)return;const d=Math.min(1,scrollY/vh);const shrink=reduced?1:ramp(d,0,.22,true);
     const q=(sel:string)=>el.querySelector<HTMLElement>(sel);
@@ -63,8 +63,8 @@ export function AboutView({settings:s,contact,media}:{settings:Row;contact:Conta
         {string(manifesto.big)&&<div data-seq="0.88,0.4" className="about-big">{string(manifesto.label)&&<span>{string(manifesto.label)}</span>}<strong>{string(manifesto.big)}<em>.</em></strong></div>}
       </section>}
       {(string(how.kicker)||string(how.title))&&<section className="about-how">{string(how.kicker)&&<span data-seq="0.94,0.4">{string(how.kicker)}</span>}{string(how.title)&&<h2 data-seq="0.92,0.4">{string(how.title)}</h2>}</section>}
-      {rows(s.rows).map((r,i)=>{const href=safeHref(r.link_url);const items=texts(r.items);return <section key={i} className="about-row">
-        <div data-seq="0.94,0.4" className="about-row-text"><h3>{string(r.title)}</h3>{string(r.intro)&&<span>{string(r.intro)}</span>}{items.length>0&&<ol>{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>}</div>
+      {rows(s.rows).filter(r=>string(r.title)||texts(r.items).length||r.media_id).map((r,i)=>{const href=safeHref(r.link_url);const items=texts(r.items);return <section key={i} className={`about-row${i%2?' about-row--photo-first':''}`}>
+        <div data-seq="0.94,0.4" className="about-row-text">{string(r.title)&&<h3>{string(r.title)}</h3>}{string(r.intro)&&<span>{string(r.intro)}</span>}{items.length>0&&<ol>{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>}</div>
         <div data-seq="0.9,0.4" className="about-row-media">{r.media_id?<div className="about-row-image"><Picture id={r.media_id} media={media}/></div>:null}{href&&string(r.link_label)&&(href.startsWith('/')?<Link href={href}>{string(r.link_label)} →</Link>:<a href={href} target="_blank" rel="noopener">{string(r.link_label)} →</a>)}</div>
       </section>;})}
       {belief&&<section className="about-belief"><h2 data-seq="0.94,0.4">{cut<0?belief:<>{belief.slice(0,cut)}<em>{emphasis}</em>{belief.slice(cut+emphasis.length)}</>}</h2></section>}

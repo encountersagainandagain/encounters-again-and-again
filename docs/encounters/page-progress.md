@@ -32,7 +32,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390, video, teclado, movimiento reducido, casos 0/1/varios y recorrido del admin (ver abajo) | Intro, crédito e ilustraciones reales | Pendiente (revisión visual de Juani) | — |
 | 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí; plantilla compartida con la preview y créditos visibles (2026-10-19) | 2026-10-19 (recorrido del admin) | — | Pendiente (revisión visual de Juani) | — |
 | 7 | `/posts/[slug]` | `Post.dc.html` | Sí; todos los bloques del alcance | 2026-10-19: bloque por bloque contra el prototipo, editor de bloques desde el admin y plantilla compartida en los seis tipos (ver abajo) | Noticias y resultados reales | Pendiente (revisión visual de Juani) | — |
-| 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
+| 8 | `/about` | `About.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390 y edición desde el admin (ver abajo) | Presentación completa (hoy: texto importado en remoto) | Pendiente (revisión visual de Juani) | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
 | 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
 | 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; fidelidad (`a4f98a6`) y rendimiento (2026-10-18, ver abajo) | Comparación controlada con el prototipo; mediciones de rendimiento sin video en desarrollo y producción local | **Sí**: textos de diseño o de ejemplo; **aprobación editorial pendiente** | **Conformidad visual de Juani (2026-10-18) sobre `5762076`, con rendimiento pendiente.** La revisión de rendimiento está hecha; falta que Juani confirme la fluidez y decida sobre la resolución adaptativa del agua | — |
@@ -314,6 +314,33 @@ Capturas: [verification/review-2026-10-19-art/](verification/review-2026-10-19-a
 **Aprobado por Juani:** pendiente.
 
 Capturas: [verification/review-2026-10-19-post/](verification/review-2026-10-19-post/).
+
+### About — módulo completo (2026-10-19)
+
+**Implementado**
+- Frase «We believe…» sin el tracking global de los h2 (el prototipo usa `normal`): vuelve a tres líneas.
+- Listas de las filas con interlineado `normal` como el prototipo (48 px por ítem; antes 59).
+- Una columna desde 860 px, como el prototipo. La primera fila muestra el texto antes de la foto y la segunda la foto antes del texto.
+  - **Para decidir:** el CSS del prototipo dice «la foto va siempre arriba del texto», pero solo lo aplica a la segunda fila. Se siguió el prototipo ejecutable.
+- Columnas y filas vacías no se muestran (antes quedaban huecos). Una fila sin título no deja un h3 vacío.
+- Ayudas en los campos de Page presentation → About page.
+
+**Verificado técnicamente**
+- Comparación con el prototipo en 1440, 1024 y 390 px (`d-sheet.jpg`, `t-sheet.jpg`, `m-sheet.jpg`): secciones con ±15 px en escritorio y misma composición en tablet y teléfono.
+- Edición desde el admin del título del banner y de la frase «We believe»: preview en vivo, la página pública sin cambios antes de guardar, guardar, recargar, página pública actualizada y valor original restaurado.
+- Enlaces a secciones: /art, /expeditions, /contact («Write to us →»), más el navbar.
+- Teléfono y movimiento reducido: sin desborde, sin contenido oculto, sin enlaces vacíos y sin errores.
+
+**Diferencias conocidas**
+- Fotos de ejemplo distintas a las del prototipo.
+- La fila de contacto (email, teléfono y redes) aparece solo con datos en Settings. En local está vacía; ver Contact.
+- El cierre usa el footer compartido.
+
+**Pendiente editorial:** cargar la presentación real (en la base real hoy se ve el texto importado).
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-about/](verification/review-2026-10-19-about/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

@@ -250,7 +250,7 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .about-row-text h3{font-size:clamp(1.8rem,3.6vw,3rem)!important;line-height:1.1!important;color:#08222f}
 .about-row-text>span{max-width:42ch;font-size:13px;line-height:1.6;letter-spacing:.06em;color:rgba(14,42,56,.68)}
 .about-row-text ol{list-style:none;margin:0;padding:0}
-.about-row-text li{display:flex;align-items:baseline;gap:14px;border-top:1px solid rgba(14,42,56,.18);padding:14px 0;font-size:clamp(15px,1.4vw,19px)}
+.about-row-text li{display:flex;align-items:baseline;gap:14px;border-top:1px solid rgba(14,42,56,.18);padding:14px 0;font-size:clamp(15px,1.4vw,19px);line-height:normal;margin:0}
 .about-row-text li:last-child{border-bottom:1px solid rgba(14,42,56,.18)}
 .about-row-text li span{font-family:ui-monospace,monospace;font-size:11px;color:#0f3b4c}
 .about-row-media{display:flex;flex-direction:column;gap:12px}
@@ -258,7 +258,7 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .about-row-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .about-row-media a{font-family:var(--font-display),Georgia,serif;font-style:italic;font-size:14px;color:rgba(14,42,56,.74)}
 .about-belief{padding-block:clamp(40px,8vh,100px) clamp(60px,12vh,140px);border-top:1px solid rgba(14,42,56,.18)}
-.about-belief h2{margin:0 auto!important;max-width:20ch;text-align:center;font-size:clamp(2rem,6vw,4.6rem)!important;line-height:1.06!important;color:#08222f}
+.about-belief h2{margin:0 auto!important;max-width:20ch;letter-spacing:normal!important;text-align:center;font-size:clamp(2rem,6vw,4.6rem)!important;line-height:1.06!important;color:#08222f}
 .about-belief em{color:#0f3b4c}
 .about-talk{background:#061826;color:#eaf5fa}
 .about-talk>div{max-width:1240px;margin:0 auto;padding:clamp(60px,12vh,150px) clamp(20px,5vw,72px) clamp(50px,9vh,110px);display:flex;flex-direction:column;gap:clamp(26px,5vh,50px)}
@@ -272,7 +272,10 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .about-contact-lines.is-light{border-color:rgba(14,42,56,.16)}.about-contact-lines.is-light span{color:rgba(14,42,56,.6)}
 .about-write{align-self:flex-start;font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:#8fd9ea!important}
 @media (max-width:1080px){.about-panel{grid-template-columns:1fr;gap:14px;overflow:auto}.about-panel p{font-size:13px!important}}
-@media (max-width:759px){.about-row{grid-template-columns:1fr}.about-row .about-row-media{order:2!important}.about-row .about-row-text{order:1!important}.about-credit{display:none}}
+/* About.dc.html ≤860: one column. As the executable prototype does, the first row keeps text above its photo
+   and the second puts the photo first (its CSS comment says "photo always on top"; see page-progress). */
+@media (max-width:860px){.about-row{grid-template-columns:minmax(0,1fr);gap:clamp(20px,4vh,34px)}.about-row--photo-first .about-row-media{order:-1}}
+@media (max-width:759px){.about-credit{display:none}}
 @media (prefers-reduced-motion:reduce){.about-hero{height:auto}.about-sticky{position:relative;height:auto}.about-frame{height:60vh!important}.about-main{margin-top:0}}
 
 /* ── Contact (Contact.dc.html, 02-animations § 12) ── */
