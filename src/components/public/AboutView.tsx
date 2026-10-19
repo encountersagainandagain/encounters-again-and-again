@@ -11,11 +11,13 @@ const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object
 const texts=(v:unknown)=>Array.isArray(v)?v.map(String).filter(Boolean):[];
 const fallbackGallery=['/design/about-1-turtle-web.jpg'];
 export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}){
-  if(!contact.email&&!contact.phone&&!contact.socials.length)return null;
+  if(!contact.email&&!contact.phone&&!contact.whatsapp&&!contact.donation&&!contact.socials.length)return null;
   return <div className={`about-contact-lines${dark?'':' is-light'}`}>
     {contact.email&&<div><span>Email</span><a href={`mailto:${contact.email}`}>{contact.email}</a></div>}
     {contact.phone&&<div><span>Phone</span><a href={`tel:${contact.phone.replace(/[^\d+]/g,'')}`}>{contact.phone}</a></div>}
+    {contact.whatsapp&&<div><span>WhatsApp</span><a href={contact.whatsapp} rel="noopener" target="_blank">Message us</a></div>}
     {contact.socials.length>0&&<div><span>Elsewhere</span><p>{contact.socials.map(([k,v])=><a key={k} href={v} rel="noopener" target="_blank">{k}</a>)}</p></div>}
+    {contact.donation&&<div><span>Support</span><a href={contact.donation.href} rel="noopener" target="_blank">{contact.donation.label} ↗</a></div>}
   </div>;
 }
 // About (About.dc.html, 02-animations § 5): the photo shrinks into a band while three columns rise

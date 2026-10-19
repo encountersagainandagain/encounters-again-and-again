@@ -33,7 +33,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí; plantilla compartida con la preview y créditos visibles (2026-10-19) | 2026-10-19 (recorrido del admin) | — | Pendiente (revisión visual de Juani) | — |
 | 7 | `/posts/[slug]` | `Post.dc.html` | Sí; todos los bloques del alcance | 2026-10-19: bloque por bloque contra el prototipo, editor de bloques desde el admin y plantilla compartida en los seis tipos (ver abajo) | Noticias y resultados reales | Pendiente (revisión visual de Juani) | — |
 | 8 | `/about` | `About.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390 y edición desde el admin (ver abajo) | Presentación completa (hoy: texto importado en remoto) | Pendiente (revisión visual de Juani) | — (vive en `site_settings`) |
-| 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
+| 9 | `/contact` | `Contact.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/390 y recorrido sin y con email desde Settings (ver abajo) | Email, WhatsApp, donación y redes reales en Settings | Pendiente (revisión visual de Juani) | — |
 | 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
 | 11 | `/` (Home v2) | `Abismo Home v2.dc.html` | Sí; fidelidad (`a4f98a6`) y rendimiento (2026-10-18, ver abajo) | Comparación controlada con el prototipo; mediciones de rendimiento sin video en desarrollo y producción local | **Sí**: textos de diseño o de ejemplo; **aprobación editorial pendiente** | **Conformidad visual de Juani (2026-10-18) sobre `5762076`, con rendimiento pendiente.** La revisión de rendimiento está hecha; falta que Juani confirme la fluidez y decida sobre la resolución adaptativa del agua | — |
 
@@ -342,6 +342,44 @@ Capturas: [verification/review-2026-10-19-post/](verification/review-2026-10-19-
 
 Capturas: [verification/review-2026-10-19-about/](verification/review-2026-10-19-about/).
 
+### Contact — módulo completo (2026-10-19)
+
+**Implementado**
+- **Settings** suma, sin cambiar el esquema (JSON de `site_settings`):
+  - **WhatsApp**: número internacional que se convierte en un enlace `wa.me`.
+  - **Página de donación**: solo `https://`, con su texto.
+  - Contact y About los muestran solo si están cargados, junto al email y las redes.
+- El formulario explica su acción:
+  - el botón dice **«Open my email app»**;
+  - debajo de la nota: «The button opens your email app with this message written to … Nothing is sent until you press send there.».
+- Ya no dice «Thank you for writing» ni nada que suene a enviado. Después de abrir la app de correo muestra:
+  - **«One more step · Send it from your email app»**, que explica que llega solo al pulsar enviar ahí;
+  - el texto del motivo elegido;
+  - «Open it again» con el mismo mensaje preparado;
+  - el email directo;
+  - «Edit the message», que vuelve al formulario con lo escrito.
+- Sin email: botón desactivado, explicación al visitante y mención de los otros caminos.
+- La nota de validación vuelve a su texto en cuanto se corrige un campo.
+- Ayuda del admin actualizada: el texto por motivo se llama «Text for this topic after the email app opens».
+
+**Verificado técnicamente** (recorrido con Settings desde el admin, valores originales restaurados)
+- Sin email: botón desactivado, explicación visible, sin «otros caminos» vacíos y ninguna frase de «enviado».
+- Con email `hello@example.com`, WhatsApp y donación de ejemplo:
+  - la validación pide nombre y email;
+  - se elige motivo y se abre la app de correo;
+  - destinatario `hello@example.com`, asunto = motivo («Workshops & talks»), cuerpo con nombre, email, lugar y mensaje;
+  - estado «One more step» sin palabras de envío; «Edit the message» conserva el texto;
+  - «otros caminos» y About muestran email, WhatsApp (`https://wa.me/61400000000`) y donación.
+- Comparación con el prototipo en 1440 y 390 px: misma composición del banner, panel, motivos, campos y pie.
+
+**Diferencias conocidas**
+- Botón «Open my email app» en vez de «Send message» y estado «One more step» en vez de «Message sent»: el sitio no envía (decisión del alcance).
+- En local no hay email cargado, así que el botón se ve desactivado y «otros caminos» oculto. Cargar email, WhatsApp y donación reales en Settings.
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-contact/](verification/review-2026-10-19-contact/).
+
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
 Las 14 primeras (hasta `20261006000100_art_crew_publication.sql`) ya están en la base real. Faltan, solo probadas en local:
@@ -479,7 +517,7 @@ Capturas: [verification/review-2026-10-17-crew-page/](verification/review-2026-1
 - **Workshops:** cada workshop publicado es un pin; los terminados o sin sesiones muestran «How it went» (campo nuevo `outcome`) y «See the result» si tienen resultado. El título de la nota es el campo nuevo `note_title`. Inscripción: botón solo si el estado es *open* y hay email de inscripción; si no, el detalle lleva a /contact.
 - **Meaningful Messages:** orden por *Order*; lados alternados por posición; ventanas con el ritmo del prototipo para cualquier cantidad.
 - **About y Contact:** su presentación vive en *Page presentation*. Mientras no se complete (título de About, temas de Contact) se muestra el texto importado. Email, teléfono y redes salen de Settings y **solo se muestran si existen**; no se inventa ninguno.
-- **Contact:** el sitio no envía nada. «Send message» abre la app de correo del visitante dirigida al email público, con los campos escritos; sin email el botón queda desactivado y lo explica.
+- **Contact:** el sitio no envía nada. «Open my email app» (antes «Send message») abre la app de correo del visitante dirigida al email público, con los campos escritos, y la página dice que falta enviarlo desde ahí. Sin email el botón queda desactivado y lo explica. Ver «Contact — módulo completo».
 - **Home:** orden y visibilidad de secciones en Page presentation → Home page; una sección que falte en un orden guardado vuelve a su lugar del diseño. Las listas salen de contenido publicado: agenda = expediciones y workshops próximos o en curso + anuncios que no sean uno de ellos (sin duplicados); historias = noticias y resultados más recientes, sin repetir lo que ya está en la agenda; arte = obras publicadas; tripulación = personas publicadas. **Publicar no destaca:** «Featured on Home» y su orden ponen un contenido primero. Secciones vacías se ocultan.
 - **Agua de Home:** se usó el «degradado animado equivalente» que permite 10-home.md § 4.2 (línea de agua que sube, cáusticas como textura celular, rayos). El shader WebGL no se replicó. Sí están el desenfoque del fondo, el velo, burbujas, profundímetro, HUD, nieve marina y morfeo del logo. **Las criaturas SVG (deseables, no bloqueantes) no se implementaron.**
 - **Newsletter:** solo registra suscripciones con consentimiento; los envíos siguen desactivados (`campaigns: false`).

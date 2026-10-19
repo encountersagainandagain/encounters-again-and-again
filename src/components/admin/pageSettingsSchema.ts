@@ -43,9 +43,9 @@ export const pageSchemas:PageSchema[]=[
     area('belief','Belief phrase','Large centred phrase before the contact. Empty: the section is hidden.'),t('belief_emphasis','Words in italics','Part of the phrase shown in italics.'),
     t('talk_title','Contact title','Default: Talk to us'),area('talk_body','Contact text','Email, phone and social links come from General and contact.'),
   ]},
-  {key:'contact',label:'Contact page',path:'/contact',store:'pages',lead:'The form appears once there is at least one topic. Messages are not sent by the site: the visitor’s email app opens addressed to the public contact email.',fields:[
+  {key:'contact',label:'Contact page',path:'/contact',store:'pages',lead:'Messages are not sent by the site: “Open my email app” opens the visitor’s email app with the message written to the public contact email (Settings), and the page says it still has to be sent there. Without that email the button is off. WhatsApp, donation and social links also come from Settings.',fields:[
     media('cover_id','Banner image','Default: the design image.'),t('title','Title','Default: Get in touch'),area('lead','Line under the title'),
-    t('topics_title','Topics question','Default: What are you writing about?'),list('topics','Topics',[t('title','Topic'),t('hint','Hint'),area('reply','Thank-you text for this topic')],6),
+    t('topics_title','Topics question','Default: What are you writing about?'),list('topics','Topics',[t('title','Topic'),t('hint','Hint'),area('reply','Text for this topic after the email app opens','e.g. We will tell you what the next crossing needs. Shown under “Send it from your email app”.')],6),
     t('note','Note beside the button','Default: No newsletters, no lists. Just us writing back.'),
     list('links','Other ways to reach us',[t('title','Label','e.g. Read the book'),t('label','Link text'),t('url','Link','Full address. Empty links are not shown.')],4),
   ]},

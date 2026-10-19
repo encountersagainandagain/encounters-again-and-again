@@ -39,6 +39,9 @@ export type SiteSettings = {
   description: string;
   email: string;
   phone: string;
+  whatsapp: string;
+  donationUrl: string;
+  donationLabel: string;
   logoLight: string;
   logoDark: string;
   logoFooter: string;
@@ -101,6 +104,9 @@ export const defaultSiteSettings: SiteSettings = {
   description: siteConfig.description,
   email: '',
   phone: '',
+  whatsapp: '',
+  donationUrl: '',
+  donationLabel: '',
   logoLight: '/images/brand/encounters-logo.png',
   logoDark: '/images/brand/encounters-logo.png',
   logoFooter: '/images/brand/encounters-logo.png',
