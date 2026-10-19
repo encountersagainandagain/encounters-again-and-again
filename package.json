@@ -21,7 +21,7 @@
     "demo:local:keep": "node scripts/demo-local.mjs keep",
     "demo:local:adopt": "node scripts/demo-local.mjs adopt",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
-    "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs"
+    "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs && node --experimental-strip-types scripts/check-round-2026-10-19.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
