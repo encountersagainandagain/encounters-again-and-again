@@ -31,7 +31,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 | 5b | `/workshops/[slug]` | Plantilla Post | Sí; inscripción independiente y campos opcionales (2026-10-18) | 2026-10-18 (recorrido del admin) | Ídem | Pendiente (revisión visual de Juani) | Ídem |
 | 6 | `/meaningful-messages` | `Meaningful Messages.dc.html` | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390, video, teclado, movimiento reducido, casos 0/1/varios y recorrido del admin (ver abajo) | Intro, crédito e ilustraciones reales | Pendiente (revisión visual de Juani) | — |
 | 6b | `/meaningful-messages/[slug]` | Plantilla Post | Sí; plantilla compartida con la preview y créditos visibles (2026-10-19) | 2026-10-19 (recorrido del admin) | — | Pendiente (revisión visual de Juani) | — |
-| 7 | `/posts/[slug]` | `Post.dc.html` | Sí; **todos los bloques del alcance** desde 2026-10-18 | Comparación con el prototipo (post demo con todos los bloques) | Noticias y resultados reales | Pendiente | — |
+| 7 | `/posts/[slug]` | `Post.dc.html` | Sí; todos los bloques del alcance | 2026-10-19: bloque por bloque contra el prototipo, editor de bloques desde el admin y plantilla compartida en los seis tipos (ver abajo) | Noticias y resultados reales | Pendiente (revisión visual de Juani) | — |
 | 8 | `/about` | `About.dc.html` | Sí | 2026-10-17 | Presentación completa (hoy: texto importado en remoto) | Pendiente | — (vive en `site_settings`) |
 | 9 | `/contact` | `Contact.dc.html` | Sí | 2026-10-17 | Temas, email y teléfono públicos | Pendiente | — |
 | 10 | Newsletter | Sin prototipo | Sí (envíos bloqueados) | 2026-10-17 | Texto | Pendiente | — |
@@ -283,6 +283,37 @@ Capturas: [verification/review-2026-10-19-messages/](verification/review-2026-10
 **Aprobado por Juani:** pendiente.
 
 Capturas: [verification/review-2026-10-19-art/](verification/review-2026-10-19-art/).
+
+### Plantilla Post — verificación completa (2026-10-19)
+
+**Implementado:** sin cambios de código en este módulo. Los bloques ya cumplían; las correcciones de esta ronda que tocan la plantilla están en Messages (`MessageView`) y en Art (video y audio).
+
+**Verificado técnicamente**
+- Bloque por bloque contra `Post.dc.html` a 1440 px, con cada bloque en la misma altura de pantalla y el movimiento asentado (`blocks/`). Igual composición en imagen grande, índice, heading con número y antetítulo, párrafo con lead, quick facts, dos imágenes, título + lista, cita, carrusel con flechas y contador, divisor, YouTube con miniatura y play, costos con total, link simple, FAQs y acordeón.
+- Diferencias de contenido: el post de ejemplo tiene menos filas de costos y preguntas y dos headings más. Las etiquetas al margen del prototipo son ayudas de revisión y no van a producción, como indica el handoff.
+- Bloques fuera de alcance (tour/centro de buceo, afiliados, alojamiento) siguen desactivados.
+- Editor de bloques desde el admin, en verde:
+  - crear una noticia con heading, párrafo y cita;
+  - mover la cita al primer lugar, duplicar el párrafo y quitar la copia;
+  - guardar borrador (404 público) y recargar con el mismo orden y los mismos textos;
+  - editar, y revisar la preview visual y la Full preview en ese orden;
+  - publicar sin destacar; la página pública mantiene el orden;
+  - despublicar: 404 y fuera del sitemap.
+- La plantilla compartida conserva lo propio de cada tipo:
+  - resultados con el enlace a su expedición o workshop;
+  - expedición con datos y necesidades;
+  - workshop con sesiones, qué llevar y resultado;
+  - mensaje con ilustración y vuelta;
+  - obra con autores y roles;
+  - personas acreditadas donde existen.
+  - En teléfono con movimiento reducido: sin desborde, sin contenido oculto, sin enlaces vacíos y sin errores de consola.
+- Crew y perfiles conservan su renderizador aprobado (sin cambios).
+
+**Ejemplos locales:** «Post with every block (demo)», los resultados de ejemplo y «UI journey news (demo)», creada desde el admin y adoptada (en borrador).
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-post/](verification/review-2026-10-19-post/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
