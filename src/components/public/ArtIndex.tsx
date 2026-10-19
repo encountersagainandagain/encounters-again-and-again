@@ -13,8 +13,11 @@ export function ArtIndex({categories,cards,sections}:{pathPrefix?:string;categor
 // over the edges that only show where there is more to see, and a counter. The native scrollbar is hidden.
 function CategoryRail({children,count}:{children:ReactNode[];count:number}){
   const rail=useRef<HTMLDivElement>(null);const [state,setState]=useState({prev:false,next:true,first:1,last:4});
-  const measure=()=>{const r=rail.current;if(!r)return;const slide=(r.firstElementChild as HTMLElement|null)?.offsetWidth||1;const step=slide+1;const first=Math.round(r.scrollLeft/step);setState({prev:r.scrollLeft>4,next:r.scrollLeft+r.clientWidth<r.scrollWidth-4,first:first+1,last:Math.min(count,first+Math.round(r.clientWidth/step))});};
-  useEffect(()=>{measure();addEventListener('resize',measure);return()=>removeEventListener('resize',measure);});
+  const measure=()=>{const r=rail.current;if(!r)return;const slide=(r.firstElementChild as HTMLElement|null)?.offsetWidth||1;const step=slide+1;const first=Math.round(r.scrollLeft/step);const next={prev:r.scrollLeft>4,next:r.scrollLeft+r.clientWidth<r.scrollWidth-4,first:first+1,last:Math.min(count,first+Math.round(r.clientWidth/step))};
+    // Only a real change re-renders; an unchanged measure must not loop.
+    setState(old=>old.prev===next.prev&&old.next===next.next&&old.first===next.first&&old.last===next.last?old:next);};
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(()=>{measure();addEventListener('resize',measure);return()=>removeEventListener('resize',measure);},[count]);
   const move=(dir:number)=>{const r=rail.current;if(!r)return;const slide=(r.firstElementChild as HTMLElement|null)?.offsetWidth||r.clientWidth;r.scrollBy({left:dir*(slide+1),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});};
   return <section className="category-rail" aria-label="Art categories" data-prev={state.prev} data-next={state.next}>
     <div ref={rail} className="category-rail-track" onScroll={measure}>{children.map((child,i)=><div className="category-rail-slide" key={i}>{child}</div>)}</div>

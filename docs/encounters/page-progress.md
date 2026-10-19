@@ -24,7 +24,7 @@ Categorías: **Implementado** (el código existe) · **Verificado** (comprobado 
 |---|---|---|---|---|---|---|---|
 | 1 | `/crew` | `The Crew.dc.html` | Sí; secciones explícitas | 2026-10-17; 3218 sin cambios (8762 px) el 2026-10-18 | — | **Aprobada** la versión `cbea565` (2026-10-13). Las secciones editables (`ed1322d`) no cambian el aspecto y esperan revisión del editor | `20261017000100` |
 | 2 | `/crew/[slug]` | `Wild Wonders.dc.html` | Sí; **secciones explícitas** desde 2026-10-18 (`e673a7a`) | Equivalencia con la lectura aprobada sobre los bloques de Wild Wonders del snapshot + 5 casos (`npm test`); 3218 idéntico (7654 px, mismo HTML); perfiles locales convertidos con el mismo HTML | — | Wild Wonders **aprobado** (2026-10-14, con la plantilla anterior a las secciones explícitas). El editor de secciones del perfil es nuevo: **revisar el editor**, no el aspecto | Convertir el perfil real (abrir y guardar en el admin, o script) |
-| 3 | `/art`, categoría, obra | `Art.dc.html` (+ `Post.dc.html`) | Sí; el cuerpo de la obra usa ahora los bloques de Post | 2026-10-16; obra con bloques 2026-10-18 | Obras reales | Pendiente (cambió el cuerpo de la obra: revisar esa parte) | — |
+| 3 | `/art`, categoría, obra | `Art.dc.html` (+ `Post.dc.html`) | Sí; módulo completo (2026-10-19) | 2026-10-19: prototipo 1440/1024/390, carrusel, filtros, teclado, movimiento reducido y recorrido del admin (ver abajo) | Obras reales | Pendiente (revisión visual de Juani) | — |
 | 4 | `/expeditions` | `Expeditions.dc.html` | Sí; módulo completo (`175a101`) | 2026-10-18: prototipo 1440/390 y recorrido del admin (ver abajo) | Cards reales del programa | Pendiente (revisión visual de Juani) | `20261017000200` (opcional para la página) |
 | 4b | `/expeditions/[slug]` | Plantilla Post | Sí | 2026-10-18 (recorrido del admin) | Expediciones reales | Pendiente (revisión visual de Juani) | `20261017000200` (`outcome`) |
 | 5 | `/workshops` | `Workshops.dc.html` | Sí; módulo completo (2026-10-18) | 2026-10-18: prototipo 1440/1024/390, teclado, movimiento reducido y recorrido del admin (ver abajo) | Workshops reales | Pendiente (revisión visual de Juani) | `20261017000200` (`note_title`, `outcome`) |
@@ -250,6 +250,39 @@ Capturas: [verification/review-2026-10-18-workshops/](verification/review-2026-1
 **Aprobado por Juani:** pendiente.
 
 Capturas: [verification/review-2026-10-19-messages/](verification/review-2026-10-19-messages/).
+
+### Art — módulo completo (2026-10-19)
+
+**Implementado**
+- Galería como el prototipo (Drawings): dos obras que ocupan las columnas libres junto a una obra de alto completo se apilan ahí a media altura, en vez de pasar a la fila siguiente.
+- Video sin imagen propia: usa la miniatura de YouTube, en la obra y en su tile de categoría, como el prototipo. El reproductor carga recién al click.
+- Audio: el reproductor de Spotify es una tarjeta de 352 px, no un cuadro de video. Cada obra de la categoría es un episodio. Carga al click.
+- Teléfono, según el prototipo: el banner con sus medidas de escritorio, tiles de 74vh y obras de alto completo a pantalla menos navbar. Con eso, banner y tiles coinciden al píxel (358 px y 625 px).
+- Carrusel (más de 4 categorías): **corregido un bucle de renders** («Maximum update depth exceeded») que además cortaba el scroll al elegir un tile.
+- La preview de una categoría la numera como quedará publicada.
+- `demo:local:adopt` acepta también categorías de arte.
+
+**Verificado técnicamente**
+- Comparación con el prototipo en 1440, 1024 y 390 px, con las mismas 4 categorías: igual en banner, tiles, chips, secciones, galería, libro, video y cierre (`d-sheet.jpg`, `t-sheet.jpg`, `m-sheet.jpg`). Las otras 4 categorías se dejaron temporalmente en borrador y se restauraron.
+- Con 8 categorías: carrusel con contador «01–04 / 08» → «02–05 / 08». El tile filtra y lleva a su sección, los chips filtran y «All» vuelve a mostrar las 8. Teclado con foco visible en chips, obras y CTA. Movimiento reducido sin nada oculto. Sin desborde en teléfono ni errores de consola.
+- Audio (`audio.jpg`): comprobado publicando temporalmente la categoría de ejemplo con un embed, y restaurado después.
+- Recorrido desde el admin, en verde:
+  - Categoría nueva: borrador privado (404 y fuera de /art), recargar, preview, publicar vacía («No published works in this collection yet.»), chip en /art.
+  - Obra con **dos autores** (Drawing y Colour): borrador privado, recargar con los dos autores, preview «By … · Drawing, … · Colour», publicar sin destacar.
+  - Aparece en la categoría, en la página de la obra con migas y autores enlazados, y **en los dos perfiles**.
+  - Despublicar la obra la quita de la categoría y de los perfiles.
+  - Despublicar la categoría deja 404 en la categoría y en su obra, la saca de /art, de los perfiles y del sitemap.
+
+**Ejemplos locales:** las 8 categorías del seed (Books, Films, Drawings, Photography, Wire art, Field notes, Sound notes en borrador, y las de prueba local). Además, «Tide pools (demo)» (categoría en borrador) y «Rock pool study (demo)» (obra con dos autores), creadas desde el admin y adoptadas.
+
+**Diferencias conocidas**
+- Las obras llevan el pie `[ título ]` que abre su página; el prototipo no lo tiene (función requerida). Suma unos 30 px por obra.
+- Los nombres de ejemplo llevan «(demo)».
+- Las flechas del carrusel aparecen solo donde hay más para ver (decisión anterior, sin cambios).
+
+**Aprobado por Juani:** pendiente.
+
+Capturas: [verification/review-2026-10-19-art/](verification/review-2026-10-19-art/).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 

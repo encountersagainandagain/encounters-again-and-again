@@ -22,13 +22,22 @@ export function Responsible({postId,data,pathPrefix=''}:{postId:string;data:Edit
 
 // A work as the prototype shows it: a framed image and a monospace caption that opens the work.
 export function ArtworkCards({posts,data,layout='gallery',pathPrefix=''}:{posts:ContentRow[];data:EditorialData;layout?:string;pathPrefix?:string}) {
-  return <div className={`art-works layout-${layout}`}>{posts.map((post,i)=>{const art=data.artworks.find(a=>a.id===post.id)||{};const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
-    const span=layout==='gallery'?Math.min(6,Math.max(1,Number(art.span)||3)):layout==='feature'||layout==='more'?3:6;const tall=layout==='gallery'?art.full_height===true:layout!=='more';
+  const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const spanOf=(post:ContentRow)=>Math.min(6,Math.max(1,Number(artOf(post).span)||3));
+  const card=(post:ContentRow,i:number,half=false)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
+    const span=layout==='gallery'?spanOf(post):layout==='feature'||layout==='more'?3:6;const tall=layout==='gallery'?art.full_height===true:layout!=='more';
     const frame=layout==='video'&&art.embed_kind==='youtube'?<VideoFrame id={art.embed_id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
-    return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}`} style={{gridColumn:`span ${span}`}} data-seq={`${i%2?.86:1},0.45`}>
+    return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}${half?' art-work--half':''}`} style={half?undefined:{gridColumn:`span ${span}`}} data-seq={half?undefined:`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
       <figcaption><Link href={href}>[ {post.title} ]</Link>{layout==='audio'&&art.embed_kind?<MediaEmbed kind={art.embed_kind} id={art.embed_id}/>:null}</figcaption>
-    </figure>;})}</div>;
+    </figure>;};
+  // Gallery (Art.dc.html, Drawings): up to two works that fill the columns left beside a full-height work
+  // stack there at half height each, instead of wrapping to the next row.
+  const items:ReactNode[]=[];
+  for(let i=0;i<posts.length;i++){const post=posts[i];const art=artOf(post);const rest=6-spanOf(post);
+    if(layout==='gallery'&&art.full_height===true&&rest>0){const stack=[];let j=i+1;while(stack.length<2&&j<posts.length&&artOf(posts[j]).full_height!==true&&spanOf(posts[j])===rest&&artworkPath(posts[j],data.artworks,data.categories)){stack.push(posts[j]);j++;}
+      if(stack.length===2){items.push(card(post,items.length));items.push(<div key={`stack-${post.id}`} className="art-stack" style={{gridColumn:`span ${rest}`}} data-seq={`${items.length%2?.86:1},0.45`}>{stack.map(p=>card(p,0,true))}</div>);i=j-1;continue;}}
+    items.push(card(post,items.length));}
+  return <div className={`art-works layout-${layout}`}>{items}</div>;
 }
 export function CategoryIntro({category,number,pathPrefix='',link=true}:{category:Row;number:string;pathPrefix?:string;link?:boolean}){
   const title=string(category.title)||string(category.name);
@@ -45,7 +54,9 @@ export function CategorySection({category,posts,data,pathPrefix='',link=true}:{c
 }
 // Category entry tile: the cover, or the first work when the category has no cover.
 export function CategoryTile({category,number,image,data}:{category:Row;number:string;image:unknown;data:EditorialData}){
-  return <>{image?<MediaImage id={image} media={data.media} contain={category.layout==='feature'}/>:null}<span><small>{number}</small>{string(category.name)}</span></>;
+  // No cover and no image in the first work: a YouTube work lends its thumbnail, as the prototype's Films tile.
+  const video=!image&&category.layout==='video'?data.artworks.find(a=>a.category_id===category.id&&a.embed_kind==='youtube'&&/^[\w-]{11}$/.test(String(a.embed_id))&&data.posts.some(p=>p.id===a.id)):null;
+  return <>{image?<MediaImage id={image} media={data.media} contain={category.layout==='feature'}/>:video?<img src={`https://img.youtube.com/vi/${String(video.embed_id)}/maxresdefault.jpg`} alt="" loading="lazy"/>:null}<span><small>{number}</small>{string(category.name)}</span></>;
 }
 export function tileImage(category:Row,posts:ContentRow[],data:EditorialData){const first=posts[0];return category.cover_id||(first&&(data.artworks.find(a=>a.id===first.id)?.media_id||first.cover_id))||null;}
 

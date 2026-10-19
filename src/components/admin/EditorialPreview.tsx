@@ -8,7 +8,7 @@ import {CrewView} from '@/components/public/CrewView';
 import {PhotoHero} from '@/components/public/EditorialPieces';
 import {MediaEmbed} from '@/components/public/EditorialInteractive';
 import {ActivityView,MessageView,PostView} from '@/components/public/PostView';
-import {string,type Row} from '@/features/encounters/presentation';
+import {byOrder,string,type Row} from '@/features/encounters/presentation';
 import type {ContentBlock,ContentRow} from '@/features/encounters/public-content';
 import type {EditorialData} from '@/features/encounters/editorial-data';
 
@@ -50,10 +50,10 @@ export function EditorialPreview({record,blocks,detail,media,crew=[],categories=
 }
 // Art category: its public section with the published works it already has.
 export function CategoryPreview({record,media,posts=[],artworks=[],crew=[],categories=[],contributors=[]}:{record:Row;media:Row[];posts?:Row[];artworks?:Row[];crew?:Row[];categories?:Row[];contributors?:Row[]}){
-  const category={...record,status:'published'};
+  const category:Row={...record,status:'published'};
   const works=posts.filter(p=>p.kind==='artwork'&&p.status==='published'&&artworks.some(a=>a.id===p.id&&a.category_id===record.id)) as ContentRow[];
   const ids=JSON.stringify([record.cover_id,...works.map(w=>[w.cover_id,artworks.find(a=>a.id===w.id)?.media_id])]);
   const {images,error}=usePreviewImages(media,ids);
-  const data={posts:works,categories:[category,...categories.filter(c=>c.id!==record.id)],artworks,crew,contributors,relations:[],media:images,settings:{}} as unknown as EditorialData;
+  const data={posts:works,categories:[category,...categories.filter(c=>c.id!==record.id&&c.status==='published')].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)||byOrder(a,b)),artworks,crew,contributors,relations:[],media:images,settings:{}} as unknown as EditorialData;
   return <section aria-label="Visual preview" className="editorial-page art-page"><p className="p-4" role="status">Preview · unsaved changes · only published works are listed · {error}</p><CategorySection category={category} posts={works} data={data} link={false}/></section>;
 }

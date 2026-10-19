@@ -3,7 +3,7 @@
 //   npm run demo:local:plan            list what a cleanup would delete, and what it keeps
 //   npm run demo:local:clean -- --confirm   delete the demo records listed by the plan
 //   npm run demo:local:keep -- <id>    keep one demo record as your own content (excluded from cleanup)
-//   npm run demo:local:adopt -- <id>   make content created from the admin a local example (included in plan/clean)
+//   npm run demo:local:adopt -- <id>   make content or an art category created from the admin a local example (included in plan/clean)
 // Every record uses a stable id starting with de000000-, so re-running is safe and cleanup is exact.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -205,7 +205,7 @@ const siteSettings={pages:{
   projects:{expeditions:{status_label:'Sail boat | In refit',body:'We take people to the sea, document what lives there and support the crews already protecting it.'},messages:{status_label:'Books & films | Free to read',body:'Little big books, short films and fanzines — made to be given away, not sold.'}},
   about:{kicker:'About us',line:'To connect people with nature, again and again.',body:'Demo text for the About block of Home. Edit it in Site → Home.'},
   newsletter:{title:'Letters from the water',body:'Demo text. Subscriptions are only recorded; no email is sent from the site.'}}};
-const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id),...sitePosts.map(p=>p.id),...adopted],categories:categories.map(c=>c.id),cards:cards.map(c=>c.id),upcoming:announcements.map(a=>a.id)};
+const demoIds={media:media.map(m=>m.id),crew:crew.map(c=>c.id),posts:[teamPage.id,...crew.map(c=>c.page),...works.map(w=>w.id),...sitePosts.map(p=>p.id),...adopted],categories:[...categories.map(c=>c.id),...adopted],cards:cards.map(c=>c.id),upcoming:announcements.map(a=>a.id)};
 
 async function exists(table,ids){const rows=await ok(db.from(table).select('id').in('id',ids));return new Set(rows.map(r=>r.id));}
 async function seed(){
@@ -306,8 +306,9 @@ else if(command==='clean'){if(arg!=='--confirm'){console.log('Dry run. Review th
 else if(command==='adopt'){
   // Marks content created from the admin as a local example: it is labelled demo and the plan and clean
   // commands include it (keep still protects it).
-  assert(arg,'Pass the id of the content to adopt.');const post=(await ok(db.from('posts').select('id,title,source_metadata').eq('id',arg)))[0];assert(post,'No content with that id in the local CMS.');
-  await ok(db.from('posts').update({source_metadata:{...(post.source_metadata||{}),demo:true,adopted:true}}).eq('id',arg));
+  // An art category created from the admin can be adopted too (its id joins the category list of plan/clean).
+  assert(arg,'Pass the id of the content to adopt.');const post=(await ok(db.from('posts').select('id,title,source_metadata').eq('id',arg)))[0]||(await ok(db.from('art_categories').select('id,name').eq('id',arg))).map(c=>({...c,title:c.name,category:true}))[0];assert(post,'No content or art category with that id in the local CMS.');
+  if(!post.category)await ok(db.from('posts').update({source_metadata:{...(post.source_metadata||{}),demo:true,adopted:true}}).eq('id',arg));
   if(!adopted.includes(arg))adopted.push(arg);await mkdir('.encounters-work',{recursive:true});await writeFile(adoptPath,JSON.stringify(adopted,null,2)+'\n');
   console.log(`Adopted “${post.title}” (${arg}) as a local example.`);
 }else if(command==='keep'){

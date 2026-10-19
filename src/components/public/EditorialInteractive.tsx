@@ -81,7 +81,8 @@ export function VideoFrame({id,title,children}:{id:unknown;title:string;children
   const [open,setOpen]=useState(false);
   if(typeof id!=='string'||!/^[\w-]{11}$/.test(id))return <>{children}</>;
   if(open)return <iframe className="art-video" title={title} src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>;
-  return <button type="button" className="art-play" onClick={()=>setOpen(true)} aria-label={`Play ${title}`}>{children}<span aria-hidden="true">▶</span></button>;
+  // Without an image of its own, the video shows YouTube's thumbnail, as in the prototype.
+  return <button type="button" className="art-play" onClick={()=>setOpen(true)} aria-label={`Play ${title}`}>{children||<img src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy"/>}<span aria-hidden="true">▶</span></button>;
 }
 export function MediaEmbed({kind,id}:{kind:unknown;id:unknown}) {
   const [open,setOpen]=useState(false);
