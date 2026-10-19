@@ -18,6 +18,8 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 ## Estado al 2026-10-18
 
+**Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
+
 Categorías: **Implementado** (el código existe) · **Verificado** (comprobado en local con capturas o recorridos) · **Pendiente de contenido** (falta cargar datos reales; lo que se ve son textos del diseño o ejemplos locales) · **Pendiente de aprobación visual** (solo Juani aprueba) · **Pendiente en la base remota** (migración o datos por aplicar con aprobación).
 
 | # | Ruta | Prototipo | Implementado | Verificado | Pendiente de contenido | Aprobación visual | Pendiente en remoto |
@@ -412,6 +414,35 @@ Capturas: [verification/review-2026-10-19-contact/](verification/review-2026-10-
 **Aprobado por Juani:** pendiente.
 
 Capturas: [verification/review-2026-10-19-newsletter/](verification/review-2026-10-19-newsletter/).
+
+### Verificación integrada (2026-10-19)
+
+- **Recorrido completo del sitio**, en desarrollo (3219) y en producción local (3221, build de `4bad594`). Parte de /, el sitemap, el navbar y el footer y sigue todos los enlaces internos:
+  - 51 páginas, todas 200;
+  - ningún enlace vacío o roto ni errores de consola;
+  - todas con `noindex`;
+  - ninguna con desborde en teléfono.
+- **Relaciones:** obras ↔ autores (los dos perfiles), actividades ↔ resultados (en los dos sentidos), facilitadores y participantes ↔ perfiles, mensajes ↔ créditos. Todo comprobado en los recorridos de cada módulo y por el recorrido completo.
+- **Home** (desde el admin; todo restaurado):
+  - publicar no destaca;
+  - «Featured on Home» con orden 1 lleva un workshop al primer lugar de la agenda, y al desmarcarlo vuelve al orden por fecha;
+  - en Home page, subir «Who is on board» dos lugares cambia el orden;
+  - ocultar una sección la quita;
+  - sin actividades próximas ni anuncios, la agenda desaparece sin hueco.
+- **Ida y vuelta** por el navbar (navegación del cliente) y con Atrás y Adelante:
+  - cada página arranca arriba con su título visible;
+  - los loops de animación no se acumulan (60 o 120 llamadas por segundo según la página, estables tras volver);
+  - sin errores.
+  - Las páginas con 120 tienen dos loops por diseño: el de la página y el compartido de apariciones.
+- **Regresiones:**
+  - The Crew 8762 px y Wild Wonders 7654 px en 3218, igual que lo aprobado;
+  - perfiles locales sin desborde;
+  - los cambios de esta ronda están acotados a las clases de cada página (Messages, Art, About, Contact).
+- **Observación de entorno:** durante una lentitud de la máquina (respuestas de 38 s), una consulta superó el límite local de 3 s del rol `anon` (código 57014) y /expeditions mostró su estado de error («Unable to load this page»). No se repitió en 5 intentos (menos de 0,5 s). Nada que corregir en el código. El estado de error se ve correctamente.
+- **Chequeos:** TypeScript, lint, `npm test` (5 suites, incluida la nueva de esta ronda: ventanas de Messages para 1 a 12 mensajes y datos de contacto desde Settings) y build de producción. La prueba nueva encontró y dejó corregidos dos bordes de Messages con muchos mensajes (salida antes de terminar la entrada desde 6; salida fuera del pin con 11).
+- El build de producción reescribe `tsconfig.json` y `next-env.d.ts` para su carpeta (`.next-cms-prod`). Se restauraron y no se versionan.
+
+**Guía para Juani:** [revision-integrada.md](revision-integrada.md).
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
