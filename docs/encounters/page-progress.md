@@ -20,6 +20,25 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
 
+**Ejemplos de revisión (2026-10-20):** el CMS local tiene tres ejemplos ficticios por tipo, relacionados entre sí y con fechas relativas a la carga.
+- Uno de cada tipo se creó o completó desde el admin.
+- Están marcados con «Example» en el admin y con una nota en el pie del sitio local.
+- Gestión: `demo:local:seed / tidy / untidy / plan / clean / keep / adopt`. La limpieza respeta ediciones manuales e imágenes compartidas.
+- Tabla y enlaces en [revision-integrada.md](revision-integrada.md#ejemplos-de-revisión-2026-10-20).
+
+Fallos corregidos con estos datos:
+- Los avisos de Home que apuntaban a una obra o a un mensaje enlazaban a `/posts/…`, que no existe.
+- Una expedición en curso no mostraba su actualización, aunque la ayuda del admin lo prometía.
+- El crédito de la página de Messages atribuía mensajes ficticios a personas reales.
+
+Verificado:
+- 30 de 30 páginas responden, sin enlaces rotos ni errores de consola, con noindex y sin desborde en teléfono;
+- relaciones en las dos direcciones;
+- orden y destacados de Home;
+- 7 vistas previas completas;
+- la carga es idempotente;
+- lint, TypeScript y 6 suites de tests pasan.
+
 Categorías: **Implementado** (el código existe) · **Verificado** (comprobado en local con capturas o recorridos) · **Pendiente de contenido** (falta cargar datos reales; lo que se ve son textos del diseño o ejemplos locales) · **Pendiente de aprobación visual** (solo Juani aprueba) · **Pendiente en la base remota** (migración o datos por aplicar con aprobación).
 
 | # | Ruta | Prototipo | Implementado | Verificado | Pendiente de contenido | Aprobación visual | Pendiente en remoto |
