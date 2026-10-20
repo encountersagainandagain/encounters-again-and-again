@@ -26,10 +26,12 @@ export function homeView(data:HomeData){
   // What is coming: upcoming and running expeditions and workshops, plus announcements that are not one of them.
   const list=activities(data).filter(isUpcoming).sort((a,b)=>featuredFirst(a.post,b.post)||string(a.detail.starts_on||'9999').localeCompare(string(b.detail.starts_on||'9999'))||byOrder(a.post,b.post));
   const agenda:AgendaItem[]=list.map(a=>({key:string(a.post.id),type:a.kind==='workshop'?'Workshop':'Expedition',chip:string(a.detail.availability_label),date:dateLabel(a.detail),title:string(a.post.title),place:string(a.detail.place),detail:string(a.post.meta_line)||string(a.post.subtitle),cta:string(a.detail.cta_label)||(a.kind==='workshop'?'Join this workshop':'Ask about this expedition'),href:a.path,image:a.post.cover_id}));
+  // Each kind of linked content has its own address; content without a public page is not announced.
+  const linkOf=(post:Row)=>post.kind==='expedition'||post.kind==='workshop'?activityPath(post):post.kind==='artwork'?artworkPath(post,data.artworks,data.categories):post.kind==='message'?`/meaningful-messages/${string(post.slug)}`:string(post.kind) in {news:1,expedition_report:1,workshop_report:1}?`/posts/${string(post.slug)}`:null;
   for(const u of data.upcoming||[]){
     if(u.post_id&&list.some(a=>a.post.id===u.post_id))continue;
-    const post=u.post_id?data.posts.find(p=>p.id===u.post_id&&p.status==='published'):null;if(u.post_id&&!post)continue;
-    agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on}),title:string(u.title)||string(post?.title),place:'',detail:string(u.body),cta:post?'Read more':'',href:post?(post.kind==='expedition'||post.kind==='workshop'?activityPath(post):`/posts/${string(post.slug)}`):null,image:u.media_id||post?.cover_id});
+    const post=u.post_id?data.posts.find(p=>p.id===u.post_id&&p.status==='published'):null;const href=post?linkOf(post):null;if(u.post_id&&!href)continue;
+    agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on}),title:string(u.title)||string(post?.title),place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id});
   }
   const shown=new Set(agenda.map(a=>a.key));
   const limit=Math.max(2,Math.min(6,Number(home.upcoming_limit)||4));

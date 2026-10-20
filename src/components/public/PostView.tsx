@@ -47,7 +47,7 @@ export function ActivityView({activity:a,blocks,media,needs,sessions,people,trai
       {string(post.excerpt)&&<p className="editorial-lead">{string(post.excerpt)}</p>}
       {finished&&string(detail.outcome)&&<div className="activity-outcome"><span>How it went</span><p>{string(detail.outcome)}</p></div>}
       {action&&<a className="editorial-button" href={action}>{actionLabel} →</a>}
-      {finished&&a.result&&<Link className="editorial-button" href={`/posts/${string(a.result.slug)}`}>See the result →</Link>}
+      {a.result&&<Link className="editorial-button" href={`/posts/${string(a.result.slug)}`}>{finished?'See the result':'Read the latest update'} →</Link>}
     </section>}>
     {a.kind==='workshop'&&(string(detail.note_title)||string(detail.audience_note))&&<section className="activity-note" data-seq="0.94,0.4"><h2>{string(detail.note_title)||'Who it is for'}</h2>{string(detail.audience_note)&&<p>{string(detail.audience_note)}</p>}</section>}
     {sessions.length>0&&<section className="activity-sessions" aria-labelledby="sessions-title"><h2 id="sessions-title" data-seq="0.96,0.4">Sessions</h2><ol>{sessions.map((s,i)=><li key={string(s.id)} data-seq="0.94,0.4"><span className="activity-session-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{(string(s.place)||string(s.held_on))&&<small>{[dateLabel({starts_on:s.held_on}),string(s.place)].filter(Boolean).join(' · ')}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</li>)}</ol></section>}

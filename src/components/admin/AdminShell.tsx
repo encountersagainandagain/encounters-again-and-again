@@ -61,6 +61,13 @@ export function AdminHeader({kicker,title,lead,children}:{kicker?:string;title:s
   return <header className="adm-head"><div>{kicker&&<span className="adm-kicker">{kicker}</span>}<h1>{title}</h1>{lead&&<p className="adm-lead">{lead}</p>}</div>{children&&<div className="adm-actions">{children}</div>}</header>;
 }
 
+// Fictional examples of the local demo set (scripts/demo-local.mjs): their ids start with de000000-, and
+// content adopted from the admin is marked in its metadata.
+export function ExampleBadge({row}:{row:Record<string,unknown>}){
+  const meta=row.source_metadata as {demo?:unknown}|null|undefined;
+  return meta?.demo!==false&&(String(row.id||'').startsWith('de000000-')||meta?.demo===true)?<span className="adm-badge adm-badge--plain" title="Fictional example of the local demo set. It can be edited, kept or cleaned up with npm run demo:local:plan.">Example</span>:null;
+}
+
 export function StatusBadge({status}:{status:unknown}){
   const value=String(status||'draft');
   return <span className={`adm-badge adm-badge--${value==='published'?'published':value==='draft'?'draft':'plain'}`}>{value==='published'?'Published':value==='draft'?'Draft':value}</span>;
