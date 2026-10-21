@@ -20,6 +20,62 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
 
+**Correcciones de la revisión manual (2026-10-20, producción local `51f2ec6`):** causa, solución y pendientes de cada punto. Videos en `.encounters-work/videos-2026-10-20/` (no versionados): `navbar-new-page-at-top`, `home-descent`, `about-banner-desktop`, `about-banner-phone`, `messages-read-link`.
+
+1. **Home: tirones durante el scroll.**
+   - *Medición:* Chrome con GPU real, densidad 2, por sección y en recorridos lento, rápido y hacia atrás. Solo había trabas en el descenso desde el hero: dos frames de ~265 ms y hasta 14 frames de más de 33 ms. El resto de las secciones iba a 60 fps. No se acumulan listeners ni bucles al navegar (60 rAF/s y la misma cantidad de listeners tras 3 vueltas).
+   - *Causa (confirmada aislando cada capa):*
+     - la foto de fondo, de pantalla completa, se re-filtraba en cada frame (`blur` de 0 a 11 px, `brightness`, `saturate`) debajo del agua WebGL;
+     - el `blur` del título también abarcaba su halo radial de 900 px × 150 %;
+     - el shader del agua calculaba agua y arena en cada píxel, aunque su propio `mix()` descarta una de las dos.
+   - *Solución:*
+     - el fondo funde dos copias desenfocadas una sola vez (4 y 11 px) y suma un velo negro para el brillo;
+     - el `blur` se aplica solo a las palabras;
+     - el shader calcula únicamente el lado que se ve: misma imagen (como máximo 1/255 en el 0,06 % de los canales) y entre 30 % y 70 % más barato.
+     - Tiempos, efectos y resolución adaptativa sin cambios.
+   - *Resultado:* con la escala recordada, el recorrido completo da 0 frames de más de 33 ms (antes, 11–21 en el hero, con picos de 133–267 ms).
+   - *Compromiso visual:* el desenfoque intermedio del fondo es una mezcla de dos desenfoques fijos, no un radio continuo. En la comparación lado a lado no se distingue.
+   - *Pendiente:* en la primera visita con pantalla densa, el regulador ajusta la escala una vez (2–7 frames lentos) y después la recuerda. Que tu pantalla se sienta fluida lo decidís vos.
+2. **About: el banner avanzaba demasiado rápido.**
+   - *Causa:* cada foto cambiaba al avanzar un 2 % del largo total de la página, unos 80 px (0,09 de pantalla). Las cuatro pasaban en un cuarto de pantalla.
+   - *Solución:* cada foto dura 0,186 de pantalla (el doble), medida en pantallas y no en largo de página. La cuarta llega a 0,56, antes de que el papel cubra la banda (0,86 en escritorio, 1,0 en teléfono).
+   - Orden, composición, cortes, velocidad de rueda y táctil y versión con movimiento reducido sin cambios.
+   - *Pendiente:* evaluar el ritmo vos. Para alargarlo más habría que extender también el tramo fijado.
+3. **Crew: faltaban las fotos.**
+   - *Causa:* la base local nunca tuvo a los seis integrantes importados, porque se sembró con fixtures y ejemplos. Por eso `/crew` mostraba solo a Flaquito y a los tres ficticios. No era un problema de estilos ni de carga. En la base real (3218) las seis fotos responden 200.
+   - *Solución:* `npm run crew:local:restore` (solo local; simula por defecto y aplica con `-- --apply`).
+     - Toma las seis personas del Team del snapshot con el mismo mapeo, IDs y rutas que el importador.
+     - Sube los 6 retratos al Storage local, con el bucket privado sin cambios.
+     - Crea las 6 fichas, sin duplicar ni tocar a los ficticios.
+     - Es idempotente.
+   - *Pendiente:*
+     - el retrato de Georgia Webb es de 236×315 en la fuente, así que se ve con poca definición. Hace falta uno mejor, en remoto y en local (Admin → People → Georgia Webb → Portrait).
+     - Wild Wonders no tiene página local; se revisa en 3218.
+     - En remoto no hay nada que reparar.
+4. **Barras azules dentro de las animaciones.**
+   - *Causa:* era la barra de scroll propia del sitio (8 px, color `--ocean`). La regla heredada `section { overflow-x: hidden }` convertía cada sección en un contenedor con scroll vertical. Cuando una entrada desplazaba contenido unos píxeles más abajo, aparecía la barra.
+     - Antes había 14 elementos así: Home, Art, Messages, workshops, obras, perfiles y Crew en teléfono.
+     - Además, el panel de columnas de About (hasta 1080 px) tenía `overflow: auto`.
+   - *Solución:*
+     - las secciones usan `overflow-x: clip`, que recorta igual en horizontal y no crea scroll ni rompe el sticky;
+     - el panel de About ya no hace scroll y, en pantallas bajas, ajusta su espaciado para que el texto entre;
+     - el riel del carrusel oculta la barra y conserva teclado, gesto táctil y botones.
+   - *Resultado:* 0 barras internas en 4.398 muestras (18 páginas, 6 anchos, durante las entradas y en reposo). Chequeo agregado a `npm test`.
+5. **Navegación: la página nueva aparecía desde abajo.**
+   - *Causa:* `html` tiene `scroll-behavior: smooth` para las anclas, pero no llevaba `data-scroll-behavior="smooth"`. Next 16 llevaba cada página nueva arriba con un scroll animado (0 de 9 empezaban arriba). Atrás también viajaba desde arriba hasta la posición restaurada.
+   - *Solución:*
+     - con el atributo, Next desactiva el scroll suave para ese movimiento;
+     - Atrás y Adelante restauran sin animación;
+     - el scroll suave vuelve con el siguiente toque o tecla, sin temporizadores.
+   - *Resultado:*
+     - 56/56 navegaciones del navbar en escritorio y 20/20 en teléfono empiezan arriba en el primer frame;
+     - tarjetas y detalles también;
+     - Atrás y Adelante restauran la posición exacta, y el primer frame pintado de About corresponde a la foto de esa posición;
+     - la carga directa empieza arriba, en el estado inicial.
+   - *Nota:* el ancla «Scroll» de About ya saltaba sin animación antes de este cambio, y sigue llegando a su sección.
+
+Hallado durante la verificación: en Messages, los enlaces «Read the message» de los mensajes 1 y 2 nunca se podían tocar, porque la caja del último mensaje los tapaba. Corregido y verificado en escritorio, teléfono y movimiento reducido.
+
 **Ejemplos de revisión (2026-10-20):** el CMS local tiene tres ejemplos ficticios por tipo, relacionados entre sí y con fechas relativas a la carga.
 - Uno de cada tipo se creó o completó desde el admin.
 - Están marcados con «Example» en el admin y con una nota en el pie del sitio local.

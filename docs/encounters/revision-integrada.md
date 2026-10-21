@@ -8,7 +8,7 @@ Estado técnico de cada módulo: [page-progress.md](page-progress.md).
 
 | Qué | Dirección | Notas |
 |---|---|---|
-| Sitio completo (producción local) | http://127.0.0.1:3221 | Build de producción contra Supabase local, con los ejemplos de revisión. Reconstruido el 2026-10-20 desde `5cd1726`; los commits posteriores son solo documentación. |
+| Sitio completo (producción local) | http://127.0.0.1:3221 | Build de producción contra Supabase local, con los ejemplos de revisión. Reconstruido el 2026-10-20 desde `51f2ec6` (correcciones de la revisión manual); los commits posteriores son solo documentación. |
 | Admin conectado a esos datos | http://127.0.0.1:3221/admin | Usuario y contraseña locales en `.encounters-work/local-cms.json` (no versionado). Todo lo que se edita es local. |
 | Prototipos | http://127.0.0.1:3220/ | `docs/encounters/handoff-current`, servidos tal cual. |
 | Crew y Wild Wonders con datos reales | http://127.0.0.1:3218/crew · http://127.0.0.1:3218/crew/wild-wonders | Solo lectura de la base real; nada se escribe. |
@@ -19,6 +19,24 @@ Para volver a levantar: `npm run cms:local:prod` (producción, 3221), `npm run c
 Desde el 2026-10-20 el sitio local se ve **como si el equipo ya usara el CMS**: tres ejemplos ficticios por tipo, escritos en inglés, con relaciones entre sí. Detalle en [Ejemplos de revisión](#ejemplos-de-revisión-2026-10-20) más abajo.
 
 En el navegador, la herramienta de diseño de pantalla (`Cmd+Opt+I` → icono de teléfono) sirve para mirar 390 px (teléfono) y 1024 px (tablet).
+
+## Correcciones de la revisión manual (2026-10-20)
+
+Qué mirar de cada punto. Causa, medición y pendientes en [page-progress.md](page-progress.md). Videos en `.encounters-work/videos-2026-10-20/`.
+
+| Punto | Dónde | Qué mirar |
+|---|---|---|
+| 1. Tirones en Home | http://127.0.0.1:3221/ | Descenso lento, rápido y hacia atrás, sobre todo del hero a «Ongoing projects». El fondo se desenfoca y oscurece igual que antes. |
+| 2. Banner de About | http://127.0.0.1:3221/about (escritorio y teléfono) | Las cuatro fotos, cada una con el doble de recorrido. La cuarta queda hasta que sube el papel. |
+| 3. Fotos de Crew | http://127.0.0.1:3221/crew · real: http://127.0.0.1:3218/crew | Seis fichas originales con sus retratos, más Flaquito y los tres ficticios con sus dibujos. El retrato se cambia en Admin → People → (persona) → Portrait. |
+| 4. Barras azules | Home («What already happened», «Who is on board», About), Art, Messages, workshops, obras y perfiles; Crew en teléfono | Ninguna barra dentro de las secciones mientras entran las animaciones. Los rieles siguen respondiendo al gesto, al teclado y a sus botones. |
+| 5. Navegación | Desde el final de cualquier página, cada enlace del navbar, tarjetas y detalles; después Atrás y Adelante | La página nueva aparece en su encabezado, sin viaje. Atrás vuelve a la posición anterior sin animar. |
+
+- [ ] Fluidez de Home en tu pantalla
+- [ ] Ritmo del banner de About
+- [ ] Fichas originales de Crew con sus fotos
+- [ ] Sin barras dentro de las animaciones
+- [ ] Cada página nueva aparece arriba
 
 ## Ejemplos de revisión (2026-10-20)
 
