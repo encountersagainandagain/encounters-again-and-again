@@ -1,5 +1,5 @@
-// Water of Abismo Home v2: the prototype's fragment shader, unchanged, drawn on one full-screen
-// triangle with premultiplied alpha. Parameters are the prototype defaults (10-home.md "Parámetros del agua").
+// Water of Abismo Home v2: the prototype's fragment shader, drawn on one full-screen triangle with premultiplied
+// alpha. Same image; it only skips the terms that its own mix() or a zero factor discards. Parameters are the prototype defaults (10-home.md "Parámetros del agua").
 export const WATER={palette:{shallow:[0.17,0.52,0.66],deep:[0.015,0.09,0.19]},caustics:0.85,godRays:0.75,sunPosition:0.66,waves:1} as const;
 const FRAG=`
 precision highp float;
@@ -35,45 +35,57 @@ void main(){
   float above = uv.y - edge;
   float depth = clamp((edge - uv.y) * 1.05, 0.0, 1.0);
 
-  // ---- water body
-  vec3 water = mix(uShallow, uDeep, pow(depth, 0.72));
-
-  vec2 cp = p * vec2(3.2, 6.4) + vec2(uTime * 0.055, -uTime * 0.028);
-  float n1 = fbm(cp);
-  float n2 = fbm(cp * 1.65 + n1 * 0.85 + uTime * 0.04);
-  float c = pow(max(0.0, 1.0 - abs(n1 - n2) * 5.5), 2.2);
-  float cFall = 0.16 + 0.84 * smoothstep(0.0, 0.42, uv.y / max(edge, 0.001));
-  water += vec3(0.58, 0.87, 0.96) * c * uCaustic * cFall * (0.18 + 0.82 * (1.0 - smoothstep(0.0, 0.75, depth)));
-
-  vec2 dp = p * 1.6 + vec2(uTime * 0.02, -uTime * 0.012);
-  water += vec3(0.40, 0.70, 0.82) * pow(fbm(dp * 2.4) * fbm(dp * 5.1 + 3.0), 2.0) * 0.35 * dive;
-
-  vec2 rp = p - vec2(sunX, edge);
-  float ang = atan(rp.x, -rp.y + 0.002);
-  float rays = fbm(vec2(ang * 5.5, uTime * 0.06)) * fbm(vec2(ang * 12.0, uTime * 0.04 + 5.0));
-  rays = pow(max(rays, 0.0), 1.5) * smoothstep(0.0, 0.22, depth) * (0.28 + 0.72 * (1.0 - smoothstep(0.1, 1.1, depth)));
-  water += vec3(0.52, 0.82, 0.92) * rays * uRays * smoothstep(0.04, 0.45, dive);
-
-  // ---- breaking foam along the edge
-  float d0 = max(-above, 0.0);
-  float foamBase = exp(-d0 * 64.0) * (0.5 + 0.5 * fbm(p * vec2(7.0, 15.0) + vec2(uTime * 0.22, uTime * 0.08)));
-  float lace = smoothstep(0.42, 0.95, fbm(p * vec2(13.0, 26.0) + vec2(uTime * 0.3, uTime * 0.05))) * exp(-d0 * 18.0);
-  float foam = clamp(foamBase * 1.05 + lace * 0.5, 0.0, 1.0) * (1.0 - 0.6 * smoothstep(0.25, 0.75, dive)) * uWaves;
-  water = mix(water, vec3(0.94, 0.975, 0.99), foam);
-
-  float aWater = clamp(0.40 + depth * 1.05 + dive * 0.85, 0.0, 1.0);
-  aWater = max(aWater, foam * 0.95);
-
-  // ---- wet sand sheen just above the wave line, gone once submerged
-  vec3 sand = vec3(0.80, 0.74, 0.64);
-  float grain = noise(p * 180.0);
-  sand += (grain - 0.5) * 0.08;
-  float aSand = 0.30 * (1.0 - smoothstep(0.0, 0.42, dive)) * exp(-max(above, 0.0) * 7.5);
-  float spray = exp(-max(above, 0.0) * 26.0) * smoothstep(0.5, 0.95, fbm(p * vec2(11.0, 20.0) + vec2(uTime * 0.35, uTime * 0.6)));
-  sand = mix(sand, vec3(0.97, 0.99, 1.0), clamp(spray * 1.4, 0.0, 1.0));
-  aSand = max(aSand, spray * 0.55 * (1.0 - smoothstep(0.1, 0.6, dive)) * uWaves);
-
+  // Each pixel is water, sand or the thin band between. The final mix() takes exactly one side where inWater is
+  // 0 or 1, so that side alone is computed: the same image for half the work in the hero, a third less below.
   float inWater = smoothstep(0.003, -0.003, above);
+  vec3 water = vec3(0.0), sand = vec3(0.0);
+  float aWater = 0.0, aSand = 0.0;
+  if (inWater > 0.0) {
+    // ---- water body
+    water = mix(uShallow, uDeep, pow(depth, 0.72));
+
+    vec2 cp = p * vec2(3.2, 6.4) + vec2(uTime * 0.055, -uTime * 0.028);
+    float n1 = fbm(cp);
+    float n2 = fbm(cp * 1.65 + n1 * 0.85 + uTime * 0.04);
+    float c = pow(max(0.0, 1.0 - abs(n1 - n2) * 5.5), 2.2);
+    float cFall = 0.16 + 0.84 * smoothstep(0.0, 0.42, uv.y / max(edge, 0.001));
+    water += vec3(0.58, 0.87, 0.96) * c * uCaustic * cFall * (0.18 + 0.82 * (1.0 - smoothstep(0.0, 0.75, depth)));
+
+    vec2 dp = p * 1.6 + vec2(uTime * 0.02, -uTime * 0.012);
+    if (dive > 0.0) water += vec3(0.40, 0.70, 0.82) * pow(fbm(dp * 2.4) * fbm(dp * 5.1 + 3.0), 2.0) * 0.35 * dive;
+
+    if (dive > 0.04) {
+      vec2 rp = p - vec2(sunX, edge);
+      float ang = atan(rp.x, -rp.y + 0.002);
+      float rays = fbm(vec2(ang * 5.5, uTime * 0.06)) * fbm(vec2(ang * 12.0, uTime * 0.04 + 5.0));
+      rays = pow(max(rays, 0.0), 1.5) * smoothstep(0.0, 0.22, depth) * (0.28 + 0.72 * (1.0 - smoothstep(0.1, 1.1, depth)));
+      water += vec3(0.52, 0.82, 0.92) * rays * uRays * smoothstep(0.04, 0.45, dive);
+    }
+
+    // ---- breaking foam along the edge (more than 0.35 below it, foam is under 0.0005: no colour level changes)
+    float d0 = max(-above, 0.0);
+    float foam = 0.0;
+    if (d0 < 0.35) {
+      float foamBase = exp(-d0 * 64.0) * (0.5 + 0.5 * fbm(p * vec2(7.0, 15.0) + vec2(uTime * 0.22, uTime * 0.08)));
+      float lace = smoothstep(0.42, 0.95, fbm(p * vec2(13.0, 26.0) + vec2(uTime * 0.3, uTime * 0.05))) * exp(-d0 * 18.0);
+      foam = clamp(foamBase * 1.05 + lace * 0.5, 0.0, 1.0) * (1.0 - 0.6 * smoothstep(0.25, 0.75, dive)) * uWaves;
+    }
+    water = mix(water, vec3(0.94, 0.975, 0.99), foam);
+
+    aWater = clamp(0.40 + depth * 1.05 + dive * 0.85, 0.0, 1.0);
+    aWater = max(aWater, foam * 0.95);
+  }
+  if (inWater < 1.0) {
+    // ---- wet sand sheen just above the wave line, gone once submerged
+    sand = vec3(0.80, 0.74, 0.64);
+    float grain = noise(p * 180.0);
+    sand += (grain - 0.5) * 0.08;
+    aSand = 0.30 * (1.0 - smoothstep(0.0, 0.42, dive)) * exp(-max(above, 0.0) * 7.5);
+    float spray = exp(-max(above, 0.0) * 26.0) * smoothstep(0.5, 0.95, fbm(p * vec2(11.0, 20.0) + vec2(uTime * 0.35, uTime * 0.6)));
+    sand = mix(sand, vec3(0.97, 0.99, 1.0), clamp(spray * 1.4, 0.0, 1.0));
+    aSand = max(aSand, spray * 0.55 * (1.0 - smoothstep(0.1, 0.6, dive)) * uWaves);
+  }
+
   vec3 col = mix(sand, water, inWater);
   float a = mix(aSand, aWater, inWater);
 

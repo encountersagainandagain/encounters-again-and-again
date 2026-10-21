@@ -97,7 +97,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     const header=document.querySelector<HTMLElement>('.editorial-nav');const brandEl=header?.querySelector<HTMLElement>('.editorial-brand')||null;
     const creature=(name:string,fins:string[])=>{const svg=q<SVGSVGElement>(`[data-creature=${name}]`);return svg?{svg,box:svg.parentElement as HTMLElement,fins:fins.map(f=>svg.querySelector<SVGElement>(f))}:null;};
     return {
-      art:q('[data-home-bg]'),back:all('[data-back]'),clear:all('[data-clear]'),projects:q('#projects'),fallback:q('[data-water]'),caustics:q('[data-caustics]'),rays:q('[data-rays]'),veil:q('[data-deep]'),bubbles:q('[data-bubbles]'),block:q('[data-hero-block]'),cue:q('[data-cue]'),mark:q('.home-hero-mark'),
+      art:q('[data-home-bg]'),soft:q('[data-bg-soft]'),deep:q('[data-bg-deep]'),dim:q('[data-bg-dim]'),back:all('[data-back]'),clear:all('[data-clear]'),projects:q('#projects'),fallback:q('[data-water]'),caustics:q('[data-caustics]'),rays:q('[data-rays]'),veil:q('[data-deep]'),bubbles:q('[data-bubbles]'),block:q('[data-hero-block]'),words:all('[data-hero-block]>:not(.home-hero-glow)'),cue:q('[data-cue]'),mark:q('.home-hero-mark'),
       gauge:q('[data-gauge]'),gaugeText:q('[data-gauge] span'),hud:q('[data-hud]'),hudDepth:q('[data-hud-depth]'),o2:q('[data-o2]'),tank:q('[data-tank]'),
       header,brand:brandEl,navImg:brandEl?.querySelector<HTMLElement>('img')||null,navWord:brandEl?.querySelector<HTMLElement>(':scope>span')||null,
       descent:document.getElementById('descenso'),reefImg:q('[data-reef] img'),
@@ -129,13 +129,19 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     // ---- write
     const now=performance.now(),dt=lastFrame.current?now-lastFrame.current:16.7;lastFrame.current=now;
     if(n.size.backVisible&&water.current){water.current.draw(t,d);if(!reduced&&dt<250)govern(governor.current,water.current,dt,now);if(root.current)root.current.dataset.waterScale=water.current.scale().toFixed(2);}
-    const k=Math.min(1,d/.8);if(n.art){n.art.style.transform=`scale(${(1+k*.14).toFixed(3)}) translate3d(0,${(-k*5).toFixed(2)}%,0)`;n.art.style.filter=`blur(${(k*11).toFixed(1)}px) brightness(${(1-k*.5).toFixed(3)}) saturate(${(1+k*.2).toFixed(2)})`;}
+    // Background focus (prototype: blur 0→11px, brightness 1→.5, saturate 1→1.2). Re-filtering the full-screen photo
+    // with a new radius every frame, under the water shader, stalled whole frames (~265 ms at 2× density); the same
+    // pull is drawn with two copies blurred once (4px and 11px) fading in over the sharp photo, and a black veil
+    // for the brightness, so the GPU only blends cached layers.
+    const k=Math.min(1,d/.8),focus=k*11;if(n.art){n.art.style.transform=`scale(${(1+k*.14).toFixed(3)}) translate3d(0,${(-k*5).toFixed(2)}%,0)`;
+      if(n.soft)n.soft.style.opacity=clamp01(focus/4).toFixed(3);if(n.deep)n.deep.style.opacity=clamp01((focus-4)/7).toFixed(3);if(n.dim)n.dim.style.opacity=(k*.5).toFixed(3);}
     if(n.fallback&&!water.current){const line=.12+(1.22-.12)*d;n.fallback.style.clipPath=`inset(${Math.max(0,(1-line)*100).toFixed(2)}% 0 0 0)`;n.fallback.style.opacity=String(.5+d*.5);
       if(n.caustics){n.caustics.style.backgroundPosition=`${(t*9)%512}px ${(t*5)%512}px, ${(-t*6)%512}px ${(t*8)%512}px`;n.caustics.style.opacity=String((.18+.27*Math.min(1,d*1.4))*(1-clamp01((y-vh*1.6)/(vh*2))*.6));}
       if(n.rays){n.rays.style.opacity=String(smooth(d,.04,.45)*.75*(1-clamp01((y-vh)/(vh*2.5))));n.rays.style.transform=`translate3d(${Math.sin(t*.2)*20}px,0,0)`;}}
     if(n.veil)n.veil.style.opacity=(clamp01((y-vh)/(vh*1.8))*.72).toFixed(3);
     if(n.bubbles)n.bubbles.style.opacity=reduced?'0':String(clamp01((d-.42)/.35)*.9);
-    if(n.block){const b=reduced?0:clamp01((d-.18)/.42);n.block.style.opacity=String(1-b);n.block.style.transform=`translate3d(0,${(b*70).toFixed(1)}px,0) scale(${(1+b*.12).toFixed(3)})`;n.block.style.filter=`blur(${(b*9).toFixed(2)}px)`;}
+    // The glow behind the words is a soft gradient: only the words take the blur, so the filter covers the text alone.
+    if(n.block){const b=reduced?0:clamp01((d-.18)/.42);n.block.style.opacity=String(1-b);n.block.style.transform=`translate3d(0,${(b*70).toFixed(1)}px,0) scale(${(1+b*.12).toFixed(3)})`;const blur=`blur(${(b*9).toFixed(2)}px)`;n.words.forEach(w=>{w.style.filter=blur;});}
     if(n.cue)n.cue.style.opacity=String(Math.max(0,1-d/.2));
     if(n.mark)n.mark.style.display=H<700||(vw<760&&H<800)?'none':'block';
     const text=`${(5+Math.max(0,(y-.6*vh)/(.25*vh))*25).toFixed(1)} m`,handoff=smooth(y,.9*vh,1.15*vh);
@@ -201,7 +207,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   };
   return <div ref={root} className="home-root">
     <span data-nav-theme="dark" hidden/>
-    <div className="home-bg" data-back aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src="/design/home-background.jpg" alt="" fill priority sizes="100vw"/></div></div>
+    <div className="home-bg" data-back aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src="/design/home-background.jpg" alt="" fill priority sizes="100vw"/><div className="home-bg-focus" data-bg-soft><Image src="/design/home-background.jpg" alt="" fill sizes="100vw"/></div><div className="home-bg-focus is-deep" data-bg-deep><Image src="/design/home-background.jpg" alt="" fill sizes="100vw"/></div><div className="home-bg-dim" data-bg-dim/></div></div>
     <canvas ref={waterCanvas} className="home-water-gl" data-back aria-hidden="true"/>
     <div className="home-water" data-water data-back aria-hidden="true"><div className="home-caustics" data-caustics/></div>
     <div className="home-rays" data-rays data-back aria-hidden="true"/>
