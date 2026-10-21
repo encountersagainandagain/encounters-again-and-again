@@ -23,7 +23,9 @@ export const metadata: Metadata = {
 };
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const settings=process.env.NEXT_PUBLIC_SUPABASE_URL?(await readRows('site_settings')).find(s=>s.key==='site')?.value as Record<string,unknown>|undefined:undefined;
-  return <html lang="en"><body className={`${heading.variable} ${body.variable}`}>
+  // The site scrolls smoothly to in-page anchors (index.css); the attribute lets Next turn that off while it moves a
+  // new page to its top, so every page appears at its top instead of travelling there from the previous position.
+  return <html lang="en" data-scroll-behavior="smooth"><body className={`${heading.variable} ${body.variable}`}>
     <JsonLd id="organization-jsonld" data={{ '@context':'https://schema.org', '@type':'Organization', '@id':`${siteUrl}/#organization`, name:brand.name, url:siteUrl, logo:`${siteUrl}${brand.logo}` }} />
     <JsonLd id="website-jsonld" data={{ '@context':'https://schema.org', '@type':'WebSite', name:brand.name, url:siteUrl }} />
     <SiteChrome settings={settings||{}} localReview={process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE==='true'}>{children}</SiteChrome>

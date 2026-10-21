@@ -25,6 +25,14 @@ export function SiteChrome({children,settings,localReview=false}:{children:React
       el.dataset.light=String(theme!=='dark'&&(theme==='light'&&!hero || path.startsWith('/art')&&!hero || !!hero&&(pinned?scrollY>innerHeight*.95:hero.getBoundingClientRect().bottom<(hero.classList.contains('exp-dissolve')?120:150))));el.dataset.scrolled=String(scrollY>40);el.style.setProperty('--nav-k',String(Math.min(1,scrollY/240)));};
     update();window.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);return()=>{window.removeEventListener('scroll',update);window.removeEventListener('resize',update);};
   },[path,editorial]);
+  // Back and Forward: the browser restores the position of the page it returns to, and with the smooth scrolling of
+  // <html> it travelled there from the top. Restoration is instant; smooth anchors come back with the next pointer
+  // or key press (before any link can be activated). Moving to a new page is handled by Next (layout.tsx).
+  useEffect(()=>{
+    const html=document.documentElement;const instant=()=>{html.style.scrollBehavior='auto';};const restore=()=>{html.style.scrollBehavior='';};
+    addEventListener('popstate',instant);addEventListener('pointerdown',restore,true);addEventListener('keydown',restore,true);
+    return()=>{removeEventListener('popstate',instant);removeEventListener('pointerdown',restore,true);removeEventListener('keydown',restore,true);};
+  },[]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} / ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span><span>{alternate}</span></span></span>:label}</Link>;
   if(path.startsWith('/admin'))return <>{children}</>;
   const socials=Object.entries((settings.social_links||{}) as Row).concat(['instagram','youtube','facebook','tiktok','pinterest'].map(key=>[key,settings[key]]));
