@@ -271,7 +271,10 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .about-contact-lines p{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0}
 .about-contact-lines.is-light{border-color:rgba(14,42,56,.16)}.about-contact-lines.is-light span{color:rgba(14,42,56,.6)}
 .about-write{align-self:flex-start;font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:#8fd9ea!important}
-@media (max-width:1080px){.about-panel{grid-template-columns:1fr;gap:14px;overflow:auto}.about-panel p{font-size:13px!important}}
+/* The stacked columns fit under the band once it has shrunk; the panel is not a scroll container (its scrollbar showed
+   inside the banner while the photo was still full height). Short landscape screens tighten the spacing to fit. */
+@media (max-width:1080px){.about-panel{grid-template-columns:1fr;gap:14px}.about-panel p{font-size:13px!important}}
+@media (max-width:1080px) and (max-height:480px){.about-panel{gap:8px;padding-block:10px}}
 /* About.dc.html ≤860: one column. As the executable prototype does, the first row keeps text above its photo
    and the second puts the photo first (its CSS comment says "photo always on top"; see page-progress). */
 @media (max-width:860px){.about-row{grid-template-columns:minmax(0,1fr);gap:clamp(20px,4vh,34px)}.about-row--photo-first .about-row-media{order:-1}}

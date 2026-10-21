@@ -115,9 +115,11 @@
     display: block;
   }
 
+  /* clip, not hidden: hidden turns every section into a vertical scroll container, and an entrance animation that
+     pushes content a few pixels past its bottom then drew the site's blue scrollbar inside the section. */
   section {
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 }
 
