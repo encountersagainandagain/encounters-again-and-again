@@ -10,6 +10,7 @@ import {ramp,useFrame} from './useFrame';
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const texts=(v:unknown)=>Array.isArray(v)?v.map(String).filter(Boolean):[];
 const fallbackGallery=['/design/about-1-turtle-web.jpg'];
+const PHOTO_SPAN=.186;
 export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}){
   if(!contact.email&&!contact.phone&&!contact.whatsapp&&!contact.donation&&!contact.socials.length)return null;
   return <div className={`about-contact-lines${dark?'':' is-light'}`}>
@@ -35,10 +36,13 @@ export function AboutView({settings:s,contact,media}:{settings:Row;contact:Conta
     const cue=q('[data-cue]');if(cue)cue.style.opacity=String(Math.max(0,1-d*8));
     const meta=q('[data-meta]');if(meta)meta.style.opacity=String(.35+shrink*.65);
     el.querySelectorAll<HTMLElement>('[data-col]').forEach((c,i)=>{const k=reduced?1:ramp(d,.14+i*.05,.3+i*.05,true);c.style.opacity=String(k);c.style.transform=`translate3d(0,${(1-k)*26}px,0)`;});
-    // Hard cut between photos, tied to the overall reading progress shown by the counter.
-    const g=scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight);const step=.02;const current=Math.min(frames.length-1,Math.floor(g/step));
+    // Hard cut between photos. The prototype cut every 2% of the whole page (about 0.09 of a viewport, so four photos
+    // went by in a quarter screen); on request (2026-10-20) each photo now holds 0.186 of a viewport, twice that, measured
+    // in viewports so the pace no longer depends on the page length. The fourth photo arrives at 0.56 vh, before the
+    // paper reaches the band (0.86–1 vh).
+    const g=scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight);const seq=scrollY/(vh*PHOTO_SPAN);const current=Math.min(frames.length-1,Math.floor(seq));
     el.querySelectorAll<HTMLElement>('[data-photo]').forEach((p,i)=>{p.style.opacity=i===current?'1':'0';p.style.zIndex=i===current?'1':'0';});
-    const idx=q('[data-idx]');if(idx)idx.textContent=pad(current+1);const bar=q('[data-bar]');if(bar)bar.style.setProperty('--p',`${Math.min(100,g/(step*Math.max(1,frames.length-1))*100).toFixed(1)}%`);
+    const idx=q('[data-idx]');if(idx)idx.textContent=pad(current+1);const bar=q('[data-bar]');if(bar)bar.style.setProperty('--p',`${Math.min(100,seq/Math.max(1,frames.length-1)*100).toFixed(1)}%`);
     const pct=main.current?.querySelector<HTMLElement>('[data-pct]');if(pct)pct.textContent=String(Math.round(g*100)).padStart(3,'0');
   });
   const belief=string(s.belief),emphasis=string(s.belief_emphasis),cut=emphasis&&belief.includes(emphasis)?belief.indexOf(emphasis):-1;
