@@ -20,7 +20,7 @@ export function MessagesView({settings,messages,media}:{settings:Row;messages:Me
     const pinned=getComputedStyle(sticky).position==='sticky';
     const rect=el.getBoundingClientRect();const t=Math.max(-.3,Math.min(1,-rect.top/Math.max(1,rect.height-sticky.offsetHeight)));
     el.querySelectorAll<HTMLElement>('[data-stage]').forEach(item=>{
-      if(reduced){item.style.opacity='1';item.style.transform='none';item.style.filter='none';return;}
+      if(reduced){item.style.opacity='1';item.style.transform='none';item.style.filter='none';item.style.pointerEvents='auto';return;}
       let p=1,out=0;
       if(pinned){const [a,b,c,d]=item.dataset.stage!.split(',').map(Number);p=ramp(t,a,b,true);out=ramp(t,c,d,true);}
       else p=ramp((vh*.88-item.getBoundingClientRect().top)/(vh*.4),0,1,true);

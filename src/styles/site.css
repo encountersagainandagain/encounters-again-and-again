@@ -181,7 +181,8 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .mm-intro>span{margin-top:clamp(10px,2vh,22px);font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
 .mm-stage{position:relative}
 .mm-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
-.mm-message{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'media text';align-items:center;margin-left:calc(clamp(20px,5vw,72px)*-1)}
+/* The stacked boxes never take clicks themselves: only the visible illustration and text do (MessagesView). */
+.mm-message{pointer-events:none;position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'media text';align-items:center;margin-left:calc(clamp(20px,5vw,72px)*-1)}
 .mm-message.media-right{grid-template-areas:'text media';margin-left:0;margin-right:calc(clamp(20px,5vw,72px)*-1)}
 .mm-media{grid-area:media;position:relative;height:100%;overflow:hidden;background:#0f3b4c;opacity:0}
 .mm-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
