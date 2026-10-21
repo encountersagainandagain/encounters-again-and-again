@@ -8,10 +8,10 @@ Estado técnico de cada módulo: [page-progress.md](page-progress.md).
 
 | Qué | Dirección | Notas |
 |---|---|---|
-| Sitio completo (producción local) | http://127.0.0.1:3221 | Build de producción contra Supabase local, con los ejemplos de revisión. Reconstruido el 2026-10-20 desde `51f2ec6` (correcciones de la revisión manual); los commits posteriores son solo documentación. |
+| Sitio completo (producción local) | http://127.0.0.1:3221 | Build de producción contra Supabase local, con los ejemplos de revisión. Reconstruido el 2026-10-21 desde `dc25415` (correcciones de la revisión manual y Wild Wonders local); los commits posteriores son solo documentación. |
 | Admin conectado a esos datos | http://127.0.0.1:3221/admin | Usuario y contraseña locales en `.encounters-work/local-cms.json` (no versionado). Todo lo que se edita es local. |
 | Prototipos | http://127.0.0.1:3220/ | `docs/encounters/handoff-current`, servidos tal cual. |
-| Crew y Wild Wonders con datos reales | http://127.0.0.1:3218/crew · http://127.0.0.1:3218/crew/wild-wonders | Solo lectura de la base real; nada se escribe. |
+| Crew y Wild Wonders con datos reales | http://127.0.0.1:3218/crew · http://127.0.0.1:3218/crew/wild-wonders | Solo lectura de la base real; nada se escribe. Desde el 2026-10-21 las seis fichas originales y Wild Wonders también están en local (3221), con editor. |
 | Desarrollo (mismos datos que 3221) | http://127.0.0.1:3219 | Alternativa si 3221 no está levantado. |
 
 Para volver a levantar: `npm run cms:local:prod` (producción, 3221), `npm run cms:local:dev` (3219) y el servidor de prototipos de `handoff-current` en 3220.
@@ -28,8 +28,8 @@ Qué mirar de cada punto. Causa, medición y pendientes en [page-progress.md](pa
 |---|---|---|
 | 1. Tirones en Home | http://127.0.0.1:3221/ | Descenso lento, rápido y hacia atrás, sobre todo del hero a «Ongoing projects». El fondo se desenfoca y oscurece igual que antes. |
 | 2. Banner de About | http://127.0.0.1:3221/about (escritorio y teléfono) | Las cuatro fotos, cada una con el doble de recorrido. La cuarta queda hasta que sube el papel. |
-| 3. Fotos de Crew | http://127.0.0.1:3221/crew · real: http://127.0.0.1:3218/crew | Seis fichas originales con sus retratos, más Flaquito y los tres ficticios con sus dibujos. El retrato se cambia en Admin → People → (persona) → Portrait. |
-| 4. Barras azules | Home («What already happened», «Who is on board», About), Art, Messages, workshops, obras y perfiles; Crew en teléfono | Ninguna barra dentro de las secciones mientras entran las animaciones. Los rieles siguen respondiendo al gesto, al teclado y a sus botones. |
+| 3. Fotos de Crew | http://127.0.0.1:3221/crew → Georgia Webb → http://127.0.0.1:3221/crew/wild-wonders · real: http://127.0.0.1:3218/crew | Seis fichas originales con sus retratos, más Flaquito y los tres ficticios con sus dibujos. El retrato se cambia en Admin → People → (persona) → Portrait. |
+| 4. Barras azules (falta comparar con tu captura) | Home («What already happened», «Who is on board», About), Art, Messages, workshops, obras y perfiles; Crew en teléfono | Ninguna barra dentro de las secciones mientras entran las animaciones. Los rieles siguen respondiendo al gesto, al teclado y a sus botones. |
 | 5. Navegación | Desde el final de cualquier página, cada enlace del navbar, tarjetas y detalles; después Atrás y Adelante | La página nueva aparece en su encabezado, sin viaje. Atrás vuelve a la posición anterior sin animar. |
 
 - [ ] Fluidez de Home en tu pantalla
@@ -123,6 +123,7 @@ No se tocó nada renombrado o editado, por ejemplo la persona «Flaquito». `npm
 - **Diferencias conocidas:** textos de diseño o de ejemplo. El agua usa resolución adaptativa (decisión pendiente tuya).
 - [x] Conformidad visual (2026-10-18, sobre `5762076`)
 - [ ] Fluidez y resolución adaptativa del agua
+- [ ] Optimizaciones respecto del prototipo (shader del agua, desenfoque del fondo con dos copias fijas, desenfoque solo de las palabras del título): misma imagen en la comparación, falta tu confirmación visual
 - [ ] Aprobación editorial
 
 ### The Crew — http://127.0.0.1:3218/crew (real) · prototipo `The Crew.dc.html`
@@ -131,7 +132,8 @@ No se tocó nada renombrado o editado, por ejemplo la persona «Flaquito». `npm
 - [x] Aprobada (`cbea565`, 2026-10-13)
 - [ ] Editor de secciones de la página Team (no cambia el aspecto)
 
-### Perfil (Wild Wonders) — http://127.0.0.1:3218/crew/wild-wonders (real) · prototipo `Wild Wonders.dc.html`
+### Perfil (Wild Wonders) — http://127.0.0.1:3221/crew/wild-wonders (local, editable) · real: http://127.0.0.1:3218/crew/wild-wonders · prototipo `Wild Wonders.dc.html`
+- **Edición:** http://127.0.0.1:3221/admin/content?table=posts&edit=17de9058-f9f1-5e5f-a434-e715df63667c (página, con «Visual preview» y «Full preview») · ficha de Georgia: http://127.0.0.1:3221/admin/content?table=crew_members&edit=c73cf5fc-1c68-59a6-a8d8-d32cf72fddd1. Recuperada del snapshot; las ediciones son solo locales.
 - **Ejemplo local:** http://127.0.0.1:3221/crew/demo-maker-nerida (libro, episodio, workshops y mensajes acreditados).
 - **Qué mirar:** igual que lo aprobado; navbar en teléfono.
 - [x] Wild Wonders aprobado (2026-10-14)
@@ -221,6 +223,7 @@ No se tocó nada renombrado o editado, por ejemplo la persona «Flaquito». `npm
 
 - Ejemplos ficticios marcados con «Example» en el admin y con el aviso del pie; imágenes sintéticas.
 - Falta un audio o video autorizado para el episodio de Listening.
+- Falta un retrato original de Georgia Webb con más resolución: el actual mide 236×315 y se conserva mientras tanto (Admin → People → Georgia Webb → Portrait).
 - Datos reales por cargar: cards de Expeditions, workshops y expediciones reales, obras, presentación de About, email, WhatsApp y donación en Settings, textos de Messages.
 - Pendiente en la base real, con aprobación: las migraciones `20261017000100` y `20261017000200`, y la conversión del perfil real a secciones.
 - Funciones agregadas que el prototipo no dibuja: enlaces a detalles y resultados, créditos, pie de las obras, «Read the message».

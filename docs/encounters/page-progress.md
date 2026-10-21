@@ -34,7 +34,12 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
      - el shader calcula únicamente el lado que se ve: misma imagen (como máximo 1/255 en el 0,06 % de los canales) y entre 30 % y 70 % más barato.
      - Tiempos, efectos y resolución adaptativa sin cambios.
    - *Resultado:* con la escala recordada, el recorrido completo da 0 frames de más de 33 ms (antes, 11–21 en el hero, con picos de 133–267 ms).
-   - *Compromiso visual:* el desenfoque intermedio del fondo es una mezcla de dos desenfoques fijos, no un radio continuo. En la comparación lado a lado no se distingue.
+   - **Diferencias con el prototipo, pendientes de tu confirmación visual:** el shader del agua y el desenfoque del fondo y del título ya no se calculan como en el prototipo.
+     - El shader se salta las partes que su propio `mix()` descarta y la espuma invisible.
+     - El fondo funde dos copias desenfocadas fijas en lugar de un radio continuo.
+     - El título desenfoca solo las palabras, no el halo.
+     - En la comparación lado a lado no se distinguen, pero la confirmación es tuya.
+     - No sigo ajustando el rendimiento salvo que aparezca un problema concreto.
    - *Pendiente:* en la primera visita con pantalla densa, el regulador ajusta la escala una vez (2–7 frames lentos) y después la recuerda. Que tu pantalla se sienta fluida lo decidís vos.
 2. **About: el banner avanzaba demasiado rápido.**
    - *Causa:* cada foto cambiaba al avanzar un 2 % del largo total de la página, unos 80 px (0,09 de pantalla). Las cuatro pasaban en un cuarto de pantalla.
@@ -48,10 +53,15 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
      - Sube los 6 retratos al Storage local, con el bucket privado sin cambios.
      - Crea las 6 fichas, sin duplicar ni tocar a los ficticios.
      - Es idempotente.
-   - *Pendiente:*
-     - el retrato de Georgia Webb es de 236×315 en la fuente, así que se ve con poca definición. Hace falta uno mejor, en remoto y en local (Admin → People → Georgia Webb → Portrait).
-     - Wild Wonders no tiene página local; se revisa en 3218.
-     - En remoto no hay nada que reparar.
+   - **Wild Wonders en local (2026-10-21):** `crew:local:restore` también recupera la página personal de Georgia.
+     - Incluye el post `wordpress:page:2907` (`17de9058-…`), sus 16 bloques y sus 8 imágenes (7 nuevas en el Storage local y el retrato reutilizado), con la misma transformación e IDs que el importador.
+     - Solo agrega el vínculo en su ficha, sin tocar otros campos.
+     - Antes comprobé que no existían; la segunda corrida no crea nada.
+     - Recorrido: Crew → Georgia Webb → `/crew/wild-wonders`, igual que en 3218.
+     - Se edita en Admin → Content → Wild Wonders, con vista previa visual y completa.
+     - Los borradores y los medios privados siguen protegidos (0 de 40 borradores visibles sin sesión, bucket privado).
+   - **Pendiente editorial:** conseguir un retrato original de Georgia Webb con más resolución. El actual mide 236×315 en la fuente y se conserva mientras tanto. Se reemplaza en Admin → People → Georgia Webb → Portrait.
+   - En remoto no hay nada que reparar.
 4. **Barras azules dentro de las animaciones.**
    - *Causa:* era la barra de scroll propia del sitio (8 px, color `--ocean`). La regla heredada `section { overflow-x: hidden }` convertía cada sección en un contenedor con scroll vertical. Cuando una entrada desplazaba contenido unos píxeles más abajo, aparecía la barra.
      - Antes había 14 elementos así: Home, Art, Messages, workshops, obras, perfiles y Crew en teléfono.
@@ -61,6 +71,7 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
      - el panel de About ya no hace scroll y, en pantallas bajas, ajusta su espaciado para que el texto entre;
      - el riel del carrusel oculta la barra y conserva teclado, gesto táctil y botones.
    - *Resultado:* 0 barras internas en 4.398 muestras (18 páginas, 6 anchos, durante las entradas y en reposo). Chequeo agregado a `npm test`.
+   - *Pendiente:* comparar con tu captura cuando haya una ruta accesible. El Escritorio no se pudo leer desde la sesión. Si la corrección ya la resuelve, no se cambia nada más.
 5. **Navegación: la página nueva aparecía desde abajo.**
    - *Causa:* `html` tiene `scroll-behavior: smooth` para las anclas, pero no llevaba `data-scroll-behavior="smooth"`. Next 16 llevaba cada página nueva arriba con un scroll animado (0 de 9 empezaban arriba). Atrás también viajaba desde arriba hasta la posición restaurada.
    - *Solución:*
