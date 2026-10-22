@@ -85,7 +85,7 @@ if(command==='check'){
   const vars={NEXT_PUBLIC_SUPABASE_URL:[target.url,false],NEXT_PUBLIC_SUPABASE_ANON_KEY:[target.anonKey,false],SUPABASE_SERVICE_ROLE_KEY:[target.serviceRoleKey,true],NEXT_PUBLIC_SITE_URL:[reviewUrl(),false],ENCOUNTERS_EMAIL_ENABLED:['false',false]};
   for(const [name,[value,sensitive]] of Object.entries(vars)){
     if(!apply){console.log(`would set ${name} (Preview${sensitive?', sensitive':''})`);continue;}
-    const r=spawnSync('vercel',['env','add',name,'preview','--force','--yes',sensitive?'--sensitive':'--no-sensitive','--project',config.vercelProject],{input:value,encoding:'utf8'});
+    const r=spawnSync('vercel',['env','add',name,'preview','--force','--non-interactive',sensitive?'--sensitive':'--no-sensitive','--project',config.vercelProject],{input:value,encoding:'utf8'});
     if(r.status!==0)throw new Error(`vercel env add ${name}: ${`${r.stdout}${r.stderr}`.replaceAll(value,'<secret>').trim().split('\n').slice(-3).join(' ')}`);
     console.log(`set ${name} (Preview${sensitive?', sensitive':''})`);
   }
