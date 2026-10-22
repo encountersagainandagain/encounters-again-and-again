@@ -16,8 +16,16 @@ const linked=JSON.parse(await readFile('.vercel/project.json','utf8').catch(()=>
 const inspect=spawnSync('vercel',['project','inspect',config.vercelProject],{encoding:'utf8'});
 assert(linked.projectId&&`${inspect.stdout}${inspect.stderr}`.includes(linked.projectId),`Link this folder to ${config.vercelProject} first (vercel link --project ${config.vercelProject}).`);
 console.log(`Deploying ${head.slice(0,7)} (review) to a Preview of ${config.vercelProject}…`);
-const url=sh('vercel',['deploy','--yes','--target=preview','--meta',`reviewCommit=${head}`]).split('\n').filter(l=>/^https:\/\//.test(l)).pop();
+const out=sh('vercel',['deploy','--yes','--target=preview','--non-interactive','--meta',`reviewCommit=${head}`]);
+const url=(out.match(new RegExp(`https://${config.vercelProject}-[a-z0-9]{9}-[a-z0-9-]+\\.vercel\\.app`))||[])[0];
 assert(url,'Vercel did not return a deployment URL.');
-if(config.reviewUrl){sh('vercel',['alias','set',url,new URL(config.reviewUrl).host]);console.log(`Review: ${config.reviewUrl} → ${url}`);}
-else console.log(`Deployment: ${url} (no stable reviewUrl configured yet)`);
+// Only aliases under the team scope (…-<team>.vercel.app) are covered by Vercel Authentication; a free-form
+// *.vercel.app alias or the project's default domain would be public. The alias is checked and removed if open.
+const protectedStatus=async u=>(await fetch(u,{redirect:'manual'})).status;
+if(config.reviewUrl){
+  const host=new URL(config.reviewUrl).host;sh('vercel',['alias','set',url,host,'--non-interactive']);
+  const status=await protectedStatus(config.reviewUrl);
+  if(![301,302,307,308,401,403].includes(status)){sh('vercel',['alias','rm',host,'--yes','--non-interactive']);throw new Error(`${host} answered ${status} without login: alias removed.`);}
+  console.log(`Review: ${config.reviewUrl} → ${url} (asks for Vercel login: ${status})`);
+}else console.log(`Deployment: ${url} (no stable reviewUrl configured yet)`);
 console.log(`Commit: ${head}`);
