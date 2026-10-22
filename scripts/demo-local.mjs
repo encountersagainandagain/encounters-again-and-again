@@ -22,7 +22,9 @@ const target=await cmsTarget();const work=target.workDir;
 const keepPath=`${work}/demo-keep.json`,adoptPath=`${work}/demo-adopted.json`,demoPath=`${work}/demo-state.json`;
 // A connection that never opened (timeout, refused, DNS) is retried: the request was not sent, so nothing repeats.
 const connectFailure=e=>['UND_ERR_CONNECT_TIMEOUT','ECONNREFUSED','ENOTFOUND','EAI_AGAIN'].includes(e?.cause?.code);
-const retryingFetch=async(...args)=>{for(let attempt=1;;attempt++){try{return await fetch(...args);}catch(e){if(!connectFailure(e)||attempt>=6)throw e;await new Promise(r=>setTimeout(r,attempt*3000));}}};
+// Reads (GET/HEAD) are retried after any network failure: repeating them changes nothing.
+const isRead=(input,init)=>['GET','HEAD'].includes((init?.method||input?.method||'GET').toUpperCase());
+const retryingFetch=async(...args)=>{for(let attempt=1;;attempt++){try{return await fetch(...args);}catch(e){if(!(connectFailure(e)||isRead(...args))||attempt>=6)throw e;await new Promise(r=>setTimeout(r,attempt*3000));}}};
 const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:retryingFetch}});
 const ok=async query=>{const r=await query;if(r.error)throw r.error;return r.data;};
 const json=async(path,fallback)=>JSON.parse(await readFile(path,'utf8').catch(()=>JSON.stringify(fallback)));
@@ -46,7 +48,8 @@ async function fingerprint(table,rowId){
     detailTables[post.kind]?ok(db.from(detailTables[post.kind]).select('*').eq('id',rowId)):[],childTables[post.kind]?ok(db.from(childTables[post.kind][0]).select('*').eq(childTables[post.kind][1],rowId).order('sort')):[]]);
   return hash({post:omit(post,['updated_at','created_at','published_at','source_metadata']),blocks,credits,relations,detail:detail[0]||null,children});
 }
-const remember=async(table,rowId)=>{demo.baseline[rowId]=await fingerprint(table,rowId);demo.pending=demo.pending.filter(x=>x!==rowId);};
+// Saved at once: an interrupted seed (remote timeouts) keeps the fingerprints of what it already loaded.
+const remember=async(table,rowId)=>{demo.baseline[rowId]=await fingerprint(table,rowId);demo.pending=demo.pending.filter(x=>x!==rowId);await saveState();};
 
 // ---- Base set: pages built from the prototypes, kept from the first demo ---------------------------------
 // Real images of the design handoff, used for the program pages, the Crew page, About and the Expeditions cards
@@ -234,6 +237,10 @@ async function seed(){
       else if(was!==undefined&&same(target[k],was)&&!same(target[k],v)){target[k]=deep(v);changed.push(`${path}${k} (first demo text replaced)`);}}};
     merge(value,baseSettings,null,'');merge(value,set.settings,legacy.settings,'');
     if(changed.length){await ok(db.from('site_settings').update({value}).eq('key','site'));report.created.push(`settings: ${changed.join(', ')}`);}}
+  // Production before launch: examples an interrupted seed created without a fingerprint cannot have been edited
+  // yet (no site, no admin session), so they are fingerprinted now and remain removable by plan/clean.
+  if(target.name==='production')for(const [table,ids] of [['posts',reviewIds.posts],['crew_members',reviewIds.crew],['art_categories',reviewIds.categories],['upcoming_items',reviewIds.upcoming]])
+    for(const rowId of await exists(table,ids))if(!demo.baseline[rowId]&&!demo.pending.includes(rowId)){await remember(table,rowId);report.adopted.push(`${table} ${rowId} (interrupted seed)`);}
   demo.pending=[...new Set(demo.pending)];await saveState();
   return report;
 }
