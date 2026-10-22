@@ -30,7 +30,20 @@ export async function stagingConfig(){
   return {name:'staging',ref,url,anonKey,serviceRoleKey,dbPassword:env.STAGING_SUPABASE_DB_PASSWORD||'',env,workDir:'.encounters-work/staging'};
 }
 
+// The real Encounters project (production): the keys of .env.local, only with --target=production and
+// --confirm-real, and only while they point at the real ref. The examples are then the client's starting content.
+export async function productionConfig(argv){
+  assert(argv.includes('--confirm-real'),'--target=production writes to the real Encounters site: add --confirm-real.');
+  const env=await readEnvFile('.env.local');
+  const url=env.NEXT_PUBLIC_SUPABASE_URL,serviceRoleKey=env.SUPABASE_SERVICE_ROLE_KEY;
+  assert(url&&serviceRoleKey,'.env.local needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
+  assert.equal(new URL(url).origin,`https://${REAL_REF}.supabase.co`,'.env.local does not point at the real Encounters project.');
+  const r=jwtRef(serviceRoleKey);assert(r===null||r===REAL_REF,'The service key belongs to another project.');
+  return {name:'production',ref:REAL_REF,url,anonKey:env.NEXT_PUBLIC_SUPABASE_ANON_KEY,serviceRoleKey,workDir:'.encounters-work/production'};
+}
+
 export async function cmsTarget(argv=process.argv){
+  if(argv.includes('--target=production'))return productionConfig(argv);
   if(argv.includes('--target=staging')){
     const target=await stagingConfig();
     // The service key must answer for this project: its REST root is served by the staging host only.
@@ -38,7 +51,7 @@ export async function cmsTarget(argv=process.argv){
     assert(r.ok,`The staging service key was not accepted by ${new URL(target.url).host} (${r.status}).`);
     return target;
   }
-  assert(!argv.some(a=>a.startsWith('--target=')),'Unknown target; use --target=staging or none (local).');
+  assert(!argv.some(a=>a.startsWith('--target=')),'Unknown target; use --target=staging, --target=production --confirm-real, or none (local).');
   const state=JSON.parse(await readFile('.encounters-work/local-cms.json','utf8'));
   assert(localOrigins.includes(new URL(state.url).origin),'Refusing a non-local Supabase target.');
   return {name:'local',url:state.url,anonKey:state.anonKey,serviceRoleKey:state.serviceRoleKey,workDir:'.encounters-work'};

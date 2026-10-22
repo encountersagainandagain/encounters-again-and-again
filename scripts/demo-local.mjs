@@ -213,8 +213,8 @@ async function seed(){
     report.created.push(`announcement ${a.title}`);if(leave){demo.pending.push(a.id);report.left_for_admin.push(`announcement ${a.title}: link, date and publication`);}else await remember('upcoming_items',a.id);
   }
 
-  // Synthetic subscribers. Recorded only; nothing is sent.
-  for(const s of set.subscribers){
+  // Synthetic subscribers. Recorded only; nothing is sent. Never in production: the list there is the client's.
+  for(const s of target.name==='production'?[]:set.subscribers){
     const row=(await ok(db.from('newsletter_subscribers').select('id').eq('email',s.email)))[0];
     if(row){if(!demo.subscribers.includes(s.email)){demo.subscribers.push(s.email);report.adopted.push(s.email);}else report.kept.push(s.email);continue;}
     if(leaveForAdmin&&s.viaAdmin){report.left_for_admin.push(`subscriber ${s.email} (Home form)`);continue;}
@@ -314,7 +314,7 @@ async function cleanup(){
   return p;
 }
 
-const [command,arg]=process.argv.slice(2).filter(a=>!a.startsWith('--target='));
+const [command,arg]=process.argv.slice(2).filter(a=>!a.startsWith('--target=')&&a!=='--confirm-real');
 const show=({settingsAfter:_,...shown})=>JSON.stringify(shown,null,2);
 if(command==='seed')console.log(JSON.stringify(await seed(),null,2));
 else if(command==='tidy')console.log(JSON.stringify(await tidy(),null,2));

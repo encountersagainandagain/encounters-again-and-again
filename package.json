@@ -27,6 +27,8 @@
     "demo:staging:seed": "node scripts/demo-local.mjs seed --target=staging",
     "demo:staging:plan": "node scripts/demo-local.mjs plan --target=staging",
     "demo:staging:keep": "node scripts/demo-local.mjs keep --target=staging",
+    "demo:production:seed": "node scripts/demo-local.mjs seed --target=production --confirm-real",
+    "demo:production:plan": "node scripts/demo-local.mjs plan --target=production --confirm-real",
     "staging": "node scripts/staging-cms.mjs",
     "review:deploy": "node scripts/review-deploy.mjs",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
