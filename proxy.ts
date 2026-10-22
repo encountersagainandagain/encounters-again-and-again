@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isRouteEnabled } from '@/config/module-policy';
 export function proxy(request: NextRequest) {
-  if (!isRouteEnabled(request.nextUrl.pathname)) {
+  // The local visual review (/review, fixtures and handoff assets) never runs on a Vercel deployment.
+  const localReview = process.env.VERCEL && /^\/review(\/|$)/.test(request.nextUrl.pathname);
+  if (localReview || !isRouteEnabled(request.nextUrl.pathname)) {
     return new NextResponse('Not found', { status: 404, headers: { 'X-Robots-Tag': 'noindex, nofollow' } });
   }
   return NextResponse.next();

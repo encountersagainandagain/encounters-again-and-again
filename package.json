@@ -23,6 +23,12 @@
     "demo:local:tidy": "node scripts/demo-local.mjs tidy",
     "demo:local:untidy": "node scripts/demo-local.mjs untidy",
     "crew:local:restore": "node scripts/crew-local-restore.mjs",
+    "crew:staging:restore": "node scripts/crew-local-restore.mjs --target=staging",
+    "demo:staging:seed": "node scripts/demo-local.mjs seed --target=staging",
+    "demo:staging:plan": "node scripts/demo-local.mjs plan --target=staging",
+    "demo:staging:keep": "node scripts/demo-local.mjs keep --target=staging",
+    "staging": "node scripts/staging-cms.mjs",
+    "review:deploy": "node scripts/review-deploy.mjs",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
     "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs && node --experimental-strip-types scripts/check-round-2026-10-19.mjs && node --experimental-strip-types scripts/check-round-2026-10-20.mjs && node scripts/check-round-2026-10-20b.mjs"
   },

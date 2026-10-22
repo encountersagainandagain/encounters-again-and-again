@@ -8,7 +8,8 @@ const modulesUrl = compileUrl(await source('src/config/modules.ts'));
 const policyUrl = compileUrl((await source('src/config/module-policy.ts')).replace("'./modules'", JSON.stringify(modulesUrl)));
 const { isRouteEnabled, assertDataAccessEnabled } = await import(policyUrl);
 const { moduleFetch } = await import(compileUrl((await source('src/lib/moduleFetch.ts')).replace("'@/config/module-policy'", JSON.stringify(policyUrl))));
-const { isAllowedEncountersSupabaseTarget } = await import(compileUrl(await source('src/lib/encountersSupabaseTarget.ts')));
+const targetSource = async ref => compileUrl((await source('src/lib/encountersSupabaseTarget.ts')).replace("import staging from '@/config/staging.json';", `const staging = ${JSON.stringify({ ...JSON.parse(await source('src/config/staging.json')), ...(ref === undefined ? {} : { supabaseRef: ref }) })};`));
+const { isAllowedEncountersSupabaseTarget } = await import(await targetSource());
 const blocked = ['/shop','/shop/item','/cart','/checkout','/support-us','/gallery','/gear','/destinations','/blog/post','/r/token','/admin/orders','/admin/products','/admin/providers','/admin/reviews','/admin/comments','/admin/gallery','/admin/gear','/admin/countries','/api/shop/checkout','/api/stripe/webhook','/api/admin/orders/x/refund','/api/admin/pod/variants','/api/cron/cleanup-pending-orders','/api/post-likes','/api/post-comments','/api/contact'];
 for (const path of blocked) assert.equal(isRouteEnabled(path),false,path);
 for (const path of ['/','/admin/posts','/admin/newsletter','/api/newsletter/subscribe','/crew','/art','/posts/new-slug']) assert.equal(isRouteEnabled(path),true,path);
@@ -20,6 +21,23 @@ assert.equal(isAllowedEncountersSupabaseTarget('http://127.0.0.1:54321'),true);
 assert.equal(isAllowedEncountersSupabaseTarget('http://localhost:54321'),true);
 assert.equal(isAllowedEncountersSupabaseTarget('http://127.0.0.1:6543'),false);
 delete process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE;
+// Review deployments (Vercel Preview) accept only the staging project; it is refused everywhere else.
+{
+  const staged = await import(await targetSource('abcdefghijklmnopqrst') + '#staging');
+  const stagingUrl = 'https://abcdefghijklmnopqrst.supabase.co';
+  assert.equal(staged.isAllowedEncountersSupabaseTarget(stagingUrl), false, 'staging outside a preview deployment');
+  process.env.VERCEL_ENV = 'preview';
+  assert.equal(staged.isAllowedEncountersSupabaseTarget(stagingUrl), true);
+  assert.equal(staged.isAllowedEncountersSupabaseTarget('https://lzwmwofxoegkxykglneq.supabase.co'), false, 'real project in a preview deployment');
+  assert.equal(staged.isAllowedEncountersSupabaseTarget('http://127.0.0.1:54321'), false);
+  const unset = await import(await targetSource('') + '#unset');
+  assert.equal(unset.isAllowedEncountersSupabaseTarget('https://lzwmwofxoegkxykglneq.supabase.co'), false, 'preview without staging ref');
+  const real = await import(await targetSource('lzwmwofxoegkxykglneq') + '#real');
+  assert.equal(real.isAllowedEncountersSupabaseTarget('https://lzwmwofxoegkxykglneq.supabase.co'), false, 'the real ref is never a staging ref');
+  process.env.VERCEL_ENV = 'production';
+  assert.equal(staged.isAllowedEncountersSupabaseTarget(stagingUrl), false, 'staging in production');
+  delete process.env.VERCEL_ENV;
+}
 const originalFetch = globalThis.fetch;
 let outboundCalls = 0;
 globalThis.fetch = async () => { outboundCalls++; return new Response('{}'); };

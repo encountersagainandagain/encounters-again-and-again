@@ -11,3 +11,4 @@ supabase/.temp/
 supabase/.branches/
 .encounters-work/
 .next-cms-prod/
+.vercel

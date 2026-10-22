@@ -28,6 +28,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return <html lang="en" data-scroll-behavior="smooth"><body className={`${heading.variable} ${body.variable}`}>
     <JsonLd id="organization-jsonld" data={{ '@context':'https://schema.org', '@type':'Organization', '@id':`${siteUrl}/#organization`, name:brand.name, url:siteUrl, logo:`${siteUrl}${brand.logo}` }} />
     <JsonLd id="website-jsonld" data={{ '@context':'https://schema.org', '@type':'WebSite', name:brand.name, url:siteUrl }} />
-    <SiteChrome settings={settings||{}} localReview={process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE==='true'}>{children}</SiteChrome>
+    <SiteChrome settings={settings||{}} localReview={process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE==='true'||process.env.VERCEL_ENV==='preview'}>{children}</SiteChrome>
   </body></html>;
 }

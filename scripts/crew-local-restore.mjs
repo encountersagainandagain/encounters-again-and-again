@@ -1,5 +1,6 @@
-// Restores the six original Crew cards and their portraits in the isolated local CMS only (Supabase at
-// 127.0.0.1:54321). The local database was seeded from fixtures and the review examples, never from the import, so
+// Restores the six original Crew cards and their portraits in the isolated local CMS (Supabase at 127.0.0.1:54321),
+// or in the online review project with --target=staging (npm run crew:staging:restore; never the real project).
+// The local database was seeded from fixtures and the review examples, never from the import, so
 // /crew showed only Flaquito and the fictional makers. This takes the six people from the Team page of the content
 // snapshot with the same mapping, ids and storage paths as scripts/encounters-import.mjs (crewSpecs), so the local
 // records match the imported ones; it is not a new import and touches nothing else.
@@ -14,12 +15,13 @@ import {execFileSync} from 'node:child_process';
 import {readFile} from 'node:fs/promises';
 import {createClient} from '@supabase/supabase-js';
 import {expectedSnapshotHash,hash,stableId} from './encounters-context.mjs';
+import {cmsTarget} from './cms-target.mjs';
 // Same table as the importer: new public path of each snapshot page, for the links inside blocks.
 const pathByRole={home:'/',about:'/about',team:'/crew',contact:'/contact',encounters_expeditions:'/expeditions',artsy_animals:'/workshops',wild_wonders:'/crew/wild-wonders'};
 
-const state=JSON.parse(await readFile('.encounters-work/local-cms.json','utf8'));
-assert(['http://127.0.0.1:54321','http://localhost:54321'].includes(new URL(state.url).origin),'Refusing a non-local Supabase target.');
-const db=createClient(state.url,state.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
+// Local CMS by default; the online review project only with --target=staging (scripts/cms-target.mjs checks it).
+const target=await cmsTarget();
+const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
 const ok=async query=>{const r=await query;if(r.error)throw r.error;return r.data;};
 const apply=process.argv.includes('--apply');
 const zip='docs/encounters/migration-source/encounters-content-snapshot.zip';
@@ -30,7 +32,7 @@ const team=seed.content.pages.find(p=>p.role==='team');const block=pos=>team.blo
 const assets=new Map(seed.assets.images.map(a=>[a.asset_id,a]));
 // Same table as the importer: slug and the Team page block positions of the heading, portrait, bio and quote.
 const crewSpecs=[['julian-lange',7,8,10,11],['fabrizio-ferrari',12,13,15,16],['wild-wonders',17,18,20,21],['hugo-delgado',22,23,25,26],['maja-koronska',27,28,29,30],['alexis-menage',31,32,34,35]];
-const report={mode:apply?'apply':'dry-run',portraits:{uploaded:[],reused:[]},crew:{created:[],kept:[]},wildWonders:{page:'',images:{uploaded:[],reused:[]},card:''},missing:[]};
+const report={target:target.name,mode:apply?'apply':'dry-run',portraits:{uploaded:[],reused:[]},crew:{created:[],kept:[]},wildWonders:{page:'',images:{uploaded:[],reused:[]},card:''},missing:[]};
 // One file per image: an existing media row with the same content is reused whatever its id (importer ids and paths).
 async function mediaFor(a,log){
   const bytes=read(a.local_path);const sha=hash(bytes);assert.equal(bytes.length,a.bytes,`Size mismatch for ${a.local_path}`);
@@ -85,4 +87,4 @@ if(!georgia)report.missing.push('Georgia Webb card (wild-wonders) not found');
 else if(georgia.has_page&&georgia.page_post_id)report.wildWonders.card=`already linked to ${georgia.page_post_id}, left as it is`;
 else{const pageNow=existingPage?.id||pageId;if(apply){const {updated_at,...row}=georgia;await ok(db.rpc('save_entity',{entity:'crew_members',payload:{...row,has_page:true,page_post_id:pageNow}}));}report.wildWonders.card=`linked to ${pageNow}`;}
 console.log(JSON.stringify(report,null,2));
-if(!apply)console.log('Dry run. Apply with: npm run crew:local:restore -- --apply');
+if(!apply)console.log(`Dry run. Apply with: npm run crew:${target.name}:restore -- --apply`);

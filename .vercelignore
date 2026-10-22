@@ -1,0 +1,12 @@
+# Online review deployments (Vercel Preview) upload only what the app needs.
+# Never upload local secrets, local CMS state or the design/migration sources.
+.env*
+!.env.example
+.encounters-work/
+.next*/
+docs/
+legacy/
+backups/
+supabase/.temp/
+supabase/.branches/
+*.tsbuildinfo

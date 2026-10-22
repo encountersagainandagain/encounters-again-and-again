@@ -1,4 +1,5 @@
-// Demonstration content for the isolated local CMS only (Supabase at 127.0.0.1:54321).
+// Demonstration content for the isolated local CMS (Supabase at 127.0.0.1:54321), or for the online review project
+// with --target=staging (npm run demo:staging:*; checked by scripts/cms-target.mjs, never the real project).
 //   npm run demo:local:seed            create the missing examples (scripts/demo-content.mjs); never overwrites edits
 //        -- --leave-for-admin          leave out the examples meant to be created or completed from the admin
 //   npm run demo:local:tidy            hide (draft) the superseded first demo set and the unequivocal test records
@@ -14,17 +15,18 @@ import {createHash} from 'node:crypto';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createClient} from '@supabase/supabase-js';
 import {id,images,legacy,portraits,reviewSet,sceneSvg} from './demo-content.mjs';
+import {cmsTarget} from './cms-target.mjs';
 
-const statePath='.encounters-work/local-cms.json',keepPath='.encounters-work/demo-keep.json',adoptPath='.encounters-work/demo-adopted.json',demoPath='.encounters-work/demo-state.json';
-const state=JSON.parse(await readFile(statePath,'utf8'));
-assert(['http://127.0.0.1:54321','http://localhost:54321'].includes(new URL(state.url).origin),'Refusing a non-local Supabase target.');
-const db=createClient(state.url,state.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
+// Local CMS by default; the online review project only with --target=staging (scripts/cms-target.mjs checks it).
+const target=await cmsTarget();const work=target.workDir;
+const keepPath=`${work}/demo-keep.json`,adoptPath=`${work}/demo-adopted.json`,demoPath=`${work}/demo-state.json`;
+const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
 const ok=async query=>{const r=await query;if(r.error)throw r.error;return r.data;};
 const json=async(path,fallback)=>JSON.parse(await readFile(path,'utf8').catch(()=>JSON.stringify(fallback)));
 const keep=new Set(await json(keepPath,[]));
 const adopted=await json(adoptPath,[]);
 const demo={baseline:{},pending:[],hidden:[],subscribers:[],...await json(demoPath,{})};
-const saveState=async()=>{await mkdir('.encounters-work',{recursive:true});await writeFile(demoPath,JSON.stringify(demo,null,2)+'\n');await writeFile(adoptPath,JSON.stringify(adopted,null,2)+'\n');};
+const saveState=async()=>{await mkdir(work,{recursive:true});await writeFile(demoPath,JSON.stringify(demo,null,2)+'\n');await writeFile(adoptPath,JSON.stringify(adopted,null,2)+'\n');};
 const leaveForAdmin=process.argv.includes('--leave-for-admin');
 const set=reviewSet();
 
@@ -312,7 +314,7 @@ async function cleanup(){
   return p;
 }
 
-const [command,arg]=process.argv.slice(2);
+const [command,arg]=process.argv.slice(2).filter(a=>!a.startsWith('--target='));
 const show=({settingsAfter:_,...shown})=>JSON.stringify(shown,null,2);
 if(command==='seed')console.log(JSON.stringify(await seed(),null,2));
 else if(command==='tidy')console.log(JSON.stringify(await tidy(),null,2));
@@ -329,7 +331,7 @@ else if(command==='adopt'){
   console.log(`Adopted “${post?.title||category.name}” (${arg}) as a local example.`);
 }else if(command==='keep'){
   assert(arg&&(arg.startsWith('de000000-')||adopted.includes(arg)),'Pass the id of a demo record (it starts with de000000-) or of adopted content.');
-  keep.add(arg);await mkdir('.encounters-work',{recursive:true});await writeFile(keepPath,JSON.stringify([...keep],null,2)+'\n');
+  keep.add(arg);await mkdir(work,{recursive:true});await writeFile(keepPath,JSON.stringify([...keep],null,2)+'\n');
   const post=await db.from('posts').select('source_metadata').eq('id',arg).maybeSingle();if(post.data)await ok(db.from('posts').update({source_metadata:{...post.data.source_metadata,demo:false}}).eq('id',arg));
   console.log(`Kept ${arg}. It will not be deleted by demo:local:clean. Rename it so it no longer says “demo”.`);
 }else{console.error('Usage: node scripts/demo-local.mjs seed [--leave-for-admin]|tidy|untidy|plan|clean [--confirm]|keep <id>|adopt <id>');process.exit(1);}
