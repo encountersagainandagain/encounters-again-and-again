@@ -10,6 +10,7 @@ Estado técnico de cada módulo: [page-progress.md](page-progress.md).
 |---|---|---|
 | Sitio completo (producción local) | http://127.0.0.1:3221 | Build de producción contra Supabase local, con los ejemplos de revisión. Reconstruido el 2026-10-21 desde `dc25415` (correcciones de la revisión manual y Wild Wonders local); los commits posteriores son solo documentación. |
 | Admin conectado a esos datos | http://127.0.0.1:3221/admin | Usuario y contraseña locales en `.encounters-work/local-cms.json` (no versionado). Todo lo que se edita es local. |
+| Revisión online (Vercel Preview) | https://encounters-review-juanimolfinos-projects.vercel.app | Pide iniciar sesión en Vercel con tu cuenta. Todavía sin base de pruebas: ver [entornos.md](entornos.md). |
 | Prototipos | http://127.0.0.1:3220/ | `docs/encounters/handoff-current`, servidos tal cual. |
 | Crew y Wild Wonders con datos reales | http://127.0.0.1:3218/crew · http://127.0.0.1:3218/crew/wild-wonders | Solo lectura de la base real; nada se escribe. Desde el 2026-10-21 las seis fichas originales y Wild Wonders también están en local (3221), con editor. |
 | Desarrollo (mismos datos que 3221) | http://127.0.0.1:3219 | Alternativa si 3221 no está levantado. |

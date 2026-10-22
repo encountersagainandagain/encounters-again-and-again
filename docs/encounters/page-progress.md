@@ -20,6 +20,14 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
 
+**Revisión online (2026-10-21):** proyecto Vercel `encounters-review` con despliegues Preview protegidos desde la rama `review`. Detalle y procedimiento en [entornos.md](entornos.md).
+- Hecho: proyecto independiente sin Git conectado; Vercel Authentication; `noindex`; `/review` en 404; `docs`, `legacy`, `.env*` y el estado local fuera de la subida; correo bloqueado.
+- Validación del destino: un Preview solo acepta la base de pruebas y ningún otro entorno la acepta.
+- Scripts: procedimiento de staging (`npm run staging -- …`) y despliegue (`npm run review:deploy`).
+- Desplegado `72807e7`: build correcto.
+- **Pendiente:** el proyecto Supabase de pruebas no existe; lo crea Juani (pasos en entornos.md). Hasta entonces el sitio online responde «Supabase is not configured» y no se pudieron hacer la carga ni la verificación online (login, CRUD, privacidad, relaciones, newsletter).
+- Incidente corregido: el primer alias libre (`encounters-review.vercel.app`) y el dominio por defecto del proyecto respondían sin login. Se eliminaron a los pocos minutos, cuando el sitio todavía no tenía base de datos. Ahora solo se usa el alias con el sufijo del equipo, y el script de despliegue verifica que pida login.
+
 **Correcciones de la revisión manual (2026-10-20, producción local `51f2ec6`):** causa, solución y pendientes de cada punto. Videos en `.encounters-work/videos-2026-10-20/` (no versionados): `navbar-new-page-at-top`, `home-descent`, `about-banner-desktop`, `about-banner-phone`, `messages-read-link`.
 
 1. **Home: tirones durante el scroll.**

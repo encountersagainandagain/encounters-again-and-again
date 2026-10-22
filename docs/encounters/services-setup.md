@@ -32,7 +32,7 @@ Newsletter sigue en alcance con alta/baja, deduplicación, exclusión de bajas, 
 
 - GA4: verificar propiedad existente y propietario antes de crear otra; NEXT_PUBLIC_GA_MEASUREMENT_ID es pública y opcional, sin valor Katie; no está aún en .env.example porque el tracking está apagado. Activación y consentimiento se validan antes de lanzamiento.
 - Search Console: confirmar acceso y método de verificación existente; no inventar token ni exigir una variable hasta saber el método.
-- Vercel: pendiente por instrucción. Nuevo proyecto y repo correctos cuando se autorice etapa de despliegue; ninguna variable o ID de proyecto Katie.
+- Vercel: desde 2026-10-21, proyecto `encounters-review` solo para la revisión online (Preview, sin dominio ni producción); ver [entornos.md](entornos.md). El lanzamiento sigue pendiente; ninguna variable o ID de proyecto Katie.
 - Dominio/DNS/Hostinger: confirmar responsables y backup restaurable, conservar WordPress y registros de correo. No cambiar DNS.
 
 No se requieren Stripe, Printful, Tapstitch, Meta Pixel, Travelpayouts, cron comercial ni proveedor extra de Auth/archivos para v1.
