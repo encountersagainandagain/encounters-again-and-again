@@ -62,7 +62,7 @@ No se configuran `ENCOUNTERS_ALLOW_LOCAL_SUPABASE`, `ENCOUNTERS_LOCAL_PRODUCTION
    - región **East US (North Virginia)**, la más cercana a las funciones de Vercel;
    - contraseña de base de datos generada (guardala);
    - confirmar que dice **$0/month**. Si pide un plan pago, detenerse.
-3. Cuando esté listo, crear el archivo `.encounters-work/staging.env` (ignorado por Git, no se sube) con:
+3. Cuando esté listo, completar el archivo `.encounters-work/staging.env` (ya existe como plantilla vacía; ignorado por Git y por Vercel) con:
    ```
    STAGING_SUPABASE_URL=https://<ref>.supabase.co
    STAGING_SUPABASE_ANON_KEY=<Project Settings → API Keys: anon / publishable>
@@ -70,13 +70,16 @@ No se configuran `ENCOUNTERS_ALLOW_LOCAL_SUPABASE`, `ENCOUNTERS_LOCAL_PRODUCTION
    STAGING_SUPABASE_DB_PASSWORD=<la contraseña del paso 2>
    ```
    Si el proyecto quedara en otra cuenta, agregar `STAGING_SUPABASE_ACCESS_TOKEN=<token personal de esa cuenta>`.
-4. Pasar solo el **ref** (no es secreto). Se escribe en `src/config/staging.json`.
+4. Avisar. El ref (no es secreto) se toma de la URL con `npm run staging -- init --apply`, que lo escribe en `src/config/staging.json`; ese cambio se commitea en `review` antes de desplegar.
+
+**Ninguna de estas claves sale de `.env.local`**: allí están las del proyecto real, que el Preview rechaza. De `.env.local` solo se reutiliza, si el proyecto de pruebas está en la misma cuenta, el token `SUPABASE_ACCESS_TOKEN` para la API de administración, sin copiarlo.
 
 Los proyectos Free se pausan tras una semana sin uso; se reanudan desde el panel.
 
 **Cargarlo (procedimiento de staging, nunca automático):** cada comando verifica el ref de `staging.json`, que no sea el real y que las claves pertenezcan a ese proyecto. Sin `--apply` solo muestra lo que haría; no imprime secretos.
 
 ```
+npm run staging -- init --apply       # ref de la URL → src/config/staging.json (commit + push a review)
 npm run staging -- check              # proyecto, Auth, Storage, esquema
 npm run staging -- migrate --apply    # migraciones versionadas en orden (supabase db push, con historial)
 npm run staging -- auth --apply       # registro público desactivado; Site URL y redirects = URL de revisión

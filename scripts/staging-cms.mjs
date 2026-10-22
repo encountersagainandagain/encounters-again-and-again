@@ -2,6 +2,7 @@
 // Never the real Encounters project, never localhost: every command first checks the ref written in
 // src/config/staging.json and the keys of .encounters-work/staging.env (scripts/cms-target.mjs). Nothing runs on build.
 // Each command is a dry run unless it gets --apply; secrets are never printed.
+//   npm run staging -- init [--apply]     write the ref of STAGING_SUPABASE_URL into src/config/staging.json
 //   npm run staging -- check              project, keys, migrations applied, Auth and Storage state
 //   npm run staging -- migrate [--apply]  apply the versioned migrations in order (supabase db push, history kept)
 //   npm run staging -- auth [--apply]     public signup off, site URL and redirect URLs of the review deployment
@@ -17,6 +18,17 @@ import {createClient} from '@supabase/supabase-js';
 import {REAL_REF,cmsTarget,readEnvFile} from './cms-target.mjs';
 
 const [command]=process.argv.slice(2).filter(a=>!a.startsWith('--'));const apply=process.argv.includes('--apply');
+if(command==='init'){
+  // Writes the ref of STAGING_SUPABASE_URL into src/config/staging.json (the only tracked trace of the project).
+  const {STAGING_SUPABASE_URL:url}=await readEnvFile('.encounters-work/staging.env');
+  const ref=/^https:\/\/([a-z0-9]{20})\.supabase\.co\/?$/.exec(url||'')?.[1];
+  assert(ref,'STAGING_SUPABASE_URL in .encounters-work/staging.env must be https://<ref>.supabase.co.');
+  assert.notEqual(ref,REAL_REF,'That is the real Encounters project, not the staging one.');
+  const current=JSON.parse(await readFile('src/config/staging.json','utf8'));
+  if(apply)await writeFile('src/config/staging.json',JSON.stringify({...current,supabaseRef:ref},null,2)+'\n');
+  console.log(`${apply?'wrote':'would write'} supabaseRef=${ref} to src/config/staging.json${apply?'':' (add --apply)'}`);
+  process.exit(0);
+}
 const target=await cmsTarget(['--target=staging']);const {ref}=target;
 const config=JSON.parse(await readFile('src/config/staging.json','utf8'));
 const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
