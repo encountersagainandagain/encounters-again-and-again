@@ -20,7 +20,10 @@ import {cmsTarget} from './cms-target.mjs';
 // Local CMS by default; the online review project only with --target=staging (scripts/cms-target.mjs checks it).
 const target=await cmsTarget();const work=target.workDir;
 const keepPath=`${work}/demo-keep.json`,adoptPath=`${work}/demo-adopted.json`,demoPath=`${work}/demo-state.json`;
-const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false}});
+// A connection that never opened (timeout, refused, DNS) is retried: the request was not sent, so nothing repeats.
+const connectFailure=e=>['UND_ERR_CONNECT_TIMEOUT','ECONNREFUSED','ENOTFOUND','EAI_AGAIN'].includes(e?.cause?.code);
+const retryingFetch=async(...args)=>{for(let attempt=1;;attempt++){try{return await fetch(...args);}catch(e){if(!connectFailure(e)||attempt>=6)throw e;await new Promise(r=>setTimeout(r,attempt*3000));}}};
+const db=createClient(target.url,target.serviceRoleKey,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:retryingFetch}});
 const ok=async query=>{const r=await query;if(r.error)throw r.error;return r.data;};
 const json=async(path,fallback)=>JSON.parse(await readFile(path,'utf8').catch(()=>JSON.stringify(fallback)));
 const keep=new Set(await json(keepPath,[]));
