@@ -15,5 +15,8 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   if(!media)return new Response(null,{status:404});
   const {data,error:downloadError}=await client.storage.from('media').download(media.storage_path);
   if(downloadError||!data)return new Response(null,{status:404});
-  return new Response(data,{headers:{'Content-Type':media.mime_type,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; sandbox"}});
+  // Without a session the row was visible to anyone (published content): the browser and Vercel's CDN keep it for
+  // 10 minutes, so an unpublished image stops being served at most 10 minutes later. With a session, never cached.
+  const cache=authorization?'private, no-store':'public, max-age=600, s-maxage=600';
+  return new Response(data,{headers:{'Content-Type':media.mime_type,'Cache-Control':cache,'X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; sandbox"}});
 }

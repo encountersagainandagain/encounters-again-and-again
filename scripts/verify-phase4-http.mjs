@@ -29,7 +29,7 @@ try{
       else if(['/elementor-page-3462','/elementor-2907'].includes(path))assert.equal(r.status,308);else assert.equal(r.status,404);
     }
     const sitemap=await (await fetch(base+'/sitemap.xml')).text();assert.ok(sitemap.includes('/crew/wild-wonders'));assert.ok(!sitemap.includes('/crew/julian-lange'));assert.ok(!sitemap.includes('/expeditions'));checks.push('Completed routes, canonical/OG, published-only sitemap and only ready legacy redirects');
-    const media=ok(await anon.from('media').select('id').limit(1))[0];const image=await fetch(base+`/api/media/${media.id}`);assert.equal(image.status,200);assert.match(image.headers.get('cache-control'),/no-store/);assert.match(image.headers.get('content-type'),/^image\//);checks.push('Anonymous published image uses stable endpoint with no-store');
+    const media=ok(await anon.from('media').select('id').limit(1))[0];const image=await fetch(base+`/api/media/${media.id}`);assert.equal(image.status,200);assert.match(image.headers.get('cache-control'),/^public, max-age=600, s-maxage=600$/);assert.match(image.headers.get('content-type'),/^image\//);checks.push('Anonymous published image uses stable endpoint, cached 10 minutes');
     assert.equal((await fetch(base+'/api/admin/revalidate',{method:'POST',headers:{'Content-Type':'application/json'},body:'{"scope":"posts"}'})).status,401);
     const email=(process.env.ADMIN_EMAILS||'').split(',')[0].trim();
     const link=ok(await admin.auth.admin.generateLink({type:'magiclink',email}));
