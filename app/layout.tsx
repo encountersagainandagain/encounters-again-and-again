@@ -9,8 +9,10 @@ import '@/styles/encounters-tokens.css';
 import '@/styles/editorial.css';
 import '@/styles/site.css';
 import '@/styles/admin.css';
-const heading = localFont({ src: [{path:'../public/fonts/eb-garamond.ttf',weight:'400 500',style:'normal'},{path:'../public/fonts/eb-garamond-italic.ttf',weight:'400 500',style:'italic'}], variable: '--font-display', display: 'swap' });
-const body = localFont({ src: '../public/fonts/archivo.ttf', weight: '400 700', variable: '--font-body', display: 'swap' });
+// WOFF2 copies trimmed to the characters and weights the site uses (scripts/subset-fonts.mjs); the fallback is sized to
+// each face so the text does not jump when the font arrives.
+const heading = localFont({ src: [{path:'../public/fonts/eb-garamond.woff2',weight:'400 500',style:'normal'},{path:'../public/fonts/eb-garamond-italic.woff2',weight:'400 500',style:'italic'}], variable: '--font-display', display: 'swap', adjustFontFallback: 'Times New Roman' });
+const body = localFont({ src: '../public/fonts/archivo.woff2', weight: '400 700', variable: '--font-body', display: 'swap' });
 // Public pages are rendered from published content only (anonymous RLS) and cached for 5 minutes on Vercel; every
 // save, publish or unpublish in the admin expires them at once (/api/admin/revalidate). Admin pages stay dynamic.
 export const revalidate=300;
