@@ -27,12 +27,17 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const headers={'Cache-Control':cache,'X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; sandbox"};
   // ?w=: a WebP no wider than asked (never enlarged), oriented like the original. SVG and GIF are served as they are.
   // If the WebP would not be lighter than the original, the original is served.
-  const asked=Number(new URL(request.url).searchParams.get('w'));
+  const search=new URL(request.url).searchParams;const asked=Number(search.get('w'));
+  // &blur=: a copy blurred beforehand (Gaussian sigma in output pixels, 0.5–20), for effects that would otherwise
+  // re-filter the image on every frame (Home project cards coming into focus).
+  const sigma=Number(search.get('blur'));const blurred=sigma>=.5&&sigma<=20;
   if(asked>0&&RESIZABLE.includes(media.mime_type)){
     const width=WIDTHS.find(w=>w>=asked)??WIDTHS.at(-1)!;
     const original=Buffer.from(await data.arrayBuffer());
     try{
-      const resized=await sharp(original).rotate().resize({width,withoutEnlargement:true}).webp({quality:82,alphaQuality:90,effort:4}).toBuffer();
+      const sized=sharp(original).rotate().resize({width,withoutEnlargement:true});
+      const resized=await (blurred?sized.blur(sigma):sized).webp({quality:82,alphaQuality:90,effort:4}).toBuffer();
+      if(blurred)return new Response(new Uint8Array(resized),{headers:{...headers,'Content-Type':'image/webp'}});
       if(resized.length<original.length)return new Response(new Uint8Array(resized),{headers:{...headers,'Content-Type':'image/webp'}});
     }catch{/* an image sharp cannot read is served as stored */}
     return new Response(new Uint8Array(original),{headers:{...headers,'Content-Type':media.mime_type}});

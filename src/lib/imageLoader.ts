@@ -19,3 +19,6 @@ export default function encountersImageLoader({src,width}:{src:string;width:numb
   if(!list?.length)return src;
   return (list.find(([w])=>w>=width)??list.at(-1)!)[1];
 }
+
+// The small copy of a design image blurred beforehand for the Home project cards (scripts/image-variants.mjs, "#focus").
+export const focusDesignImage=(src:string)=>staticVariants[`${src}#focus`]?.[0]?.[1]??null;

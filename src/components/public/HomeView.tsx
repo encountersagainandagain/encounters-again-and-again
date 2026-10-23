@@ -1,6 +1,6 @@
 'use client';
 import focusFiles from '@/config/home-bg-focus.json';
-import {fullDesignImage} from '@/lib/imageLoader';
+import {focusDesignImage,fullDesignImage} from '@/lib/imageLoader';
 import Image from 'next/image';
 import Link from 'next/link';
 import {useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
@@ -80,6 +80,15 @@ function FocusLayer({name}:{name:'soft'|'deep'}){
     {/* A plain <img>: the source depends on the window height, which next/image cannot express. */}
     <img src={file(FOCUS_HEIGHTS.at(-1)!)} alt="" decoding="async" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}/></picture>;
 }
+// The project-card photo blurred beforehand (9 CSS px on a photo drawn about 900 px wide): a small copy from the media
+// route (&blur=) or the design variants, laid over the sharp photo with the same crop and focal point.
+function FocusPhoto({id,media,fallback}:{id:unknown;media:Row[];fallback?:string}){
+  const item=id?media.find(m=>m.id===id):undefined;const preview=item?string(item.preview_url):'';
+  const src=item?(preview?null:`/api/media/${item.id}?w=360&blur=3.6`):fallback?focusDesignImage(fallback):null;
+  if(!src)return null;
+  const position=item?`${Number(item.focal_x??.5)*100}% ${Number(item.focal_y??.5)*100}%`:undefined;
+  return <img data-pfocus src={src} alt="" aria-hidden="true" decoding="async" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',...(position?{objectPosition:position}:{}),opacity:0}}/>;
+}
 export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];closing:string;newsletter:boolean}){
   const {home,sections,agenda,happened,art,crew,projects}=view;const hero=(home.hero||{}) as Row,descent=(home.descent||{}) as Row,reef=(home.reef||{}) as Row,about=(home.about||{}) as Row,letters=(home.newsletter||{}) as Row;
   const root=useRef<HTMLDivElement>(null),snow=useRef<HTMLCanvasElement>(null);const flakes=useMemo(()=>makeSnow(),[]);
@@ -118,7 +127,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       header,brand:brandEl,navImg:brandEl?.querySelector<HTMLElement>('img')||null,navWord:brandEl?.querySelector<HTMLElement>(':scope>span')||null,
       descent:document.getElementById('descenso'),reefImg:q('[data-reef] img'),
       turtle:creature('turtle',["[data-flip='front']","[data-flip='rear']"]),fish:creature('fish',["[data-fin='tail']","[data-fin='pec']"]),dolphin:creature('dolphin',["[data-fin='fluke']","[data-fin='pec']"]),whale:creature('whale',["[data-fin='fluke']","[data-fin='pec']"]),
-      cards:all('[data-pcard]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-pimg]'),ray:el.querySelector<HTMLElement>('[data-pray]')})),
+      cards:all('[data-pcard]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-pimg]'),focus:el.querySelector<HTMLElement>('[data-pfocus]'),ray:el.querySelector<HTMLElement>('[data-pray]')})),
       stage:q('[data-agenda]'),events:all('[data-nx]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-nximg]'),ray:el.querySelector<HTMLElement>('[data-nxray]'),txt:el.querySelector<HTMLElement>('[data-nxtxt]')})),
       hudA:q('[data-nxhud]'),fill:q('[data-nxfill]'),markA:q('[data-nxmark]'),labels:all('[data-nxlabel]'),
       seq:all('[data-hseq]'),scribbles:all<SVGPathElement>('[data-hscribble] path'),
@@ -185,10 +194,12 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       // Entering, the card comes into focus (blur 9px → 0) and colour (saturate, hue). Blurring the whole rotated card,
       // with its screen-blended rays inside, made the GPU re-filter a large surface on every frame (traces: 8% of frames
       // missed through Ongoing projects, pauses up to 280 ms; 1% without the blur). The colour stays on the card; the
-      // focus is on the photo only (same radius and timing), so the title and text enter sharp — A/B pending (?cards=a).
+      // focus is on the photo only: a copy blurred beforehand (9px, FocusPhoto) fades out over the sharp photo, so the GPU
+      // only blends two textures; title and text enter sharp — A/B pending (?cards=a keeps the full-card blur).
       const fullCardBlur=cardsA.current;const blur=e<.995?`blur(${((1-e)*9).toFixed(2)}px)`:'';
       c.el.style.filter=e<.995?`${fullCardBlur?blur+' ':''}saturate(${(.5+.5*e).toFixed(2)}) hue-rotate(${((1-e)*14).toFixed(1)}deg)`:'none';
-      if(c.img){c.img.style.transform=`translate3d(0,${((.5-p)*r.height*.24).toFixed(1)}px,0) scale(${(1.03+(1-e)*.08).toFixed(3)})`;c.img.style.filter=fullCardBlur||!blur?'none':blur;}
+      if(c.img){c.img.style.transform=`translate3d(0,${((.5-p)*r.height*.24).toFixed(1)}px,0) scale(${(1.03+(1-e)*.08).toFixed(3)})`;c.img.style.filter=fullCardBlur||!blur||c.focus?'none':blur;}
+      if(c.focus)c.focus.style.opacity=fullCardBlur||e>=.995?'0':(1-e).toFixed(3);
       if(c.ray)c.ray.style.transform=`translate3d(${(Math.sin(t*.3+i)*50+p*90).toFixed(1)}px,0,0)`;});
     // Agenda (prototype drawNext): only while the stage is on screen.
     if(stageR&&!(stageR.bottom<0||stageR.top>vh)){
@@ -213,7 +224,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     descent:(string(descent.title)||string(descent.body))?<section key="descent" id="descenso" className="home-descent" data-clear><h2>{string(descent.title)}</h2>{string(descent.body)&&<p>{emphasize(string(descent.body),string(descent.emphasis))}</p>}</section>:null,
     reef:<section key="reef" className="home-reef" data-reef data-clear><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp" sizes="100vw"/><Creature name="fish"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
     projects:<section key="projects" id="projects" className="home-projects"><h2>{string(home.projects_title)||'Ongoing projects'}</h2><svg className="home-projects-scribble" data-pscribble viewBox="0 0 600 130" aria-hidden="true"><path pathLength="1" d="M10 92 C 96 26, 188 20, 244 56 C 296 90, 256 118, 218 100 C 172 78, 214 40, 306 38 C 420 36, 522 56, 590 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
-      <div className="home-pcards">{projects.map((p,i)=><Link key={p.key} href={p.href} data-pcard={i} className="home-pcard"><div data-pimg><Picture id={p.media_id} media={media} fallback={p.fallback} sizes="(max-width: 760px) 250vw, (max-width: 1080px) 100vw, 64vw"/></div><div className="home-pcard-shade"/><div data-pray className="home-pcard-rays" aria-hidden="true"/><div className="home-pcard-copy"><span className="home-pcard-title">{lines(p.title)}</span><div>{string(p.status_label)&&<span className="home-pcard-status">{string(p.status_label).split('|').map((part,n)=><span key={n}>{n>0&&<i>|</i>}{part.trim()}</span>)}</span>}{string(p.body)&&<p>{string(p.body)}</p>}</div></div></Link>)}</div></section>,
+      <div className="home-pcards">{projects.map((p,i)=><Link key={p.key} href={p.href} data-pcard={i} className="home-pcard"><div data-pimg><Picture id={p.media_id} media={media} fallback={p.fallback} sizes="(max-width: 760px) 250vw, (max-width: 1080px) 100vw, 64vw"/><FocusPhoto id={p.media_id} media={media} fallback={p.fallback}/></div><div className="home-pcard-shade"/><div data-pray className="home-pcard-rays" aria-hidden="true"/><div className="home-pcard-copy"><span className="home-pcard-title">{lines(p.title)}</span><div>{string(p.status_label)&&<span className="home-pcard-status">{string(p.status_label).split('|').map((part,n)=><span key={n}>{n>0&&<i>|</i>}{part.trim()}</span>)}</span>}{string(p.body)&&<p>{string(p.body)}</p>}</div></div></Link>)}</div></section>,
     upcoming:agenda.length?<section key="upcoming" id="next" className="home-agenda pin-section" data-agenda>
       <div className="home-agenda-hud" data-nxhud aria-hidden="true"><div className="home-agenda-fade"/><div className="home-agenda-head"><h2>{string(home.upcoming_title)||'What is coming'}</h2><span>{string(home.upcoming_note)||'dates we already know'}</span></div>
         {agenda.length>1&&<div className="home-agenda-gauge"><span data-nxfill className="home-agenda-fill"/>{agenda.map((a,i)=><span key={a.key} className="home-agenda-tick" style={{top:`${(i/(agenda.length-1)*100).toFixed(2)}%`}}><span data-nxlabel>{pad(i+1)} · {a.type}</span><i/></span>)}<span data-nxmark className="home-agenda-mark"/></div>}</div>

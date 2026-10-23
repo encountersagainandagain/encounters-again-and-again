@@ -41,6 +41,12 @@
    "/design/w/about-1-turtle-web-2000.fe16ce3197.webp"
   ]
  ],
+ "/design/about-1-turtle-web.jpg#focus": [
+  [
+   360,
+   "/design/w/about-1-turtle-web-focus360.fb42eb5c84.webp"
+  ]
+ ],
  "/design/crew-banner.jpg": [
   [
    96,
@@ -73,6 +79,12 @@
   [
    1440,
    "/design/w/crew-banner-1440.de84163c40.webp"
+  ]
+ ],
+ "/design/crew-banner.jpg#focus": [
+  [
+   360,
+   "/design/w/crew-banner-focus360.342963082e.webp"
   ]
  ],
  "/design/home-background.jpg": [
@@ -117,6 +129,12 @@
    "/design/w/home-background-1940.1001bc9331.webp"
   ]
  ],
+ "/design/home-background.jpg#focus": [
+  [
+   360,
+   "/design/w/home-background-focus360.e5ea1d409e.webp"
+  ]
+ ],
  "/design/logo-mark-blanco.png": [
   [
    96,
@@ -141,6 +159,12 @@
   [
    720,
    "/design/w/logo-mark-blanco-720.5c79a66960.webp"
+  ]
+ ],
+ "/design/logo-mark-blanco.png#focus": [
+  [
+   360,
+   "/design/w/logo-mark-blanco-focus360.b15f358236.webp"
   ]
  ],
  "/design/reef-ridge-v3.webp": [
@@ -175,6 +199,12 @@
   [
    1400,
    "/design/w/reef-ridge-v3-1400.fed9206b56.webp"
+  ]
+ ],
+ "/design/reef-ridge-v3.webp#focus": [
+  [
+   360,
+   "/design/w/reef-ridge-v3-focus360.267b096812.webp"
   ]
  ],
  "/design/reef-turtle-web.jpg": [
@@ -215,6 +245,12 @@
    "/design/w/reef-turtle-web-1920.be8bbffb5d.webp"
   ]
  ],
+ "/design/reef-turtle-web.jpg#focus": [
+  [
+   360,
+   "/design/w/reef-turtle-web-focus360.c9b9df0d5c.webp"
+  ]
+ ],
  "/design/review-book.webp": [
   [
    96,
@@ -235,6 +271,12 @@
   [
    424,
    "/design/w/review-book-424.7d7fc4df46.webp"
+  ]
+ ],
+ "/design/review-book.webp#focus": [
+  [
+   360,
+   "/design/w/review-book-focus360.8833734f4a.webp"
   ]
  ],
  "/design/ww-backcover.webp": [
@@ -269,6 +311,12 @@
   [
    1200,
    "/design/w/ww-backcover-1200.13042c4235.webp"
+  ]
+ ],
+ "/design/ww-backcover.webp#focus": [
+  [
+   360,
+   "/design/w/ww-backcover-focus360.9e4cd93adb.webp"
   ]
  ],
  "/design/ww-banner.webp": [
@@ -307,6 +355,12 @@
   [
    1600,
    "/design/w/ww-banner-1600.772d642891.webp"
+  ]
+ ],
+ "/design/ww-banner.webp#focus": [
+  [
+   360,
+   "/design/w/ww-banner-focus360.c4f92153b2.webp"
   ]
  ],
  "/images/brand/encounters-logo.png": [
@@ -349,6 +403,12 @@
   [
    1940,
    "/images/brand/w/encounters-logo-1940.a9aca52dbf.webp"
+  ]
+ ],
+ "/images/brand/encounters-logo.png#focus": [
+  [
+   360,
+   "/images/brand/w/encounters-logo-focus360.db1d03d12b.webp"
   ]
  ]
 }

@@ -11,6 +11,7 @@ import {join} from 'node:path';
 import sharp from 'sharp';
 
 export const WIDTHS=[96,160,256,384,640,828,1080,1440,1920,2560];
+export const FOCUS={width:360,sigma:3.6};
 const DIRS=['public/design','public/images/brand'];
 const KEEP=/^home-background-(soft|deep)-/; // made by scripts/home-bg-focus.mjs
 const manifest={};
@@ -27,6 +28,11 @@ for(const dir of DIRS){
       await writeFile(join(dir,'w',name),out);kept.push([w,`/${join(dir,'w',name).replace(/^public\//,'')}`]);
     }
     manifest[`/${path.replace(/^public\//,'')}`]=kept;
+    // "#focus": a small copy blurred beforehand for the Home project cards coming into focus (HomeView FOCUS_PHOTO:
+    // 9 CSS px of blur on a photo drawn about 900 px wide = sigma 3.6 at 360 px).
+    if(width>FOCUS.width){const out=await sharp(input).rotate().resize({width:FOCUS.width}).blur(FOCUS.sigma).webp({quality:80,effort:6}).toBuffer();
+      const name=`${base}-focus${FOCUS.width}.${createHash('sha256').update(out).digest('hex').slice(0,10)}.webp`;await writeFile(join(dir,'w',name),out);
+      manifest[`/${path.replace(/^public\//,'')}#focus`]=[[FOCUS.width,`/${join(dir,'w',name).replace(/^public\//,'')}`]];}
     console.log(`${path} (${width}px, ${Math.round(input.length/1024)} KB): ${kept.map(([w])=>w).join(', ')||'no variant'}`);
   }
 }
