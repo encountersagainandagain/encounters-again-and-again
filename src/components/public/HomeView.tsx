@@ -86,6 +86,8 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   const state=useRef({eased:0,brandWidth:0});
   const bubbles=useRef<HTMLDivElement>(null),waterCanvas=useRef<HTMLCanvasElement>(null),water=useRef<Water|null>(null);
   const governor=useRef<Governor>({dt:16.7,bad:0,good:0,ceiling:99,since:0,off:false,tried:false});const lastFrame=useRef(0);
+  // A/B for review: ?cards=a keeps the previous project-card entrance (blur on the whole card).
+  const cardsA=useRef(false);useEffect(()=>{cardsA.current=new URLSearchParams(location.search).get('cards')==='a';},[]);
   useEffect(()=>{
     // Water: the prototype shader when WebGL works; otherwise the gradient fallback with its caustic texture.
     const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;governor.current.off=new URLSearchParams(location.search).get('water')==='full';
@@ -179,8 +181,14 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     if(n.reefImg&&reefR){const tt=clamp01(1-reefR.top/vh);n.reefImg.style.transform=`translate3d(0,${reduced?0:((1-tt)*60).toFixed(1)}px,0)`;}
     n.cards.forEach((c,i)=>{const r=cardR[i];if(r.bottom<-120||r.top>vh+120)return;if(reduced){c.el.style.opacity='1';c.el.style.transform='none';c.el.style.filter='none';return;}
       const e=1-Math.pow(1-clamp01((vh-r.top)/(vh*.6)),3),p=clamp01((vh-r.top)/(vh+r.height)),sway=Math.sin(t*.55+i*1.9),side=i%2?1:-1;
-      c.el.style.transform=`translate3d(${(sway*7+(1-e)*side*46).toFixed(1)}px,${((1-e)*110+Math.sin(t*.8+i*2.3)*6).toFixed(1)}px,0) rotate(${(sway*.45+(1-e)*side*2.4).toFixed(2)}deg)`;c.el.style.opacity=(.1+.9*e).toFixed(3);c.el.style.filter=e<.995?`blur(${((1-e)*9).toFixed(2)}px) saturate(${(.5+.5*e).toFixed(2)}) hue-rotate(${((1-e)*14).toFixed(1)}deg)`:'none';
-      if(c.img)c.img.style.transform=`translate3d(0,${((.5-p)*r.height*.24).toFixed(1)}px,0) scale(${(1.03+(1-e)*.08).toFixed(3)})`;
+      c.el.style.transform=`translate3d(${(sway*7+(1-e)*side*46).toFixed(1)}px,${((1-e)*110+Math.sin(t*.8+i*2.3)*6).toFixed(1)}px,0) rotate(${(sway*.45+(1-e)*side*2.4).toFixed(2)}deg)`;c.el.style.opacity=(.1+.9*e).toFixed(3);
+      // Entering, the card comes into focus (blur 9px → 0) and colour (saturate, hue). Blurring the whole rotated card,
+      // with its screen-blended rays inside, made the GPU re-filter a large surface on every frame (traces: 8% of frames
+      // missed through Ongoing projects, pauses up to 280 ms; 1% without the blur). The colour stays on the card; the
+      // focus is on the photo only (same radius and timing), so the title and text enter sharp — A/B pending (?cards=a).
+      const fullCardBlur=cardsA.current;const blur=e<.995?`blur(${((1-e)*9).toFixed(2)}px)`:'';
+      c.el.style.filter=e<.995?`${fullCardBlur?blur+' ':''}saturate(${(.5+.5*e).toFixed(2)}) hue-rotate(${((1-e)*14).toFixed(1)}deg)`:'none';
+      if(c.img){c.img.style.transform=`translate3d(0,${((.5-p)*r.height*.24).toFixed(1)}px,0) scale(${(1.03+(1-e)*.08).toFixed(3)})`;c.img.style.filter=fullCardBlur||!blur?'none':blur;}
       if(c.ray)c.ray.style.transform=`translate3d(${(Math.sin(t*.3+i)*50+p*90).toFixed(1)}px,0,0)`;});
     // Agenda (prototype drawNext): only while the stage is on screen.
     if(stageR&&!(stageR.bottom<0||stageR.top>vh)){
