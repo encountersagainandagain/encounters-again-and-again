@@ -1,5 +1,16 @@
 # Encounters Again and Again
 
-Art, ocean, education and conservation.
+> Art, ocean, education and conservation: expeditions, workshops for children, art and messages from a collective of ocean lovers.
 
 Planned canonical origin: https://encountersagainandagain.com
+
+## Sections
+
+- [Home](/): the collective, what is coming and what happened
+- [Encounters expeditions](/expeditions): ocean expeditions and their results
+- [Artsy Animals workshops](/workshops): art workshops about ocean life
+- [Art](/art): artworks by the crew, by category
+- [Meaningful Messages](/meaningful-messages): messages and poems for the ocean
+- [About us](/about): who we are and why
+- [The crew](/crew): the people behind the project
+- [Contact](/contact): how to reach the collective

@@ -1,0 +1,16 @@
+{
+ "soft": {
+  "600": "/design/w/home-background-soft-h600.e0d6d66e15.webp",
+  "760": "/design/w/home-background-soft-h760.779eb9439e.webp",
+  "920": "/design/w/home-background-soft-h920.de964bfb4c.webp",
+  "1120": "/design/w/home-background-soft-h1120.ea760e4123.webp",
+  "1440": "/design/w/home-background-soft-h1440.4d735b7354.webp"
+ },
+ "deep": {
+  "600": "/design/w/home-background-deep-h600.e8274a4d85.webp",
+  "760": "/design/w/home-background-deep-h760.a45fb0b8ac.webp",
+  "920": "/design/w/home-background-deep-h920.b2be2dcbac.webp",
+  "1120": "/design/w/home-background-deep-h1120.5f4ca42184.webp",
+  "1440": "/design/w/home-background-deep-h1440.99425ea2e6.webp"
+ }
+}

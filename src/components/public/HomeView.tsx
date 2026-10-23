@@ -1,4 +1,6 @@
 'use client';
+import focusFiles from '@/config/home-bg-focus.json';
+import {fullDesignImage} from '@/lib/imageLoader';
 import Image from 'next/image';
 import Link from 'next/link';
 import {useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
@@ -71,7 +73,7 @@ function Head({title,note,link}:{title:string;note?:string;link?:ReactNode}){ret
 // they are tiny and must be ready before the descent starts.
 const FOCUS_HEIGHTS=[600,760,920,1120,1440];
 function FocusLayer({name}:{name:'soft'|'deep'}){
-  const file=(h:number)=>`/design/w/home-background-${name}-h${h}.webp`;
+  const file=(h:number)=>(focusFiles as Record<string,Record<string,string>>)[name][h];
   // Each copy serves the heights closest to it (boundaries halfway between neighbours, geometrically).
   const until=FOCUS_HEIGHTS.slice(0,-1).map((h,i)=>Math.round(Math.sqrt(h*FOCUS_HEIGHTS[i+1])));
   return <picture>{until.map((max,i)=><source key={max} media={`(max-height: ${max}px)`} srcSet={file(FOCUS_HEIGHTS[i])}/>)}
@@ -219,7 +221,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   };
   return <div ref={root} className="home-root">
     <span data-nav-theme="dark" hidden/>
-    <div className="home-bg" data-back aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src="/design/home-background.jpg" alt="" fill priority sizes="100vw" unoptimized/><div className="home-bg-focus" data-bg-soft><FocusLayer name="soft"/></div><div className="home-bg-focus is-deep" data-bg-deep><FocusLayer name="deep"/></div><div className="home-bg-dim" data-bg-dim/></div></div>
+    <div className="home-bg" data-back aria-hidden="true"><div data-home-bg className="home-bg-image"><Image src={fullDesignImage('/design/home-background.jpg')} alt="" fill preload fetchPriority="high" sizes="100vw" unoptimized/><div className="home-bg-focus" data-bg-soft><FocusLayer name="soft"/></div><div className="home-bg-focus is-deep" data-bg-deep><FocusLayer name="deep"/></div><div className="home-bg-dim" data-bg-dim/></div></div>
     <canvas ref={waterCanvas} className="home-water-gl" data-back aria-hidden="true"/>
     <div className="home-water" data-water data-back aria-hidden="true"><div className="home-caustics" data-caustics/></div>
     <div className="home-rays" data-rays data-back aria-hidden="true"/>
@@ -233,7 +235,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
         <div className="home-gauge" data-gauge aria-hidden="true"><span>0 m</span><small>Descending</small></div>
         <div className="home-hero-block" data-hero-block><div className="home-hero-glow"/>
           <span className="home-hero-kicker">{string(hero.kicker)||'Welcome to'}</span>
-          <div className="home-hero-title"><h1>{string(hero.title)||'Encounters'}</h1><span>{string(hero.subtitle)||'again and again'}</span><Image src="/design/logo-mark-blanco.png" alt="" width={720} height={301} sizes="(max-width: 760px) 120px, 310px" className="home-hero-mark" priority/></div>
+          <div className="home-hero-title"><h1>{string(hero.title)||'Encounters'}</h1><span>{string(hero.subtitle)||'again and again'}</span><Image src="/design/logo-mark-blanco.png" alt="" width={720} height={301} sizes="(max-width: 760px) 120px, 310px" className="home-hero-mark" preload/></div>
           {(string(hero.tagline)||string(hero.lead))&&<div className="home-hero-lines">{string(hero.tagline)&&<p className="home-hero-tagline">{string(hero.tagline)}</p>}{string(hero.lead)&&<p className="home-hero-lead">{string(hero.lead)}</p>}</div>}
         </div>
         <a href={sections[0]==='descent'&&blocks.descent?'#descenso':'#projects'} className="home-cue" data-cue><span>{string(hero.cue)||'follow the current …where will it lead you..'}</span><i aria-hidden="true"/></a>
