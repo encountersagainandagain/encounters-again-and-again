@@ -3,6 +3,7 @@ import focusFiles from '@/config/home-bg-focus.json';
 import {focusDesignImage,fullDesignImage} from '@/lib/imageLoader';
 import Image from 'next/image';
 import Link from 'next/link';
+import Lenis from 'lenis';
 import {useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {string,type Row} from '@/features/encounters/presentation';
 import {pad} from '@/features/encounters/activities';
@@ -97,6 +98,19 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   const governor=useRef<Governor>({dt:16.7,bad:0,good:0,ceiling:99,since:0,off:false,tried:false});const lastFrame=useRef(0);
   // A/B for review: ?cards=a keeps the previous project-card entrance (blur on the whole card).
   const cardsA=useRef(false);useEffect(()=>{cardsA.current=new URLSearchParams(location.search).get('cards')==='a';},[]);
+  // A/B for review: ?calc=a keeps the previous frame calculations (progress measured on the moving element itself, a
+  // per-frame .08 ease); ?scroll=lenis adds smoothed wheel scrolling (Lenis) driven by this same frame loop.
+  const calcA=useRef(false);useEffect(()=>{calcA.current=new URLSearchParams(location.search).get('calc')==='a';},[]);
+  const lenis=useRef<Lenis|null>(null);
+  useEffect(()=>{
+    if(new URLSearchParams(location.search).get('scroll')!=='lenis'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    // Wheel only: touch keeps native scrolling. No clock of its own (autoRaf off): the Home frame loop advances it
+    // first, so the scroll position and every layer computed from it come from the same frame. In-page anchors go
+    // through it; leaving the Home destroys it before the next page is shown at its top.
+    const l=new Lenis({autoRaf:false,smoothWheel:true,syncTouch:false,anchors:true});lenis.current=l;
+    // Lenis 1.3.26 leaves a 400 ms timer from the last native scroll that, after destroy(), puts its class back on <html>.
+    return()=>{lenis.current=null;clearTimeout((l as unknown as {_resetVelocityTimeout?:number})._resetVelocityTimeout);l.destroy();};
+  },[]);
   useEffect(()=>{
     // Water: the prototype shader when WebGL works; otherwise the gradient fallback with its caustic texture.
     const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;governor.current.off=new URLSearchParams(location.search).get('water')==='full';
@@ -127,10 +141,10 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       header,brand:brandEl,navImg:brandEl?.querySelector<HTMLElement>('img')||null,navWord:brandEl?.querySelector<HTMLElement>(':scope>span')||null,
       descent:document.getElementById('descenso'),reefImg:q('[data-reef] img'),
       turtle:creature('turtle',["[data-flip='front']","[data-flip='rear']"]),fish:creature('fish',["[data-fin='tail']","[data-fin='pec']"]),dolphin:creature('dolphin',["[data-fin='fluke']","[data-fin='pec']"]),whale:creature('whale',["[data-fin='fluke']","[data-fin='pec']"]),
-      cards:all('[data-pcard]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-pimg]'),focus:el.querySelector<HTMLElement>('[data-pfocus]'),ray:el.querySelector<HTMLElement>('[data-pray]')})),
+      cards:all('[data-pcard]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-pimg]'),focus:el.querySelector<HTMLElement>('[data-pfocus]'),ray:el.querySelector<HTMLElement>('[data-pray]'),ty:0})),
       stage:q('[data-agenda]'),events:all('[data-nx]').map(el=>({el,img:el.querySelector<HTMLElement>('[data-nximg]'),ray:el.querySelector<HTMLElement>('[data-nxray]'),txt:el.querySelector<HTMLElement>('[data-nxtxt]')})),
       hudA:q('[data-nxhud]'),fill:q('[data-nxfill]'),markA:q('[data-nxmark]'),labels:all('[data-nxlabel]'),
-      seq:all('[data-hseq]'),scribbles:all<SVGPathElement>('[data-hscribble] path'),
+      seq:all('[data-hseq]'),seqTy:[] as number[],scribbles:all<SVGPathElement>('[data-hscribble] path'),
       // Sizes read on resize only.
       size:{turtle:0,dolphin:0,whale:0,dolphinPad:120,line:0,word:0,backVisible:true},
     };
@@ -139,11 +153,22 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     const measure=()=>{n.size.turtle=n.turtle?.svg.getBoundingClientRect().width||0;n.size.dolphin=n.dolphin?.svg.getBoundingClientRect().width||0;n.size.whale=n.whale?.svg.getBoundingClientRect().width||0;n.size.dolphinPad=n.dolphin?parseFloat(getComputedStyle(n.dolphin.box.parentElement!).paddingTop)||120:120;n.size.line=n.markA?.parentElement?.offsetHeight||0;};
     measure();addEventListener('resize',measure);return()=>{removeEventListener('resize',measure);nodes.current=null;};});
   useFrame(({vh,vw,t,reduced})=>{
-    const n=nodes.current;if(!n)return;const y=scrollY,H=innerHeight;const raw=clamp01(y/vh);const s=state.current;s.eased=reduced?raw:s.eased+(raw-s.eased)*.08;const d=s.eased;
+    const n=nodes.current;if(!n)return;
+    const now=performance.now(),dt=lastFrame.current?now-lastFrame.current:16.7;lastFrame.current=now;
+    lenis.current?.raf(now);
+    const y=scrollY,H=innerHeight;const raw=clamp01(y/vh);const s=state.current;
+    // The surface layers follow the scroll with a lag of about 200 ms whatever the refresh rate (.08 per frame at
+    // 60 Hz; the same fraction per frame would halve the lag at 120 Hz and double it when frames are dropped). With
+    // Lenis the scroll itself is already smoothed: they follow it directly instead of smoothing it twice.
+    const old=calcA.current;s.eased=reduced||lenis.current?raw:s.eased+(raw-s.eased)*(old?.08:1-Math.exp(-Math.min(dt,250)/200));const d=s.eased;
     // ---- read: every rectangle first, so the writes below never force a layout in between
     const rect=(e:Element|null|undefined)=>e?e.getBoundingClientRect():null;
     const dr=rect(n.descent),fr=rect(n.fish?.box),br=rect(n.dolphin?.box),wr=rect(n.whale?.box),reefR=rect(n.reefImg?.closest('section')),stageR=rect(n.stage);
-    const cardR=n.cards.map(c=>c.el.getBoundingClientRect()),eventR=n.events.map(e=>e.el.getBoundingClientRect()),seqR=n.seq.map(e=>e.getBoundingClientRect()),scribR=n.scribbles.map(p=>p.ownerSVGElement!.getBoundingClientRect());
+    // Cards and reveals are moved by the transform their own position drives: their place is read without that
+    // transform (its centre, which rotation and scale keep, less the vertical shift applied last frame), so the
+    // progress depends on the scroll only and does not feed back on itself (sway included).
+    const settled=(el:HTMLElement,ty:number)=>{const r=el.getBoundingClientRect();if(old)return r;const h=el.offsetHeight,top=(r.top+r.bottom)/2-ty-h/2;return {top,bottom:top+h,height:h};};
+    const cardR=n.cards.map(c=>settled(c.el,c.ty)),eventR=n.events.map(e=>e.el.getBoundingClientRect()),seqR=n.seq.map((e,i)=>settled(e,n.seqTy[i]||0)),scribR=n.scribbles.map(p=>p.ownerSVGElement!.getBoundingClientRect());
     const docH=document.documentElement.scrollHeight;
     // The fixed back layers (shader, illustration, bubbles, veil, turtle) only show through the hero, the
     // descent and the reef, and through the top 12% of Ongoing projects (its background turns opaque there).
@@ -152,7 +177,6 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     const backVisible=n.clear.some(c=>seen(c.getBoundingClientRect()))||(!!pr&&pr.top<H&&pr.top+pr.height*.12>0);
     if(backVisible!==n.size.backVisible){n.size.backVisible=backVisible;n.back.forEach(l=>{l.style.visibility=backVisible?'':'hidden';});}
     // ---- write
-    const now=performance.now(),dt=lastFrame.current?now-lastFrame.current:16.7;lastFrame.current=now;
     if(n.size.backVisible&&water.current){water.current.draw(t,d);if(!reduced&&dt<250)govern(governor.current,water.current,dt,now);if(root.current)root.current.dataset.waterScale=water.current.scale().toFixed(2);}
     // Background focus (prototype: blur 0→11px, brightness 1→.5, saturate 1→1.2). Re-filtering the full-screen photo
     // with a new radius every frame, under the water shader, stalled whole frames (~265 ms at 2× density); the same
@@ -188,9 +212,10 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     place(n.whale,wr&&!(wr.bottom<0||wr.top>vh)?(()=>{const w=n.size.whale,p=clamp01((vh-wr.top)/(wr.height+vh*.6));return [wr.width-p*(wr.width+w*.9)+Math.sin(t*.25)*10,wr.height*.12+p*wr.height*.18+Math.sin(t*.4)*8,-2+Math.sin(t*.4+1)*1.5,Math.min(1,Math.sin(Math.PI*p)*2.2)*.5] as [number,number,number,number];})():null,[Math.sin(t*.9)*9,Math.sin(t*.9+1.2)*5]);
     // The reef settles with a slight parallax as it enters.
     if(n.reefImg&&reefR){const tt=clamp01(1-reefR.top/vh);n.reefImg.style.transform=`translate3d(0,${reduced?0:((1-tt)*60).toFixed(1)}px,0)`;}
-    n.cards.forEach((c,i)=>{const r=cardR[i];if(r.bottom<-120||r.top>vh+120)return;if(reduced){c.el.style.opacity='1';c.el.style.transform='none';c.el.style.filter='none';return;}
+    n.cards.forEach((c,i)=>{const r=cardR[i];if(r.bottom<-120||r.top>vh+120)return;if(reduced){c.el.style.opacity='1';c.el.style.transform='none';c.el.style.filter='none';c.ty=0;return;}
       const e=1-Math.pow(1-clamp01((vh-r.top)/(vh*.6)),3),p=clamp01((vh-r.top)/(vh+r.height)),sway=Math.sin(t*.55+i*1.9),side=i%2?1:-1;
-      c.el.style.transform=`translate3d(${(sway*7+(1-e)*side*46).toFixed(1)}px,${((1-e)*110+Math.sin(t*.8+i*2.3)*6).toFixed(1)}px,0) rotate(${(sway*.45+(1-e)*side*2.4).toFixed(2)}deg)`;c.el.style.opacity=(.1+.9*e).toFixed(3);
+      c.ty=+((1-e)*110+Math.sin(t*.8+i*2.3)*6).toFixed(1);
+      c.el.style.transform=`translate3d(${(sway*7+(1-e)*side*46).toFixed(1)}px,${c.ty}px,0) rotate(${(sway*.45+(1-e)*side*2.4).toFixed(2)}deg)`;c.el.style.opacity=(.1+.9*e).toFixed(3);
       // Entering, the card comes into focus (blur 9px → 0) and colour (saturate, hue). Blurring the whole rotated card,
       // with its screen-blended rays inside, made the GPU re-filter a large surface on every frame (traces: 8% of frames
       // missed through Ongoing projects, pauses up to 280 ms; 1% without the blur). The colour stays on the card; the
@@ -214,9 +239,9 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     }
     // Reveals of Home (prototype armSeq/frame): shift 60, span .3, scale .972→1, no blur; elements above settle.
     n.seq.forEach((item,i)=>{const r=seqR[i];if(r.top>vh*1.4)return;
-      if(reduced||r.bottom<-vh*.4){item.style.opacity='1';item.style.transform='none';return;}
+      if(reduced||r.bottom<-vh*.4){item.style.opacity='1';item.style.transform='none';n.seqTy[i]=0;return;}
       const [start=.9,span=.3,shift=60]=(item.dataset.hseq||'').split(',').map(Number);const p=smooth((vh*start-r.top)/(vh*span),0,1);
-      item.style.opacity=p.toFixed(3);item.style.transform=`translate3d(0,${((1-p)*shift).toFixed(1)}px,0) scale(${(.972+p*.028).toFixed(4)})`;});
+      n.seqTy[i]=+((1-p)*shift).toFixed(1);item.style.opacity=p.toFixed(3);item.style.transform=`translate3d(0,${n.seqTy[i]}px,0) scale(${(.972+p*.028).toFixed(4)})`;});
     // Closing scribble: drawn with the scroll (prototype armFooterScribble).
     n.scribbles.forEach((path,i)=>{const p=reduced?1:clamp01((vh-scribR[i].top)/(vh*.4));path.style.strokeDasharray='1';path.style.strokeDashoffset=String(1-p);});
   });

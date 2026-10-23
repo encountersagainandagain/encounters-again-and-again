@@ -603,6 +603,10 @@ body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
 }
 /* The prototype scrolls natively: anchors and jumps are instant on Home. */
 html:has(.home-page){scroll-behavior:auto}
+/* Home with ?scroll=lenis (HomeView): the rules Lenis expects (lenis/dist/lenis.css). */
+html.lenis,html.lenis body{height:auto}
+.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
+.lenis.lenis-smooth iframe{pointer-events:none}
 .mm-back{max-width:1000px;margin:clamp(30px,6vh,60px) auto 0;padding:0 var(--enc-page-padding);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 .contact-submit>span small{display:block;margin-top:6px;font-family:var(--font-body),Arial,sans-serif;font-style:normal;font-size:12px;line-height:1.5;color:rgba(234,245,250,.55)}
 .contact-done button{padding:0;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
