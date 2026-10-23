@@ -20,6 +20,23 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
 
+**Producción y rendimiento de la Home (2026-10-22/23):** https://encounters-again-and-again-gamma.vercel.app (cuenta Vercel del cliente, despliegue automático desde `main`; base real con ejemplos). Detalle de caché y capas en [entornos.md](entornos.md#rendimiento-y-caché-producción-2026-10-22).
+- **Carga — hecho y medido:** imágenes responsivas WebP, caché ISR de 5 min invalidada por el admin, funciones en `hnd1`, CSS en línea, logo LCP precargado, variantes con hash cacheadas un año. Peso de la Home 4,0 → 2,1 MB (escritorio); Lighthouse escritorio de Juani: Performance 90, Accesibilidad 100, Buenas prácticas 100.
+  - SEO 69: el único fallo es `noindex`, que se mantiene hasta el lanzamiento.
+  - Speed Index: lo limita la entrada aprobada del fondo (opacidad 0 → 1 en 1,5 s); acortarla es decisión de Juani.
+  - JavaScript legacy: son los polyfills del runtime de Next, no código del proyecto.
+- **Fluidez — en curso:** banco de pruebas con Chrome 155 y GPU real (Apple M2, Metal), ventana 1440×754 a 2×, pantalla de 60 Hz.
+  - Mide cuadros presentados (`Display::FrameDisplayed` y `PipelineReporter`) por tramo, con 3 repeticiones por escenario.
+  - Causas demostradas desactivando efectos uno por uno: (1) el desenfoque CSS animado de las tarjetas de Proyectos (8,2 % → 1,0 % de cuadros perdidos sin él); (2) los dos desenfoques a pantalla completa del fondo bajo el agua (corregido antes con capas precalculadas).
+  - El backdrop del navbar y las partículas solo pesan en el agua; el shader, la máscara del arrecife y los rayos tienen efectos menores.
+  - No hay loops acumulados al navegar.
+  - Corrección: las tarjetas entran en foco con una copia de la foto desenfocada de antemano que se desvanece, sin filtro por cuadro.
+  - **Medido en Modo de bajo consumo y a batería**, con mucha variación entre repeticiones: repetir con cargador y modo normal antes de cerrar. Sin probar: móvil real, Safari e iPhone.
+- **Aprobación visual — pendiente de Juani (A/B):**
+  - entrada de las tarjetas de Proyectos: `/` (nueva: foto desenfocada que se desvanece; título y texto nítidos) frente a `/?cards=a` (anterior: tarjeta entera desenfocada);
+  - capas de desenfoque precalculadas del fondo al bajar;
+  - optimizaciones previas del shader y el desenfoque frente al prototipo.
+
 **Revisión online (2026-10-21):** proyecto Vercel `encounters-review` con despliegues Preview protegidos desde la rama `review`. Detalle y procedimiento en [entornos.md](entornos.md).
 - Hecho: proyecto independiente sin Git conectado; Vercel Authentication; `noindex`; `/review` en 404; `docs`, `legacy`, `.env*` y el estado local fuera de la subida; correo bloqueado.
 - Validación del destino: un Preview solo acepta la base de pruebas y ningún otro entorno la acepta.
