@@ -6,7 +6,7 @@ import {editorialRedirectOr404} from '@/features/encounters/editorial-redirect';
 import {readBlocks} from '@/features/encounters/public-content';
 import {peopleOf,siteData} from '@/features/encounters/site-data';
 import {string} from '@/features/encounters/presentation';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 export const dynamicParams=true;
 type Props={params:Promise<{slug:string}>};
 const find=async(slug:string)=>{const data=await siteData();const post=data.posts.find(p=>p.kind==='message'&&p.slug===slug);return {data,post,detail:post?data.messages.find(m=>m.id===post.id):undefined};};

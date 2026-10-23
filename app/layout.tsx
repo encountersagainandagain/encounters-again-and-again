@@ -11,8 +11,9 @@ import '@/styles/site.css';
 import '@/styles/admin.css';
 const heading = localFont({ src: [{path:'../public/fonts/eb-garamond.ttf',weight:'400 500',style:'normal'},{path:'../public/fonts/eb-garamond-italic.ttf',weight:'400 500',style:'italic'}], variable: '--font-display', display: 'swap' });
 const body = localFont({ src: '../public/fonts/archivo.ttf', weight: '400 700', variable: '--font-body', display: 'swap' });
-// Shared contact/settings are read under anonymous RLS on every request.
-export const dynamic='force-dynamic';
+// Public pages are rendered from published content only (anonymous RLS) and cached for 5 minutes on Vercel; every
+// save, publish or unpublish in the admin expires them at once (/api/admin/revalidate). Admin pages stay dynamic.
+export const revalidate=300;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: brand.name, template: `%s | ${brand.name}` },

@@ -7,7 +7,7 @@ import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {ArtworkCards} from '@/components/public/ArtViews';
 import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {Breadcrumbs} from '@/components/public/EditorialPieces';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 export const dynamicParams=true;
 type Props={params:Promise<{slug:string}>};
 export async function generateMetadata({params}:Props){const {slug}=await params;const data=await editorialData();const member=visibleProfile(data,slug);if(!member)return {title:'Profile not found',robots:{index:false}};return editorialMetadata(string(member.alias)||string(member.name),`/crew/${slug}`,member,member.portrait_id);}

@@ -5,7 +5,7 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {readBlocks} from '@/features/encounters/public-content';
 import {pageFor,siteData} from '@/features/encounters/site-data';
 import {type Row} from '@/features/encounters/presentation';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).expeditions||{}) as Row;
 export async function generateMetadata(){const data=await siteData();const page=pageFor(data,'encounters_expeditions');return editorialMetadata('Expeditions','/expeditions',page||{},settingsOf(data).cover_id||page?.cover_id);}
 // The program page explains the expeditions (its presentation cards); the concrete expeditions follow.

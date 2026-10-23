@@ -7,7 +7,7 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {readBlocks} from '@/features/encounters/public-content';
 import {pageFor,siteData} from '@/features/encounters/site-data';
 import {string,type Row} from '@/features/encounters/presentation';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).about||{}) as Row;
 export async function generateMetadata(){const data=await siteData();const s=settingsOf(data);const page=pageFor(data,'about');return editorialMetadata('About us','/about',{excerpt:string(s.hero_title),...(page||{})},(Array.isArray(s.gallery)?s.gallery[0]:null)||page?.cover_id);}
 // The About presentation is edited in Site → About page. Until it is filled in, the imported About text is shown.

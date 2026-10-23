@@ -7,7 +7,7 @@ import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {Breadcrumbs,DarkClosing} from '@/components/public/EditorialPieces';
 import {JsonLd} from '@/components/JsonLd';
 import {siteUrl} from '@/config/brand';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 export const dynamicParams = true;
 type Props={params:Promise<{category:string}>};
 export async function generateMetadata({params}:Props){const {category}=await params;const data=await editorialData();const c=data.categories.find(c=>c.slug===category);if(!c)return {title:'Collection not found',robots:{index:false}};return editorialMetadata(string(c.name),`/art/${category}`,{excerpt:string(c.lead),...c},c.cover_id);}

@@ -5,7 +5,7 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {readBlocks} from '@/features/encounters/public-content';
 import {pageFor,siteData} from '@/features/encounters/site-data';
 import {type Row} from '@/features/encounters/presentation';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).workshops||{}) as Row;
 export async function generateMetadata(){const data=await siteData();const page=pageFor(data,'artsy_animals');return editorialMetadata('Workshops','/workshops',page||{},settingsOf(data).cover_id||page?.cover_id);}
 export default async function Page(){

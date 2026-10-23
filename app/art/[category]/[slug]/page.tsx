@@ -6,7 +6,7 @@ import {ArtworkCards,ArtworkTrail,ArtworkView,categoryNumber,peopleFor} from '@/
 import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {JsonLd} from '@/components/JsonLd';
 import {siteUrl} from '@/config/brand';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 export const dynamicParams = true;
 type Props={params:Promise<{category:string;slug:string}>};
 export async function generateMetadata({params}:Props){const {category,slug}=await params;const data=await editorialData();const p=visibleArt(data).find(p=>p.slug===slug&&artworkPath(p,data.artworks,data.categories)===`/art/${category}/${slug}`);if(!p)return {title:'Work not found',robots:{index:false}};const art=data.artworks.find(a=>a.id===p.id);return editorialMetadata(p.title,`/art/${category}/${slug}`,{...p,excerpt:p.excerpt||string(art?.caption)},p.cover_id||art?.media_id);}

@@ -8,7 +8,7 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {readBlocks} from '@/features/encounters/public-content';
 import {pageFor,siteData} from '@/features/encounters/site-data';
 import {string,type Row} from '@/features/encounters/presentation';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).contact||{}) as Row;
 export async function generateMetadata(){const data=await siteData();const s=settingsOf(data);return editorialMetadata('Contact','/contact',{excerpt:string(s.lead),...(pageFor(data,'contact')||{})},s.cover_id);}
 // The contact form shows once Site → Contact page has its topics; until then the imported Contact text is shown.

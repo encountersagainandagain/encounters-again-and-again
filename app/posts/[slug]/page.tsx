@@ -7,7 +7,7 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {editorialRedirectOr404} from '@/features/encounters/editorial-redirect';
 import {contentPath,readBlocks} from '@/features/encounters/public-content';
 import {peopleOf,siteData} from '@/features/encounters/site-data';
-export const dynamic='force-dynamic';
+export const revalidate=300;
 export const dynamicParams=true;
 type Props={params:Promise<{slug:string}>};
 const kinds=['news','expedition_report','workshop_report'];

@@ -4,11 +4,13 @@ import {cache} from 'react';
 import {assertEncountersSupabaseTarget} from '@/lib/encountersSupabaseTarget';
 export type ContentRow={id:string;kind:string;slug:string;title:string;excerpt:string;cover_id:string|null;cover_alt:string;source_role:string|null;featured:boolean;home_rank:number|null;sort:number;[key:string]:unknown};
 export type ContentBlock={id:string;type:string;position:number;content:Record<string,unknown>;anchor?:string;source_block_id?:string};
+// Published content only (anonymous RLS): cached 5 minutes under one tag, expired by /api/admin/revalidate on every save.
+export const PUBLIC_CONTENT_TAG='public-content';
 export const publicClient=()=>{
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key)throw new Error('Supabase is not configured.');
   assertEncountersSupabaseTarget(url);
-  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,cache:'no-store'})}});
+  return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,next:{revalidate:300,tags:[PUBLIC_CONTENT_TAG]}})}});
 };
 export const readPosts=cache(async()=>{const {data,error}=await publicClient().from('posts').select('*').eq('status','published').order('sort').order('published_at',{ascending:false});if(error)throw error;return (data||[]) as ContentRow[];});
 export const readRows=cache(async(table:string)=>{const {data,error}=await publicClient().from(table).select('*');if(error)throw error;return (data||[]) as Record<string,unknown>[];});

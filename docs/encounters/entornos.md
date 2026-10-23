@@ -100,3 +100,27 @@ npm run review:deploy                 # nuevo despliegue para que tome las varia
 2. `git push origin review`.
 3. `npm run review:deploy`. Al terminar indica la URL, el despliegue y el commit.
 4. Si cambió el esquema: `npm run staging -- migrate` (revisar) y luego `-- migrate --apply`, antes del despliegue.
+
+## Rendimiento y caché (producción, 2026-10-22)
+
+Producción: https://encounters-again-and-again-gamma.vercel.app (cuenta Vercel del cliente, despliegue automático desde `main`). Las funciones corren en `hnd1` (Tokio), junto al proyecto Supabase (`vercel.json`).
+
+### Imágenes
+- `next/image` usa un loader propio (`src/lib/imageLoader.ts`); **no** se usa el optimizador de Vercel: no hay costo por transformación ni copias optimizadas compartidas de imágenes privadas.
+- Imágenes del CMS: `/api/media/<id>?w=<ancho>` devuelve un WebP de ese ancho (nunca agrandado; si no pesa menos que el original, el original). El acceso se decide igual que para el original: la fila y el archivo se leen con los permisos de quien pide (anónimo: solo contenido publicado). SVG y GIF se sirven tal cual. Incluye todas las imágenes existentes: se generan al pedirlas.
+- Imágenes de diseño (`public/design`, logo): variantes WebP versionadas en `public/**/w/`, generadas con `node scripts/image-variants.mjs` (manifiesto `src/config/image-variants.json`). Los originales no cambian.
+- `sizes` describe el ancho al que se **dibuja** la foto, no su caja: una foto recortada para llenar un panel alto (`object-fit: cover`) se dibuja más ancha. Por defecto (`COVER_SIZES` en `MediaImage.tsx`) se asume panel a todo el ancho; la Home pasa los suyos, medidos.
+- Fondo de la Home: la foto original se sirve sin variantes (se recorta por alto: en un teléfono se dibuja a ~2000 px). Sus dos capas de desenfoque (4 px y 11 px) están precalculadas (`node scripts/home-bg-focus.mjs`), una copia por rango de altura de ventana, con el mismo radio y la matriz exacta de `saturate()`.
+
+### Caché y cuánto puede seguir visible algo despublicado
+| Capa | Qué | Duración | Al editar/publicar/despublicar desde el admin |
+|---|---|---|---|
+| Páginas públicas (HTML, CDN de Vercel) y lecturas públicas | ISR `revalidate=300`, etiqueta `public-content` | 5 min | Se invalidan al instante (`/api/admin/revalidate`, solo admins). Si esa llamada fallara, como máximo 5 min. |
+| Imágenes publicadas (`/api/media`, sin sesión) | navegador y CDN | 10 min cada una | No se purgan: una imagen despublicada puede seguir sirviéndose hasta ~20 min (10 en el CDN + 10 en el navegador que la pidió al final). |
+| Imágenes con sesión / privadas | — | nunca se cachean | — |
+| Imágenes de diseño (`/design`, `/images/brand`) | navegador | 1 día | Son parte del código, no del CMS. |
+
+Lo que un visitante ya descargó queda en su dispositivo: no existe retirada inmediata de algo que ya se vio. El admin (`/admin/**`) es siempre dinámico y nunca pasa por la caché.
+
+### Fluidez (trazas de Chrome)
+Las pausas de 100–145 ms al entrar al agua eran el hilo principal esperando al compositor: la GPU recalculaba en cada cuadro los dos desenfoques CSS a pantalla completa del fondo (y el del navbar) bajo el shader del agua, que redibuja toda la pantalla. El desenfoque del fondo ahora está precalculado. Pendiente de confirmación visual de Juani: que las capas desenfocadas se vean igual que antes.
