@@ -126,7 +126,7 @@ Lo que un visitante ya descargó queda en su dispositivo: no existe retirada inm
 Las pausas de 100–145 ms al entrar al agua eran el hilo principal esperando al compositor: la GPU recalculaba en cada cuadro los dos desenfoques CSS a pantalla completa del fondo (y el del navbar) bajo el shader del agua, que redibuja toda la pantalla. El desenfoque del fondo ahora está precalculado. Pendiente de confirmación visual de Juani: que las capas desenfocadas se vean igual que antes.
 
 #### Cálculo de scroll A/B/C, ronda 2 (2026-10-23)
-Variantes de `7839aeb` (producción, verificado en el bundle):
+Variantes de `7839aeb`. Que sea el commit en producción es **una inferencia por el bundle, no una confirmación exacta**: el JavaScript publicado contiene `get("calc")` y Lenis, introducidos en ese commit. Eso demuestra que esas funcionalidades están publicadas, pero no identifica por sí solo el commit (no hay acceso al panel de Vercel del cliente).
 - **A** = `?calc=a`: cálculo anterior.
 - **B** = default: progreso sin la transformación del propio elemento y desfase independiente de los fps.
 - **C** = `?scroll=lenis`: Lenis sobre el mismo reloj.
@@ -159,4 +159,20 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - El tramo activo de C dura ~0,65 s más con la rueda por pasos: el listener de rueda no pasivo de Lenis hace que cada evento espere al hilo principal (~16 ms por evento en este banco).
 - El 19,8 % de cuadros perdidos de C en la batería saturada no se reprodujo: era la saturación.
 - Límites: entrada sintética de Chrome, no inercia real de trackpad; batería, no cargador; sin móvil, Safari ni iPhone.
-- **Referencia White Desert:** sin datos. La corrida se colgó en el calentamiento del banco: esperaba sin límite `decode()` de 23 imágenes `loading="lazy"` que nunca cargan. La espera ahora tiene un límite de 3 s, pero no se volvió a correr, pendiente de aprobación. Sus escenas son de distinta complejidad: sirve como referencia de sensación, no como comparación de rendimiento.
+- **B queda como default. La fluidez completa no está aprobada:** falta la revisión de Juani con su trackpad y su uso habitual. Si aparece un tirón, el paso siguiente es capturar una traza de ese momento en su navegador, anotando la sección y si era la primera pasada. No se repite la batería sintética. A y C se conservan hasta esa revisión.
+
+#### Referencia White Desert (2026-10-23)
+`https://white-desert.com/` también usa Lenis. Sus escenas tienen otra complejidad que la Home: es una referencia de **sensación**, no una comparación de rendimiento.
+- Tramo: y = 800 → 3800 (3000 px), mismos tres escenarios, 2 repeticiones con el orden rotado. 6/6 corridas válidas, carga 1,4–1,9.
+- **Primer intento colgado:** el banco esperaba sin límite `decode()` de todas las imágenes de la página, y 23 son `loading="lazy"` y nunca cargan.
+- **Corrección:** solo se esperan las imágenes del tramo, con un tope de 3 s, y cada contexto tiene un watchdog de 150 s. Del tramo, 8 de 9 imágenes estaban cargadas; la novena no terminó y la espera cortó a los 3 s.
+
+| Escenario | Cuadros perdidos activo | Pausas >50 ms activo | Retraso | Frenado | Cuadros perdidos en frenado (mayor hueco) |
+|---|---|---|---|---|---|
+| Continuo 800 px/s | 0/451 | 0 | 191 ms | 0,92 s | 23/111 (100 ms) |
+| Rápido 4000 px/s | 1/92 | 0 | 163 ms | 1,19 s | 0/142 (33 ms) |
+| Rueda por pasos | 1/291 | 0 | 161 ms | 1,03 s | 10/124 (83 ms) |
+
+- White Desert tiene el mismo retraso (~160–190 ms) y el mismo frenado (~1 s) que la variante C. Esa sensación es la de Lenis, no un defecto de la Home.
+- Durante el gesto se mueve fluido. Pierde cuadros mientras frena, cuando cambian sus escenas.
+- La Home en C no perdió ningún cuadro en el frenado.
