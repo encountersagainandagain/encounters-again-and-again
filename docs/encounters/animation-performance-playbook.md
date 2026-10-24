@@ -109,7 +109,8 @@ Detalle de cada ronda y de sus mediciones: [entornos.md](entornos.md) (sección 
 - Una definición por página principal ([covers.ts](../../src/features/encounters/covers.ts)) que comparten la vista y el navbar.
 - Portadas con `fetchPriority="high"`.
 - La portada de la página siguiente se precarga por intención (puntero, foco o toque) con el `srcset` y `sizes` exactos de su `<img>`, a partir de una lista pequeña ([/api/covers](../../app/api/covers/route.ts)).
-- **Principio:** el prefetch de una ruta no descarga sus imágenes. Precargar solo lo que el visitante está por abrir, con la misma URL que va a pedir la página, y nunca todas.
+- La entrada de cada portada espera a su foto decodificada, con un tope de 1,5 s y sin repetirse si se scrolleó ([cover-gate.ts](../../src/features/encounters/cover-gate.ts)). La Home anticipa, de a una y con prioridad baja, las portadas de los proyectos que presenta.
+- **Principio:** el prefetch de una ruta no descarga sus imágenes. Y descargar no alcanza: lo que se ve tiene que esperar a que la imagen esté decodificada, con un tope, en lugar de revelarse sobre un hueco. Precargar solo lo que el visitante está por abrir, con la misma URL que va a pedir la página, y nunca todas.
 
 ### Fuentes
 - EB Garamond (normal e itálica) y Archivo, locales con `next/font/local` ([layout.tsx](../../app/layout.tsx)), con `display: swap` y respaldo métrico.

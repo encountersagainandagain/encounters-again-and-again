@@ -402,3 +402,30 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - «To conserve our seas» repite tres líneas (Photo-identification…, Passive acoustic…, Marine research collaborations), duplicadas en la importación.
 - «Australia.She» no tiene espacio.
 - La foto de portada tiene 963 px de ancho.
+
+
+## Sincronización de portadas (2026-10-24)
+**Problema** (Juani): en todas las páginas, el contenido aparecía antes que la imagen de la portada.
+- Reproducido en producción con `syncprobe.mjs`. En el recorrido Home → clic inmediato en Expeditions (sin puntero previo, caché fría), y también en la entrada directa y con toque en móvil, la entrada visual empezaba sin la foto. Entre 9 y 225 cuadros de entrada sin imagen. La medición anterior, con 250 ms de puntero, no representaba ese caso.
+
+**Estrategia (`6d7ee63`):**
+- **Anticipación limitada, solo en la Home** ([SiteChrome.tsx](../../src/components/public/SiteChrome.tsx)).
+  - Después de la carga y en un momento ocioso, se descargan y decodifican de a una, con prioridad baja, las portadas de Expeditions, después Workshops y después Messages.
+  - Cada una con el mismo `srcset` y `sizes` que va a usar su `<img>`, así que la página reutiliza el archivo desde la memoria.
+  - No se hace con Save-Data ni en 2G. Nunca todas las portadas, ni con prioridad alta.
+- **Intención** (puntero, foco o toque): la misma descarga decodificada, con prioridad alta solo si la página actual ya terminó de cargar.
+- **Compuerta de revelado** ([cover-gate.ts](../../src/features/encounters/cover-gate.ts), en el `<head>`: también funciona en la entrada directa, antes de hidratar). Si una portada aparece con su foto sin terminar, la entrada (imagen y títulos) queda en pausa en su primer cuadro sobre el fondo oscuro, hasta que la foto está descargada y decodificada.
+  - **Tope de 1,5 s:** después entra el texto, y la capa de la portada sigue en pausa hasta que llega la foto y hace su propia entrada.
+  - **Errores:** si la imagen falla, la compuerta se libera.
+  - **Navegación:** si la portada desaparece por una navegación, la compuerta se ignora.
+  - **Scroll:** si el visitante bajó más de 40 px mientras esperaba, no se repite la entrada: aparece el estado final con un fundido corto.
+  - **Fotos listas:** una foto ya completa (anticipada, en caché) no se detiene nunca.
+  - **Sin JavaScript** no hay compuerta.
+  - **La Home no tiene `hero-image`:** no la toca.
+
+**Verificado:**
+- **Producción** (`syncprobe.mjs`, Expeditions; red real ×2 y 1,5 Mbps): en los recorridos Home → clic inmediato, clic apenas cargó la Home, entrada directa y toque en móvil hay **0 cuadros con la portada visible sin foto y 0 cuadros con el texto antes que la foto**.
+- **Tiempos:** lo que varía con la red es cuánto tarda en llegar la página (1 a 7 s en las primeras corridas, recién desplegado y con cachés frías). Con la anticipación hecha, la foto está pintada a ~40 ms de llegar la página.
+- **Local:** las demás páginas, con clic inmediato desde la Home, dan 0 cuadros con la portada sin foto. En About, la foto local tardó 2,5 s: el texto entró después del tope y la portada esperó a su foto. Con scroll durante la espera (Contact, Crew): estado `skip`, sin repetir la entrada.
+- **Reutilización:** un solo pedido por portada (`covercheck.mjs`).
+- **La Home no cambió:** historial, Lenis y teclado igual.

@@ -1,5 +1,42 @@
 # Seguimiento por páginas
 
+## Estado actual (2026-10-24)
+
+Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel del cliente, despliegue automático desde `main`). Admin: https://encounters-again-and-again-gamma.vercel.app/admin, sobre el **proyecto real de Supabase `lzwmwofxoegkxykglneq`** (contenido importado + ejemplos marcados). Sin dominio propio y con `noindex`.
+
+### Aprobado visualmente por Juani (en lo que revisó, en su entorno: su computadora y su navegador)
+- **Home:** scroll con Lenis, fluidez y efectos (2026-10-24).
+- **Todo lo que revisó en producción el 2026-10-24, incluida Expeditions** (tarjetas dentro del banner armadas desde el texto real, título «Expeditions»).
+- No se extiende a dispositivos o navegadores no probados.
+
+### Verificado técnicamente
+- **Navbar:** Art al frente del grupo derecho, en 14 anchos.
+- **Historial y anclas:** ancla, otra página, Atrás y Adelante; también índice de posts guardados desde el CMS local, carga directa con hash, skip link y reduced motion.
+- **Portadas:**
+  - se piden con prioridad alta;
+  - la Home anticipa las de Expeditions, Workshops y Messages después de su carga;
+  - la intención (puntero, foco o toque) reutiliza la misma descarga ya decodificada;
+  - **la entrada de cada portada espera a su foto** (con tope, sin repetirse si se scrolleó). Ver [entornos.md](entornos.md#sincronización-de-portadas-2026-10-24).
+- **Expeditions:** preview igual a la página pública. Las tarjetas guardadas en el CMS tienen prioridad.
+- **Fuentes:** WOFF2 de 173 KB idénticas a los originales, y respaldos propios del título y el párrafo del descenso.
+- **CMS local:** `cms:local:stop` conserva los datos.
+- Implementación de animación y rendimiento documentada en el [playbook](animation-performance-playbook.md).
+
+### Pendiente de prueba manual del CMS
+- **Carga y edición** por Juani, como los fundadores, con el contenido original: [guía de carga editorial](guia-carga-editorial.md). Cubre Crew y su página, el libro Encounters en Art, Expeditions, el workshop original con etapas, el Meaningful Message, Home, About y Contact.
+- **Contenido para corregir en el CMS:** líneas repetidas y «Australia.She» en Expeditions; foto de portada de Expeditions de 963 px.
+- **Decidir qué ejemplos retirar.** Se retiran de a uno con «Unpublish», o se conservan editándolos.
+
+### Pendiente de lanzamiento
+- Dominio del cliente, redirecciones, quitar `noindex`, y correo del newsletter (no habilitado).
+- Pruebas en Safari, iPhone, iPad y Android, y en red lenta (el agua espera los scripts de Next).
+- **Portadas pesadas:** Crew 374 KB y Contact 220 KB.
+- Respaldo del título del descenso entre 363 y 371 px; Android sin validar.
+- Retirar `?scroll=native` y `?calc=a` cuando ya no hagan falta.
+
+> Las secciones de abajo son el historial: los estados marcados «(histórico)» fueron superados por este resumen.
+
+
 Fuente única del estado de cada página pública. Rutas y prototipos según `handoff-current/handoff/00-README.md`. La aprobación solo la marca Juani; nada se aprueba por inferencia.
 
 **Método (desde 2026-10-17):** página por página, el prototipo vigente es la referencia visual.
@@ -16,7 +53,7 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
 
 **Desde el 2026-10-17 (entrega «web completa»)** todas las rutas públicas usan su plantilla del prototipo; ya no queda ninguna página provisoria. Detalle por página más abajo.
 
-## Estado al 2026-10-18
+## Estado al 2026-10-18 (histórico)
 
 **Revisión integrada (2026-10-19):** guía única para Juani con URLs, ejemplos, qué mirar, recorridos y casillas → [revision-integrada.md](revision-integrada.md).
 
