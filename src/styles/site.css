@@ -378,13 +378,16 @@ body:has(.home-page){background:#061826}
 .home-descent h2{grid-column:3/6;text-align:right;font-size:clamp(1.2rem,3.9vw,3.2rem)!important;line-height:1.08!important;letter-spacing:.005em!important;text-transform:uppercase;background:linear-gradient(to bottom,#fff 0%,#fff 58%,rgba(143,217,234,.62) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 /* Fallbacks of the descent title and paragraph while the web fonts load. The shared metric fallbacks (layout.tsx) did
    not wrap them like the final fonts, and the section changed height when the fonts arrived. Sized for this text:
-   - title (uppercase): Times New Roman breaks it exactly like EB Garamond at 16 of 17 widths (desktop 1024–1920, iPad,
-     iPhone 375–430); at 360 it takes one line more (it was one line fewer at 8 of them);
+   - title (uppercase): Times New Roman breaks it exactly like EB Garamond at desktop 1024–1920, iPad and 373–430; up
+     to 362 px (the title stays at its minimum size there) it needs 97% instead of 97.5%. Between 363 and 371 px no
+     single value fits (one line fewer); the shared fallback was one line fewer at 8 of 17 widths;
    - paragraph: Arial takes as many lines as Archivo at all 19 widths checked (it was one line more at 390).
    Vertical metrics as the shared fallbacks. The final fonts and layout do not change. */
 @font-face{font-family:"Descent Title Fallback";src:local("Times New Roman"),local("TimesNewRomanPSMT");size-adjust:97.5%;ascent-override:107.66%;descent-override:31.86%;line-gap-override:0%}
 @font-face{font-family:"Descent Body Fallback";src:local("Arial"),local("ArialMT");size-adjust:98%;ascent-override:85.41%;descent-override:20.43%;line-gap-override:0%}
 .home-descent h2{font-family:var(--font-display-face),"Descent Title Fallback",Georgia,serif}
+@font-face{font-family:"Descent Title Fallback Narrow";src:local("Times New Roman"),local("TimesNewRomanPSMT");size-adjust:97%;ascent-override:107.66%;descent-override:31.86%;line-gap-override:0%}
+@media(max-width:362px){.home-descent h2{font-family:var(--font-display-face),"Descent Title Fallback Narrow",Georgia,serif}}
 .home-descent>p{font-family:var(--font-body-face),"Descent Body Fallback",Arial,sans-serif}
 .home-descent p{grid-column:3/6;text-align:right;font-size:clamp(14px,1.1vw,17px)!important;line-height:1.7!important;color:rgba(226,242,248,.84)}
 .home-reef{position:relative;z-index:3;height:100vh;overflow:hidden}
