@@ -20,10 +20,14 @@ import {createWater,waterMaxScale,type Water} from './homeWater';
 // miss their budget. Shader cost grows with the square of the scale, so the step is sized from the measured
 // frame time. The level that holds is remembered for this browser (local storage, best effort) and a higher
 // one is retried once at most. ?water=full keeps the prototype resolution always, for comparison.
-const KEY='encounters.water.scale';
-type Governor={dt:number;bad:number;good:number;ceiling:number;since:number;off:boolean;tried:boolean};
+// Frames are judged only once the page has loaded and 1.5 s after the water starts: on a first visit the frames
+// right after hydration are slow from start-up work (scripts, first image decodes), not from the shader, and
+// judging them dropped the resolution mid-scroll and remembered it.
+// v2: levels remembered before that fix are ignored.
+const KEY='encounters.water.scale.v2';
+type Governor={dt:number;bad:number;good:number;ceiling:number;since:number;off:boolean;tried:boolean;from:number};
 function govern(g:Governor,water:Water,dt:number,now:number){
-  if(g.off)return;g.dt+=(dt-g.dt)*.15;const max=waterMaxScale(),cur=water.scale();
+  if(g.off||now<g.from||document.readyState!=='complete')return;g.dt+=(dt-g.dt)*.15;const max=waterMaxScale(),cur=water.scale();
   if(g.dt>20){g.bad+=dt;g.good=0;}else if(g.dt<17.5){g.good+=dt;g.bad=0;}
   if(g.bad>250&&cur>1){const next=Math.max(1,Math.min(cur-.25,Math.round(cur*Math.sqrt(16/g.dt)*.95*4)/4));water.setScale(next);g.ceiling=Math.min(g.ceiling,next);g.since=now;g.bad=0;g.dt=16.7;try{localStorage.setItem(KEY,String(next));}catch{/* storage unavailable */}}
   else if(g.good>4000&&!g.tried&&cur+.25<=Math.min(g.ceiling,max)+1e-6){g.tried=true;water.setScale(cur+.25);g.since=now;g.good=0;}
@@ -95,15 +99,18 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   const root=useRef<HTMLDivElement>(null),snow=useRef<HTMLCanvasElement>(null);const flakes=useMemo(()=>makeSnow(),[]);
   const state=useRef({eased:0,brandWidth:0});
   const bubbles=useRef<HTMLDivElement>(null),waterCanvas=useRef<HTMLCanvasElement>(null),water=useRef<Water|null>(null);
-  const governor=useRef<Governor>({dt:16.7,bad:0,good:0,ceiling:99,since:0,off:false,tried:false});const lastFrame=useRef(0);
+  const governor=useRef<Governor>({dt:16.7,bad:0,good:0,ceiling:99,since:0,off:false,tried:false,from:0});const lastFrame=useRef(0);
   // A/B for review: ?cards=a keeps the previous project-card entrance (blur on the whole card).
   const cardsA=useRef(false);useEffect(()=>{cardsA.current=new URLSearchParams(location.search).get('cards')==='a';},[]);
-  // A/B for review: ?calc=a keeps the previous frame calculations (progress measured on the moving element itself, a
-  // per-frame .08 ease); ?scroll=lenis adds smoothed wheel scrolling (Lenis) driven by this same frame loop.
+  // Smoothed wheel scrolling (Lenis) driven by this same frame loop is the Home default (approved 2026-10-23).
+  // For comparison during review: ?scroll=native keeps native scrolling with the current calculations; ?calc=a
+  // keeps native scrolling with the previous ones (progress measured on the moving element itself, a per-frame
+  // .08 ease).
   const calcA=useRef(false);useEffect(()=>{calcA.current=new URLSearchParams(location.search).get('calc')==='a';},[]);
   const lenis=useRef<Lenis|null>(null);
   useEffect(()=>{
-    if(new URLSearchParams(location.search).get('scroll')!=='lenis'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const q=new URLSearchParams(location.search);
+    if(q.get('scroll')==='native'||q.get('calc')==='a'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     // Wheel only: touch keeps native scrolling. No clock of its own (autoRaf off): the Home frame loop advances it
     // first, so the scroll position and every layer computed from it come from the same frame. In-page anchors go
     // through it; leaving the Home destroys it before the next page is shown at its top.
@@ -113,7 +120,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
   },[]);
   useEffect(()=>{
     // Water: the prototype shader when WebGL works; otherwise the gradient fallback with its caustic texture.
-    const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;governor.current.off=new URLSearchParams(location.search).get('water')==='full';
+    const canvas=waterCanvas.current;water.current=canvas?createWater(canvas):null;governor.current.off=new URLSearchParams(location.search).get('water')==='full';governor.current.from=performance.now()+1500;
     if(water.current&&!governor.current.off){try{const saved=Number(localStorage.getItem(KEY));if(saved>=1&&saved<water.current.maxScale()){water.current.setScale(saved);governor.current.ceiling=saved;}}catch{/* storage unavailable */}}
     if(root.current)root.current.dataset.water=water.current?'webgl':'fallback';
     if(!water.current){const layer=root.current?.querySelector<HTMLElement>('[data-caustics]');if(layer&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const u=causticTexture();layer.style.backgroundImage=`url(${u}), url(${u})`;}}
