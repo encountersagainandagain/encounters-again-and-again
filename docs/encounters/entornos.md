@@ -101,7 +101,20 @@ npm run review:deploy                 # nuevo despliegue para que tome las varia
 3. `npm run review:deploy`. Al terminar indica la URL, el despliegue y el commit.
 4. Si cambió el esquema: `npm run staging -- migrate` (revisar) y luego `-- migrate --apply`, antes del despliegue.
 
-## Rendimiento y caché (producción, 2026-10-22)
+## CMS local: detener o reiniciar los datos
+Supabase local corre en Docker (Colima) y guarda la base en volúmenes de Docker. El CLI fijado por el proyecto es `supabase` 2.119.0 (`node_modules/.bin/supabase`); en Homebrew hay 2.120.0.
+- **Detener, conservando los datos:** `npm run cms:local:stop`, que ejecuta `supabase stop`.
+  - Detiene los contenedores y deja los volúmenes; el próximo `cms:local:prepare` arranca con los mismos datos.
+  - Después se puede apagar Colima (`colima stop`) sin perder nada.
+  - Hasta el 2026-10-23 el script ejecutaba `supabase stop --no-backup`, que **borra los volúmenes**: corregido.
+  - Comprobado: después de detener con el script siguen los 3 volúmenes, y al volver a levantar están los mismos 67 posts, incluidos los de prueba.
+- **Reiniciar los datos (borra todo lo local):** es un paso aparte y deliberado. El script no lo hace. Dos formas:
+  - `supabase stop --no-backup` borra los volúmenes; el próximo `supabase start` crea una base vacía con las migraciones.
+  - `supabase db reset --local` recrea la base local con las migraciones (y el seed, si lo hay) sin detener el stack.
+  - En los dos casos se pierden los datos locales (contenido de prueba, usuarios y archivos de Storage locales). Después hay que correr `cms:local:prepare` para volver a crear el administrador.
+  - **Nunca** usar `db reset --linked` ni `--db-url`: apuntan a una base remota.
+
+
 
 Producción: https://encounters-again-and-again-gamma.vercel.app (cuenta Vercel del cliente, despliegue automático desde `main`). Las funciones corren en `hnd1` (Tokio), junto al proyecto Supabase (`vercel.json`).
 
@@ -277,11 +290,15 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 #### Respaldo del descenso y prueba real del índice (`ef42a88`, 2026-10-23)
 **Respaldo de fuentes del descenso** (`site.css`; `layout.tsx` expone `--font-display-face` y `--font-body-face`, las caras sin el respaldo compartido).
 - **Título:** respaldo propio, Times New Roman con `size-adjust: 97.5%`. El compartido usa 93,54 % y está calculado para texto en mayúsculas y minúsculas; este título va todo en mayúsculas.
-  - Antes cortaba en una línea menos en 8 de 17 anchos. Ahora corta exactamente igual que EB Garamond en 16: escritorio 1024–1920, iPad e iPhone 375–430.
-  - En 360 px toma una línea de más. Ningún valor coincide en los 17 anchos: 97 % arregla 360 pero rompe 1366. 360 es sobre todo Android, que no trae Times New Roman.
+  - Antes cortaba en una línea menos en 8 de 17 anchos. Ahora corta exactamente igual que EB Garamond en escritorio 1024–1920, iPad y 373–430 px.
+  - **Hasta 362 px** (`@media (max-width: 362px)`), un segundo respaldo con 97 %. Ahí el título queda en su tamaño mínimo (19,2 px) y lo único que cambia es el ancho. Corta igual que EB Garamond de 320 a 362 px, 360 incluido.
 - **Párrafo del descenso:** respaldo propio, Arial con `size-adjust: 98%` (el compartido usa 102,8 %). En 390 px el respaldo compartido ocupaba una línea más; antes eso se compensaba con el título, que crecía. Ahora toma tantas líneas como Archivo en los 19 anchos probados. El `<em>` conserva su propia fuente.
 - **Final sin cambios:** con las fuentes cargadas, la sección del descenso es idéntica píxel por píxel (0 píxeles distintos) en 1440, 1366, 390 y 360.
-- **Fuentes demoradas 4 s** (`delayfont.mjs`, 11 anchos de escritorio y móvil). El arrecife, debajo del descenso, se movía 56/56/55/0/0/0/0/0/−3/0/+21 px en 1920/1440/1366/1280/1024/834/430/414/390/375/360. Ahora: 0/0/0/−1/0/−1/0/−1/0/−1/−21 px.
+- **Fuentes demoradas 4 s** (`delayfont.mjs`, Chrome de escritorio con Times New Roman y Arial). El arrecife, debajo del descenso, se movía 56/56/55/0/0/0/0/0/−3/0/+21 px en 1920/1440/1366/1280/1024/834/430/414/390/375/360.
+  - Con `ef42a88`: 0/0/0/−1/0/−1/0/−1/0/−1/−21 px. En 360 px el salto tenía la misma magnitud en sentido contrario: no estaba resuelto.
+  - Con el respaldo hasta 362 px: 360 → −1, 362 → −1, 350/340 → 0, 320 → −1. Escritorio y 375–430 siguen en 0/−1.
+- **Pendiente explícito, 363–371 px:** el respaldo corta una línea menos y el arrecife salta +20 px al llegar la fuente. En ese tramo el valor necesario cambia casi píxel a píxel (de 97,5 % a más de 99,5 %): cubrirlo exigiría siete tramos ajustados al texto actual del título, que se edita desde el CMS. No se hizo.
+- **Android: no validado.** Android no trae Times New Roman, Georgia ni Arial: ahí estos respaldos no se aplican, y el título y el párrafo caen en la serif y la sans del sistema (normalmente Noto Serif y Roboto, según el fabricante). En esta Mac no hay emulador ni esas fuentes, así que no se comprobó cómo cortan ni cuánto se mueve la sección en Android. Queda pendiente en un dispositivo real.
 - Siguen los pequeños desplazamientos al cambiar el resto de las fuentes (CLS ~0,005 en el swap), iguales que antes.
 - **En producción, `ef42a88`:** el resultado es el mismo que en local (píxeles finales idénticos en los 4 anchos y los mismos movimientos con las fuentes demoradas). Además, el recorrido de historial de `hist.mjs` (Home, About, skip link y post) da ALL OK.
 
@@ -296,6 +313,6 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
   - Adelante dos veces repite el ancla y después /crew arriba;
   - la carga directa de `#third-part` queda en el ancla.
 - **Datos locales:** quedan dos posts de prueba en la base local, «Local index test» (de una primera corrida) y «Local index check». En esa primera corrida, un segundo intento con el mismo slug fue rechazado por el CMS como dirección duplicada, como corresponde.
-- Supabase local se detuvo conservando los datos (`supabase stop`, no `cms:local:stop`, que borra los volúmenes con `--no-backup`) y después se detuvo Colima.
+- Supabase local se detuvo conservando los datos (`supabase stop`) y después se detuvo Colima. `cms:local:stop` hacía `--no-backup`, que borra los volúmenes; quedó corregido (ver «CMS local: detener o reiniciar los datos»).
 
-**Siguen pendientes:** red lenta (scripts con prioridad baja, sin tocar cómo Next los emite), Safari e iPhone sin probar, 360 px del título del descenso (una línea de más con el respaldo), y la revisión manual de Juani de la primera entrada al agua.
+**Siguen pendientes:** red lenta (scripts con prioridad baja, sin tocar cómo Next los emite); Safari e iPhone sin probar; el salto del título del descenso entre 363 y 371 px; Android sin validar (sus fuentes de respaldo reales); la revisión manual de Juani de la primera entrada al agua.
