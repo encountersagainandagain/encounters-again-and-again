@@ -6,10 +6,10 @@ import {pad} from '@/features/encounters/activities';
 import type {Contact} from '@/features/encounters/contact';
 import {Picture} from './MediaImage';
 import {ramp,useFrame} from './useFrame';
+import {aboutFallbackGallery} from '@/features/encounters/covers';
 
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const texts=(v:unknown)=>Array.isArray(v)?v.map(String).filter(Boolean):[];
-const fallbackGallery=['/design/about-1-turtle-web.jpg'];
 const PHOTO_SPAN=.186;
 export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}){
   if(!contact.email&&!contact.phone&&!contact.whatsapp&&!contact.donation&&!contact.socials.length)return null;
@@ -25,7 +25,7 @@ export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}
 // under it; photos switch with the reading progress; then the manifesto, how, belief and contact.
 export function AboutView({settings:s,contact,media}:{settings:Row;contact:Contact;media:Row[]}){
   const hero=useRef<HTMLElement>(null),main=useRef<HTMLDivElement>(null);
-  const gallery=texts(s.gallery);const frames=gallery.length?gallery:fallbackGallery;
+  const gallery=texts(s.gallery);const frames=gallery.length?gallery:aboutFallbackGallery;
   const columns=rows(s.columns).filter(c=>string(c.label)||string(c.text)).slice(0,3);const manifesto=(s.manifesto||{}) as Row;const how=(s.how||{}) as Row;
   useFrame(({vh,vw,reduced})=>{
     const el=hero.current;if(!el)return;const d=Math.min(1,scrollY/vh);const shrink=reduced?1:ramp(d,0,.22,true);

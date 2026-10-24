@@ -8,6 +8,7 @@ import {pinProgress,ramp,useFrame} from './useFrame';
 import {DarkClosing} from './EditorialPieces';
 import {PostBlocks} from './PostBlocks';
 import type {ContentBlock} from '@/features/encounters/public-content';
+import {covers} from '@/features/encounters/covers';
 
 const ORDER=[0,2,4,1,3,5];
 // Card windows (02-animations.md § 9). Five cards use the executable prototype's exact table; other counts
@@ -40,12 +41,12 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
       card.style.opacity=(p*(1-out)).toFixed(3);card.style.transform=`translate3d(0,${((1-p)*90-out*130).toFixed(1)}px,0) scale(${(.965+p*.035-out*.05).toFixed(4)})`;card.style.filter=blur<.05?'none':`blur(${blur.toFixed(2)}px)`;card.style.pointerEvents=p*(1-out)>.6?'auto':'none';
     });
   });
-  const surfaceId=settings.cover_id||page?.cover_id,underwaterId=settings.underwater_id;
+  const surface=covers.expeditions(settings,page),underwaterId=settings.underwater_id;
   const upcoming=list.filter(a=>!isFinished(a)),finished=list.filter(isFinished);
   return <>
     <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
       <div ref={sticky} className="exp-sticky">
-        <div className="exp-surface hero-image"><div data-surface className="exp-fill"><Picture id={surfaceId} media={media} fallback="/design/crew-banner.jpg" priority/></div></div>
+        <div className="exp-surface hero-image"><div data-surface className="exp-fill"><Picture id={surface.id} media={media} fallback={surface.fallback} priority/></div></div>
         <div className="exp-panels" aria-hidden="true">{[0,1,2,3,4,5].map(i=><div key={i} data-panel={i} style={{clipPath:i%2===0?'inset(100% 0 0 0)':'inset(0 0 100% 0)'}}><div className="exp-strip" style={{left:`${-i*100}%`}}><Picture id={underwaterId} media={media} fallback="/design/reef-turtle-web.jpg"/></div></div>)}</div>
         <div data-veil className="exp-veil"/>
         <div data-copy className="exp-copy"><p>{string(settings.kicker)||string(page?.kicker)||'following our nature'}</p><h1>{string(page?.title)||'Expeditions'}</h1></div>

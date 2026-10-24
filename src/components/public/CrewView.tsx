@@ -5,6 +5,7 @@ import {profileVisible,string,type Row} from '@/features/encounters/presentation
 import {EmptyState,PhotoHero,Scribble} from './EditorialPieces';
 import {CrewIntroduction,hasCrewSections} from './ImportedEditorial';
 import {MediaImage} from './MediaImage';
+import {covers} from '@/features/encounters/covers';
 
 // The Crew page (The Crew.dc.html), shared by /crew and the CMS previews.
 // Content comes from the Team page (cover kicker and section blocks), Crew records and the Crew cover setting.
@@ -14,7 +15,7 @@ export function CrewView({page,blocks,crew,posts,media,cover}:{page?:Row;blocks:
   const kicker=explicit?string(page?.kicker):'Meet the team';
   const story=explicit?blocks:blocks.filter(b=>!b.source_block_id||/^team_00[2-6]$/.test(b.source_block_id));
   const linked=(member:Row)=>profileVisible(member,posts);
-  return <><PhotoHero pinned title="The Crew" kicker={kicker||undefined} cover={cover} fallback="/design/crew-banner.jpg" media={media}/>
+  return <><PhotoHero pinned title="The Crew" kicker={kicker||undefined} cover={covers.crew({cover_id:cover}).id} fallback={covers.crew({cover_id:cover}).fallback} media={media}/>
     <div id="editorial-content" className="crew-story"><CrewIntroduction blocks={story} media={media}/></div>
     <section className="crew-members"><div className="crew-heading"><h2>Our crew</h2><Scribble variant="loop"/></div>{crew.length?<><div className="crew-pairs">{crew.map((member,i)=><article className="crew-person" key={string(member.id)} data-seq={`${i%2?.86:1},.34,70`}><MediaImage id={member.portrait_id} media={media} alt={string(member.name)}/><CrewCardCopy member={member}/></article>)}</div>
       <div className="crew-heading crew-more"><h2>More about us</h2><Scribble variant="wide"/></div>

@@ -7,6 +7,7 @@ import {stageWindows} from '@/features/encounters/message-stage';
 import {DarkClosing,PhotoHero,Scribble} from './EditorialPieces';
 import {Picture} from './MediaImage';
 import {ramp,useFrame} from './useFrame';
+import {covers} from '@/features/encounters/covers';
 
 // Meaningful Messages (Meaningful Messages.dc.html, 02-animations § 8): one message per screen, the
 // illustration at full height beside its text, sides alternating, crossing as the next one rises.
@@ -36,7 +37,7 @@ export function MessagesView({settings,messages,media}:{settings:Row;messages:Me
     scrollTo({top:el.getBoundingClientRect().top+scrollY+run*Math.max(0,(at+until)/2),behavior:'instant'});};
   return <>
     {/* Meaningful Messages.dc.html: the image dims over 0.06–0.82 of the first screen, the copy fades over 0.10–0.78. */}
-    <PhotoHero pinned heroWindow="0.06,0.82,0.1,0.78" title={string(settings.title)||'Meaningful messages'} kicker={string(settings.kicker)||'a few words'} cover={settings.cover_id} media={media} fallback="/design/ww-backcover.webp"/>
+    <PhotoHero pinned heroWindow="0.06,0.82,0.1,0.78" title={string(settings.title)||'Meaningful messages'} kicker={string(settings.kicker)||'a few words'} cover={covers.messages(settings).id} media={media} fallback={covers.messages(settings).fallback}/>
     <div id="editorial-content" className="mm-content">
       {(string(settings.intro)||string(settings.credit_line))&&<section className="mm-intro">{string(settings.intro)&&<><h2 data-seq="0.95,0.5">{string(settings.intro)}</h2><Scribble variant="title"/></>}{string(settings.credit_line)&&<span data-seq="0.85,0.45">{string(settings.credit_line)}</span>}</section>}
       {messages.length>0&&<section ref={stage} className="mm-stage pin-section" style={{height:`${120+60*messages.length}vh`}} aria-label="Messages">

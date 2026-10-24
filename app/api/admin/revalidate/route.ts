@@ -15,5 +15,6 @@ export async function POST(request: Request) {
   if (!input.success) return NextResponse.json({error:'Unsupported revalidation request.'}, {status:400});
   revalidateTag(PUBLIC_CONTENT_TAG, {expire:0});
   revalidatePath('/', 'layout');
+  revalidatePath('/api/covers');
   return NextResponse.json({revalidated:true});
 }

@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image,{getImageProps} from 'next/image';
 import {usePathname} from 'next/navigation';
 import {useEffect,useRef,type ReactNode} from 'react';
 import {brand} from '@/config/brand';
@@ -53,6 +53,32 @@ export function SiteChrome({children,settings,localReview=false}:{children:React
     };
     document.addEventListener('click',click);return()=>document.removeEventListener('click',click);
   },[]);
+  // Banner of the next page. A route prefetch brings the page's data, not its banner: the image used to be requested
+  // only once the new page rendered, so its text showed first. When a visitor points at, focuses or touches a link to
+  // a top-level page, that page's banner is preloaded with the srcset and sizes its <img> will use (same file, from
+  // the cache), one page at a time and never all of them. The list (/api/covers) is fetched once, after the current
+  // page has loaded; the preload only goes high priority once the current page is complete.
+  useEffect(()=>{
+    if(path.startsWith('/admin'))return;
+    let list:Record<string,{src:string;sizes:string}>|null=null,pending:Promise<void>|null=null;const done=new Set<string>();
+    const load=()=>pending??=fetch('/api/covers').then(r=>r.ok?r.json():{}).then(m=>{list=m;},()=>{list={};});
+    const idle=()=>{if('requestIdleCallback' in window)requestIdleCallback(()=>void load(),{timeout:3000});else setTimeout(()=>void load(),1500);};
+    if(document.readyState==='complete')idle();else addEventListener('load',idle,{once:true});
+    const preload=(target:string)=>{
+      const cover=list?.[target];if(!cover||done.has(target))return;done.add(target);
+      const {props}=getImageProps({src:cover.src,alt:'',fill:true,sizes:cover.sizes});
+      const link=document.createElement('link');link.rel='preload';link.as='image';
+      if(props.srcSet){link.imageSrcset=props.srcSet;link.imageSizes=props.sizes||'';}else link.href=String(props.src);
+      link.fetchPriority=document.readyState==='complete'?'high':'low';document.head.append(link);
+    };
+    const intent=(event:Event)=>{
+      const link=(event.target as Element|null)?.closest?.('a[href]');if(!(link instanceof HTMLAnchorElement))return;
+      const url=new URL(link.href);if(url.origin!==location.origin||url.pathname===location.pathname)return;
+      if(list)preload(url.pathname);else void load().then(()=>preload(url.pathname));
+    };
+    document.addEventListener('pointerover',intent,{passive:true});document.addEventListener('focusin',intent);document.addEventListener('touchstart',intent,{passive:true});
+    return()=>{removeEventListener('load',idle);document.removeEventListener('pointerover',intent);document.removeEventListener('focusin',intent);document.removeEventListener('touchstart',intent);};
+  },[path]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span>{' '}<span>{alternate}</span></span></span>:label}</Link>;
   if(path.startsWith('/admin'))return <>{children}</>;
   const socials=Object.entries((settings.social_links||{}) as Row).concat(['instagram','youtube','facebook','tiktok','pinterest'].map(key=>[key,settings[key]]));

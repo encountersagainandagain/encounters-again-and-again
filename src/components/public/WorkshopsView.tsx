@@ -7,6 +7,7 @@ import {countLabel,dateLabel,isFinished,pad,signupHref,statusLabels,type Activit
 import {PostBlocks} from './PostBlocks';
 import {ramp,useFrame} from './useFrame';
 import {MediaImage,Picture} from './MediaImage';
+import {covers} from '@/features/encounters/covers';
 
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
 // inside the card (their own snap and contained overscroll); the image crossfades with the rail position.
@@ -57,7 +58,7 @@ export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:
   return <>
     <span data-nav-theme="dark" hidden/>
     <section ref={hero} className="ws-hero" data-nav-hero aria-label={string(page?.title)||'Workshops'}>
-      <div className="ws-hero-image hero-image"><div data-ws-img className="ws-fill"><Picture id={settings.cover_id||page?.cover_id} media={media} fallback="/design/ww-banner.webp" priority/></div></div>
+      <div className="ws-hero-image hero-image"><div data-ws-img className="ws-fill"><Picture id={covers.workshops(settings,page).id} media={media} fallback={covers.workshops(settings,page).fallback} priority/></div></div>
       <div className="ws-hero-shade"/>
       <div className="ws-hero-copy" data-ws-copy><p>{string(settings.kicker)||string(page?.kicker)||'artsy animals'}</p><h1>{string(page?.title)||'Workshops'}</h1></div>
       <a href="#editorial-content" className="scroll-cue" data-ws-cue>Scroll <span aria-hidden="true"/></a>

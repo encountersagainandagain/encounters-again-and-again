@@ -5,6 +5,7 @@ import type {Contact} from '@/features/encounters/contact';
 import {Scribble} from './EditorialPieces';
 import {Picture} from './MediaImage';
 import {ramp,useFrame} from './useFrame';
+import {covers} from '@/features/encounters/covers';
 
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 // Contact (Contact.dc.html, 02-animations § 12): the form rises over the banner. Nothing is sent by the
@@ -33,7 +34,7 @@ export function ContactView({settings:s,contact,media}:{settings:Row;contact:Con
   return <>
     <span data-nav-theme="dark" hidden/>
     <section ref={hero} className="contact-hero" data-nav-hero>
-      <div className="contact-hero-image hero-image"><div data-hero-img className="contact-fill"><Picture id={s.cover_id} media={media} fallback="/design/reef-turtle-web.jpg" priority/></div></div>
+      <div className="contact-hero-image hero-image"><div data-hero-img className="contact-fill"><Picture id={covers.contact(s).id} media={media} fallback={covers.contact(s).fallback} priority/></div></div>
       <div className="contact-hero-shade"/>
       <div className="contact-hero-copy" data-copy><h1>{string(s.title)||'Get in touch'}</h1>{string(s.lead)&&<p>{string(s.lead)}</p>}</div>
     </section>
