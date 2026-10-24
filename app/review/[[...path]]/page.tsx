@@ -31,6 +31,12 @@ export default async function ReviewPage({params,searchParams}:{params:Promise<{
     const view=sparse?{...referenceView,home:{...referenceView.home,descent:{},about:{}},sections:referenceView.sections.filter(k=>k!=='descent'&&k!=='about'),agenda:referenceView.agenda.slice(0,2),happened:referenceView.happened.slice(0,1),art:referenceView.art.slice(0,2),crew:referenceView.crew.slice(0,3)}:referenceView;
     return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><div className="editorial-page home-page"><HomeView view={view} media={referenceMedia} closing="May the ocean be with you" newsletter={false}/></div></>;
   }
+  if(route==='/expeditions'){
+    // Visual reference of Expeditions.dc.html: the real template with the prototype's texts, images and five cards.
+    const ref=await import('@/features/encounters/expeditions-reference');
+    const {ExpeditionsView}=await import('@/components/public/ExpeditionsView');
+    return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><ScrollStage className="editorial-page expeditions-page"><ExpeditionsView page={ref.expeditionsReferencePage} settings={ref.expeditionsReferenceSettings} cards={ref.expeditionsReferenceCards} list={[]} media={ref.expeditionsReferenceMedia} blocks={[]}/></ScrollStage></>;
+  }
   if(route==='/art') {
     screen=<ArtLanding data={data} works={works} pathPrefix={prefix}/>;
   }else if(path[0]==='art'&&path.length===2){
