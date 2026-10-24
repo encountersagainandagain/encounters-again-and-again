@@ -32,6 +32,7 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
   - No hay loops acumulados al navegar.
   - Corrección: las tarjetas entran en foco con una copia de la foto desenfocada de antemano que se desvanece, sin filtro por cuadro.
   - **Medido en Modo de bajo consumo y a batería**, con mucha variación entre repeticiones: repetir con cargador y modo normal antes de cerrar. Sin probar: móvil real, Safari e iPhone.
+  - **Aprobado por Juani (2026-10-24): scroll, fluidez y efectos de la Home, en el entorno donde los probó** (su computadora y su navegador, con trackpad). No se extiende a dispositivos no probados (Safari, iPhone, iPad, Android, 120 Hz). Implementación final y aprendizajes: [animation-performance-playbook.md](animation-performance-playbook.md).
   - **Lenis por defecto en la Home (`c63fe01`, 2026-10-23):** Juani aprobó la sensación de scroll con Lenis. Es el default de la Home; `?scroll=native` y `?calc=a` quedan temporalmente para comparar. **La fluidez de la primera entrada al agua sigue pendiente.**
     - Corregido: en la primera visita, el ajuste automático bajaba la resolución del agua en pleno scroll y la recordaba.
     - Pendiente con propuesta: hidratar antes en la primera visita.
