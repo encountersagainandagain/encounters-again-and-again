@@ -34,6 +34,25 @@ export function SiteChrome({children,settings,localReview=false}:{children:React
     addEventListener('popstate',instant);addEventListener('pointerdown',restore,true);addEventListener('keydown',restore,true);
     return()=>{removeEventListener('popstate',instant);removeEventListener('pointerdown',restore,true);removeEventListener('keydown',restore,true);};
   },[]);
+  // In-page anchors (#id links on any public page): the history entry is made with history.pushState, which Next
+  // integrates into its router and fills with the router's own state. A native fragment navigation makes an entry
+  // without that state, which the router ignores on Back: returning from another page to it showed the URL of
+  // this page over the other one. The scroll stays what it was: Lenis animates it on the Home (it handles the same
+  // click), elsewhere scrollIntoView follows the CSS scroll-behavior (smooth, instant with reduced motion). Focus
+  // moves to targets that take it (the skip link's <main>), as a native fragment navigation would.
+  useEffect(()=>{
+    const click=(event:MouseEvent)=>{
+      if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      const link=(event.target as Element|null)?.closest?.('a[href*="#"]');if(!(link instanceof HTMLAnchorElement)||link.target&&link.target!=='_self'||link.hasAttribute('download'))return;
+      const url=new URL(link.href);if(url.origin!==location.origin||url.pathname!==location.pathname||url.search!==location.search||url.hash.length<2)return;
+      const target=document.getElementById(decodeURIComponent(url.hash.slice(1)));if(!target)return;
+      event.preventDefault();
+      if(url.hash!==location.hash)history.pushState(null,'',url.hash);
+      if(!document.documentElement.classList.contains('lenis'))target.scrollIntoView();
+      if(target.hasAttribute('tabindex'))target.focus({preventScroll:true});
+    };
+    document.addEventListener('click',click);return()=>document.removeEventListener('click',click);
+  },[]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span>{' '}<span>{alternate}</span></span></span>:label}</Link>;
   if(path.startsWith('/admin'))return <>{children}</>;
   const socials=Object.entries((settings.social_links||{}) as Row).concat(['instagram','youtube','facebook','tiktok','pinterest'].map(key=>[key,settings[key]]));

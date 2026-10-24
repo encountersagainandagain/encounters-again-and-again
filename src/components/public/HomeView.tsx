@@ -161,13 +161,15 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     measure();addEventListener('resize',measure);return()=>{removeEventListener('resize',measure);nodes.current=null;};});
   useFrame(({vh,vw,t,reduced})=>{
     const n=nodes.current;if(!n)return;
-    const now=performance.now(),dt=lastFrame.current?now-lastFrame.current:16.7;lastFrame.current=now;
+    const now=performance.now(),first=!lastFrame.current,dt=first?16.7:now-lastFrame.current;lastFrame.current=now;
     lenis.current?.raf(now);
     const y=scrollY,H=innerHeight;const raw=clamp01(y/vh);const s=state.current;
     // The surface layers follow the scroll with a lag of about 200 ms whatever the refresh rate (.08 per frame at
     // 60 Hz; the same fraction per frame would halve the lag at 120 Hz and double it when frames are dropped). With
-    // Lenis the scroll itself is already smoothed: they follow it directly instead of smoothing it twice.
-    const old=calcA.current;s.eased=reduced||lenis.current?raw:s.eased+(raw-s.eased)*(old?.08:1-Math.exp(-Math.min(dt,250)/200));const d=s.eased;
+    // Lenis the scroll itself is already smoothed: they follow it directly instead of smoothing it twice. The first
+    // frame starts where the page already is (a visitor may have scrolled before the scripts arrived): no descent
+    // replayed from the top.
+    const old=calcA.current;s.eased=reduced||lenis.current||first?raw:s.eased+(raw-s.eased)*(old?.08:1-Math.exp(-Math.min(dt,250)/200));const d=s.eased;
     // ---- read: every rectangle first, so the writes below never force a layout in between
     const rect=(e:Element|null|undefined)=>e?e.getBoundingClientRect():null;
     const dr=rect(n.descent),fr=rect(n.fish?.box),br=rect(n.dolphin?.box),wr=rect(n.whale?.box),reefR=rect(n.reefImg?.closest('section')),stageR=rect(n.stage);
