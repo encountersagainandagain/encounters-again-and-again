@@ -376,6 +376,16 @@ body:has(.home-page){background:#061826}
 .home-cue i{display:block;width:1px;height:34px;background:linear-gradient(rgba(255,255,255,.8),rgba(255,255,255,0));animation:editorial-cue 2.6s ease-in-out infinite}
 .home-descent{position:relative;z-index:3;padding:clamp(70px,18vh,200px) clamp(18px,3vw,46px) clamp(90px,20vh,220px);max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(26px,5vh,56px) clamp(12px,2vw,28px)}
 .home-descent h2{grid-column:3/6;text-align:right;font-size:clamp(1.2rem,3.9vw,3.2rem)!important;line-height:1.08!important;letter-spacing:.005em!important;text-transform:uppercase;background:linear-gradient(to bottom,#fff 0%,#fff 58%,rgba(143,217,234,.62) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* Fallbacks of the descent title and paragraph while the web fonts load. The shared metric fallbacks (layout.tsx) did
+   not wrap them like the final fonts, and the section changed height when the fonts arrived. Sized for this text:
+   - title (uppercase): Times New Roman breaks it exactly like EB Garamond at 16 of 17 widths (desktop 1024–1920, iPad,
+     iPhone 375–430); at 360 it takes one line more (it was one line fewer at 8 of them);
+   - paragraph: Arial takes as many lines as Archivo at all 19 widths checked (it was one line more at 390).
+   Vertical metrics as the shared fallbacks. The final fonts and layout do not change. */
+@font-face{font-family:"Descent Title Fallback";src:local("Times New Roman"),local("TimesNewRomanPSMT");size-adjust:97.5%;ascent-override:107.66%;descent-override:31.86%;line-gap-override:0%}
+@font-face{font-family:"Descent Body Fallback";src:local("Arial"),local("ArialMT");size-adjust:98%;ascent-override:85.41%;descent-override:20.43%;line-gap-override:0%}
+.home-descent h2{font-family:var(--font-display-face),"Descent Title Fallback",Georgia,serif}
+.home-descent>p{font-family:var(--font-body-face),"Descent Body Fallback",Arial,sans-serif}
 .home-descent p{grid-column:3/6;text-align:right;font-size:clamp(14px,1.1vw,17px)!important;line-height:1.7!important;color:rgba(226,242,248,.84)}
 .home-reef{position:relative;z-index:3;height:100vh;overflow:hidden}
 .home-reef>img{position:absolute;left:0;right:0;bottom:0;width:100%;height:auto!important;object-fit:fill!important;object-position:center bottom!important;-webkit-mask-image:linear-gradient(to bottom,#000 88%,transparent 100%);mask-image:linear-gradient(to bottom,#000 88%,transparent 100%)}

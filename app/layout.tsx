@@ -28,7 +28,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const settings=process.env.NEXT_PUBLIC_SUPABASE_URL?(await readRows('site_settings')).find(s=>s.key==='site')?.value as Record<string,unknown>|undefined:undefined;
   // The site scrolls smoothly to in-page anchors (index.css); the attribute lets Next turn that off while it moves a
   // new page to its top, so every page appears at its top instead of travelling there from the previous position.
-  return <html lang="en" data-scroll-behavior="smooth"><body className={`${heading.variable} ${body.variable}`}>
+  // --font-display-face / --font-body-face: EB Garamond and Archivo alone, without the shared metric fallbacks, for text
+  // that needs a fallback of its own (the Home descent title and paragraph, site.css).
+  return <html lang="en" data-scroll-behavior="smooth"><body className={`${heading.variable} ${body.variable}`} style={{'--font-display-face':heading.style.fontFamily.split(',')[0],'--font-body-face':body.style.fontFamily.split(',')[0]} as React.CSSProperties}>
     <JsonLd id="organization-jsonld" data={{ '@context':'https://schema.org', '@type':'Organization', '@id':`${siteUrl}/#organization`, name:brand.name, url:siteUrl, logo:`${siteUrl}${brand.logo}` }} />
     <JsonLd id="website-jsonld" data={{ '@context':'https://schema.org', '@type':'WebSite', name:brand.name, url:siteUrl }} />
     <SiteChrome settings={settings||{}} localReview={process.env.ENCOUNTERS_ALLOW_LOCAL_SUPABASE==='true'||process.env.VERCEL_ENV==='preview'}>{children}</SiteChrome>
