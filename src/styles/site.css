@@ -26,7 +26,8 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .exp-card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* --fit (ExpeditionsView): 1 keeps the prototype's sizes; longer text steps down to 0.7 instead of being cut. */
 .exp-card-text{grid-area:text;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--fit,1)*clamp(12px,2.2vh,24px));padding:clamp(26px,4vw,64px);min-width:0;overflow:hidden}
-.exp-card-text[data-overflow=true]{overflow-y:auto;justify-content:flex-start}
+.exp-card-text[data-overflow=true]{overflow-y:auto;justify-content:flex-start;scrollbar-width:none}
+.exp-card-text[data-overflow=true]::-webkit-scrollbar{display:none}
 .exp-card-kicker{display:flex;align-items:baseline;gap:10px;font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
 .exp-card-kicker span{font-family:ui-monospace,monospace;letter-spacing:.1em;opacity:.6}
 .exp-card[data-theme=dark] .exp-card-kicker,.exp-card[data-theme=dark] .exp-card-cta{color:#8fd9ea}

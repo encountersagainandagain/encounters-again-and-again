@@ -28,7 +28,7 @@ export const pageSchemas:PageSchema[]=[
     group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
   ]},
   {key:'expeditions',label:'Expeditions page',path:'/expeditions',store:'pages',lead:'Banner of the Expeditions page. The cards inside the banner are edited in Expeditions → Presentation cards.',fields:[
-    media('cover_id','Surface image','Default: the cover of the program page, or the design image.'),media('underwater_id','Underwater image','Revealed in six strips while scrolling.'),t('kicker','Small line above the title','Default: following our nature'),
+    media('cover_id','Surface image','Default: the cover of the program page, or the design image.'),media('underwater_id','Underwater image','Revealed in six strips while scrolling.'),t('kicker','Small line above the title','Default: following our nature'),t('title','Title','Large capitals of the banner. Default: Expeditions'),
     t('list_title','Title of the list of expeditions','Default: On the water'),t('list_note','Note of the list'),t('closing','Closing phrase','Default: May the ocean be with you')]},
   {key:'workshops',label:'Workshops page',path:'/workshops',store:'pages',lead:'Banner and closing of the Workshops page. Each workshop is edited in Workshops.',fields:[
     media('cover_id','Banner image','Default: the design image.'),t('kicker','Small line above the title','Default: artsy animals'),t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]},
