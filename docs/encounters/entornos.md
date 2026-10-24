@@ -176,3 +176,41 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - White Desert tiene el mismo retraso (~160–190 ms) y el mismo frenado (~1 s) que la variante C. Esa sensación es la de Lenis, no un defecto de la Home.
 - Durante el gesto se mueve fluido. Pierde cuadros mientras frena, cuando cambian sus escenas.
 - La Home en C no perdió ningún cuadro en el frenado.
+
+#### Lenis por defecto en la Home (`c63fe01`, 2026-10-23)
+- **Aprobado por Juani:** la sensación de scroll con Lenis (C), probada con su trackpad. Es el default de la Home sin parámetros.
+  - Se mantiene la configuración: rueda suavizada, `syncTouch: false` (el táctil sigue nativo en móvil), `anchors: true` y el reloj de la Home.
+  - Solo en la Home: ni otras páginas ni el admin.
+- **Alternativas temporales para comparar:** `/?scroll=native` (B, scroll nativo) y `/?calc=a` (A, nativo con el cálculo anterior). Reduced motion apaga Lenis.
+- **Sigue pendiente:** la fluidez de la primera entrada al agua.
+
+**Primera visita con caché fría y scroll rápido inmediato** (síntoma de Juani: el agua parece trabarse un instante).
+- Sonda: `.encounters-work/bench-scroll-2026-10-23/coldprobe.mjs`. Una visita en frío por contexto, scroll de 3000 px a 4000 px/s apenas se ve el título, y después una segunda visita en el mismo contexto.
+- Antes de la corrección (6 visitas en frío, B y C): **4 de 6 tuvieron un hueco de ~50 ms** (3 cuadros). Ninguna de las 6 segundas visitas tuvo huecos. Pasa igual con y sin Lenis.
+- Qué coincidió con cada hueco, sin una causa única:
+  - decodificación de 13 imágenes (40 ms);
+  - el primer cuadro del agua después de la hidratación (swap de la GPU, 24 ms);
+  - evaluación de un chunk de JS (30 ms);
+  - un hueco antes de hidratar sin tarea atribuible.
+- **Descartado:** la compilación del shader. `getProgramParameter` y `getShaderParameter` tardan menos de 3 ms.
+- **Hidratación:** en frío, la Home se pinta a los 0,75–1,0 s pero hidrata a los ~1,3–1,5 s (sin trazado; con trazado, 1,1–4,7 s). Los scripts (~200 KB) se descargan en paralelo con las fuentes (370 KB) y la foto de fondo. Si se hace scroll antes de hidratar, el agua y las capas todavía no siguen la página.
+- **Causa demostrada y corregida: ajuste de resolución.**
+  - En una visita en frío con Lenis, el gobernador bajó el agua de 1,75× a 1,25× a los 1388 ms, en pleno scroll, ~320 ms después de crear el agua, y lo guardó para las visitas siguientes.
+  - El gobernador juzgaba la GPU con los primeros cuadros después de la hidratación, que son lentos por el arranque y no por el shader.
+  - Ahora espera a que la página termine de cargar y a que pasen 1,5 s desde que arranca el agua. La clave guardada pasa a `encounters.water.scale.v2`, así que se ignoran los niveles guardados antes de la corrección.
+  - Después (4 visitas en frío, default y `?scroll=native`): 0 bajadas de resolución. Quedan huecos de 50 ms en 2 de 4, en corridas que hidrataron tarde (3,6 y 4,7 s), después del scroll.
+- **Pendiente, propuesto sin aplicar:** acortar el tiempo hasta la hidratación en la primera visita, por ejemplo priorizando los scripts frente a las fuentes que no son críticas para el primer pintado. Requiere medir el costo en la carga, que ya está aprobada.
+
+**Verificación funcional en producción, `c63fe01`** (`check2.mjs`, viewport real; default, `?scroll=native`, `?calc=a` y default con reduced motion; 0 errores de consola):
+- Lenis está activo solo en el default (5 listeners de rueda frente a 4).
+- 600 px de rueda mueven 600 px. Lenis va a 272 px a los 80 ms y llega a 600; nativo llega a 600 enseguida.
+- Fin, Inicio y AvPág funcionan. El ancla «follow the current» deja `#descenso` a 150 px del borde, igual en todas las variantes.
+- **Al salir de la Home se limpia Lenis:** en /crew no queda la clase, quedan 4 listeners y la rueda es nativa (500 px a los 80 ms).
+- Atrás desde /crew sin haber usado el ancla: vuelve a la Home y Lenis se crea de nuevo. Adelante: /crew sin Lenis.
+- **Artefacto de verificación:** con un viewport emulado (escala 1 sobre una pantalla 2×), Playwright entrega `deltaY` duplicado a la página, y Lenis movía el doble. Con el viewport real no hay duplicación. Los bancos usan el viewport real.
+
+**Fallo previo, en todo el sitio y sin corregir: ancla + navegación + Atrás.**
+- Al tocar un ancla `#…` se crea una entrada de historial con `history.state = null`.
+- Si después se va a otra página y se toca Atrás, la URL vuelve a `/#descenso` pero **sigue visible la otra página**, porque el router de Next ignora los `popstate` sin su estado. Un segundo Atrás vuelve bien.
+- Pasa igual con Lenis, con `?scroll=native` y con `?calc=a`: no lo introdujo Lenis. `BlogPostPageContent.tsx` (`pushState(null, …)`) produce lo mismo.
+- **Corrección propuesta:** en las anclas internas, crear la entrada conservando el estado de Next (`history.pushState(history.state, '', '#id')`) y hacer el desplazamiento suave por Lenis cuando está activo. Afecta la navegación de todo el sitio: espera aprobación.

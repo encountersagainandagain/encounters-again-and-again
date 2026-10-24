@@ -32,6 +32,11 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
   - No hay loops acumulados al navegar.
   - Corrección: las tarjetas entran en foco con una copia de la foto desenfocada de antemano que se desvanece, sin filtro por cuadro.
   - **Medido en Modo de bajo consumo y a batería**, con mucha variación entre repeticiones: repetir con cargador y modo normal antes de cerrar. Sin probar: móvil real, Safari e iPhone.
+  - **Lenis por defecto en la Home (`c63fe01`, 2026-10-23):** Juani aprobó la sensación de scroll con Lenis. Es el default de la Home; `?scroll=native` y `?calc=a` quedan temporalmente para comparar. **La fluidez de la primera entrada al agua sigue pendiente.**
+    - Corregido: en la primera visita, el ajuste automático bajaba la resolución del agua en pleno scroll y la recordaba.
+    - Pendiente con propuesta: hidratar antes en la primera visita.
+    - Fallo previo en todo el sitio, sin corregir: ancla + otra página + Atrás muestra la página equivocada.
+    - Detalle en [entornos.md](entornos.md#lenis-por-defecto-en-la-home-c63fe01-2026-10-23).
   - **Cálculo de scroll A/B/C (`7839aeb`, 2026-10-23):** la primera batería se cortó con la Mac saturada (carga ~273, bajo consumo). Sus datos quedan solo como diagnóstico en `.encounters-work/bench-scroll-2026-10-23/results-diagnostico-saturado/`. La segunda ronda corta, con carga 2–3,6 y modo normal (a batería), no reprodujo los cuadros perdidos de Lenis: **A, B y C sin pausas ni cuadros perdidos** en Proyectos → Agenda. Lenis suma ~175 ms de retraso y ~1 s de deslizamiento después del gesto. **B queda como default.** A y C (`?calc=a`, `?scroll=lenis`) se mantienen hasta la revisión manual de Juani. **La fluidez no está aprobada:** falta que Juani pruebe B con su trackpad. Si aparece un tirón, se captura una traza de ese momento (sección y si era la primera pasada), sin repetir la batería. White Desert, como referencia: mismo retraso y frenado que Lenis. Que `7839aeb` sea el commit en producción se infiere por el bundle; no está confirmado exactamente. Detalle en [entornos.md](entornos.md#cálculo-de-scroll-abc-ronda-2-2026-10-23).
 - **Aprobación visual — pendiente de Juani (A/B):**
   - entrada de las tarjetas de Proyectos: `/` (nueva: foto desenfocada que se desvanece; título y texto nítidos) frente a `/?cards=a` (anterior: tarjeta entera desenfocada);
