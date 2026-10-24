@@ -267,8 +267,35 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - **Red lenta:** el agua todavía espera los scripts, que siguen con prioridad baja.
   - Siguiente palanca posible: subir su prioridad o bajar los bytes de JS.
   - La primera exige tocar cómo Next emite los scripts; no se hizo.
-- **Salto de línea al llegar la fuente (previo):** con el respaldo métrico, el `h2` del descenso ocupa 7 líneas; con EB Garamond, 8 (+55 px).
+- ~~**Salto de línea al llegar la fuente (previo):** con el respaldo métrico, el `h2` del descenso ocupa 7 líneas; con EB Garamond, 8 (+55 px).~~ Corregido en `ef42a88` (ver abajo).
   - Si la fuente llega con la página ya scrolleada, el navegador compensa con scroll anchoring (`scrollY` +56) y lo que está en pantalla no salta, pero cuenta como layout shift.
   - Corregirlo requiere ajustar el respaldo de ese título.
 - Safari e iPhone: sin probar.
 - `?scroll=native` y `?calc=a` siguen disponibles para comparar.
+
+
+#### Respaldo del descenso y prueba real del índice (`ef42a88`, 2026-10-23)
+**Respaldo de fuentes del descenso** (`site.css`; `layout.tsx` expone `--font-display-face` y `--font-body-face`, las caras sin el respaldo compartido).
+- **Título:** respaldo propio, Times New Roman con `size-adjust: 97.5%`. El compartido usa 93,54 % y está calculado para texto en mayúsculas y minúsculas; este título va todo en mayúsculas.
+  - Antes cortaba en una línea menos en 8 de 17 anchos. Ahora corta exactamente igual que EB Garamond en 16: escritorio 1024–1920, iPad e iPhone 375–430.
+  - En 360 px toma una línea de más. Ningún valor coincide en los 17 anchos: 97 % arregla 360 pero rompe 1366. 360 es sobre todo Android, que no trae Times New Roman.
+- **Párrafo del descenso:** respaldo propio, Arial con `size-adjust: 98%` (el compartido usa 102,8 %). En 390 px el respaldo compartido ocupaba una línea más; antes eso se compensaba con el título, que crecía. Ahora toma tantas líneas como Archivo en los 19 anchos probados. El `<em>` conserva su propia fuente.
+- **Final sin cambios:** con las fuentes cargadas, la sección del descenso es idéntica píxel por píxel (0 píxeles distintos) en 1440, 1366, 390 y 360.
+- **Fuentes demoradas 4 s** (`delayfont.mjs`, 11 anchos de escritorio y móvil). El arrecife, debajo del descenso, se movía 56/56/55/0/0/0/0/0/−3/0/+21 px en 1920/1440/1366/1280/1024/834/430/414/390/375/360. Ahora: 0/0/0/−1/0/−1/0/−1/0/−1/−21 px.
+- Siguen los pequeños desplazamientos al cambiar el resto de las fuentes (CLS ~0,005 en el swap), iguales que antes.
+- **En producción, `ef42a88`:** el resultado es el mismo que en local (píxeles finales idénticos en los 4 anchos y los mismos movimientos con las fuentes demoradas). Además, el recorrido de historial de `hist.mjs` (Home, About, skip link y post) da ALL OK.
+
+**Índice de un post, recorrido real en el CMS local** (`cmsindex.mjs`; app `127.0.0.1:3221` sobre Supabase local `127.0.0.1:54321`; nada en producción).
+- **Editor:** en «New message» se cargan título, slug y mensaje, con «Show index» activo y tres bloques «Heading» con nombre de índice (`first-part`, `second-part`, `third-part`), cada uno con su párrafo. «Save and publish» responde «Published.».
+- **Página pública, como visitante sin sesión:** `/meaningful-messages/local-index-check` renderiza el índice («In this post») con los tres enlaces guardados.
+- **Recorrido, con y sin reduced motion, 0 errores de consola:**
+  - el enlace 02 lleva a `#second-part` (destino a 150 px, estado del router presente);
+  - /crew por el navbar aparece arriba;
+  - Atrás vuelve al post en el ancla (misma posición);
+  - otro Atrás vuelve al post donde estaba el visitante al tocar el índice;
+  - Adelante dos veces repite el ancla y después /crew arriba;
+  - la carga directa de `#third-part` queda en el ancla.
+- **Datos locales:** quedan dos posts de prueba en la base local, «Local index test» (de una primera corrida) y «Local index check». En esa primera corrida, un segundo intento con el mismo slug fue rechazado por el CMS como dirección duplicada, como corresponde.
+- Supabase local se detuvo conservando los datos (`supabase stop`, no `cms:local:stop`, que borra los volúmenes con `--no-backup`) y después se detuvo Colima.
+
+**Siguen pendientes:** red lenta (scripts con prioridad baja, sin tocar cómo Next los emite), Safari e iPhone sin probar, 360 px del título del descenso (una línea de más con el respaldo), y la revisión manual de Juani de la primera entrada al agua.
