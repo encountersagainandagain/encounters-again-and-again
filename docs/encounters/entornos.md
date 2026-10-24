@@ -209,8 +209,66 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - Atrás desde /crew sin haber usado el ancla: vuelve a la Home y Lenis se crea de nuevo. Adelante: /crew sin Lenis.
 - **Artefacto de verificación:** con un viewport emulado (escala 1 sobre una pantalla 2×), Playwright entrega `deltaY` duplicado a la página, y Lenis movía el doble. Con el viewport real no hay duplicación. Los bancos usan el viewport real.
 
-**Fallo previo, en todo el sitio y sin corregir: ancla + navegación + Atrás.**
+**Fallo previo, en todo el sitio: ancla + navegación + Atrás** (corregido en `246ccd6`, ver abajo).
 - Al tocar un ancla `#…` se crea una entrada de historial con `history.state = null`.
 - Si después se va a otra página y se toca Atrás, la URL vuelve a `/#descenso` pero **sigue visible la otra página**, porque el router de Next ignora los `popstate` sin su estado. Un segundo Atrás vuelve bien.
 - Pasa igual con Lenis, con `?scroll=native` y con `?calc=a`: no lo introdujo Lenis. `BlogPostPageContent.tsx` (`pushState(null, …)`) produce lo mismo.
 - **Corrección propuesta:** en las anclas internas, crear la entrada conservando el estado de Next (`history.pushState(history.state, '', '#id')`) y hacer el desplazamiento suave por Lenis cuando está activo. Afecta la navegación de todo el sitio: espera aprobación.
+
+#### Anclas y primer arranque del agua (`246ccd6` + `03e6f15`, 2026-10-23)
+**Anclas — corregido (`246ccd6`, `SiteChrome.tsx`).**
+- Un solo manejador para los enlaces `#…` de la misma página (cualquier página pública).
+- Cancela la navegación nativa al fragmento y crea la entrada con `history.pushState(null, '', '#id')`. Next 16 integra ese `pushState` a su router y le copia su propio estado. No se arman campos internos del router.
+- El desplazamiento no cambia: en la Home lo anima Lenis, que atiende el mismo clic. En las demás páginas `scrollIntoView` sigue el `scroll-behavior` del CSS (suave, o instantáneo con reduced motion).
+- El foco pasa a los destinos que lo aceptan (`<main tabIndex=-1>` del skip link), como en la navegación nativa.
+- `BlogPostPageContent` ya usaba `pushState(null, …)`: Next le agrega su estado. Comprobado.
+
+**Verificado en producción (`03e6f15`, `hist.mjs`, `skiponly.mjs`): 36 pasos y 6 skip links, 0 errores de consola.**
+- Con Lenis, con `?scroll=native` y con reduced motion, el recorrido Home → ancla `#descenso` → /crew por el navbar → Atrás → Atrás → Adelante → Adelante mantiene URL, página visible y posición en correspondencia:
+  - la Home en el ancla (y=1352, destino a 150 px);
+  - la Home arriba;
+  - /crew arriba.
+- Carga directa de `/#descenso` (también con `?scroll=native`): queda en el ancla, y Lenis no la mueve al arrancar.
+- Navbar desde la mitad de la Home: /about aparece arriba desde el primer cuadro.
+- /about: su flecha `#about-content`, después /crew y Atrás vuelven a About en el ancla.
+- Skip link en /about, `/` y `/?scroll=native`, con y sin reduced motion: el foco va a `main`.
+- Post (`/meaningful-messages/you-never-know-what-encounter-could-change-your-life`): ningún post publicado tiene índice, así que se inyectó en el DOM un enlace igual a los del índice. Ancla, /crew y Atrás vuelven al post en el ancla. `pushState(null)` conserva el estado del router.
+- Verificación funcional anterior (`check2.mjs`), en local y en producción:
+  - Lenis se limpia al salir de la Home;
+  - al volver con Atrás se crea de nuevo (5 listeners);
+  - Fin, Inicio, AvPág, ancla y reduced motion funcionan.
+
+**Primer arranque del agua — qué lo retrasa** (`coldstart.mjs`: prioridades de red, llegada de cada script, tareas largas, hidratación y primer cuadro).
+- **Descarga.** La Home hidrata ~20 ms después de que llega el último script inicial, sin tareas largas: ni la ejecución del JS ni la hidratación pesan.
+- Los scripts de Next van `async`, con prioridad baja, y el runtime se precarga con `fetchPriority="low"` (Next no lo deja configurar). Llegan después de las fuentes (precargadas, prioridad alta) y de las imágenes de la primera pantalla.
+- Antes de hidratar llegaban ~726 KB: fuentes 373 (51 %), scripts ~185 (25 %), imágenes ~105 (14 %) y HTML 63 (9 %).
+- La primera pantalla de la Home usa las tres caras: Archivo, EB Garamond y su itálica. Todas se conservan.
+- **Decodificación de imágenes:** no retrasa la hidratación. En frío puede coincidir con un hueco de cuadros durante el scroll.
+- El HTML trae el CSS tres veces: en el `<style>` y dos copias en el payload de RSC, efecto de `experimental.inlineCss`. Son ~495 KB sin comprimir, pero comprimen bien. No se tocó.
+
+**Fuentes (`03e6f15`): 372 KB → 173 KB, sin cambio de tipografía.**
+- **Rasgos OpenType:** solo los que el navegador aplica por defecto más `tnum`, el único que pide el CSS. EB Garamond tenía 2092 glifos para ~400 caracteres: versalitas, swashes, ss01–ss07 y otros que nunca se muestran.
+- **Caracteres:** Latin-1 + Extended-A, acentos, puntuación, sub/superíndices, € ™ y flechas. Se recorrieron las 31 páginas publicadas: fuera de ASCII solo usan `· – — ’ “ ” • … ₂ ← → ↓ ↗`.
+- **Eje de peso completo.** El recorte de `de55bf5` (limitado a 400–500) había dejado mal los avances en peso 500, por un problema de harfbuzz 0.4.15 con la tabla HVAR. EB Garamond 500 quedaba 1,9 % más angosta y la itálica 500, 3,2 %, desparejo letra por letra: es el espaciado irregular de «EN COUN TERS» en el navbar. Ahora las posiciones de cada letra coinciden con los TTF originales en las 8 combinaciones de familia y peso que usa el sitio.
+- **Píxeles contra los TTF originales** en 7 páginas: solo difiere una franja de antialiasing de 6 px en los enlaces del navbar (Archivo 600, eje de ancho fijado en 100), igual que antes del cambio.
+- **Dependencias:** `subset-font` forzaba todos los rasgos y no dejaba elegirlos. `scripts/subset-fonts.mjs` usa harfbuzz directo (`harfbuzzjs` 0.4.15 y `fontverter` 2.0.0, devDependencies fijas).
+- **Efecto medido**, con red limitada a 150 KB/s y 150 ms (`prehydr.mjs`, mismo script antes y después): la animación arranca a los **4,9–5,5 s, contra 8,4–10,3 s** antes.
+- Con la red real de esta sesión, muy variable, el arranque va de ~1,3 s a más de 4 s, sin una diferencia atribuible.
+
+**Si ya se hizo scroll antes de que la animación esté lista** (`246ccd6`): el desfase de la superficie arranca en la posición actual. Era el único estado con suavizado en el tiempo; con Lenis ya seguía la posición directa. No se reproduce el descenso ni se toca el scroll. Antes de hidratar, la Home ya se ve en su posición (capturas con red limitada).
+
+**Cierre en producción, `03e6f15`, primera visita en frío con scroll inmediato y segunda pasada** (`coldprobe.mjs`, default y `?scroll=native`):
+- 1 de 4 visitas en frío tuvo un hueco de 50 ms; otra, con Lenis, perdió 30 de 116 cuadros sueltos sin pausas mayores a 40 ms. Antes eran 4 de 6 y luego 2 de 4.
+- 0 bajadas de resolución.
+- Segundas pasadas: 0 huecos.
+
+**Pendiente**
+- **Fluidez de la primera entrada al agua: no aprobada.** Falta la revisión de Juani.
+- **Red lenta:** el agua todavía espera los scripts, que siguen con prioridad baja.
+  - Siguiente palanca posible: subir su prioridad o bajar los bytes de JS.
+  - La primera exige tocar cómo Next emite los scripts; no se hizo.
+- **Salto de línea al llegar la fuente (previo):** con el respaldo métrico, el `h2` del descenso ocupa 7 líneas; con EB Garamond, 8 (+55 px).
+  - Si la fuente llega con la página ya scrolleada, el navegador compensa con scroll anchoring (`scrollY` +56) y lo que está en pantalla no salta, pero cuenta como layout shift.
+  - Corregirlo requiere ajustar el respaldo de ese título.
+- Safari e iPhone: sin probar.
+- `?scroll=native` y `?calc=a` siguen disponibles para comparar.
