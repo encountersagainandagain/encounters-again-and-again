@@ -93,7 +93,9 @@ if(command==='prepare'){
   const status=localStatus();
   console.log(`Supabase local is available at ${status.url}.`);
 }else if(command==='stop'){
-  run(['stop','--no-backup']);
+  // Stops the containers and keeps the data volumes: the next prepare starts with the same local data. Resetting the
+  // data is a separate, explicit step (docs/encounters/entornos.md): `supabase stop --no-backup` deletes the volumes.
+  run(['stop']);
 }else if(command==='dev'){
   const state=await readState();
   const child=spawn('npm',['run','dev','--','--hostname','127.0.0.1','--port','3219'],{
