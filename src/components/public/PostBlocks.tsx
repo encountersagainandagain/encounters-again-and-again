@@ -13,16 +13,17 @@ import {ramp,useFrame} from './useFrame';
 // Out of scope: tour/stay/affiliate blocks (their modules are disabled for Encounters).
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const pad=(n:number)=>String(n).padStart(2,'0');
-const mediaId=(img:Row)=>img.media_id||(/^\/api\/media\/[\w-]+$/.test(string(img.src))?string(img.src).split('/').pop():null);
-function images(c:Row):Row[]{
+export const mediaId=(img:Row)=>img.media_id||(/^\/api\/media\/[\w-]+$/.test(string(img.src))?string(img.src).split('/').pop():null);
+export function images(c:Row):Row[]{
   const list=rows(c.images).length?rows(c.images):rows(c.carouselImages).length?rows(c.carouselImages):rows(c.slides);
   if(list.length)return list.filter(i=>mediaId(i));
   return [{media_id:c.media_id,src:c.src,alt:c.alt,caption:c.caption},...(c.srcSecondary?[{src:c.srcSecondary,alt:c.altSecondary,caption:c.captionSecondary}]:[])].filter(i=>mediaId(i));
 }
-const paragraphs=(c:Row)=>Array.isArray(c.paragraphs)?c.paragraphs.map(String).filter(Boolean):(string(c.text)||string(c.body)).split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+export const blockLinks=(c:Row)=>[...rows(c.links),{url:c.href||c.url,label:c.label}].filter(l=>safeHref(l.url));
+export const paragraphs=(c:Row)=>Array.isArray(c.paragraphs)?c.paragraphs.map(String).filter(Boolean):(string(c.text)||string(c.body)).split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
 const youtubeId=(c:Row)=>{if(/^[\w-]{11}$/.test(string(c.video_id)))return string(c.video_id);try{const u=new URL(string(c.youtubeUrl));const id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v')||u.pathname.split('/').pop()||'';return /^[\w-]{11}$/.test(id)?id:'';}catch{return '';}};
 const anchorOf=(b:ContentBlock)=>string(b.anchor)||`block-${b.id}`;
-const headingText=(b:ContentBlock)=>string(b.content.text)||string(b.content.title);
+export const headingText=(b:ContentBlock)=>string(b.content.text)||string(b.content.title);
 
 function Accordion({items,boxed}:{items:{q:string;a:string}[];boxed:boolean}){
   const [open,setOpen]=useState<number[]>(boxed?[]:[0]);
@@ -67,7 +68,7 @@ export function PostBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[]
     if(type==='faq'){const items=rows(c.faqItems||c.items).map(x=>({q:string(x.question)||string(x.q),a:string(x.answer)||string(x.a)})).filter(x=>x.q);if(items.length)out.push(<div className="pb pb-faqs" key={key} id={b.anchor?anchorOf(b):undefined}><div data-seq="0.94,0.4">{(string(c.title)||string(c.text))&&<h3>{string(c.title)||string(c.text)}</h3>}<Accordion items={items} boxed={false}/></div></div>);continue;}
     if(type==='accordion'){const items=rows(c.accordionItems||c.items).map(x=>({q:string(x.title)||string(x.label),a:string(x.text)||string(x.body)})).filter(x=>x.q);if(items.length)out.push(<div className="pb pb-accordion" key={key}><div data-seq="0.94,0.4"><Accordion items={items} boxed/></div></div>);continue;}
     if(type==='list'){const items=(Array.isArray(c.items)?c.items:[]).map(x=>typeof x==='string'?x:string((x as Row).text)||string((x as Row).title)).filter(Boolean);if(!items.length)continue;out.push(<div className="pb pb-list" key={key}><div data-seq="0.94,0.4">{(string(c.title)||string(c.text))&&<h3>{string(c.title)||string(c.text)}</h3>}<ol>{items.map((x,i)=><li key={i}><span>{pad(i+1)}</span><span>{x}</span></li>)}</ol></div></div>);continue;}
-    if(type==='link'||type==='source'){const links=[...rows(c.links),{url:c.href||c.url,label:c.label}].filter(l=>safeHref(l.url));if(!links.length)continue;out.push(<div className="pb pb-link" key={key}>{string(c.text)&&type==='link'&&<p>{string(c.text)}</p>}{links.map((l,i)=>{const href=safeHref(l.url)!;return <a key={i} href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(l.label)||href}<span aria-hidden="true">→</span></a>;})}</div>);continue;}
+    if(type==='link'||type==='source'){const links=blockLinks(c);if(!links.length)continue;out.push(<div className="pb pb-link" key={key}>{string(c.text)&&type==='link'&&<p>{string(c.text)}</p>}{links.map((l,i)=>{const href=safeHref(l.url)!;return <a key={i} href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(l.label)||href}<span aria-hidden="true">→</span></a>;})}</div>);continue;}
     // Paragraph (and imported text blocks): an optional lead in Garamond, then the body.
     const body=paragraphs(c);if(!string(c.lead)&&!body.length)continue;
     out.push(<div className="pb pb-paragraph" id={b.anchor?anchorOf(b):undefined} key={key}><div data-seq="0.92,0.4">{string(c.lead)&&<p className="pb-lead">{string(c.lead)}</p>}{body.map((p,i)=><p key={i}>{p}</p>)}</div></div>);

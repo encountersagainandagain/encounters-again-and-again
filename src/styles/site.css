@@ -7,8 +7,9 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 /* ── Expeditions (Expeditions.dc.html, 02-animations § 9) ── */
 .exp-dissolve{position:relative;z-index:1;background:#061826;}
 .exp-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#061826}
-.exp-surface,.exp-fill,.exp-panels,.exp-veil,.exp-cards{position:absolute;inset:0}
-.exp-fill img,.exp-strip img{width:100%;height:100%;object-fit:cover;object-position:center 50%;display:block}
+.exp-surface,.exp-fill,.exp-under,.exp-panels,.exp-veil,.exp-cards{position:absolute;inset:0}
+.exp-under{z-index:2;opacity:0}
+.exp-fill img,.exp-under img,.exp-strip img{width:100%;height:100%;object-fit:cover;object-position:center 50%;display:block}
 .exp-panels{z-index:2;display:grid;grid-template-columns:repeat(6,1fr)}
 .exp-panels>div{position:relative;overflow:hidden}
 .exp-strip{position:absolute;top:0;width:600%;height:100%}
@@ -23,16 +24,19 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .exp-card[data-theme=dark]{background:#08222f;color:#eaf5fa;border-color:rgba(255,255,255,.12)}
 .exp-card-media{grid-area:media;position:relative;height:100%;overflow:hidden;background:#0f3b4c}
 .exp-card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.exp-card-text{grid-area:text;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,2.2vh,24px);padding:clamp(26px,4vw,64px);min-width:0}
+/* --fit (ExpeditionsView): 1 keeps the prototype's sizes; longer text steps down to 0.7 instead of being cut. */
+.exp-card-text{grid-area:text;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--fit,1)*clamp(12px,2.2vh,24px));padding:clamp(26px,4vw,64px);min-width:0;overflow:hidden}
+.exp-card-text[data-overflow=true]{overflow-y:auto;justify-content:flex-start}
 .exp-card-kicker{display:flex;align-items:baseline;gap:10px;font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#0f3b4c}
 .exp-card-kicker span{font-family:ui-monospace,monospace;letter-spacing:.1em;opacity:.6}
 .exp-card[data-theme=dark] .exp-card-kicker,.exp-card[data-theme=dark] .exp-card-cta{color:#8fd9ea}
-.exp-card h2{max-width:20ch;font-size:clamp(1.7rem,3.6vw,3.2rem)!important;line-height:1.06!important;color:#08222f}
+.exp-card h2{max-width:20ch;font-size:calc(var(--fit,1)*clamp(1.7rem,3.6vw,3.2rem))!important;line-height:1.06!important;color:#08222f}
 .exp-card[data-theme=dark] h2{color:#fff}
-.exp-card p{max-width:46ch;font-size:clamp(14px,1.1vw,17px)!important;line-height:1.75!important;color:rgba(14,42,56,.86)}
+.exp-card p{max-width:46ch;font-size:calc(var(--fit,1)*clamp(14px,1.1vw,17px))!important;line-height:1.75!important;color:rgba(14,42,56,.86)}
 .exp-card[data-theme=dark] p{color:rgba(234,245,250,.84)}
-.exp-card-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-width:46ch}
-.exp-card-list li{display:flex;gap:12px;align-items:baseline;font-size:clamp(14px,1.1vw,17px);line-height:1.6;color:inherit;opacity:.86;border-top:1px solid rgba(14,42,56,.14);padding-top:10px}
+.exp-card-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:calc(var(--fit,1)*10px);max-width:46ch}
+.exp-card-list li{display:flex;gap:12px;align-items:baseline;font-size:calc(var(--fit,1)*clamp(14px,1.1vw,17px));line-height:1.6;color:inherit;opacity:.86;border-top:1px solid rgba(14,42,56,.14);padding-top:calc(var(--fit,1)*10px)}
+.exp-card[data-theme=dark] .exp-card-list li{border-top-color:rgba(255,255,255,.14)}
 .exp-card-list li span,.activity-list-block li>span{font-family:ui-monospace,monospace;font-size:10px;opacity:.55}
 .exp-card-signature{font-family:var(--font-display),Georgia,serif;font-style:italic;font-size:clamp(14px,1.15vw,18px);opacity:.7}
 .exp-card-cta{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#0f3b4c}
@@ -42,15 +46,18 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 @media (max-width:1080px){.exp-card{width:86vw;margin-left:-43vw;top:max(13%,112px)}}
 @media (max-width:760px){
   .exp-card{width:92vw;margin-left:-46vw;top:max(12%,116px);bottom:4%;height:auto;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:34% minmax(0,1fr);grid-template-areas:'media' 'text'!important}
-  .exp-card-text{padding:clamp(18px,5vw,28px);gap:10px}
-  .exp-card h2{font-size:clamp(1.4rem,6vw,2rem)!important}
-  .exp-card p{font-size:14px!important;line-height:1.6!important}
+  .exp-card-text{padding:clamp(18px,5vw,28px);gap:calc(var(--fit,1)*10px)}
+  .exp-card h2{font-size:calc(var(--fit,1)*clamp(1.4rem,6vw,2rem))!important}
+  .exp-card p{font-size:calc(var(--fit,1)*14px)!important;line-height:1.6!important}
+  .exp-card-list li{font-size:calc(var(--fit,1)*14px)}
 }
 @media (prefers-reduced-motion:reduce){
   .exp-dissolve{height:auto!important}.exp-sticky{position:relative;height:auto;overflow:visible}
-  .exp-surface,.exp-panels,.exp-veil{position:absolute;height:100vh}.exp-copy{position:relative;height:100vh}
+  .exp-surface,.exp-under,.exp-panels,.exp-veil{position:absolute;height:100vh}.exp-copy{position:relative;height:100vh}
   .exp-cards{position:relative;display:flex;flex-direction:column;gap:40px;padding:0 16px 80px;pointer-events:auto}
   .exp-card{position:relative;top:auto;left:auto;margin:0 auto;width:min(100%,1120px);height:auto;min-height:60vh;opacity:1}
+  /* The cue stays at the foot of the first screen, not under the stacked cards. */
+  .exp-sticky>.scroll-cue{top:calc(100vh - clamp(22px,4vh,44px));bottom:auto;transform:translate(-50%,-100%)}
 }
 
 /* ── Lists of expeditions and workshops (no prototype of their own: Home "What already happened" cards on paper) ── */

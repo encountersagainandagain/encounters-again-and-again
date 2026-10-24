@@ -1,12 +1,12 @@
 'use client';
 import Link from 'next/link';
-import {useRef} from 'react';
+import {useEffect,useRef} from 'react';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {dateLabel,isFinished,pad,statusLabels,lines,type Activity} from '@/features/encounters/activities';
 import {Picture} from './MediaImage';
 import {pinProgress,ramp,useFrame} from './useFrame';
 import {DarkClosing} from './EditorialPieces';
-import {PostBlocks} from './PostBlocks';
+import {PostBlocks,blockLinks,headingText,images as blockImages,mediaId,paragraphs} from './PostBlocks';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {covers} from '@/features/encounters/covers';
 
@@ -20,11 +20,49 @@ export function cardWindows(n:number){
   const step=n>1?.49/(n-1):0,enter=(i:number)=>.42+i*step,full=(i:number)=>enter(i)+Math.min(.08,Math.max(.06,step*.6));
   return Array.from({length:n},(_,i)=>i===n-1?[enter(i),Math.min(.97,full(i)),1.4,1.5]:[enter(i),full(i),enter(i+1),full(i+1)]);
 }
+// Without presentation cards (Expeditions → Presentation cards), the program page's own text is told the way the
+// prototype tells it: one card per heading inside the pinned banner, with its paragraphs (short lines and • items as a
+// list), one of the page's photos (the banner photo last) and the support link as the dark closing card. Only when
+// every block fits a card (headings, paragraphs, images, links and imported link sources, read as PostBlocks reads
+// them); otherwise the text keeps its place after the banner.
+// Saved presentation cards always win. Card ids start with "page-": they are not editable as cards.
+export function cardsFromBlocks(blocks:ContentBlock[],coverId:unknown):Row[]|null{
+  if(!blocks.length||blocks.some(b=>!['heading','paragraph','image','link','source'].includes(b.type)))return null;
+  type Group={title:string;text:string[];images:string[];link?:{label:string;url:string}};const groups:Group[]=[];
+  for(const b of blocks){const c=b.content as Row;
+    if(b.type==='heading'){const title=headingText(b);if(title)groups.push({title,text:[],images:[]});continue;}
+    const g=groups.at(-1)??(groups.push({title:'',text:[],images:[]}),groups[groups.length-1]);
+    if(b.type==='paragraph')g.text.push(...paragraphs(c));
+    else if(b.type==='image')g.images.push(...blockImages(c).map(i=>String(mediaId(i))));
+    else{const l=blockLinks(c)[0];if(!l)continue;if(b.type==='link'&&string(c.text))g.text.push(string(c.text));g.link={label:string(l.label)||String(l.url),url:String(l.url)};}
+  }
+  // Text before the first heading belongs to the first card.
+  if(groups.length>1&&!groups[0].title){const [lead,next]=groups;next.text.unshift(...lead.text);next.images.unshift(...lead.images);next.link??=lead.link;groups.shift();}
+  if(!groups.length)return null;
+  const all=groups.flatMap(g=>g.images),used=new Set<string>();const cover=String(coverId||'');
+  const take=(list:string[])=>{const id=list.find(i=>!used.has(i)&&i!==cover);if(id)used.add(id);return id;};
+  const media=groups.map(g=>take(g.images));groups.forEach((_,i)=>{media[i]??=take(all);});
+  groups.forEach((_,i)=>{if(!media[i]&&cover&&all.includes(cover)&&!used.has(cover)){media[i]=cover;used.add(cover);}});
+  return groups.map((g,i)=>{
+    const lines=g.text.flatMap(t=>t.includes('•')?t.split('•').map(x=>x.trim()).filter(Boolean).map(x=>`• ${x}`):[t]);
+    const bulletOnly=lines.filter(l=>!l.startsWith('• '));const allShort=bulletOnly.length>=3&&bulletOnly.every(l=>l.length<=70&&!/[:]$/.test(l));
+    const bullets=allShort?lines.map(l=>l.replace(/^• /,'')):lines.filter(l=>l.startsWith('• ')).map(l=>l.slice(2));
+    const body=allShort?[]:bulletOnly;
+    return {id:`page-${i}`,title:g.title,body:body.join('\n\n'),bullets,media_id:media[i]||null,theme:g.link?'dark':'light',cta_label:g.link?.label||'',cta_url:g.link?.url||''};
+  });
+}
 // Pin length: 660vh with five cards, as in the prototype (220vh + 88vh per card).
 export const pinHeight=(n:number)=>n?220+88*n:240;
-export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:Row;settings:Row;cards:Row[];list:Activity[];media:Row[];blocks:ContentBlock[]}){
+export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{page?:Row;settings:Row;cards:Row[];list:Activity[];media:Row[];blocks:ContentBlock[]}){
   const section=useRef<HTMLElement>(null),sticky=useRef<HTMLDivElement>(null);
+  const surface=covers.expeditions(settings,page),underwaterId=settings.underwater_id;
+  const fromPage=saved.length?null:cardsFromBlocks(blocks,surface.id);const cards=saved.length?saved:fromPage||[];
   const windows=cardWindows(cards.length);
+  // Card text keeps the prototype's sizes when it fits; longer text steps down (to 70%) instead of being cut.
+  useEffect(()=>{const root=sticky.current;if(!root)return;
+    const fit=()=>root.querySelectorAll<HTMLElement>('.exp-card-text').forEach(el=>{let f=1;el.style.setProperty('--fit','1');while(el.scrollHeight>el.clientHeight+1&&f>.7){f=Math.round((f-.05)*100)/100;el.style.setProperty('--fit',String(f));}el.dataset.overflow=el.scrollHeight>el.clientHeight+1?'true':'';});
+    fit();void document.fonts?.ready.then(fit);addEventListener('resize',fit);return()=>removeEventListener('resize',fit);
+  },[cards.length]);
   useFrame(({reduced})=>{
     const root=sticky.current;if(!root)return;
     const t=reduced?(cards.length?.5:1):pinProgress(section.current,root);
@@ -32,6 +70,9 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
     const surface=root.querySelector<HTMLElement>('[data-surface]');if(surface){const k=ramp(t,0,.5);surface.style.transform=`scale(${1+k*.06})`;surface.style.filter=`saturate(${1-k*.2})`;}
     const copy=root.querySelector<HTMLElement>('[data-copy]');if(copy){const o=reduced?(cards.length?1:0):ramp(t,.06,.22,true);copy.style.opacity=String(1-o);copy.style.transform=`translate3d(0,${o*-46}px,0) scale(${1+o*.05})`;}
     const cue=root.querySelector<HTMLElement>('[data-cue]');if(cue)cue.style.opacity=String(1-ramp(t,0,.05));
+    // Under the strips, the same underwater photo whole, once every strip is open (t ≥ 0.44): it covers the hairlines
+    // that antialiasing leaves between strips.
+    const under=root.querySelector<HTMLElement>('[data-under]');if(under)under.style.opacity=t>=.44?'1':'0';
     const veil=root.querySelector<HTMLElement>('[data-veil]');if(veil)veil.style.opacity=String(1+ramp(t,.36,.5,true)*.55);
     root.querySelectorAll<HTMLElement>('[data-card]').forEach((card,i)=>{
       const [a,b,c,d]=windows[i];
@@ -41,22 +82,22 @@ export function ExpeditionsView({page,settings,cards,list,media,blocks}:{page?:R
       card.style.opacity=(p*(1-out)).toFixed(3);card.style.transform=`translate3d(0,${((1-p)*90-out*130).toFixed(1)}px,0) scale(${(.965+p*.035-out*.05).toFixed(4)})`;card.style.filter=blur<.05?'none':`blur(${blur.toFixed(2)}px)`;card.style.pointerEvents=p*(1-out)>.6?'auto':'none';
     });
   });
-  const surface=covers.expeditions(settings,page),underwaterId=settings.underwater_id;
   const upcoming=list.filter(a=>!isFinished(a)),finished=list.filter(isFinished);
   return <>
     <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
       <div ref={sticky} className="exp-sticky">
         <div className="exp-surface hero-image"><div data-surface className="exp-fill"><Picture id={surface.id} media={media} fallback={surface.fallback} priority/></div></div>
+        <div data-under className="exp-under" aria-hidden="true"><Picture id={underwaterId} media={media} fallback="/design/reef-turtle-web.jpg"/></div>
         <div className="exp-panels" aria-hidden="true">{[0,1,2,3,4,5].map(i=><div key={i} data-panel={i} style={{clipPath:i%2===0?'inset(100% 0 0 0)':'inset(0 0 100% 0)'}}><div className="exp-strip" style={{left:`${-i*100}%`}}><Picture id={underwaterId} media={media} fallback="/design/reef-turtle-web.jpg"/></div></div>)}</div>
         <div data-veil className="exp-veil"/>
-        <div data-copy className="exp-copy"><p>{string(settings.kicker)||string(page?.kicker)||'following our nature'}</p><h1>{string(page?.title)||'Expeditions'}</h1></div>
+        <div data-copy className="exp-copy"><p>{string(settings.kicker)||string(page?.kicker)||'following our nature'}</p><h1>{string(settings.title)||'Expeditions'}</h1></div>
         <a data-cue href="#expeditions-content" className="scroll-cue">Scroll <span aria-hidden="true"/></a>
         {!!cards.length&&<div className="exp-cards">{cards.map((card,i)=>{const side=string(card.media_side)||(i%2===0?'left':'right');const items=lines(card.bullets);const href=safeHref(card.cta_url);
           return <article key={string(card.id)} data-card data-card-id={string(card.id)} data-side={side} data-theme={card.theme==='dark'?'dark':'light'} className="exp-card">
             <div className="exp-card-media"><Picture id={card.media_id} media={media}/></div>
             <div className="exp-card-text"><span className="exp-card-kicker"><span>{pad(i+1)}</span>{string(card.kicker)}</span><h2>{string(card.title)}</h2>
-              {items.length?<ol className="exp-card-list">{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>:string(card.body)&&<p>{string(card.body)}</p>}
-              {items.length&&string(card.body)?<p>{string(card.body)}</p>:null}
+              {string(card.body).split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean).map((t,n)=><p key={n}>{t}</p>)}
+              {items.length?<ol className="exp-card-list">{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>:null}
               {string(card.signature)&&<span className="exp-card-signature">{string(card.signature)}</span>}
               {href&&string(card.cta_label)&&<a className="exp-card-cta" href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(card.cta_label)} →</a>}
             </div>
