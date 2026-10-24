@@ -105,6 +105,12 @@ Detalle de cada ronda y de sus mediciones: [entornos.md](entornos.md) (sección 
   - **Diseño:** variantes WebP con hash en el nombre (`node scripts/image-variants.mjs`), cacheadas un año.
 - **Páginas públicas:** ISR de 5 minutos, invalidado al instante desde el admin. Tabla completa de capas y tiempos en [entornos.md](entornos.md#caché-y-cuánto-puede-seguir-visible-algo-despublicado).
 
+### Portadas de las páginas (2026-10-24)
+- Una definición por página principal ([covers.ts](../../src/features/encounters/covers.ts)) que comparten la vista y el navbar.
+- Portadas con `fetchPriority="high"`.
+- La portada de la página siguiente se precarga por intención (puntero, foco o toque) con el `srcset` y `sizes` exactos de su `<img>`, a partir de una lista pequeña ([/api/covers](../../app/api/covers/route.ts)).
+- **Principio:** el prefetch de una ruta no descarga sus imágenes. Precargar solo lo que el visitante está por abrir, con la misma URL que va a pedir la página, y nunca todas.
+
 ### Fuentes
 - EB Garamond (normal e itálica) y Archivo, locales con `next/font/local` ([layout.tsx](../../app/layout.tsx)), con `display: swap` y respaldo métrico.
 - **WOFF2 de 173 KB en total** ([subset-fonts.mjs](../../scripts/subset-fonts.mjs)):

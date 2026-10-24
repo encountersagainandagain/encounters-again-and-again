@@ -316,3 +316,89 @@ Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un
 - Supabase local se detuvo conservando los datos (`supabase stop`) y después se detuvo Colima. `cms:local:stop` hacía `--no-backup`, que borra los volúmenes; quedó corregido (ver «CMS local: detener o reiniciar los datos»).
 
 **Siguen pendientes:** red lenta (scripts con prioridad baja, sin tocar cómo Next los emite); Safari e iPhone sin probar; el salto del título del descenso entre 363 y 371 px; Android sin validar (sus fuentes de respaldo reales); la revisión manual de Juani de la primera entrada al agua.
+
+
+## Navbar, portadas y Expeditions (2026-10-24)
+
+### Navbar (`83519e5`)
+- **Orden:** Expeditions · Workshops · Messages | marca | Art · About us · The crew · Contact. Las etiquetas que rotan no cambiaron.
+- El grupo derecho se llama ahora «Art and collective» para lectores de pantalla.
+- El mismo orden rige en la vista apilada de teléfono y tablet (es el mismo navbar reacomodado por CSS, no hay un menú aparte) y en la cabecera heredada (`publicNavigation`).
+- **Verificado** (`navcheck.mjs`, 14 anchos entre 320 y 1920 px, en local y en producción):
+  - cada grupo en una sola línea, sin solaparse con la marca ni desbordar;
+  - estado activo y foco en el orden visual;
+  - áreas táctiles de 24–26 px, como antes;
+  - la marca sigue corrida −4 px en escritorio, igual que antes del cambio.
+
+### Portadas que aparecían tarde (`5b2fd70`)
+**Qué pasaba** (medido en producción con `bannerprobe.mjs`, 1440×860):
+- **Prioridad:** las portadas tenían `priority` (precarga y carga inmediata), pero se pedían con **prioridad baja**. La precarga de Next no lleva `fetchPriority`, así que competían como imágenes comunes contra las fuentes.
+- **Navegación desde el navbar:** el prefetch de la ruta trae los datos de la página, **no su portada**. El `<img>` recién se crea al renderizar la página nueva (a 50–90 ms del clic; en Expeditions, a ~600 ms). La portada terminaba de pintarse entre 244 y 802 ms después del clic, y mientras tanto ya se veía el texto. Con la portada en caché: 50–105 ms.
+- **Entrada directa:** la precarga está arriba de todo en el `<head>` y se descubre apenas llega el HTML. Ahí la demora era la propia respuesta del documento y la prioridad baja.
+- **Tamaños:** se pide lo que se dibuja (`sizes` medidos). La excepción es la foto de portada actual de Expeditions: su original mide 963 px y se dibuja a ~1440 px.
+- **Pesos:** Crew 374 KB, Contact 220 KB, Expeditions 147 KB, About 93 KB, Messages 34 KB, Workshops 17 KB.
+- **Caché:** `/api/media` se cachea 10 minutos en la CDN y las imágenes de diseño, un día. Ninguna portada depende de la hidratación: se renderizan en el servidor.
+- Antes de que llegue la imagen, todas las portadas muestran el fondo oscuro #061826, coherente con el texto blanco. No hay saltos, porque el espacio está reservado.
+
+**Estrategia compartida:**
+- **Una sola definición de la portada** de cada página principal ([covers.ts](../../src/features/encounters/covers.ts)), que leen las vistas y el navbar.
+- **Prioridad alta:** `fetchPriority="high"` en las portadas (`MediaImage`, `Picture` y `PhotoHero` con `priority`).
+- **[`/api/covers`](../../app/api/covers/route.ts):** la portada de cada página principal (`{src, sizes}`), solo de contenido publicado, con la misma caché que las páginas y expirada por cada guardado del admin. Art no tiene foto de portada.
+- **Precarga por intención** ([SiteChrome.tsx](../../src/components/public/SiteChrome.tsx)):
+  - la lista se pide una vez, en un momento ocioso después de cargar la página;
+  - cuando se apunta, enfoca o toca un enlace a una página principal, se precarga **solo esa portada**, con el mismo `srcset` y `sizes` que va a usar su `<img>` (`getImageProps`);
+  - prioridad alta solo si la página actual ya terminó de cargar.
+- **No se hace:** precargar todas las portadas, una pantalla de carga global, ni esperar imágenes para navegar. Las previews y los borradores no pasan por esta lista.
+
+**Verificado:**
+- **`covercheck.mjs`** (local y producción, 1440 y 390 px):
+  - en la entrada directa, la portada se pide con prioridad alta;
+  - con puntero (1440) o toque (390), la portada de la página siguiente se pide **una sola vez**, 56–90 ms después de la intención, y el `<img>` reutiliza esa descarga.
+- **`bannerab.mjs`** (producción, red fija de 1,5 Mbps y 40 ms, CDN precalentada, mediana de 2): tiempo desde el clic hasta la portada pintada, A = clic sin precarga, B = puntero 250 ms sobre el enlace y clic.
+  - Expeditions 3754 → 1878 ms; Workshops 312 → 68; Messages 894 → 192; About 2946 → 520; Crew 6886 → 2500.
+  - **Contact no mejoró** en esta medición (3542 → 5131 ms), con mucha dispersión entre corridas.
+- Con la red real de esa sesión (carga 2–5 y CDN fría después del deploy), las mediciones sin limitar no fueron comparables con las de antes.
+
+**Pendiente:**
+- Las portadas de Crew (374 KB) y Contact (220 KB) son pesadas para red lenta.
+- La foto de portada de Expeditions tiene poca resolución para escritorio (963 px de ancho).
+- Contact: revisar por qué no mejoró con la precarga.
+
+### Expeditions (`c4fa061`, `a9c623d`, `5c9d41a`) — pendiente de aprobación visual de Juani
+**Comparación con el prototipo** (`expcompare.mjs`, mismo viewport y puntos del pin t = 0…1, 1440×900 y 390×844):
+- **Mismo contenido:** se armó una referencia local, `/review/expeditions` (solo en localhost; da 404 en Vercel), con los textos, imágenes y 5 tarjetas de `Expeditions.dc.html` sobre la plantilla real.
+  - Coincide con el prototipo: pin de 660vh, título de 144 / 54,6 px en la misma posición, y tarjetas con el mismo tamaño, posición, opacidad y tipografía en cada punto del recorrido. La única diferencia es un borde corrido 4 px en escritorio.
+  - La plantilla no se había alejado.
+- **Datos reales:** lo que se alejaba era cómo se presentaban.
+  - **Sin tarjetas.** La página no tiene «Presentation cards» cargadas: el pin duraba 240vh, la disolución terminaba en un fondo vacío y el texto importado del sitio anterior aparecía después, como un post.
+  - **Título distinto.** El banner tomaba el título de la página importada, «Encounters Expeditions», en dos líneas, en lugar de «Expeditions».
+  - **Líneas entre franjas.** Quedaba una línea fina de antialiasing entre las franjas de la disolución.
+
+**Restaurado:**
+- **Tarjetas desde el texto de la página.** Si no hay tarjetas de presentación, el texto de la página del programa se cuenta como en el prototipo: una tarjeta por título dentro del banner fijo.
+  - Cada tarjeta lleva sus párrafos (las líneas cortas y los ítems con • van como lista), una foto de la página y el enlace de apoyo como tarjeta oscura de cierre.
+  - Hoy son 4 tarjetas: Meet Coquitlam, To conserve our seas, Join the expedition y The ocean is vast…; pin de 572vh.
+  - Solo ocurre si todos los bloques entran en una tarjeta (títulos, párrafos, imágenes y enlaces, leídos igual que `PostBlocks`). Si no, el texto queda después del banner, como antes.
+  - Las tarjetas guardadas en el CMS tienen siempre prioridad. Las generadas se identifican con ids `page-…` y no se editan como tarjetas: se edita el texto en Site → Imported pages.
+- **Título** con el campo nuevo `title` de la página de Expeditions (Default: Expeditions), como dice `14-expeditions.md`. El título importado no se borra.
+- **Texto que no entra:** se ajusta (`--fit`, hasta 70 %) en lugar de cortarse. Si aun así desborda, la tarjeta permite desplazar su texto, sin barra visible.
+- **Franjas:** debajo, la misma foto submarina entera, visible cuando todas las franjas ya se abrieron (t ≥ 0,44). Las uniones caen sobre píxeles idénticos.
+- **Reduced motion:** las tarjetas se ven apiladas y legibles, y la flecha «Scroll» queda al pie de la primera pantalla (antes quedaba tapada por las tarjetas).
+- **Preview:** la del admin recibe ahora los mismos bloques que la página pública. Comprobado en el CMS local: mismo título, mismas tarjetas y mismo pin que la página pública, y el campo «Title» aparece en el editor.
+- **No se agregó Lenis** a Expeditions, porque el prototipo no lo usa. Se conservan sus tiempos propios: ventanas del § 9 y pin de 220 + 88·n vh.
+- **Se conservan,** aunque no están en el prototipo, y quedan identificadas: la lista «On the water» de expediciones (próximas, en curso y terminadas, con su enlace a la expedición o a su resultado) y el cierre.
+
+**Verificado en producción** (`cardfit.mjs`, `expfunc.mjs`, `hist.mjs`):
+- **Ajuste del texto en 8 tamaños:**
+  - Meet Coquitlam, Join y The ocean entran a 90–100 %;
+  - To conserve our seas (11 líneas) baja al 70–95 %, y en 360×740 desplaza su texto.
+- **Funciones** (1440 y 390 px, con y sin reduced motion), 0 errores de consola:
+  - la tarjeta de apoyo abre GoFundMe en otra pestaña;
+  - las tarjetas de la lista llevan a su expedición;
+  - el ancla `#expeditions-content`, Atrás/Adelante (la posición se conserva) y la vuelta a la Home (con Lenis si corresponde) funcionan.
+- **Home intacta:** historial, anclas y Lenis dan ALL OK.
+
+**Contenido para revisar en el CMS** (no se modificó):
+- «To conserve our seas» repite tres líneas (Photo-identification…, Passive acoustic…, Marine research collaborations), duplicadas en la importación.
+- «Australia.She» no tiene espacio.
+- La foto de portada tiene 963 px de ancho.
