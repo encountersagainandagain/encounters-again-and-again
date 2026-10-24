@@ -22,8 +22,8 @@ export const routes = {
 export const publicNavigation = [
   { label: 'Expeditions', href: routes.expeditions },
   { label: 'Workshops', href: routes.workshops },
-  { label: 'Art', href: routes.art },
   { label: 'Meaningful Messages', href: routes.messages },
+  { label: 'Art', href: routes.art },
   { label: 'About us', href: routes.about },
   { label: 'The crew', href: routes.crew },
   { label: 'Contact', href: routes.contact },
