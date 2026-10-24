@@ -53,31 +53,41 @@ export function SiteChrome({children,settings,localReview=false}:{children:React
     };
     document.addEventListener('click',click);return()=>document.removeEventListener('click',click);
   },[]);
-  // Banner of the next page. A route prefetch brings the page's data, not its banner: the image used to be requested
-  // only once the new page rendered, so its text showed first. When a visitor points at, focuses or touches a link to
-  // a top-level page, that page's banner is preloaded with the srcset and sizes its <img> will use (same file, from
-  // the cache), one page at a time and never all of them. The list (/api/covers) is fetched once, after the current
-  // page has loaded; the preload only goes high priority once the current page is complete.
+  // Banner of the next page. A route prefetch brings the page's data, not its banner, and a banner requested only once
+  // the new page renders arrives after its text. The page asks for a variant chosen by srcset and sizes: the same pair
+  // is given to a detached image here, so the browser downloads and decodes the very file the page will use (memory
+  // cache), and the cover gate (cover-gate.ts) finds it complete. Two moments:
+  //   - anticipation, on the Home only: once the Home has loaded and the browser is idle, the banners of the three
+  //     projects it presents (Expeditions first, then Workshops, then Messages), one after the other, low priority,
+  //     not with Save-Data or on 2G;
+  //   - intention, anywhere: pointing at, focusing or touching a link to a top-level page fetches that banner, high
+  //     priority once the current page is complete.
+  // Never all banners at once. The list (/api/covers, published content only) is fetched once, after the load.
   useEffect(()=>{
     if(path.startsWith('/admin'))return;
-    let list:Record<string,{src:string;sizes:string}>|null=null,pending:Promise<void>|null=null;const done=new Set<string>();
+    let list:Record<string,{src:string;sizes:string}>|null=null,pending:Promise<void>|null=null,live=true;const done=new Map<string,Promise<void>>();
     const load=()=>pending??=fetch('/api/covers').then(r=>r.ok?r.json():{}).then(m=>{list=m;},()=>{list={};});
-    const idle=()=>{if('requestIdleCallback' in window)requestIdleCallback(()=>void load(),{timeout:3000});else setTimeout(()=>void load(),1500);};
-    if(document.readyState==='complete')idle();else addEventListener('load',idle,{once:true});
-    const preload=(target:string)=>{
-      const cover=list?.[target];if(!cover||done.has(target))return;done.add(target);
+    const warm=(target:string,priority:'high'|'low')=>{
+      const cover=list?.[target];if(!cover)return Promise.resolve();const known=done.get(target);if(known)return known;
       const {props}=getImageProps({src:cover.src,alt:'',fill:true,sizes:cover.sizes});
-      const link=document.createElement('link');link.rel='preload';link.as='image';
-      if(props.srcSet){link.imageSrcset=props.srcSet;link.imageSizes=props.sizes||'';}else link.href=String(props.src);
-      link.fetchPriority=document.readyState==='complete'?'high':'low';document.head.append(link);
+      const img=new window.Image();img.fetchPriority=priority;img.decoding='async';if(props.sizes)img.sizes=props.sizes;if(props.srcSet)img.srcset=props.srcSet;img.src=String(props.src);
+      const ready=img.decode().catch(()=>{});done.set(target,ready);return ready;
     };
+    const anticipate=async()=>{
+      const connection=(navigator as Navigator&{connection?:{saveData?:boolean;effectiveType?:string}}).connection;
+      if(location.pathname!=='/'||connection?.saveData||/(^|-)2g$/.test(connection?.effectiveType||''))return;
+      for(const target of ['/expeditions','/workshops','/meaningful-messages']){if(!live||location.pathname!=='/')return;await warm(target,'low');}
+    };
+    const idle=()=>{const run=()=>void load().then(anticipate);if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:3000});else setTimeout(run,1500);};
+    if(document.readyState==='complete')idle();else addEventListener('load',idle,{once:true});
     const intent=(event:Event)=>{
       const link=(event.target as Element|null)?.closest?.('a[href]');if(!(link instanceof HTMLAnchorElement))return;
       const url=new URL(link.href);if(url.origin!==location.origin||url.pathname===location.pathname)return;
-      if(list)preload(url.pathname);else void load().then(()=>preload(url.pathname));
+      const priority=document.readyState==='complete'?'high':'low';
+      if(list)void warm(url.pathname,priority);else void load().then(()=>warm(url.pathname,priority));
     };
     document.addEventListener('pointerover',intent,{passive:true});document.addEventListener('focusin',intent);document.addEventListener('touchstart',intent,{passive:true});
-    return()=>{removeEventListener('load',idle);document.removeEventListener('pointerover',intent);document.removeEventListener('focusin',intent);document.removeEventListener('touchstart',intent);};
+    return()=>{live=false;removeEventListener('load',idle);document.removeEventListener('pointerover',intent);document.removeEventListener('focusin',intent);document.removeEventListener('touchstart',intent);};
   },[path]);
   const navLink=(href:string,label:string,alternate?:string)=><Link href={pathname.startsWith('/review/')&&(href==='/art')?'/review/art':href} aria-label={alternate?`${label} ${alternate}`:undefined} aria-current={path===href||path.startsWith(href+'/')?'page':undefined}>{alternate?<span className="nav-roll-window" aria-hidden="true"><span className="nav-roll"><span>{label}</span>{' '}<span>{alternate}</span></span></span>:label}</Link>;
   if(path.startsWith('/admin'))return <>{children}</>;
