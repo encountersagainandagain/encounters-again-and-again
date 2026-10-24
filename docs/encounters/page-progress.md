@@ -32,6 +32,7 @@ Orden: The Crew → Perfil de Crew → Art, categoría y obra → Expeditions, d
   - No hay loops acumulados al navegar.
   - Corrección: las tarjetas entran en foco con una copia de la foto desenfocada de antemano que se desvanece, sin filtro por cuadro.
   - **Medido en Modo de bajo consumo y a batería**, con mucha variación entre repeticiones: repetir con cargador y modo normal antes de cerrar. Sin probar: móvil real, Safari e iPhone.
+  - **Cálculo de scroll A/B/C (`7839aeb`, 2026-10-23):** la primera batería se cortó con la Mac saturada (carga ~273, bajo consumo). Sus datos quedan solo como diagnóstico en `.encounters-work/bench-scroll-2026-10-23/results-diagnostico-saturado/`. La segunda ronda corta, con carga 2–3,6 y modo normal (a batería), no reprodujo los cuadros perdidos de Lenis: **A, B y C sin pausas ni cuadros perdidos** en Proyectos → Agenda. Lenis suma ~175 ms de retraso y ~1 s de deslizamiento después del gesto. Recomendación: **B queda como default**. A y C (`?calc=a`, `?scroll=lenis`) se mantienen hasta la revisión manual de Juani. Detalle en [entornos.md](entornos.md#cálculo-de-scroll-abc-ronda-2-2026-10-23).
 - **Aprobación visual — pendiente de Juani (A/B):**
   - entrada de las tarjetas de Proyectos: `/` (nueva: foto desenfocada que se desvanece; título y texto nítidos) frente a `/?cards=a` (anterior: tarjeta entera desenfocada);
   - capas de desenfoque precalculadas del fondo al bajar;

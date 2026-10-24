@@ -124,3 +124,39 @@ Lo que un visitante ya descargó queda en su dispositivo: no existe retirada inm
 
 ### Fluidez (trazas de Chrome)
 Las pausas de 100–145 ms al entrar al agua eran el hilo principal esperando al compositor: la GPU recalculaba en cada cuadro los dos desenfoques CSS a pantalla completa del fondo (y el del navbar) bajo el shader del agua, que redibuja toda la pantalla. El desenfoque del fondo ahora está precalculado. Pendiente de confirmación visual de Juani: que las capas desenfocadas se vean igual que antes.
+
+#### Cálculo de scroll A/B/C, ronda 2 (2026-10-23)
+Variantes de `7839aeb` (producción, verificado en el bundle):
+- **A** = `?calc=a`: cálculo anterior.
+- **B** = default: progreso sin la transformación del propio elemento y desfase independiente de los fps.
+- **C** = `?scroll=lenis`: Lenis sobre el mismo reloj.
+
+Condiciones:
+- Apple M2, Chrome 155, GPU real (Metal), ventana 1440×751 a 2×, pantalla de 60 Hz.
+- Modo normal pero **a batería**, carga 2–3,6. Un solo navegador de prueba, cerrado al terminar.
+- Tramo: desde que asoman los Proyectos hasta que entra la Agenda (~3950 px).
+- 3 repeticiones, con el orden de variantes y escenarios rotado. Script: `.encounters-work/bench-scroll-2026-10-23/bench3.mjs`.
+
+El tramo **activo** (primer → último evento de rueda) se mide aparte del **frenado** (último evento → página quieta). 27/27 corridas válidas: el recorrido real quedó a menos del 2 % del pedido.
+
+| Escenario | Var. | Recorrido | Activo | Cuadros perdidos | Pausas >50 ms | Mayor hueco | 1.er movimiento | Retraso | Frenado |
+|---|---|---|---|---|---|---|---|---|---|
+| Continuo 800 px/s | A | 3942 px | 4,93 s | 0/886 | 0 | 33 ms | 18 ms | 16 ms | — |
+| | B | 3942 px | 4,93 s | 0/886 | 0 | 33 ms | 17 ms | 16 ms | — |
+| | C | 3955 px | 4,95 s | 0/889 (frenado 0/165) | 0 | 33 ms | 19 ms | 176 ms | 0,92 s |
+| Rápido 4000 px/s | A | 3923 px | 0,98 s | 0/176 | 0 | 33 ms | 14 ms | 8 ms | — |
+| | B | 3892 px | 0,98 s | 0/176 | 0 | 33 ms | 19 ms | 16 ms | — |
+| | C | 3952 px | 1,00 s | 0/180 (frenado 0/213) | 0 | 33 ms | 19 ms | 170 ms | 1,18 s |
+| Rueda por pasos (40 × 100 px) | A | 3900 px | 3,27 s | 0/588 | 0 | 17 ms | 86 ms | 0 | — |
+| | B | 3900 px | 3,27 s | 0/587 | 0 | 17 ms | 86 ms | 0 | — |
+| | C | 3990 px | 3,92 s | 0/704 (frenado 0/180) | 0 | 33 ms | 19 ms | 179 ms | 1,00 s |
+
+Valores: mediana por corrida y cuadros sumados de las 3. Un hueco de 33 ms es un solo cuadro repetido aislado, no una pausa visible.
+
+- **A y B no se distinguen** en esta máquina. B queda como default: su desfase no depende de los fps, lo que importa en pantallas de 120 Hz o en equipos lentos (no medido aquí).
+- **C** mueve los cuadros igual de fluido, pero la página va ~175 ms detrás de la rueda y sigue deslizándose ~1 s después del gesto. Es una decisión de sensación, no de rendimiento.
+- Con la rueda por pasos, Chrome tarda 86 ms en el primer movimiento de A y B. Es su animación nativa de rueda, no un costo de la página.
+- El tramo activo de C dura ~0,65 s más con la rueda por pasos: el listener de rueda no pasivo de Lenis hace que cada evento espere al hilo principal (~16 ms por evento en este banco).
+- El 19,8 % de cuadros perdidos de C en la batería saturada no se reprodujo: era la saturación.
+- Límites: entrada sintética de Chrome, no inercia real de trackpad; batería, no cargador; sin móvil, Safari ni iPhone.
+- **Referencia White Desert:** sin datos. La corrida se colgó en el calentamiento del banco: esperaba sin límite `decode()` de 23 imágenes `loading="lazy"` que nunca cargan. La espera ahora tiene un límite de 3 s, pero no se volvió a correr, pendiente de aprobación. Sus escenas son de distinta complejidad: sirve como referencia de sensación, no como comparación de rendimiento.
