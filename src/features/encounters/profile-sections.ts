@@ -103,14 +103,31 @@ export const composeProfile=(blocks:Block[])=>composeSections(hasSections(blocks
 // Consecutive dark galleries share one dark section: the first title is large, the next ones are small.
 export const profileKinds=[
   {layout:'profile-title',type:'heading',label:'Large title',hint:'A big title with a hand-drawn line, e.g. “meet georgia”.'},
-  {layout:'profile-intro',type:'paragraph',label:'Opening text',hint:'Paragraphs; the first one is larger. A small line above it (empty: the alias).'},
+  {layout:'profile-intro',type:'paragraph',label:'Opening text',hint:'Paragraphs, each with its own style, and a small line above them (empty: the alias).'},
   {layout:'profile-pair',type:'image-pair',label:'Pinned photo pair',hint:'One or two photos side by side that stay while the page scrolls.'},
   {layout:'profile-row',type:'image',label:'Photo row',hint:'Photos in a row, each with an optional caption.'},
-  {layout:'profile-chapter',type:'paragraph',label:'Chapter',hint:'A title and subtitles, its text, links and a row of photos.'},
+  {layout:'profile-chapter',type:'paragraph',label:'Chapter',hint:'A title and subtitles, its paragraphs (each with its own style), links and a row of photos.'},
   {layout:'profile-gallery',type:'image',label:'Dark gallery',hint:'A title and photos on a dark background. The next dark galleries continue it with a smaller title.'},
 ] as const;
 export type ProfileLayout=typeof profileKinds[number]['layout'];
 export const profileLayout=(b:{content:Row}):ProfileLayout|null=>profileKinds.some(k=>k.layout===b.content.layout)?b.content.layout as ProfileLayout:null;
+// Paragraphs of an opening text or a chapter, each with its style. Blocks saved before kept one text and styled it by
+// position (opening: the first paragraph large; chapter: the first one highlighted when there are more); they are read
+// with those same styles, so they look the same until edited.
+export const paragraphStyles=[
+  {style:'lead',label:'Large',hint:'Larger serif, as an opening sentence.'},
+  {style:'voice',label:'Highlighted',hint:'Serif in italics, a little larger than normal text.'},
+  {style:'body',label:'Normal',hint:'Body text.'},
+] as const;
+export type ParagraphStyle=typeof paragraphStyles[number]['style'];
+export type Paragraph={text:string;style:ParagraphStyle};
+const isStyle=(v:unknown):v is ParagraphStyle=>paragraphStyles.some(p=>p.style===v);
+export function profileParagraphs(c:Row):Paragraph[]{
+  if(Array.isArray(c.paragraphs))return (c.paragraphs as Row[]).map(p=>({text:str(p.text),style:isStyle(p.style)?p.style:'body'}));
+  const texts=str(c.text).split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean);
+  const first:ParagraphStyle=c.layout==='profile-intro'?'lead':texts.length>1?'voice':'body';
+  return texts.map((text,i)=>({text,style:i===0?first:'body'}));
+}
 export const hasProfileBlocks=(blocks:{content:Row}[])=>blocks.some(b=>profileLayout(b)!==null);
 const image=(p:Picture)=>({media_id:p.id,caption:p.caption||undefined,src:p.id?`/api/media/${String(p.id)}`:undefined});
 const strip=(b:Block)=>{const content={...b.content};delete content.section;delete content.in_pair;return {...b,content};};

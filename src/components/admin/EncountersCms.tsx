@@ -12,7 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
-import {hasProfileBlocks,profileKinds,profileLayout,toProfileBlocks} from '@/features/encounters/profile-sections';
+import {hasProfileBlocks,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
 import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 import {meetLine} from '@/features/encounters/presentation';
 type Row=Record<string,unknown>;
@@ -101,6 +101,34 @@ function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index
     {list.length<max&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>save([...list,{media_id:null,caption:''}])}><Plus aria-hidden="true"/>Add image</button>}</div>;
 }
 // Fields of a profile block (profile-sections.ts): each one holds everything it shows.
+// Paragraphs of an opening text or a chapter, each with its style; **bold** and *italic* mark words inside them.
+function ParagraphsField({content,index,onChange}:{content:Row;index:number;onChange:(content:Row)=>void}){
+  const list=profileParagraphs(content);
+  const set=(next:Paragraph[])=>onChange({...content,paragraphs:next,text:next.map(p=>p.text.trim()).filter(Boolean).join('\n\n')});
+  const edit=(n:number,p:Partial<Paragraph>)=>set(list.map((x,k)=>k===n?{...x,...p}:x));
+  const move=(n:number,step:number)=>{const next=[...list];[next[n+step],next[n]]=[next[n],next[n+step]];set(next);};
+  // Wraps the selected words (or a placeholder) in the mark and keeps them selected.
+  const mark=(n:number,m:string)=>{const el=document.getElementById(`block-${index}-paragraph-${n}`) as HTMLTextAreaElement|null;if(!el)return;
+    const {selectionStart:a,selectionEnd:b,value}=el;const words=value.slice(a,b)||'text';edit(n,{text:value.slice(0,a)+m+words+m+value.slice(b)});
+    requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
+  return <fieldset className="adm-group"><legend>Paragraphs</legend>
+    <p className="adm-help">Each paragraph is shown with its style. Select words and use <b>B</b> or <i>I</i> to make them bold or italic.</p>
+    {list.map((p,n)=><div key={n} className="adm-paragraph">
+      <div className="adm-paragraph-head">
+        <label className="adm-field">Paragraph {n+1} · style<select aria-label={`Block ${index+1} paragraph ${n+1} style`} value={p.style} onChange={e=>edit(n,{style:e.target.value as Paragraph['style']})}>{paragraphStyles.map(s=><option key={s.style} value={s.style}>{s.label}</option>)}</select></label>
+        <div className="adm-block-tools">
+          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark(n,'**')} aria-label={`Bold in paragraph ${n+1}`}><b>B</b></button>
+          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark(n,'*')} aria-label={`Italic in paragraph ${n+1}`}><i>I</i></button>
+          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===0} onClick={()=>move(n,-1)} aria-label={`Move paragraph ${n+1} up`}><ArrowUp aria-hidden="true"/></button>
+          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===list.length-1} onClick={()=>move(n,1)} aria-label={`Move paragraph ${n+1} down`}><ArrowDown aria-hidden="true"/></button>
+          <button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>set(list.filter((_,k)=>k!==n))} aria-label={`Remove paragraph ${n+1}`}><Trash2 aria-hidden="true"/></button>
+        </div></div>
+      <textarea id={`block-${index}-paragraph-${n}`} aria-label={`Block ${index+1} paragraph ${n+1}`} rows={p.style==='body'?3:2} value={p.text} onChange={e=>edit(n,{text:e.target.value})}/>
+      <small className="adm-help">{paragraphStyles.find(s=>s.style===p.style)?.hint}</small>
+    </div>)}
+    <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set([...list,{text:'',style:'body'}])}><Plus aria-hidden="true"/>Add paragraph</button></div>
+  </fieldset>;
+}
 function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
   const c=block.content;const layout=profileLayout(block);const kind=profileKinds.find(k=>k.layout===layout);const set=(content:Row)=>onChange({...block,content} as never);
   const text=(key:string,label:string,rows=2,hint?:string,placeholder?:string)=><label className="adm-field adm-field--wide">{label}<textarea aria-label={`Block ${index+1} ${label}`} rows={rows} placeholder={placeholder} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value})}/>{hint&&<small>{hint}</small>}</label>;
@@ -108,8 +136,9 @@ function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;con
   return <div className="adm-stack" style={{gap:10}}>
     {kind&&<p className="adm-help">{kind.hint}</p>}
     {layout==='profile-title'&&<div className="adm-fields">{text('text','Title',2)}</div>}
-    {layout==='profile-intro'&&<div className="adm-fields"><label className="adm-field">Small line<input value={String(c.kicker||'')} placeholder="Empty: the alias" onChange={e=>set({...c,kicker:e.target.value})}/></label>{text('text','Text',6,'Leave an empty line between paragraphs. The first one is larger.')}</div>}
-    {layout==='profile-chapter'&&<div className="adm-fields">{text('title','Title',2)}<label className="adm-field adm-field--wide">Subtitles<textarea rows={2} value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={e=>set({...c,subtitles:e.target.value.split('\n')})}/><small>Optional. One per line, shown under the title.</small></label>{text('text','Text',6,'Leave an empty line between paragraphs.')}</div>}
+    {layout==='profile-intro'&&<div className="adm-fields"><label className="adm-field">Small line<input value={String(c.kicker||'')} placeholder="Empty: the alias" onChange={e=>set({...c,kicker:e.target.value})}/></label></div>}
+    {(layout==='profile-intro'||layout==='profile-chapter')&&<ParagraphsField content={c} index={index} onChange={set}/>}
+    {layout==='profile-chapter'&&<div className="adm-fields">{text('title','Title',2)}<label className="adm-field adm-field--wide">Subtitles<textarea rows={2} value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={e=>set({...c,subtitles:e.target.value.split('\n')})}/><small>Optional. One per line, shown under the title.</small></label></div>}
     {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Links</legend>{links.map((l,n)=><div key={n} className="adm-fields"><label className="adm-field">Link text<input value={String(l.label||'')} onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,label:e.target.value}:x)})}/></label><label className="adm-field">Link<input value={String(l.url||'')} placeholder="https://… or /art" onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,url:e.target.value}:x)})}/></label><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>set({...c,links:links.filter((_,k)=>k!==n)})}>Remove link</button></div>)}<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set({...c,links:[...links,{label:'',url:''}]})}><Plus aria-hidden="true"/>Add link</button></fieldset>}
     {layout==='profile-gallery'&&<div className="adm-fields">{text('title','Title',2,'The first dark gallery shows it large; the next ones in a row, small.')}</div>}
     {(layout==='profile-pair'||layout==='profile-row'||layout==='profile-chapter'||layout==='profile-gallery')&&<BlockImages block={block} index={index} max={layout==='profile-pair'?2:12} media={media} onChange={content=>set({...content,layout})}/>}
