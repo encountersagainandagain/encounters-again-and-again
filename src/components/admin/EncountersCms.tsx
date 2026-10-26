@@ -14,6 +14,7 @@ import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
 import {hasSections,profileSections,toSections} from '@/features/encounters/profile-sections';
 import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
+import {meetLine} from '@/features/encounters/presentation';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
 const tables=['posts',...Object.keys(entities)];
@@ -29,6 +30,18 @@ const date=(v:unknown)=>v?new Date(String(v)).toLocaleDateString('en-GB',{day:'n
 const FieldErrors=createContext<{errors:Record<string,string>;clear:(key:string)=>void}>({errors:{},clear:()=>{}});
 // Lets image fields refresh the media list after an upload.
 const ReloadOptions=createContext<()=>void>(()=>{});
+// Banner of a personal page (Wild Wonders.dc.html): what each part shows and where it is edited (presentation.ts profileHero).
+function ProfileBanner({record,member,onChange,options}:{record:Row;member?:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>}){
+  const name=String(member?.name||''),big=String(member?.alias||'')||name||String(record.title||'');const design=String(record.cover_image||'').startsWith('/design/');
+  return <Card title="Banner" lead="The top of the personal page: a photo, a small line and a large title.">
+    <div className="adm-banner-parts">
+      <p><strong>Large title</strong> · “{big}”<small>From Crew → {name||'the person'} → “Alias / project” (empty: the Name). {member&&<Link href={`/admin/content?table=crew_members&edit=${String(member.id)}`}>Edit in Crew</Link>}</small></p>
+    </div>
+    <Fields fields={[{key:'kicker',label:'Small line',type:'text'}]} value={record} onChange={onChange} options={options} notes={{kicker:`Shown small above the large title. Empty: “${member?meetLine(member):'meet …'}”, made from the person’s Name.`}}/>
+    <Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={onChange} options={options} notes={{...help,cover_id:'Banner photo. Empty: the person’s portrait from Crew.',cover_alt:'Describe the banner photo for people who cannot see it.'}}/>
+    {design&&<p className="adm-help">Now showing the design image <code>{String(record.cover_image)}</code> from the handoff. Choosing a banner photo replaces it. <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>onChange({...record,cover_image:''})}>Stop using the design image</button></p>}
+  </Card>;
+}
 function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fields:Field[];value:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>;notes?:Record<string,string>;prefix?:string}) {
   const {errors,clear}=useContext(FieldErrors);const reload=useContext(ReloadOptions);
   return <div className="adm-fields">{fields.map(field=>{
@@ -150,7 +163,7 @@ export function EncountersCms(){
         const member=(await supabase.from('crew_members').select('slug,portrait_id').eq('page_post_id',row.id).maybeSingle()).data;
         // The approved Wild Wonders banner, chosen until now by its name, becomes an explicit design cover.
         if(member?.slug==='wild-wonders'&&(!row.cover_id||row.cover_id===member.portrait_id))row={...row,cover_id:null,cover_image:'/design/ww-banner.webp'};
-        setMessage('This page had no explicit sections yet. They were filled in with its current layout, so it looks the same; save to keep them.');}
+        setMessage('Imported page: its blocks were placed as the site shows them today, and its banner photo was set as below. Nothing changes until you save.');}
       setBlocks(loaded);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
     }setRecord(row);setMarkClean(true);}catch(e){setMessage(e instanceof Error?e.message:'Could not load content');}finally{setBusy(false);}}
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
@@ -280,8 +293,9 @@ export function EncountersCms(){
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}{notice}
     <div className="adm-split"><div className="adm-stack">
-      <Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
-        <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
+      {kind==='crew_member'&&<ProfileBanner record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>}
+      <Card title="General information" lead={kind==='crew_member'?'How this page is named in the admin and summarised in lists. Nothing here is shown in the banner.':`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
+        <Fields fields={pick(commonFields,kind==='crew_member'?['title','slug','excerpt']:postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
       <Card title={isCrewPage?'Sections of The Crew page':kind==='crew_member'?'Sections of the personal page':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':'The page is built from these blocks, in this order.'}>
         {kind==='crew_member'&&<ul className="adm-section-guide">{profileSections.slice(0,7).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}</ul>}
         {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in People.</small></li></ul>}
@@ -319,7 +333,7 @@ export function EncountersCms(){
       {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} posts={options.posts||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))} children={childRows} related={related}/></div></section>}
     </div><aside>
       <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
-      {isCrewPage?<Card title="Cover"><p className="adm-help">The cover image of The Crew page is chosen in <Link href="/admin/settings">Settings → Art and Crew presentation</Link>. Its small line comes from “Kicker” above; the title “The Crew” is fixed by the design.</p></Card>:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
+      {kind==='crew_member'?null:isCrewPage?<Card title="Cover"><p className="adm-help">The cover image of The Crew page is chosen in <Link href="/admin/settings">Settings → Art and Crew presentation</Link>. Its small line comes from “Kicker” above; the title “The Crew” is fixed by the design.</p></Card>:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
     </aside></div>
   </form></FieldErrors.Provider></ReloadOptions.Provider>;
 }

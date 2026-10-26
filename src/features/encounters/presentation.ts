@@ -6,23 +6,24 @@ export function profileVisible(member: Row, posts: Row[]) {
   return member.status === 'published' && member.has_page === true && posts.some(p => p.id === member.page_post_id && p.kind === 'crew_member' && p.status === 'published');
 }
 // Hero of a crew profile, shared by the public page and the CMS preview.
+// Banner of a personal page: a photo, a small line and a large title, each from one explicit place.
+//   large title  the person's “Alias / project”, else the Name
+//   small line   the page's own small line (kicker), else “meet <first name>” from the Name
+//   photo        the page's banner photo, else a design image saved on the page, else the portrait
+export const meetLine = (member: Row) => { const first = string(member.name).trim().split(/\s+/)[0]; return first ? `meet ${first.toLowerCase()}` : string(member.role); };
 export function profileHero(member: Row, post: Row, blocks: { type: string; content: Row }[]) {
   const name = string(member.alias) || string(member.name) || string(post.title);
-  // Explicit profiles (blocks with sections): the kicker is the page kicker or the opening title; the cover is
-  // the chosen cover, else a design image saved as the cover image, else the portrait.
+  // Explicit profiles (blocks with sections).
   if (blocks.some(b => string(b.content.section))) {
-    const opening = blocks.find(b => b.content.section === 'opening' && b.type === 'heading');
     const design = string(post.cover_image).startsWith('/design/') ? string(post.cover_image) : undefined;
-    return { title: name, kicker: string(post.kicker) || string(opening?.content.text) || string(member.role), cover: post.cover_id || (design ? undefined : member.portrait_id), fallback: design };
+    return { title: name, kicker: string(post.kicker) || meetLine(member), cover: post.cover_id || (design ? undefined : member.portrait_id), fallback: design };
   }
-  // Profiles not yet converted keep the previous reading: an opening heading doubles as the kicker, and
-  // Wild Wonders keeps its design banner while its cover is the portrait (approved 2026-10-14).
-  const opening = blocks.find(b => b.type === 'heading' || b.type === 'paragraph');
-  const heading = opening?.type === 'heading' ? opening : undefined;
+  // Profiles not yet saved from the admin: Wild Wonders keeps its design banner while its cover is the portrait
+  // (approved 2026-10-14); the admin turns it into an explicit design image on the page when it is opened.
   const designBanner = member.slug === 'wild-wonders';
   return {
     title: name,
-    kicker: string(post.kicker) || string(heading?.content.text) || string(heading?.content.title) || string(member.role),
+    kicker: string(post.kicker) || meetLine(member),
     cover: designBanner && post.cover_id === member.portrait_id ? undefined : post.cover_id || member.portrait_id,
     fallback: designBanner ? '/design/ww-banner.webp' : undefined,
   };
