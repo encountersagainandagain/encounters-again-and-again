@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {profileHero,safeHref,string,type Row} from '@/features/encounters/presentation';
-import {chapterPhotos,composeProfile,hasProfileBlocks,profileLayout,profileParagraphs,type Block,type Paragraph,type Picture} from '@/features/encounters/profile-sections';
+import {composeProfile,imagesOf,maxPhotos,hasProfileBlocks,profileLayout,profileParagraphs,type Block,type Paragraph,type Picture} from '@/features/encounters/profile-sections';
 import {EditorialBlocks} from './EditorialBlocks';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
@@ -39,33 +39,32 @@ export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:
 
 // Profile blocks (profile-sections.ts): each block is one visual unit, shown in its order with the same markup as
 // the previous section reading, so a converted page looks the same. Ordinary blocks in between use the post renderer.
-const imagesOf=(c:Row):Picture[]=>(Array.isArray(c.images)?c.images as Row[]:[]).map(img=>({id:img.media_id,caption:string(img.caption)})).filter(p=>p.id);
-// A paragraph of a profile block: its style and **bold** / *italic* words.
+// Text of a profile block (titles, subtitles, paragraphs): **bold**, *italic* and ++underlined++ words, as in posts.
 const styleClass:Record<Paragraph['style'],string|undefined>={lead:'crew-lead',voice:'crew-voice',body:undefined};
-const marked=(text:string)=>text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).map((part,i)=>part.startsWith('**')&&part.endsWith('**')&&part.length>4?<strong key={i}>{part.slice(2,-2)}</strong>:part.length>2&&part.startsWith('*')&&part.endsWith('*')?<em key={i}>{part.slice(1,-1)}</em>:part);
+const marked=(text:string)=>text.split(/(\*\*[^*\n]+\*\*|\+\+[^+\n]+\+\+|\*[^*\n]+\*)/).map((part,i)=>part.length>4&&part.startsWith('**')&&part.endsWith('**')?<strong key={i}>{part.slice(2,-2)}</strong>:part.length>4&&part.startsWith('++')&&part.endsWith('++')?<u key={i}>{part.slice(2,-2)}</u>:part.length>2&&part.startsWith('*')&&part.endsWith('*')?<em key={i}>{part.slice(1,-1)}</em>:part);
 const paragraph=(p:Paragraph,key:number)=><p key={key} className={styleClass[p.style]}>{marked(p.text)}</p>;
 function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
-  const small=(picture:Picture)=>Number(media.find(m=>m.id===picture.id)?.width||0)<600;
-  const covers=(images:Picture[],key:string,chapter=false)=>images.length>0&&<section className={`crew-row profile-covers${chapter?' profile-chapter-photos':''}`} data-count={chapter?images.length:undefined} key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
+  // Chapter photos and photo rows: up to maxPhotos, laid out by how many there are (profile-photo-set).
+  const covers=(images:Picture[],key:string,set?:'chapter'|'row')=>images.length>0&&<section className={`crew-row profile-covers${set?` profile-photo-set profile-${set}-photos`:''}`} data-count={set?images.length:undefined} key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
   const tiles=(images:Picture[],compact:boolean)=><div className={`crew-pairs profile-tiles${compact?' profile-tiles-compact':''}`}>{images.map((picture,i)=><figure key={i} data-seq={`${i%2?(compact?.9:.86):1},0.34,70`}><MediaImage id={picture.id} media={media} contain/>{picture.caption&&<figcaption>{picture.caption}</figcaption>}</figure>)}</div>;
   const out:ReactNode[]=[];let plain:ContentBlock[]=[];
   const flush=()=>{if(plain.length){out.push(<EditorialBlocks key={`blocks-${out.length}`} blocks={plain} media={media}/>);plain=[];}};
   for(let i=0;i<blocks.length;i++){const b=blocks[i],c=b.content as Row,layout=profileLayout(b);
     if(!layout){plain.push(b);continue;}
     flush();const key=b.id||i;
-    if(layout==='profile-title'){out.push(<section className="crew-opening profile-opening" key={key}><h2 data-seq="0.95,0.5" id={anchor(b)}>{string(c.text)}</h2><Scribble variant="title"/></section>);continue;}
+    if(layout==='profile-title'){out.push(<section className="crew-opening profile-opening" key={key}><h2 data-seq="0.95,0.5" id={anchor(b)}>{marked(string(c.text))}</h2><Scribble variant="title"/></section>);continue;}
     if(layout==='profile-intro'){const titled=i>0&&profileLayout(blocks[i-1])==='profile-title';const line=string(c.kicker)||kicker;
-      out.push(<section className={`crew-row crew-origin${titled?'':' profile-untitled'}`} key={key}><div data-seq={titled?'1.42,0.6':'0.95,0.5'}>{line&&<span className="editorial-kicker">{line}</span>}{profileParagraphs(c).filter(p=>p.text.trim()).map(paragraph)}</div></section>);continue;}
-    if(layout==='profile-pair'){const pair=imagesOf(c).slice(0,2);if(pair.length)out.push(<section className="crew-pair-pin" data-pair-pin key={key}><div className={`crew-pair${pair.length===1?' crew-pair-single':''}`}>{pair.map((picture,n)=><div key={n} data-pair={n?'b':'a'} className={small(picture)?'profile-natural':undefined}><MediaImage id={picture.id} media={media}/></div>)}</div></section>);continue;}
-    if(layout==='profile-row'){const row=covers(imagesOf(c),String(key));if(row)out.push(row);continue;}
+      out.push(<section className={`crew-row crew-origin${titled?'':' profile-untitled'}`} key={key}><div data-seq={titled?'1.42,0.6':'0.95,0.5'}>{line&&<span className="editorial-kicker">{marked(line)}</span>}{profileParagraphs(c).filter(p=>p.text.trim()).map(paragraph)}</div></section>);continue;}
+    if(layout==='profile-pair'){const pair=imagesOf(c).slice(0,2);if(pair.length)out.push(<section className="crew-pair-pin" data-pair-pin key={key}><div className={`crew-pair${pair.length===1?' crew-pair-single':''}`}>{pair.map((picture,n)=><div key={n} data-pair={n?'b':'a'}><MediaImage id={picture.id} media={media}/></div>)}</div></section>);continue;}
+    if(layout==='profile-row'){const row=covers(imagesOf(c).slice(0,maxPhotos),String(key),'row');if(row)out.push(row);continue;}
     if(layout==='profile-chapter'){const texts=profileParagraphs(c).filter(p=>p.text.trim()),links=(Array.isArray(c.links)?c.links as Row[]:[]).filter(l=>safeHref(l.url)),subtitles=(Array.isArray(c.subtitles)?c.subtitles:[]).map(string).filter(Boolean);
-      out.push(<section className="crew-row crew-project profile-chapter" key={key}><div className="profile-chapter-title" data-seq="1.2,0.5">{string(c.title)&&<h2 id={anchor(b)}>{string(c.title)}</h2>}{subtitles.map((t,n)=><span key={n}>{t}</span>)}</div>{(texts.length>0||links.length>0)&&<div data-seq="1.05,0.5">{texts.map(paragraph)}{links.map((link,n)=><a className="profile-link" href={safeHref(link.url)} key={n}>{string(link.label)||string(link.url)} <span aria-hidden="true">→</span></a>)}</div>}</section>);
-      const row=covers(imagesOf(c).slice(0,chapterPhotos),`${key}-photos`,true);if(row)out.push(row);continue;}
+      out.push(<section className="crew-row crew-project profile-chapter" key={key}><div className="profile-chapter-title" data-seq="1.2,0.5">{string(c.title)&&<h2 id={anchor(b)}>{marked(string(c.title))}</h2>}{subtitles.map((t,n)=><span key={n}>{marked(t)}</span>)}</div>{(texts.length>0||links.length>0)&&<div data-seq="1.05,0.5">{texts.map(paragraph)}{links.map((link,n)=><a className="profile-link" href={safeHref(link.url)} key={n}>{string(link.label)?marked(string(link.label)):string(link.url)} <span aria-hidden="true">→</span></a>)}</div>}</section>);
+      const row=covers(imagesOf(c).slice(0,maxPhotos),`${key}-photos`,'chapter');if(row)out.push(row);continue;}
     // Dark gallery: this block and the following ones share one dark section.
     const groups:{title:string;images:Picture[]}[]=[];let j=i;
     for(;j<blocks.length&&profileLayout(blocks[j])==='profile-gallery';j++){const g=blocks[j].content as Row;groups.push({title:string(g.title),images:imagesOf(g)});}
     i=j-1;
-    out.push(<section className="crew-members profile-gallery" key={key}>{groups.map((group,n)=>n===0?[<div className="crew-heading" key="heading"><h2 data-seq="1.1,0.5">{group.title}</h2><Scribble variant="loop"/></div>,<div key="tiles">{tiles(group.images,false)}</div>]:<div className="profile-drafts" key={n}><span className="editorial-kicker" data-seq="1.1,0.45">{group.title}</span>{tiles(group.images,true)}</div>)}</section>);
+    out.push(<section className="crew-members profile-gallery" key={key}>{groups.map((group,n)=>n===0?[<div className="crew-heading" key="heading"><h2 data-seq="1.1,0.5">{marked(group.title)}</h2><Scribble variant="loop"/></div>,<div key="tiles">{tiles(group.images,false)}</div>]:<div className="profile-drafts" key={n}><span className="editorial-kicker" data-seq="1.1,0.45">{marked(group.title)}</span>{tiles(group.images,true)}</div>)}</section>);
   }
   flush();
   return <>{out}</>;

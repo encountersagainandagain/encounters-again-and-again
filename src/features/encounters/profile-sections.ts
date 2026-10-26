@@ -102,15 +102,17 @@ export const composeProfile=(blocks:Block[])=>composeSections(hasSections(blocks
 // (the stored type is one the database accepts); blocks without a layout are ordinary blocks, shown as in a post.
 // Consecutive dark galleries share one dark section: the first title is large, the next ones are small.
 export const profileKinds=[
-  {layout:'profile-title',type:'heading',label:'Large title',hint:'A big title with a hand-drawn line, e.g. “meet georgia”.'},
+  {layout:'profile-title',type:'heading',label:'Main title',hint:'A big title with a hand-drawn line, e.g. “meet georgia”.'},
   {layout:'profile-intro',type:'paragraph',label:'Opening text',hint:'Paragraphs, each with its own style, and a small line above them (empty: the alias).'},
   {layout:'profile-pair',type:'image-pair',label:'Pinned photo pair',hint:'One or two photos side by side, the full height of the screen, that stay while the page scrolls.'},
-  {layout:'profile-row',type:'image',label:'Photo row',hint:'Photos in a row, each with an optional caption.'},
-  {layout:'profile-chapter',type:'paragraph',label:'Chapter',hint:'A title and subtitles on the left; paragraphs (each with its own style) and links on the right; up to 4 photos below.'},
+  {layout:'profile-row',type:'image',label:'Photo row',hint:'Up to 4 photos in a row, each with an optional caption.'},
+  {layout:'profile-chapter',type:'paragraph',label:'Title, text & photos',hint:'A title and subtitles on the left; paragraphs (each with its own style) and links on the right; up to 4 photos below.'},
   {layout:'profile-gallery',type:'image',label:'Dark gallery',hint:'A title and photos on a dark background. The next dark galleries continue it with a smaller title.'},
 ] as const;
-// A chapter shows at most this many photos, in one row whose columns follow how many there are.
-export const chapterPhotos=4;
+// Photos of a profile block, in order, with their captions.
+export const imagesOf=(c:Row):Picture[]=>(Array.isArray(c.images)?c.images as Row[]:[]).map(img=>({id:img.media_id,caption:str(img.caption)})).filter(p=>p.id);
+// A chapter or a photo row shows at most this many photos, in one row whose columns follow how many there are.
+export const maxPhotos=4;
 export type ProfileLayout=typeof profileKinds[number]['layout'];
 export const profileLayout=(b:{content:Row}):ProfileLayout|null=>profileKinds.some(k=>k.layout===b.content.layout)?b.content.layout as ProfileLayout:null;
 // Paragraphs of an opening text or a chapter, each with its style. Blocks saved before kept one text and styled it by

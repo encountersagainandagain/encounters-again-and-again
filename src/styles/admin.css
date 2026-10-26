@@ -269,3 +269,10 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 /* Paragraphs of a profile block: style, marks and order above each text. */
 .adm-paragraph{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--adm-line,#d8e2e6)}.adm-paragraph:first-of-type{border-top:0}
 .adm-paragraph-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}.adm-paragraph-head .adm-field{min-width:180px}
+/* Text fields of profile blocks: label and B / I / U on one line. */
+.adm-field-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.adm-marks{display:inline-flex;gap:2px}
+.adm-warning{padding:8px 12px;border-radius:8px;color:var(--adm-danger);background:var(--adm-danger-bg)}
+/* Quick actions of an open editor, always at hand while scrolling a long page. */
+.adm-floating{position:fixed;right:24px;bottom:24px;z-index:40;display:flex;gap:8px;padding:8px;border-radius:14px;background:var(--adm-card,#fff);box-shadow:0 8px 28px rgba(6,24,38,.18)}
+.adm-floating .adm-btn--ghost{background:var(--adm-card,#fff)}.adm-floating-dirty{box-shadow:0 0 0 3px rgba(201,160,73,.45)}
+@media(max-width:640px){.adm-floating{right:12px;bottom:12px}}

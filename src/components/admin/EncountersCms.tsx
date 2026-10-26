@@ -12,7 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
-import {chapterPhotos,hasProfileBlocks,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
+import {hasProfileBlocks,imagesOf,maxPhotos,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
 import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 import {meetLine} from '@/features/encounters/presentation';
 type Row=Record<string,unknown>;
@@ -102,23 +102,49 @@ function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index
 }
 // Fields of a profile block (profile-sections.ts): each one holds everything it shows.
 // Paragraphs of an opening text or a chapter, each with its style; **bold** and *italic* mark words inside them.
+// Floating at the bottom right of a long editor: back to the top once scrolled, and Save (the form's submit) at hand.
+// Kept outside the toolbar, whose backdrop blur would pin it to the toolbar instead of the screen.
+function FloatingActions({busy,dirty}:{busy:boolean;dirty:boolean}){
+  const [down,setDown]=useState(false);
+  useEffect(()=>{const check=()=>setDown(window.scrollY>600);check();window.addEventListener('scroll',check,{passive:true});return()=>window.removeEventListener('scroll',check);},[]);
+  return <div className="adm-floating" role="group" aria-label="Quick actions">
+    {down&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}><ArrowUp aria-hidden="true"/>Top</button>}
+    <button type="submit" className={`adm-btn adm-btn--small${dirty?' adm-floating-dirty':''}`} disabled={busy}>{busy?'Saving…':dirty?'Save changes':'Save'}</button>
+  </div>;
+}
+// Bold, italic and underline for a text of a profile block: wraps the selected words (or a placeholder) in **, * or ++
+// (ProfileStory.tsx marked) and keeps them selected.
+function MarkButtons({id,value,onChange,name}:{id:string;value:string;onChange:(value:string)=>void;name:string}){
+  const mark=(m:string)=>{const el=document.getElementById(id) as HTMLInputElement|HTMLTextAreaElement|null;if(!el)return;
+    const a=el.selectionStart??value.length,b=el.selectionEnd??value.length;const words=value.slice(a,b)||'text';onChange(value.slice(0,a)+m+words+m+value.slice(b));
+    requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
+  return <span className="adm-marks" role="group" aria-label={`Format ${name}`}>
+    <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('**')} aria-label={`Bold in ${name}`} title="Bold"><b>B</b></button>
+    <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('*')} aria-label={`Italic in ${name}`} title="Italic"><i>I</i></button>
+    <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('++')} aria-label={`Underline in ${name}`} title="Underline"><u>U</u></button>
+  </span>;
+}
+// A text field of a profile block with its format buttons next to the label.
+function MarkedText({id,label,value,onChange,rows=2,hint,placeholder,wide=true}:{id:string;label:string;value:string;onChange:(value:string)=>void;rows?:number;hint?:string;placeholder?:string;wide?:boolean}){
+  return <div className={`adm-field${wide?' adm-field--wide':''}`}>
+    <div className="adm-field-head"><label htmlFor={id}>{label}</label><MarkButtons id={id} value={value} onChange={onChange} name={label.toLowerCase()}/></div>
+    {rows>1?<textarea id={id} rows={rows} placeholder={placeholder} value={value} onChange={e=>onChange(e.target.value)}/>:<input id={id} placeholder={placeholder} value={value} onChange={e=>onChange(e.target.value)}/>}
+    {hint&&<small>{hint}</small>}
+  </div>;
+}
+// Paragraphs of an opening text or a chapter, each with its style; **bold**, *italic* and ++underline++ inside them.
 function ParagraphsField({content,index,onChange,legend='Paragraphs'}:{content:Row;index:number;onChange:(content:Row)=>void;legend?:string}){
   const list=profileParagraphs(content);
   const set=(next:Paragraph[])=>onChange({...content,paragraphs:next,text:next.map(p=>p.text.trim()).filter(Boolean).join('\n\n')});
   const edit=(n:number,p:Partial<Paragraph>)=>set(list.map((x,k)=>k===n?{...x,...p}:x));
   const move=(n:number,step:number)=>{const next=[...list];[next[n+step],next[n]]=[next[n],next[n+step]];set(next);};
-  // Wraps the selected words (or a placeholder) in the mark and keeps them selected.
-  const mark=(n:number,m:string)=>{const el=document.getElementById(`block-${index}-paragraph-${n}`) as HTMLTextAreaElement|null;if(!el)return;
-    const {selectionStart:a,selectionEnd:b,value}=el;const words=value.slice(a,b)||'text';edit(n,{text:value.slice(0,a)+m+words+m+value.slice(b)});
-    requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
   return <fieldset className="adm-group"><legend>{legend}</legend>
-    <p className="adm-help">Each paragraph is shown with its style. Select words and use <b>B</b> or <i>I</i> to make them bold or italic.</p>
+    <p className="adm-help">Each paragraph is shown with its style. Select words and use <b>B</b>, <i>I</i> or <u>U</u> to make them bold, italic or underlined.</p>
     {list.map((p,n)=><div key={n} className="adm-paragraph">
       <div className="adm-paragraph-head">
         <label className="adm-field">Paragraph {n+1} · style<select aria-label={`Block ${index+1} paragraph ${n+1} style`} value={p.style} onChange={e=>edit(n,{style:e.target.value as Paragraph['style']})}>{paragraphStyles.map(s=><option key={s.style} value={s.style}>{s.label}</option>)}</select></label>
         <div className="adm-block-tools">
-          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark(n,'**')} aria-label={`Bold in paragraph ${n+1}`}><b>B</b></button>
-          <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark(n,'*')} aria-label={`Italic in paragraph ${n+1}`}><i>I</i></button>
+          <MarkButtons id={`block-${index}-paragraph-${n}`} value={p.text} onChange={text=>edit(n,{text})} name={`paragraph ${n+1}`}/>
           <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===0} onClick={()=>move(n,-1)} aria-label={`Move paragraph ${n+1} up`}><ArrowUp aria-hidden="true"/></button>
           <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===list.length-1} onClick={()=>move(n,1)} aria-label={`Move paragraph ${n+1} down`}><ArrowDown aria-hidden="true"/></button>
           <button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>set(list.filter((_,k)=>k!==n))} aria-label={`Remove paragraph ${n+1}`}><Trash2 aria-hidden="true"/></button>
@@ -131,19 +157,22 @@ function ParagraphsField({content,index,onChange,legend='Paragraphs'}:{content:R
 }
 function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
   const c=block.content;const layout=profileLayout(block);const kind=profileKinds.find(k=>k.layout===layout);const set=(content:Row)=>onChange({...block,content} as never);
-  const text=(key:string,label:string,rows=2,hint?:string,placeholder?:string)=><label className="adm-field adm-field--wide">{label}<textarea aria-label={`Block ${index+1} ${label}`} rows={rows} placeholder={placeholder} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value})}/>{hint&&<small>{hint}</small>}</label>;
+  const text=(key:string,label:string,rows=2,hint?:string,placeholder?:string)=><MarkedText id={`block-${index}-${key}`} label={label} rows={rows} hint={hint} placeholder={placeholder} value={String(c[key]||'')} onChange={v=>set({...c,[key]:v})}/>;
   const links=(Array.isArray(c.links)?c.links:[]) as Row[];
+  // The pinned pair fills the screen height: a photo narrower than this will look soft.
+  const soft=layout==='profile-pair'?imagesOf(c).map((p,n)=>({n,width:Number(media.find(m=>m.id===p.id)?.width||0)})).filter(p=>p.width>0&&p.width<1200):[];
   return <div className="adm-stack" style={{gap:10}}>
     {kind&&<p className="adm-help">{kind.hint}</p>}
     {layout==='profile-title'&&<div className="adm-fields">{text('text','Title',2)}</div>}
-    {layout==='profile-intro'&&<div className="adm-fields"><label className="adm-field">Small line<input value={String(c.kicker||'')} placeholder="Empty: the alias" onChange={e=>set({...c,kicker:e.target.value})}/></label></div>}
+    {layout==='profile-intro'&&<div className="adm-fields">{text('kicker','Small line',1,undefined,'Empty: the alias')}</div>}
     {layout==='profile-intro'&&<ParagraphsField content={c} index={index} onChange={set}/>}
-    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Left · title</legend><div className="adm-fields">{text('title','Title',2)}<label className="adm-field adm-field--wide">Subtitles<textarea rows={2} value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={e=>set({...c,subtitles:e.target.value.split('\n')})}/><small>Optional. One per line, shown large under the title.</small></label></div></fieldset>}
+    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Left · title</legend><div className="adm-fields">{text('title','Title',2)}<MarkedText id={`block-${index}-subtitles`} label="Subtitles" value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={v=>set({...c,subtitles:v.split('\n')})} hint="Optional. One per line, shown large under the title."/></div></fieldset>}
     {layout==='profile-chapter'&&<ParagraphsField content={c} index={index} onChange={set} legend="Right · paragraphs"/>}
-    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Right · links, under the paragraphs</legend>{links.map((l,n)=><div key={n} className="adm-fields"><label className="adm-field">Link text<input value={String(l.label||'')} onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,label:e.target.value}:x)})}/></label><label className="adm-field">Link<input value={String(l.url||'')} placeholder="https://… or /art" onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,url:e.target.value}:x)})}/></label><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>set({...c,links:links.filter((_,k)=>k!==n)})}>Remove link</button></div>)}<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set({...c,links:[...links,{label:'',url:''}]})}><Plus aria-hidden="true"/>Add link</button></fieldset>}
+    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Right · links, under the paragraphs</legend>{links.map((l,n)=><div key={n} className="adm-fields"><MarkedText id={`block-${index}-link-${n}`} label="Link text" rows={1} wide={false} value={String(l.label||'')} onChange={v=>set({...c,links:links.map((x,k)=>k===n?{...x,label:v}:x)})}/><label className="adm-field">Link<input value={String(l.url||'')} placeholder="https://… or /art" onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,url:e.target.value}:x)})}/></label><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>set({...c,links:links.filter((_,k)=>k!==n)})}>Remove link</button></div>)}<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set({...c,links:[...links,{label:'',url:''}]})}><Plus aria-hidden="true"/>Add link</button></fieldset>}
     {layout==='profile-gallery'&&<div className="adm-fields">{text('title','Title',2,'The first dark gallery shows it large; the next ones in a row, small.')}</div>}
-    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Below · photos</legend><p className="adm-help">Up to {chapterPhotos}. One is centred; two, three or four share a row on wide screens, two per row on tablets and one under another on phones.</p><BlockImages block={block} index={index} max={chapterPhotos} media={media} onChange={content=>set({...content,layout})}/></fieldset>}
-    {(layout==='profile-pair'||layout==='profile-row'||layout==='profile-gallery')&&<BlockImages block={block} index={index} max={layout==='profile-pair'?2:12} media={media} onChange={content=>set({...content,layout})}/>}
+    {(layout==='profile-chapter'||layout==='profile-row')&&<fieldset className="adm-group"><legend>{layout==='profile-chapter'?'Below · photos':'Photos'}</legend><p className="adm-help">Up to {maxPhotos}. One is centred; two, three or four share a row on wide screens, two per row on tablets and one under another on phones.</p><BlockImages block={block} index={index} max={maxPhotos} media={media} onChange={content=>set({...content,layout})}/></fieldset>}
+    {soft.map(p=><p key={p.n} className="adm-help adm-warning">Photo {p.n+1} is {p.width} px wide. It fills the height of the screen, so it will look soft or blurry; a photo at least 1200 px wide looks sharp.</p>)}
+    {(layout==='profile-pair'||layout==='profile-gallery')&&<BlockImages block={block} index={index} max={layout==='profile-pair'?2:12} media={media} onChange={content=>set({...content,layout})}/>}
   </div>;
 }
 function BlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
@@ -338,7 +367,7 @@ export function EncountersCms(){
     const bytes=Number(record.bytes)||0;
     return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
       <AdminHeader kicker={tableLabel(table)} title={title}/>
-      {toolbar}{notice}
+      {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
         {table==='media'&&<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>}
         <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={table==='expedition_cards'?{...options,posts:programPages}:options}/></Card>
@@ -358,7 +387,7 @@ export function EncountersCms(){
   const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above “The Crew” on the cover, e.g. “Meet the team”.',title:'Name of this page in the admin. The cover always says “The Crew”.'}:{})};const credit=creditLabels[kind]||defaultCredit;const path=publicPath('posts',record,specific,options);
   return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
-    {toolbar}{notice}
+    {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
     <div className="adm-split"><div className="adm-stack">
       {kind==='crew_member'&&<ProfileBanner record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>}
       {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>

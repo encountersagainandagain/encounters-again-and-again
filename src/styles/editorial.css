@@ -326,8 +326,10 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
    of about 107px below it); the pin grows with them so the pair stays pinned as long as before (63vh of scroll). */
 @media(min-width:760px) and (prefers-reduced-motion:no-preference){.profile-page .crew-pair-pin{height:calc(100svh + 63vh)}.profile-page .crew-pair{top:74px}.profile-page .crew-pair>div{height:calc(100svh - 74px)}}
 @media(min-width:760px) and (max-width:980px) and (prefers-reduced-motion:no-preference){.profile-page .crew-pair{top:108px}.profile-page .crew-pair>div{height:calc(100svh - 108px)}}
-/* Photos of a chapter (up to four): one is centred; on wide screens three or four share one row, below 1081px two per
+/* Photos of a chapter or a photo row (up to four): one is centred; on wide screens three or four share one row, below 1081px two per
    row, and on phones one under another. Two keep the alternating halves of the photo row. */
-.profile-chapter-photos[data-count="1"] figure{grid-column:1/-1;align-items:center}
-@media(min-width:1081px){.profile-chapter-photos[data-count="1"] figure:nth-child(n){grid-column:1/-1}.profile-chapter-photos[data-count="3"] figure:nth-child(n){grid-column:span 2}.profile-chapter-photos[data-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}.profile-chapter-photos[data-count="4"] figure:nth-child(n){grid-column:auto}}
-@media(min-width:760px) and (max-width:1080px){.profile-chapter-photos:not([data-count="1"]){grid-template-columns:repeat(2,minmax(0,1fr))}.profile-chapter-photos:not([data-count="1"]) figure{grid-column:auto}}
+.profile-photo-set[data-count="1"] figure{grid-column:1/-1;align-items:center}
+@media(min-width:1081px){.profile-photo-set[data-count="1"] figure:nth-child(n){grid-column:1/-1}.profile-photo-set[data-count="3"] figure:nth-child(n){grid-column:span 2}.profile-photo-set[data-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}.profile-photo-set[data-count="4"] figure:nth-child(n){grid-column:auto}}
+@media(min-width:760px) and (max-width:1080px){.profile-photo-set:not([data-count="1"]){grid-template-columns:repeat(2,minmax(0,1fr))}.profile-photo-set:not([data-count="1"]) figure{grid-column:auto}}
+/* A photo row has as much room above as below, so its band reads as one piece after a dark gallery. */
+.profile-row-photos{padding-top:clamp(90px,24vh,260px)}
