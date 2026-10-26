@@ -14,7 +14,7 @@ export const postGroups={
   seo:['seo_title','meta_description'],
 };
 // Entity fields shown beside the form, in the publication card.
-export const entitySide=['status','sort','featured','has_page','page_post_id'];
+export const entitySide=['status','sort','featured','has_page','listed','page_post_id'];
 
 export const help:Record<string,string>={
   title:'Main title shown on the page and in lists.',
@@ -41,7 +41,7 @@ export const help:Record<string,string>={
   favourite_animal:'Shown at the bottom of the card on The Crew page as “Favourite animal”, e.g. Orca.',
   quote:'Not shown on The Crew page. Kept for other uses.',
   portrait_id:'Portrait on The Crew page. Also the banner photo of the personal page when that page has none of its own.',
-  has_page:'Gives this person a profile page. It becomes public once its profile content is published.',
+  has_page:'Gives this person a profile page. It becomes public once its profile content is published.',listed:'Untick to take the person off The Crew page and the Home strip without deleting anything: their personal page keeps working at its address, and their credits stay.',
   page_post_id:'Content that holds the blocks of the profile page.',
   number_label:'Small label such as “01”.',
   credit:'Author or photographer credit.',
@@ -86,7 +86,7 @@ export const help:Record<string,string>={
 // Entries for creating content: each opens the editor with its type fixed.
 export const newKinds:[string,string][]=[['artwork','New artwork'],['expedition','New expedition'],['workshop','New workshop'],['message','New message'],['news','New news post'],['expedition_report','New expedition report'],['workshop_report','New workshop report']];
 export const kindListLabels:Record<string,string>={artwork:'Art works',expedition:'Expeditions',expedition_report:'Expedition results',workshop:'Workshops',workshop_report:'Workshop results',message:'Meaningful Messages',news:'News',crew_member:'Personal pages',page:'Pages'};
-export const tableLabels:Record<string,string>={posts:'All content',crew_members:'Crew · People',art_categories:'Art · Categories',upcoming_items:'Announcements',expedition_cards:'Expedition cards',media:'Media library'};
+export const tableLabels:Record<string,string>={posts:'All content',crew_members:'Crew',art_categories:'Art · Categories',upcoming_items:'Announcements',expedition_cards:'Expedition cards',media:'Media library'};
 export const tableLabel=(table:string)=>tableLabels[table]||table;
 
 // How people credited on a content are named, and where that credit shows.

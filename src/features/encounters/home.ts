@@ -1,5 +1,5 @@
 import {activities,activityPath,dateLabel,isUpcoming,shortDate,type ActivityData} from './activities';
-import {artworkPath,byOrder,profileVisible,string,type Row} from './presentation';
+import {artworkPath,byOrder,listedCrew,profileVisible,string,type Row} from './presentation';
 // Home v2 (handoff 10-home.md). Everything listed here comes from published content; the section order,
 // the hidden sections and the texts come from Settings → Home. Publishing never features by itself: the
 // "Featured on Home" tick and its order put content first, the rest follows automatically.
@@ -39,7 +39,7 @@ export function homeView(data:HomeData){
   const happened:Card[]=data.posts.filter(p=>p.status==='published'&&string(p.kind) in kinds&&!shown.has(string(p.id))).sort((a,b)=>featuredFirst(a,b)||string(b.published_at).localeCompare(string(a.published_at))).slice(0,3)
     .map(p=>({key:string(p.id),href:`/posts/${string(p.slug)}`,label:kinds[string(p.kind)],date:shortDate(p.published_at),title:string(p.title),excerpt:string(p.excerpt),image:p.cover_id}));
   const art:Card[]=data.posts.filter(p=>p.kind==='artwork'&&artworkPath(p,data.artworks,data.categories)).sort((a,b)=>featuredFirst(a,b)||byOrder(a,b)).slice(0,Math.max(3,Math.min(10,Number(home.art_limit)||5))).map(p=>{const a=data.artworks.find(x=>x.id===p.id)!;const c=data.categories.find(x=>x.id===a.category_id);const m=data.media.find(x=>x.id===(a.media_id||p.cover_id));return {key:string(p.id),href:artworkPath(p,data.artworks,data.categories)!,label:string(c?.name),title:string(p.title),image:a.media_id||p.cover_id,contain:m?.fit==='contain'};});
-  const crew=data.crew.filter(c=>c.status==='published').sort(byOrder).slice(0,6).map(c=>({key:string(c.id),name:string(c.name),image:c.portrait_id,href:profileVisible(c,data.posts)?`/crew/${string(c.slug)}`:null}));
+  const crew=data.crew.filter(c=>c.status==='published'&&listedCrew(c)).sort(byOrder).slice(0,6).map(c=>({key:string(c.id),name:string(c.name),image:c.portrait_id,href:profileVisible(c,data.posts)?`/crew/${string(c.slug)}`:null}));
   const projects=((home.projects||{}) as Row);
   return {home,sections:visible,agenda:agenda.slice(0,limit),happened,art,crew,projects:projectCards.map(p=>{const own=(projects[p.key]||{}) as Row;return {...p,media_id:own.media_id,status_label:string(own.status_label),body:string(own.body)};})};
 }

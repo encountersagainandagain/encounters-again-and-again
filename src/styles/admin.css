@@ -276,3 +276,5 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-floating{position:fixed;right:24px;bottom:24px;z-index:40;display:flex;gap:8px;padding:8px;border-radius:14px;background:var(--adm-card,#fff);box-shadow:0 8px 28px rgba(6,24,38,.18)}
 .adm-floating .adm-btn--ghost{background:var(--adm-card,#fff)}.adm-floating-dirty{box-shadow:0 0 0 3px rgba(201,160,73,.45)}
 @media(max-width:640px){.adm-floating{right:12px;bottom:12px}}
+/* Deleting a crew member: what goes, before confirming. */
+.adm-danger-zone{padding:14px;border:1px solid var(--adm-danger);border-radius:10px;background:var(--adm-danger-bg)}.adm-danger-zone ul{margin:0;padding-left:18px;display:grid;gap:4px}

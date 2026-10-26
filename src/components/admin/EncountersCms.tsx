@@ -35,19 +35,19 @@ function ProfileBanner({record,member,onChange,options}:{record:Row;member?:Row;
   const name=String(member?.name||''),big=String(member?.alias||'')||name||String(record.title||'');const design=String(record.cover_image||'').startsWith('/design/');
   return <Card title="Banner" lead="The top of the personal page: a large title, a small line and a photo.">
     <Fields fields={[{key:'subtitle',label:'Large title',type:'text'},{key:'kicker',label:'Small line',type:'text'},...pick(commonFields,postGroups.cover)]} value={record} onChange={onChange} options={options} notes={{...help,
-      subtitle:`Shown large in the banner. Empty: “${big}”, the Alias / project of ${name||'the person'} in People.`,
+      subtitle:`Shown large in the banner. Empty: “${big}”, the Alias / project of ${name||'the person'} in Crew.`,
       kicker:`Shown small above the large title. Empty: “${member?meetLine(member):'meet …'}”, made from the person’s Name.`,
       cover_id:'Banner photo. Empty: the person’s portrait from Crew.',cover_alt:'Describe the banner photo for people who cannot see it.'}}/>
     {design&&<p className="adm-help">Now showing the design image <code>{String(record.cover_image)}</code> from the handoff. Choosing a banner photo replaces it. <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>onChange({...record,cover_image:''})}>Stop using the design image</button></p>}
   </Card>;
 }
 // Search and link previews of a personal page: nothing here is visible on the page (app/crew/[slug]/page.tsx metadata and
-// structured data). The address comes from the person in People.
+// structured data). The address comes from the person in Crew.
 function ProfileSeo({record,member,onChange,options}:{record:Row;member?:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>}){
   const name=String(member?.name||''),big=String(record.subtitle||'')||String(member?.alias||'')||name;const path=`/crew/${String(member?.slug||record.slug||'')}`;
   return <Card title="SEO" lead="Not shown on the page. It is how Google and link previews (WhatsApp, Instagram, LinkedIn…) present this person, as a portfolio: who they are and what they do.">
-    {member&&<p className="adm-help" style={{marginBottom:12}}>Address: <code>{path}</code>. It changes with the Slug of {name} in <Link href={`/admin/content?table=crew_members&edit=${String(member.id)}`}>People</Link>. Link previews show the banner photo.</p>}
-    <SeoPanel value={record} onChange={onChange} path={path} fallbackTitle={big} fallbackDescription={String(member?.bio||'')} fallbackSource={`the Biography of ${name||'the person'} in People`} image={record.cover_id||(String(record.cover_image||'').startsWith('/design/')?record.cover_image:member?.portrait_id)}/>
+    {member&&<p className="adm-help" style={{marginBottom:12}}>Address: <code>{path}</code>. It changes with the Slug of {name} in <Link href={`/admin/content?table=crew_members&edit=${String(member.id)}`}>Crew</Link>. Link previews show the banner photo.</p>}
+    <SeoPanel value={record} onChange={onChange} path={path} fallbackTitle={big} fallbackDescription={String(member?.bio||'')} fallbackSource={`the Biography of ${name||'the person'} in Crew`} image={record.cover_id||(String(record.cover_image||'').startsWith('/design/')?record.cover_image:member?.portrait_id)}/>
     <div style={{marginTop:18}}><Fields fields={[{key:'tags',label:'What they do',type:'lines'},{...commonFields.find(f=>f.key==='title')!,label:'Name in the admin'}]} value={record} onChange={onChange} options={options} notes={{
       tags:'One per line, e.g. Illustrator, Logo design, Wildlife photography. Search engines read them as what this person does; they are not shown on the page.',
       title:'Only in the admin lists.'}}/></div>
@@ -102,6 +102,42 @@ function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index
 }
 // Fields of a profile block (profile-sections.ts): each one holds everything it shows.
 // Paragraphs of an opening text or a chapter, each with its style; **bold** and *italic* mark words inside them.
+// Deleting a crew member, in two steps: first what goes (the person, their credits, their personal page with its blocks
+// and links; photos stay in the library) with the gentler option of only leaving The Crew page, then the name typed.
+function CrewRemoval({member,page,busy,onHide,onDeleted}:{member:Row;page?:Row;busy:boolean;onHide?:()=>void;onDeleted:(name:string)=>void}){
+  const [step,setStep]=useState(0);const [typed,setTyped]=useState('');const [counts,setCounts]=useState<{credits:number;blocks:number}|null>(null);const [error,setError]=useState('');const [working,setWorking]=useState(false);
+  const name=String(member.name||'');
+  async function open(){setStep(1);setError('');if(!supabase)return;
+    const [credits,blocks]=await Promise.all([supabase.from('post_contributors').select('post_id',{count:'exact',head:true}).eq('crew_member_id',member.id),
+      page?supabase.from('post_blocks').select('id',{count:'exact',head:true}).eq('post_id',page.id):Promise.resolve({count:0})]);
+    setCounts({credits:credits.count||0,blocks:blocks.count||0});}
+  async function remove(){if(!supabase||typed.trim()!==name.trim())return;setWorking(true);setError('');
+    try{const r=await supabase.from('crew_members').delete().eq('id',member.id);if(r.error)throw r.error;
+      // The page goes after the person; its blocks, links and address history follow it (on delete cascade).
+      if(page){const p=await supabase.from('posts').delete().eq('id',page.id);if(p.error)throw new Error(`${name} was deleted, but the personal page was not: ${p.error.message}. Delete it from Personal pages.`);}
+      onDeleted(name);}
+    catch(e){setError(e instanceof Error?e.message:'The person could not be deleted.');setWorking(false);}}
+  return <Card title="Remove" lead="Take this person off the site.">
+    {step===0&&<div className="adm-stack" style={{gap:10}}>
+      {onHide&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={onHide}>Hide from The Crew page</button>}
+      {onHide&&<p className="adm-help">Leaves The Crew page and the Home strip; the personal page keeps working at its address. Undo it with “Show on The Crew page”.</p>}
+      <button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={busy} onClick={()=>void open()}><Trash2 aria-hidden="true"/>Delete…</button>
+    </div>}
+    {step>0&&<div className="adm-stack adm-danger-zone" style={{gap:10}} role="alert">
+      <p><strong>Delete {name} from the database?</strong> This cannot be undone.</p>
+      <ul className="adm-help">
+        <li>The crew member: name, texts, contact links and order.</li>
+        <li>{counts?`${counts.credits} ${counts.credits===1?'credit':'credits'} on works and content (the content itself stays).`:'Their credits on works and content (the content itself stays).'}</li>
+        {page?<li>Their personal page “{String(page.title||'')}”{counts?` with ${counts.blocks} ${counts.blocks===1?'block':'blocks'}`:''}, its related content and its address history.</li>:<li>No personal page.</li>}
+        <li>Photos stay in the media library.</li>
+      </ul>
+      {step===1&&<div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setStep(0)}>Cancel</button>{onHide&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={()=>{setStep(0);onHide();}}>Only hide from The Crew page</button>}<button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setStep(2)}>Continue</button></div>}
+      {step===2&&<><label className="adm-field">Type “{name}” to confirm<input autoFocus value={typed} onChange={e=>setTyped(e.target.value)} aria-describedby="crew-delete-help"/><small id="crew-delete-help">The name as it is written above.</small></label>
+        <div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>{setStep(0);setTyped('');}}>Cancel</button><button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={working||typed.trim()!==name.trim()} onClick={()=>void remove()}><Trash2 aria-hidden="true"/>{working?'Deleting…':'Delete permanently'}</button></div></>}
+      {error&&<p className="adm-notice adm-notice--error">{error}</p>}
+    </div>}
+  </Card>;
+}
 // Floating at the bottom right of a long editor: back to the top once scrolled, and Save (the form's submit) at hand.
 // Kept outside the toolbar, whose backdrop blur would pin it to the toolbar instead of the screen.
 function FloatingActions({busy,dirty}:{busy:boolean;dirty:boolean}){
@@ -213,13 +249,13 @@ export function EncountersCms(){
   const [record,setRecord]=useState<Row|null>(null);const [specific,setSpecific]=useState<Row>({});const [blocks,setBlocks]=useState<Block[]>([]);
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
-  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [preview,setPreview]=useState(false);
+  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [preview,setPreview]=useState(false);
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
   const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
   const [loaded,setLoaded]=useState(false);const [rowsTable,setRowsTable]=useState('');const [scope,setScope]=useState('publications');const [query,setQuery]=useState('');const [kindFilter,setKindFilter]=useState('');const [statusFilter,setStatusFilter]=useState('');
   // Unsaved changes are detected against the state captured after loading or saving.
-  const snapshot=useMemo(()=>JSON.stringify([record,specific,blocks,contributors,contributorRoles,related,childRows]),[record,specific,blocks,contributors,contributorRoles,related,childRows]);
+  const snapshot=useMemo(()=>JSON.stringify([record,specific,blocks,contributors,contributorRoles,related,childRows,relatedNotes]),[record,specific,blocks,contributors,contributorRoles,related,childRows,relatedNotes]);
   const [baseline,setBaseline]=useState('');const [markClean,setMarkClean]=useState(false);
   useEffect(()=>{if(markClean){setBaseline(snapshot);setMarkClean(false);}},[markClean,snapshot]);
   const dirty=!!record&&baseline!==''&&baseline!==snapshot;
@@ -236,7 +272,7 @@ export function EncountersCms(){
   }void load();return()=>{live=false;};},[table,revision]);
   // Presentation cards are shown only on the Expeditions program page.
   const programPages=(options.posts||[]).filter(p=>p.kind==='page'&&p.source_role==='encounters_expeditions');
-  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0,...(table==='expedition_cards'?{post_id:programPages[0]?.id||null,sort:(rows.length+1)}:{})});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setPreview(false);setMessage('');setMarkClean(true);}
+  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0,...(table==='expedition_cards'?{post_id:programPages[0]?.id||null,sort:(rows.length+1)}:{})});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setRelatedNotes(null);setPreview(false);setMessage('');setMarkClean(true);}
   async function edit(row:Row){if(!supabase)return;setErrors({});setErrorDetail('');setBusy(true);setMessage('');setPreview(false);
     try{if(table==='posts'){
       const k=String(row.kind);const result=await Promise.all([
@@ -254,12 +290,15 @@ export function EncountersCms(){
         // The approved Wild Wonders banner, chosen until now by its name, becomes an explicit design cover.
         if(member?.slug==='wild-wonders'&&(!row.cover_id||row.cover_id===member.portrait_id))row={...row,cover_id:null,cover_image:'/design/ww-banner.webp'};
         setMessage('Imported page: its blocks were placed as the site shows them today, and its banner photo was set as below. Nothing changes until you save.');}
-      setBlocks(loaded);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
+      setBlocks(loaded);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));
+      // A comment per related item (personal pages), once the database has post_relations.note.
+      if(k==='crew_member'){const rows=(result[2].data||[]) as Row[];const hasNote=rows.length?'note' in rows[0]:!(await supabase.from('post_relations').select('note').limit(1)).error;
+        setRelatedNotes(hasNote?Object.fromEntries(rows.map(r=>[String(r.related_post_id),String(r.note||'')])):null);}else setRelatedNotes(null);setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
     }setRecord(row);setMarkClean(true);}catch(e){setMessage(e instanceof Error?e.message:'Could not load content');}finally{setBusy(false);}}
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
   const handled=useRef('');
   // Moving between admin pages keeps this view mounted: wait for the rows of the table now asked for, or a link such as
-  // “Edit personal page” (from People) would look for the page among the people and fall back to the list.
+  // “Edit personal page” (from Crew) would look for the page among the people and fall back to the list.
   useEffect(()=>{if(!loaded||rowsTable!==table)return;const key=`${table}:${params.get('new')}:${params.get('edit')}:${pageRole}`;if(handled.current===key)return;handled.current=key;
     if(params.get('new'))start(params.get('new')!);
     else if(pageRole){const row=rows.find(r=>r.kind==='page'&&r.source_role===pageRole);if(row)void edit(row);}else if(params.get('edit')){const row=rows.find(r=>r.id===params.get('edit'));if(row)void edit(row);}
@@ -291,7 +330,7 @@ export function EncountersCms(){
         if(kind==='crew_member'&&Array.isArray(current.tags))payload.tags=(current.tags as unknown[]).map(t=>String(t).trim()).filter(Boolean);
         if(!current.updated_at){payload.status=current.status||'draft';}
         const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{})}:null;
-        const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map(related_post_id=>({related_post_id,relation:['expedition','workshop'].includes(kind)?'result':'related'})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
+        const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map((related_post_id,sort)=>({related_post_id,sort,relation:['expedition','workshop'].includes(kind)?'result':'related',...(relatedNotes?{note:relatedNotes[related_post_id]||''}:{})})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
       }else if(table==='media'){
         // save_entity inserts before resolving the conflict, so it cannot update media rows (storage path and hash are required). Media keeps its file and only updates the editable fields.
         const r=await supabase.from('media').update(Object.fromEntries(entities.media.fields.filter(f=>current[f.key]!==undefined).map(f=>[f.key,current[f.key]]))).eq('id',current.id);if(r.error)throw r.error;
@@ -306,6 +345,7 @@ export function EncountersCms(){
   function duplicate(){if(!record)return;setRecord(duplicateContent(record,crypto.randomUUID()));setBlocks(blocks.map(b=>({...b,id:crypto.randomUUID(),source_block_id:undefined})));setChildRows(childRows.map(c=>({...c,id:crypto.randomUUID()})));setMessage('New draft copy. Save when ready.');}
   async function createProfile(){if(!supabase||!record?.updated_at)return;setBusy(true);try{const r=await supabase.rpc('create_crew_profile',{member_id:record.id});if(r.error)throw r.error;setRecord({...record,page_post_id:r.data,has_page:true});setRevision(x=>x+1);setMessage('Draft profile created. Open its blocks to edit and publish.');}catch(e){setMessage((e as {message?:string}).message||'Could not create profile');}finally{setBusy(false);}}
   async function upload(file:File){setBusy(true);try{const url=await uploadMediaFile(file,'posts');setRevision(x=>x+1);setMessage(`Image uploaded: ${url}`);}catch{setMessage('Image upload failed.');}finally{setBusy(false);}}
+  function deletedMember(name:string){setRecord(null);setRevision(r=>r+1);setMessage(`${name} was deleted.`);void requestAdminRevalidation({scope:'posts'});}
   function back(){if(dirty&&!window.confirm('Leave without saving your changes?'))return;setRecord(null);setMessage('');}
   function moveBlock(i:number,step:number){const n=[...blocks];[n[i+step],n[i]]=[n[i],n[i+step]];setBlocks(n);}
   const label=kindParam?kindListLabels[kindParam]||kindLabel(kindParam):pagesOnly?'Pages':tableLabel(table);
@@ -327,7 +367,7 @@ export function EncountersCms(){
       <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'&&kindParam==='crew_member'?'The page of each person of the Crew: its banner and the blocks below it. Drafts stay private until you publish them.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
       </AdminHeader>
-      {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person: it is created from that person in <Link href="/admin/content?table=crew_members">People</Link> (“Create personal page”).</p>}
+      {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person: it is created from that person in <Link href="/admin/content?table=crew_members">Crew</Link> (“Create personal page”).</p>}
       {table==='posts'&&kindParam&&kindParam!=='crew_member'&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
       {table==='posts'&&pagesOnly&&<p className="adm-help">Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.</p>}
       {table==='posts'&&!kindParam&&!pagesOnly&&<div className="adm-stack" style={{gap:14}}>
@@ -363,7 +403,7 @@ export function EncountersCms(){
 
   if(table!=='posts'){
     const seoKeys=table==='art_categories'?['seo_title','meta_description']:[];
-    const side=pick(fields,entitySide).filter(f=>f.key!=='page_post_id');const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
+    const side=pick(fields,entitySide).filter(f=>f.key!=='page_post_id'&&(f.key!=='listed'||record.listed!==undefined));const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
     const bytes=Number(record.bytes)||0;
     return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
       <AdminHeader kicker={tableLabel(table)} title={title}/>
@@ -379,6 +419,7 @@ export function EncountersCms(){
         {table==='media'&&<Card title="File">{needsAlt(record)&&<p className="adm-notice adm-notice--error" style={{marginBottom:12}}>Add a description: it is read aloud to people who cannot see the image.</p>}<dl className="adm-facts"><div><dt>Format</dt><dd>{String(record.mime_type||'—').replace('image/','').toUpperCase()}</dd></div><div><dt>Size</dt><dd>{record.width&&record.height?`${record.width} × ${record.height} px`:'—'}</dd></div><div><dt>Weight</dt><dd>{bytes?bytes>1048576?`${(bytes/1048576).toFixed(1)} MB`:`${Math.round(bytes/1024)} KB`:'—'}</dd></div></dl><p className="adm-help" style={{marginTop:12}}>Images stay private until they are used in published content. Uploading the same image again reuses this one.</p></Card>}
         {side.length>0&&<Card title="Publication"><Fields fields={side} value={record} onChange={setRecord} options={options}/></Card>}
         {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options}/></Card>}
+        {table==='crew_members'&&saved&&<CrewRemoval member={record} page={(options.posts||[]).find(p=>p.id===record.page_post_id)} busy={busy} onHide={record.listed!==undefined&&record.listed!==false?()=>void save(undefined,{listed:false}):undefined} onDeleted={deletedMember}/>}
       </aside></div>
     </form></FieldErrors.Provider></ReloadOptions.Provider>;
   }
@@ -393,8 +434,8 @@ export function EncountersCms(){
       {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>
       :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
         <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
-      <Card title={isCrewPage?'Sections of The Crew page':kind==='crew_member'?'Below the banner':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':kind==='crew_member'?'Everything under the banner, block by block, in this order. Profile blocks have the design of the personal page; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
-        {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in People.</small></li></ul>}
+      <Card title={isCrewPage?'Sections of The Crew page':kind==='crew_member'?'Below the banner':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from Crew.':kind==='crew_member'?'Everything under the banner, block by block, in this order. Profile blocks have the design of the personal page; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
+        {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in Crew.</small></li></ul>}
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{profileKinds.find(k=>k.layout===profileLayout(b))?.label||blockLabel(b.type)}</span><div className="adm-block-tools">
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===0} onClick={()=>moveBlock(i,-1)} aria-label={`Move block ${i+1} up`}><ArrowUp aria-hidden="true"/>Up</button>
@@ -422,8 +463,10 @@ export function EncountersCms(){
       </Card>
       <Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
         <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:undefined}/>
+        {kind==='crew_member'&&relatedNotes&&related.length>0&&<fieldset className="adm-group"><legend>Comments</legend><p className="adm-help">Optional. Shown under each item, e.g. why it matters to this person.</p>
+          {related.map(id=>{const p=(options.posts||[]).find(x=>String(x.id)===id);return <MarkedText key={id} id={`related-note-${id}`} label={String(p?.title||'Related item')} value={relatedNotes[id]||''} onChange={v=>setRelatedNotes({...relatedNotes,[id]:v})} placeholder="e.g. I organise most of these workshops." hint={p?kindLabel(String(p.kind)):undefined}/>;})}</fieldset>}
       </Card>
-      {kind==='crew_member'&&<Card title="Contact" lead="Shown at the end of the personal page, after the crew.">{pageOwner?<p className="adm-help">The links come from <Link href={`/admin/content?table=crew_members&edit=${String(pageOwner.id)}`}>People → {String(pageOwner.name)}</Link> → Optional contact and social links. An email address becomes a mail link; a website can be written with or without https://. {Object.keys((pageOwner.social_links||{}) as Row).length?`Now: ${Object.keys((pageOwner.social_links||{}) as Row).join(', ')}.`:'Now there are none.'}</p>:<p className="adm-help">This page has no person yet.</p>}</Card>}</>}
+      {kind==='crew_member'&&<Card title="Contact" lead="Shown at the end of the personal page, after the crew.">{pageOwner?<p className="adm-help">The links come from <Link href={`/admin/content?table=crew_members&edit=${String(pageOwner.id)}`}>Crew → {String(pageOwner.name)}</Link> → Optional contact and social links. An email address becomes a mail link; a website can be written with or without https://. {Object.keys((pageOwner.social_links||{}) as Row).length?`Now: ${Object.keys((pageOwner.social_links||{}) as Row).join(', ')}.`:'Now there are none.'}</p>:<p className="adm-help">This page has no person yet.</p>}</Card>}</>}
       {children[kind]&&<Card title={children[kind].label}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} prefix={`child-${i}-`} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
         <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setChildRows([...childRows,{id:crypto.randomUUID(),sort:childRows.length,...(kind==='expedition'?{status:'pending'}:{})}])}><Plus aria-hidden="true"/>Add {kind==='expedition'?'need':'session'}</button></div></div></Card>}
       {kind!=='crew_member'&&<Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>}

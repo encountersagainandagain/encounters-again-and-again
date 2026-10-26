@@ -38,7 +38,8 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
   - **Nombres:** «Large title» → «Main title»; «Chapter» → «Title, text & photos».
   - **Editor:** botones flotantes abajo a la derecha: «Top» (aparece al bajar) y «Save» («Save changes» resaltado si hay cambios sin guardar). Van fuera de la barra superior porque su desenfoque fijaría el `position:fixed` a la barra.
   - **Cierre de la página personal** (`ProfileFooter`): banda oscura del color del pie, justo encima de él, con tres columnas que aparecen solo si tienen algo: **Related encounters** (Related content: tipo, título con enlace y comentario), **Crew** (Credited crew sin la propia persona: retrato, nombre con enlace si tiene página visible, y su texto como comentario, con formato) y **Contact** (People → social links: un email se vuelve `mailto:`, un dominio sin `https://` se completa; lo mismo alimenta `sameAs`). El contacto se movió ahí desde después de los bloques. Sin datos no se muestra (página idéntica píxel a píxel).
-  - **Comentario de cada Related content: pendiente.** Necesita la columna `post_relations.note` (migración) y `db push` aplicaría también `…0100` y `…0200`, que siguen sin aplicarse en la base real. La página ya lee `note` y muestra el comentario cuando exista.
+  - **Comentario de cada Related content:** en el editor, un campo «Comments» por elemento elegido (con B / I / U); se muestra debajo de cada uno en el cierre. Necesita `post_relations.note` (migración `…20261026000100`, pendiente en la base real).
+  - **Crew (antes «People») en el menú.** En la ficha de una persona, tarjeta «Remove» al final: «Hide from The Crew page» (o el tilde «Show on The Crew page» en Publication; `listed=false`: sale de /crew y del Home, su página y créditos siguen) y «Delete…» en dos pasos: primero qué se borra (la persona, sus N créditos, su página con sus bloques, relaciones e historial de direcciones; las fotos quedan), después escribir el nombre. Borra la persona y luego su página (las tablas dependientes caen por `on delete cascade`). Probado en local: ocultar (sale de /crew, la página responde 200), volver a mostrar, y borrar (persona, página y bloques en 0, la dirección da 404).
 - **Carga y edición** por Juani, como los fundadores, con el contenido original: [guía de carga editorial](guia-carga-editorial.md). Cubre Crew y su página, el libro Encounters en Art, Expeditions, el workshop original con etapas, el Meaningful Message, Home, About y Contact.
 - **Contenido para corregir en el CMS:** líneas repetidas y «Australia.She» en Expeditions; foto de portada de Expeditions de 963 px.
 - **Decidir qué ejemplos retirar.** Se retiran de a uno con «Unpublish», o se conservan editándolos.
@@ -629,7 +630,11 @@ Capturas: [verification/review-2026-10-19-newsletter/](verification/review-2026-
 
 ### Migraciones pendientes en la base remota (en orden; no aplicadas)
 
-Las 14 primeras (hasta `20261006000100_art_crew_publication.sql`) ya están en la base real. Faltan, solo probadas en local:
+**Actualizado 2026-10-26:** `…20261017000100` y `…20261017000200` **ya están en la base real** (comprobado leyendo `crew_members.highlight`/`favourite_animal`, `workshops.note_title`/`outcome` y `expeditions.outcome` con la clave pública). Falta, solo probada en local:
+
+- `supabase/migrations/20261026000100_crew_listing_relation_notes.sql` — `crew_members.listed` (sacar a alguien de The Crew page y del Home sin borrar su página) y `post_relations.note` (comentario por relación); `save_content` igual salvo que guarda `note`. No convierte ni borra nada. El código ya desplegado funciona sin ella: las dos opciones aparecen en el admin recién cuando existan las columnas.
+
+Historial (ya aplicadas):
 
 1. `supabase/migrations/20261017000100_crew_page_sections.sql` — campos `crew_members.highlight` y `favourite_animal`, conversión única de los textos importados y secciones explícitas de los bloques de la página Team.
 2. `supabase/migrations/20261017000200_activity_presentation.sql` — `workshops.note_title`, `workshops.outcome` y `expeditions.outcome` (textos opcionales; no convierte ni borra nada).

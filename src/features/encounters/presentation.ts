@@ -2,6 +2,8 @@ export type Row = Record<string, unknown>;
 export const string = (value: unknown) => typeof value === 'string' ? value : '';
 export const safeHref = (value: unknown) => typeof value === 'string' && (/^(https?:\/\/|mailto:|tel:)/i.test(value) || /^\/(?!\/)/.test(value) || /^#[\w-]+$/.test(value)) ? value : undefined;
 export const byOrder = (a: Row, b: Row) => Number(a.sort || 0) - Number(b.sort || 0);
+// On The Crew page and the Home strip; a person taken off them (listed=false) keeps their personal page and credits.
+export const listedCrew = (member: Row) => member.listed !== false;
 export function profileVisible(member: Row, posts: Row[]) {
   return member.status === 'published' && member.has_page === true && posts.some(p => p.id === member.page_post_id && p.kind === 'crew_member' && p.status === 'published');
 }

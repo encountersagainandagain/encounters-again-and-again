@@ -27,7 +27,7 @@ export const adminSections=[
   {href:'/admin/page-settings?page=messages',label:'Messages page',icon:PanelsTopLeft,group:'Meaningful Messages',enabled:modules.messages},
   {href:'/admin/content?table=posts&kind=news',label:'News',icon:Newspaper,group:'News and announcements',enabled:modules.stories},
   {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'News and announcements',enabled:modules.upcoming},
-  {href:'/admin/content?table=crew_members',label:'People',icon:Users,group:'Crew',enabled:modules.crew},
+  {href:'/admin/content?table=crew_members',label:'Crew',icon:Users,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&kind=crew_member',label:'Personal pages',icon:UserRound,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&page=team',label:'The Crew page (/crew)',icon:PanelsTopLeft,group:'Crew',enabled:modules.crew},
   {href:'/admin/page-settings?page=about',label:'About page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
