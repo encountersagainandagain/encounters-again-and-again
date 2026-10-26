@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {profileHero,safeHref,string,type Row} from '@/features/encounters/presentation';
-import {composeProfile,type Block,type Picture} from '@/features/encounters/profile-sections';
+import {composeProfile,hasProfileBlocks,profileLayout,type Block,type Picture} from '@/features/encounters/profile-sections';
 import {EditorialBlocks} from './EditorialBlocks';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
@@ -16,6 +16,7 @@ export function ProfileView({member,post,blocks,media,trail,children}:{member:Ro
   return <><PhotoHero pinned title={hero.title} kicker={hero.kicker} cover={hero.cover} fallback={hero.fallback} media={media}/><div id="editorial-content">{trail}<ProfileStory blocks={blocks} media={media} kicker={string(member.alias)||string(member.name)}/>{children}</div></>;
 }
 export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
+  if(hasProfileBlocks(blocks as Block[]))return <ProfileBlocks blocks={blocks} media={media} kicker={kicker}/>;
   const {intro,pair,covers:openingCovers,segments}=composeProfile(blocks as Block[]);
   // Small originals keep their own size on the tile instead of being enlarged.
   const small=(picture:Picture)=>Number(media.find(m=>m.id===picture.id)?.width||0)<600;
@@ -34,4 +35,35 @@ export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:
     {covers(openingCovers,'opening-covers')}
     {rendered}
   </>;
+}
+
+// Profile blocks (profile-sections.ts): each block is one visual unit, shown in its order with the same markup as
+// the previous section reading, so a converted page looks the same. Ordinary blocks in between use the post renderer.
+const imagesOf=(c:Row):Picture[]=>(Array.isArray(c.images)?c.images as Row[]:[]).map(img=>({id:img.media_id,caption:string(img.caption)})).filter(p=>p.id);
+const textsOf=(c:Row)=>string(c.text).split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean);
+function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
+  const small=(picture:Picture)=>Number(media.find(m=>m.id===picture.id)?.width||0)<600;
+  const covers=(images:Picture[],key:string)=>images.length>0&&<section className="crew-row profile-covers" key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
+  const tiles=(images:Picture[],compact:boolean)=><div className={`crew-pairs profile-tiles${compact?' profile-tiles-compact':''}`}>{images.map((picture,i)=><figure key={i} data-seq={`${i%2?(compact?.9:.86):1},0.34,70`}><MediaImage id={picture.id} media={media} contain/>{picture.caption&&<figcaption>{picture.caption}</figcaption>}</figure>)}</div>;
+  const out:ReactNode[]=[];let plain:ContentBlock[]=[];
+  const flush=()=>{if(plain.length){out.push(<EditorialBlocks key={`blocks-${out.length}`} blocks={plain} media={media}/>);plain=[];}};
+  for(let i=0;i<blocks.length;i++){const b=blocks[i],c=b.content as Row,layout=profileLayout(b);
+    if(!layout){plain.push(b);continue;}
+    flush();const key=b.id||i;
+    if(layout==='profile-title'){out.push(<section className="crew-opening profile-opening" key={key}><h2 data-seq="0.95,0.5" id={anchor(b)}>{string(c.text)}</h2><Scribble variant="title"/></section>);continue;}
+    if(layout==='profile-intro'){const titled=i>0&&profileLayout(blocks[i-1])==='profile-title';const line=string(c.kicker)||kicker;
+      out.push(<section className={`crew-row crew-origin${titled?'':' profile-untitled'}`} key={key}><div data-seq={titled?'1.42,0.6':'0.95,0.5'}>{line&&<span className="editorial-kicker">{line}</span>}{textsOf(c).map((text,n)=><p key={n} className={n===0?'crew-lead':undefined}>{text}</p>)}</div></section>);continue;}
+    if(layout==='profile-pair'){const pair=imagesOf(c).slice(0,2);if(pair.length)out.push(<section className="crew-pair-pin" data-pair-pin key={key}><div className={`crew-pair${pair.length===1?' crew-pair-single':''}`}>{pair.map((picture,n)=><div key={n} data-pair={n?'b':'a'} className={small(picture)?'profile-natural':undefined}><MediaImage id={picture.id} media={media}/></div>)}</div></section>);continue;}
+    if(layout==='profile-row'){const row=covers(imagesOf(c),String(key));if(row)out.push(row);continue;}
+    if(layout==='profile-chapter'){const texts=textsOf(c),links=(Array.isArray(c.links)?c.links as Row[]:[]).filter(l=>safeHref(l.url)),subtitles=(Array.isArray(c.subtitles)?c.subtitles:[]).map(string).filter(Boolean);
+      out.push(<section className="crew-row crew-project profile-chapter" key={key}><div className="profile-chapter-title" data-seq="1.2,0.5">{string(c.title)&&<h2 id={anchor(b)}>{string(c.title)}</h2>}{subtitles.map((t,n)=><span key={n}>{t}</span>)}</div>{(texts.length>0||links.length>0)&&<div data-seq="1.05,0.5">{texts.map((text,n)=><p key={n} className={n===0&&texts.length>1?'crew-voice':undefined}>{text}</p>)}{links.map((link,n)=><a className="profile-link" href={safeHref(link.url)} key={n}>{string(link.label)||string(link.url)} <span aria-hidden="true">→</span></a>)}</div>}</section>);
+      const row=covers(imagesOf(c),`${key}-photos`);if(row)out.push(row);continue;}
+    // Dark gallery: this block and the following ones share one dark section.
+    const groups:{title:string;images:Picture[]}[]=[];let j=i;
+    for(;j<blocks.length&&profileLayout(blocks[j])==='profile-gallery';j++){const g=blocks[j].content as Row;groups.push({title:string(g.title),images:imagesOf(g)});}
+    i=j-1;
+    out.push(<section className="crew-members profile-gallery" key={key}>{groups.map((group,n)=>n===0?[<div className="crew-heading" key="heading"><h2 data-seq="1.1,0.5">{group.title}</h2><Scribble variant="loop"/></div>,<div key="tiles">{tiles(group.images,false)}</div>]:<div className="profile-drafts" key={n}><span className="editorial-kicker" data-seq="1.1,0.45">{group.title}</span>{tiles(group.images,true)}</div>)}</section>);
+  }
+  flush();
+  return <>{out}</>;
 }

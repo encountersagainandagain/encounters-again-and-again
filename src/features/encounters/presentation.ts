@@ -14,7 +14,7 @@ export const meetLine = (member: Row) => { const first = string(member.name).tri
 export function profileHero(member: Row, post: Row, blocks: { type: string; content: Row }[]) {
   const name = string(member.alias) || string(member.name) || string(post.title);
   // Explicit profiles (blocks with sections).
-  if (blocks.some(b => string(b.content.section))) {
+  if (blocks.some(b => string(b.content.section) || string(b.content.layout).startsWith('profile-'))) {
     const design = string(post.cover_image).startsWith('/design/') ? string(post.cover_image) : undefined;
     return { title: name, kicker: string(post.kicker) || meetLine(member), cover: post.cover_id || (design ? undefined : member.portrait_id), fallback: design };
   }

@@ -95,3 +95,38 @@ export function composeSections(blocks:Block[]):Composition{
   return {intro,pair,covers:[...pairImages.slice(2),...covers],segments};
 }
 export const composeProfile=(blocks:Block[])=>composeSections(hasSections(blocks)?blocks:toSections(blocks));
+
+// ---- Profile blocks (2026-10-26) --------------------------------------------------------------------------------
+// The personal page below the banner is a list of blocks shown in their order. Each visual unit of Wild Wonders.dc.html
+// is one block that holds everything it shows; nothing is grouped or placed by markers. content.layout names the unit
+// (the stored type is one the database accepts); blocks without a layout are ordinary blocks, shown as in a post.
+// Consecutive dark galleries share one dark section: the first title is large, the next ones are small.
+export const profileKinds=[
+  {layout:'profile-title',type:'heading',label:'Large title',hint:'A big title with a hand-drawn line, e.g. “meet georgia”.'},
+  {layout:'profile-intro',type:'paragraph',label:'Opening text',hint:'Paragraphs; the first one is larger. A small line above it (empty: the alias).'},
+  {layout:'profile-pair',type:'image-pair',label:'Pinned photo pair',hint:'One or two photos side by side that stay while the page scrolls.'},
+  {layout:'profile-row',type:'image',label:'Photo row',hint:'Photos in a row, each with an optional caption.'},
+  {layout:'profile-chapter',type:'paragraph',label:'Chapter',hint:'A title and subtitles, its text, links and a row of photos.'},
+  {layout:'profile-gallery',type:'image',label:'Dark gallery',hint:'A title and photos on a dark background. The next dark galleries continue it with a smaller title.'},
+] as const;
+export type ProfileLayout=typeof profileKinds[number]['layout'];
+export const profileLayout=(b:{content:Row}):ProfileLayout|null=>profileKinds.some(k=>k.layout===b.content.layout)?b.content.layout as ProfileLayout:null;
+export const hasProfileBlocks=(blocks:{content:Row}[])=>blocks.some(b=>profileLayout(b)!==null);
+const image=(p:Picture)=>({media_id:p.id,caption:p.caption||undefined,src:p.id?`/api/media/${String(p.id)}`:undefined});
+const strip=(b:Block)=>{const content={...b.content};delete content.section;delete content.in_pair;return {...b,content};};
+// The current page, whatever its markers, as profile blocks that show the same thing in the same order.
+export function toProfileBlocks(blocks:Block[]):Block[]{
+  const {intro,pair,covers,segments}=composeProfile(blocks);const out:Block[]=[];
+  const add=(type:string,content:Row,from?:Block)=>out.push({id:globalThis.crypto.randomUUID(),type,content,position:out.length,...(from?.anchor?{anchor:from.anchor}:{})});
+  if(intro.title)add('heading',{layout:'profile-title',text:title(intro.title)},intro.title);
+  if(intro.texts.length)add('paragraph',{layout:'profile-intro',text:intro.texts.join('\n\n')});
+  if(pair.length)add('image-pair',{layout:'profile-pair',images:pair.map(image)});
+  if(covers.length)add('image',{layout:'profile-row',images:covers.map(image)});
+  for(const s of segments){
+    if(s.type==='blocks'){for(const b of s.blocks)out.push({...strip(b),position:out.length});continue;}
+    if(s.type==='gallery'){for(const g of s.groups)add('image',{layout:'profile-gallery',title:g.text,images:g.images.map(image)});continue;}
+    const [heading,...subtitles]=s.headings;
+    add('paragraph',{layout:'profile-chapter',title:heading?title(heading):'',subtitles:subtitles.map(title),text:s.texts.join('\n\n'),links:s.links.map(l=>({label:str(l.label),url:str(l.url)})),images:s.images.map(image)},heading);
+  }
+  return out;
+}

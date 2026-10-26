@@ -31,6 +31,19 @@ export default async function ReviewPage({params,searchParams}:{params:Promise<{
     const view=sparse?{...referenceView,home:{...referenceView.home,descent:{},about:{}},sections:referenceView.sections.filter(k=>k!=='descent'&&k!=='about'),agenda:referenceView.agenda.slice(0,2),happened:referenceView.happened.slice(0,1),art:referenceView.art.slice(0,2),crew:referenceView.crew.slice(0,3)}:referenceView;
     return <><aside className="review-notice review-notice--home" aria-label="Local visual reference"><strong>LOCAL VISUAL REFERENCE</strong> · Prototype texts and images, not CMS content.</aside><div className="editorial-page home-page"><HomeView view={view} media={referenceMedia} closing="May the ocean be with you" newsletter={false}/></div></>;
   }
+  if(path[0]==='profile'&&path.length===2){
+    // A real crew profile (published data, read only) with its blocks converted to profile blocks, to compare it
+    // with /crew/<slug>, which still reads them as before. Nothing is saved.
+    const {editorialData,visibleProfile}=await import('@/features/encounters/editorial-data');
+    const {readBlocks}=await import('@/features/encounters/public-content');
+    const {toProfileBlocks}=await import('@/features/encounters/profile-sections');
+    const {ProfileView}=await import('@/components/public/ProfileStory');
+    const data=await editorialData();const member=visibleProfile(data,path[1]);if(!member)notFound();
+    const saved=data.posts.find(p=>p.id===member.page_post_id)!;const blocks=toProfileBlocks((await readBlocks(String(saved.id))) as never);
+    // As the admin does when it opens the page: the Wild Wonders design banner becomes the page's explicit design image.
+    const post=member.slug==='wild-wonders'&&(!saved.cover_id||saved.cover_id===member.portrait_id)?{...saved,cover_id:null,cover_image:'/design/ww-banner.webp'}:saved;
+    return <ScrollStage className="editorial-page profile-page"><ProfileView member={member} post={post} blocks={blocks as never} media={data.media} trail={<Breadcrumbs items={[{label:'The crew',href:'/crew'},{label:string(member.name),href:`/crew/${path[1]}`}]}/>}/></ScrollStage>;
+  }
   if(route==='/expeditions'){
     // Visual reference of Expeditions.dc.html: the real template with the prototype's texts, images and five cards.
     const ref=await import('@/features/encounters/expeditions-reference');

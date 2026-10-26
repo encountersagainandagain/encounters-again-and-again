@@ -23,6 +23,11 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 - Implementación de animación y rendimiento documentada en el [playbook](animation-performance-playbook.md).
 
 ### Pendiente de prueba manual del CMS
+- **Página personal de Crew (2026-10-26, en prueba con Juani):**
+  - **Banner explícito:** título grande = Crew «Alias / project» (o Name); línea chica = la de la página, o «meet <primer nombre>» de Name; foto = la de la página, o el retrato. Tiene su tarjeta «Banner» arriba del editor.
+  - **Debajo del banner, solo bloques en orden.** Bloques de perfil: Large title, Opening text, Pinned photo pair, Photo row, Chapter y Dark gallery; además, los bloques comunes. Se acabó el selector «Place on the page».
+  - Al abrir una página guardada antes, el admin la muestra convertida a esos bloques. **Hasta guardar, el sitio sigue igual.** La conversión de Wild Wonders y de los 3 ejemplos se comparó píxel por píxel con la página actual: es idéntica (Georgia: 5 píxeles de antialiasing, mismo alto).
+  - Pendiente: «Credited crew», «Related content» y «Search and sharing».
 - **Carga y edición** por Juani, como los fundadores, con el contenido original: [guía de carga editorial](guia-carga-editorial.md). Cubre Crew y su página, el libro Encounters en Art, Expeditions, el workshop original con etapas, el Meaningful Message, Home, About y Contact.
 - **Contenido para corregir en el CMS:** líneas repetidas y «Australia.She» en Expeditions; foto de portada de Expeditions de 963 px.
 - **Decidir qué ejemplos retirar.** Se retiran de a uno con «Unpublish», o se conservan editándolos.
