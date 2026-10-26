@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {profileHero,safeHref,string,type Row} from '@/features/encounters/presentation';
-import {composeProfile,hasProfileBlocks,profileLayout,profileParagraphs,type Block,type Paragraph,type Picture} from '@/features/encounters/profile-sections';
+import {chapterPhotos,composeProfile,hasProfileBlocks,profileLayout,profileParagraphs,type Block,type Paragraph,type Picture} from '@/features/encounters/profile-sections';
 import {EditorialBlocks} from './EditorialBlocks';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
@@ -46,7 +46,7 @@ const marked=(text:string)=>text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).map((par
 const paragraph=(p:Paragraph,key:number)=><p key={key} className={styleClass[p.style]}>{marked(p.text)}</p>;
 function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
   const small=(picture:Picture)=>Number(media.find(m=>m.id===picture.id)?.width||0)<600;
-  const covers=(images:Picture[],key:string)=>images.length>0&&<section className="crew-row profile-covers" key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
+  const covers=(images:Picture[],key:string,chapter=false)=>images.length>0&&<section className={`crew-row profile-covers${chapter?' profile-chapter-photos':''}`} data-count={chapter?images.length:undefined} key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
   const tiles=(images:Picture[],compact:boolean)=><div className={`crew-pairs profile-tiles${compact?' profile-tiles-compact':''}`}>{images.map((picture,i)=><figure key={i} data-seq={`${i%2?(compact?.9:.86):1},0.34,70`}><MediaImage id={picture.id} media={media} contain/>{picture.caption&&<figcaption>{picture.caption}</figcaption>}</figure>)}</div>;
   const out:ReactNode[]=[];let plain:ContentBlock[]=[];
   const flush=()=>{if(plain.length){out.push(<EditorialBlocks key={`blocks-${out.length}`} blocks={plain} media={media}/>);plain=[];}};
@@ -60,7 +60,7 @@ function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];
     if(layout==='profile-row'){const row=covers(imagesOf(c),String(key));if(row)out.push(row);continue;}
     if(layout==='profile-chapter'){const texts=profileParagraphs(c).filter(p=>p.text.trim()),links=(Array.isArray(c.links)?c.links as Row[]:[]).filter(l=>safeHref(l.url)),subtitles=(Array.isArray(c.subtitles)?c.subtitles:[]).map(string).filter(Boolean);
       out.push(<section className="crew-row crew-project profile-chapter" key={key}><div className="profile-chapter-title" data-seq="1.2,0.5">{string(c.title)&&<h2 id={anchor(b)}>{string(c.title)}</h2>}{subtitles.map((t,n)=><span key={n}>{t}</span>)}</div>{(texts.length>0||links.length>0)&&<div data-seq="1.05,0.5">{texts.map(paragraph)}{links.map((link,n)=><a className="profile-link" href={safeHref(link.url)} key={n}>{string(link.label)||string(link.url)} <span aria-hidden="true">→</span></a>)}</div>}</section>);
-      const row=covers(imagesOf(c),`${key}-photos`);if(row)out.push(row);continue;}
+      const row=covers(imagesOf(c).slice(0,chapterPhotos),`${key}-photos`,true);if(row)out.push(row);continue;}
     // Dark gallery: this block and the following ones share one dark section.
     const groups:{title:string;images:Picture[]}[]=[];let j=i;
     for(;j<blocks.length&&profileLayout(blocks[j])==='profile-gallery';j++){const g=blocks[j].content as Row;groups.push({title:string(g.title),images:imagesOf(g)});}

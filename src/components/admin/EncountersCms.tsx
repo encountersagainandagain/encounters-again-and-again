@@ -12,7 +12,7 @@ import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
-import {hasProfileBlocks,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
+import {chapterPhotos,hasProfileBlocks,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
 import {crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 import {meetLine} from '@/features/encounters/presentation';
 type Row=Record<string,unknown>;
@@ -102,7 +102,7 @@ function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index
 }
 // Fields of a profile block (profile-sections.ts): each one holds everything it shows.
 // Paragraphs of an opening text or a chapter, each with its style; **bold** and *italic* mark words inside them.
-function ParagraphsField({content,index,onChange}:{content:Row;index:number;onChange:(content:Row)=>void}){
+function ParagraphsField({content,index,onChange,legend='Paragraphs'}:{content:Row;index:number;onChange:(content:Row)=>void;legend?:string}){
   const list=profileParagraphs(content);
   const set=(next:Paragraph[])=>onChange({...content,paragraphs:next,text:next.map(p=>p.text.trim()).filter(Boolean).join('\n\n')});
   const edit=(n:number,p:Partial<Paragraph>)=>set(list.map((x,k)=>k===n?{...x,...p}:x));
@@ -111,7 +111,7 @@ function ParagraphsField({content,index,onChange}:{content:Row;index:number;onCh
   const mark=(n:number,m:string)=>{const el=document.getElementById(`block-${index}-paragraph-${n}`) as HTMLTextAreaElement|null;if(!el)return;
     const {selectionStart:a,selectionEnd:b,value}=el;const words=value.slice(a,b)||'text';edit(n,{text:value.slice(0,a)+m+words+m+value.slice(b)});
     requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
-  return <fieldset className="adm-group"><legend>Paragraphs</legend>
+  return <fieldset className="adm-group"><legend>{legend}</legend>
     <p className="adm-help">Each paragraph is shown with its style. Select words and use <b>B</b> or <i>I</i> to make them bold or italic.</p>
     {list.map((p,n)=><div key={n} className="adm-paragraph">
       <div className="adm-paragraph-head">
@@ -137,11 +137,13 @@ function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;con
     {kind&&<p className="adm-help">{kind.hint}</p>}
     {layout==='profile-title'&&<div className="adm-fields">{text('text','Title',2)}</div>}
     {layout==='profile-intro'&&<div className="adm-fields"><label className="adm-field">Small line<input value={String(c.kicker||'')} placeholder="Empty: the alias" onChange={e=>set({...c,kicker:e.target.value})}/></label></div>}
-    {(layout==='profile-intro'||layout==='profile-chapter')&&<ParagraphsField content={c} index={index} onChange={set}/>}
-    {layout==='profile-chapter'&&<div className="adm-fields">{text('title','Title',2)}<label className="adm-field adm-field--wide">Subtitles<textarea rows={2} value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={e=>set({...c,subtitles:e.target.value.split('\n')})}/><small>Optional. One per line, shown under the title.</small></label></div>}
-    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Links</legend>{links.map((l,n)=><div key={n} className="adm-fields"><label className="adm-field">Link text<input value={String(l.label||'')} onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,label:e.target.value}:x)})}/></label><label className="adm-field">Link<input value={String(l.url||'')} placeholder="https://… or /art" onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,url:e.target.value}:x)})}/></label><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>set({...c,links:links.filter((_,k)=>k!==n)})}>Remove link</button></div>)}<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set({...c,links:[...links,{label:'',url:''}]})}><Plus aria-hidden="true"/>Add link</button></fieldset>}
+    {layout==='profile-intro'&&<ParagraphsField content={c} index={index} onChange={set}/>}
+    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Left · title</legend><div className="adm-fields">{text('title','Title',2)}<label className="adm-field adm-field--wide">Subtitles<textarea rows={2} value={(Array.isArray(c.subtitles)?c.subtitles as string[]:[]).join('\n')} onChange={e=>set({...c,subtitles:e.target.value.split('\n')})}/><small>Optional. One per line, shown large under the title.</small></label></div></fieldset>}
+    {layout==='profile-chapter'&&<ParagraphsField content={c} index={index} onChange={set} legend="Right · paragraphs"/>}
+    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Right · links, under the paragraphs</legend>{links.map((l,n)=><div key={n} className="adm-fields"><label className="adm-field">Link text<input value={String(l.label||'')} onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,label:e.target.value}:x)})}/></label><label className="adm-field">Link<input value={String(l.url||'')} placeholder="https://… or /art" onChange={e=>set({...c,links:links.map((x,k)=>k===n?{...x,url:e.target.value}:x)})}/></label><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>set({...c,links:links.filter((_,k)=>k!==n)})}>Remove link</button></div>)}<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set({...c,links:[...links,{label:'',url:''}]})}><Plus aria-hidden="true"/>Add link</button></fieldset>}
     {layout==='profile-gallery'&&<div className="adm-fields">{text('title','Title',2,'The first dark gallery shows it large; the next ones in a row, small.')}</div>}
-    {(layout==='profile-pair'||layout==='profile-row'||layout==='profile-chapter'||layout==='profile-gallery')&&<BlockImages block={block} index={index} max={layout==='profile-pair'?2:12} media={media} onChange={content=>set({...content,layout})}/>}
+    {layout==='profile-chapter'&&<fieldset className="adm-group"><legend>Below · photos</legend><p className="adm-help">Up to {chapterPhotos}. One is centred; two, three or four share a row on wide screens, two per row on tablets and one under another on phones.</p><BlockImages block={block} index={index} max={chapterPhotos} media={media} onChange={content=>set({...content,layout})}/></fieldset>}
+    {(layout==='profile-pair'||layout==='profile-row'||layout==='profile-gallery')&&<BlockImages block={block} index={index} max={layout==='profile-pair'?2:12} media={media} onChange={content=>set({...content,layout})}/>}
   </div>;
 }
 function BlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
