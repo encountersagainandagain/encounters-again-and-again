@@ -23,13 +23,13 @@ export function publicPath(table:string,record:Row,detail:Row,options:Record<str
 }
 
 // Search and sharing, explained with the values that will actually be used.
-export function SeoPanel({value,onChange,path,fallbackTitle,fallbackDescription,image}:{value:Row;onChange:(v:Row)=>void;path:string;fallbackTitle:string;fallbackDescription:string;image:unknown}){
+export function SeoPanel({value,onChange,path,fallbackTitle,fallbackDescription,image,fallbackSource='the summary above'}:{value:Row;onChange:(v:Row)=>void;path:string;fallbackTitle:string;fallbackDescription:string;image:unknown;fallbackSource?:string}){
   const title=text(value.seo_title)||fallbackTitle||'Untitled';const description=text(value.meta_description)||fallbackDescription;
   const shownTitle=`${title} | ${brand.name}`;const cut=(s:string,n:number)=>s.length>n?s.slice(0,n-1).trimEnd()+'…':s;
   return <div className="adm-stack" style={{gap:18}}>
     <div className="adm-fields">
       <label className="adm-field" htmlFor="field-seo_title">Title in search results<input id="field-seo_title" value={text(value.seo_title)} placeholder={fallbackTitle} onChange={e=>onChange({...value,seo_title:e.target.value})}/><small>Leave empty to use the title. Around 50–60 characters reads best · {title.length} now.</small></label>
-      <label className="adm-field adm-field--wide" htmlFor="field-meta_description">Short description<textarea id="field-meta_description" rows={3} value={text(value.meta_description)} placeholder={fallbackDescription||'One or two sentences about this page.'} onChange={e=>onChange({...value,meta_description:e.target.value})}/><small>{text(value.meta_description)?'':fallbackDescription?'Empty: the summary above is used. ':'Empty: the general site description is used. '}Search engines may show other text; aim for 120–160 characters · {description.length} now.</small></label>
+      <label className="adm-field adm-field--wide" htmlFor="field-meta_description">Short description<textarea id="field-meta_description" rows={3} value={text(value.meta_description)} placeholder={fallbackDescription||'One or two sentences about this page.'} onChange={e=>onChange({...value,meta_description:e.target.value})}/><small>{text(value.meta_description)?'':fallbackDescription?`Empty: ${fallbackSource} is used. `:'Empty: the general site description is used. '}Search engines may show other text; aim for 120–160 characters · {description.length} now.</small></label>
     </div>
     <div className="adm-seo-previews">
       <figure className="adm-serp" aria-label="Approximate search result"><figcaption>Approximate search result</figcaption><span>{brand.domain}{path!=='/'?` › ${path.split('/').filter(Boolean).join(' › ')}`:''}</span><strong>{cut(shownTitle,62)}</strong><p>{cut(description||brand.description,160)}</p></figure>

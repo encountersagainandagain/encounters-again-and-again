@@ -33,15 +33,27 @@ const ReloadOptions=createContext<()=>void>(()=>{});
 // Banner of a personal page (Wild Wonders.dc.html): what each part shows and where it is edited (presentation.ts profileHero).
 function ProfileBanner({record,member,onChange,options}:{record:Row;member?:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>}){
   const name=String(member?.name||''),big=String(member?.alias||'')||name||String(record.title||'');const design=String(record.cover_image||'').startsWith('/design/');
-  return <Card title="Banner" lead="The top of the personal page: a photo, a small line and a large title.">
-    <div className="adm-banner-parts">
-      <p><strong>Large title</strong> · “{big}”<small>From Crew → {name||'the person'} → “Alias / project” (empty: the Name). {member&&<Link href={`/admin/content?table=crew_members&edit=${String(member.id)}`}>Edit in Crew</Link>}</small></p>
-    </div>
-    <Fields fields={[{key:'kicker',label:'Small line',type:'text'}]} value={record} onChange={onChange} options={options} notes={{kicker:`Shown small above the large title. Empty: “${member?meetLine(member):'meet …'}”, made from the person’s Name.`}}/>
-    <Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={onChange} options={options} notes={{...help,cover_id:'Banner photo. Empty: the person’s portrait from Crew.',cover_alt:'Describe the banner photo for people who cannot see it.'}}/>
+  return <Card title="Banner" lead="The top of the personal page: a large title, a small line and a photo.">
+    <Fields fields={[{key:'subtitle',label:'Large title',type:'text'},{key:'kicker',label:'Small line',type:'text'},...pick(commonFields,postGroups.cover)]} value={record} onChange={onChange} options={options} notes={{...help,
+      subtitle:`Shown large in the banner. Empty: “${big}”, the Alias / project of ${name||'the person'} in People.`,
+      kicker:`Shown small above the large title. Empty: “${member?meetLine(member):'meet …'}”, made from the person’s Name.`,
+      cover_id:'Banner photo. Empty: the person’s portrait from Crew.',cover_alt:'Describe the banner photo for people who cannot see it.'}}/>
     {design&&<p className="adm-help">Now showing the design image <code>{String(record.cover_image)}</code> from the handoff. Choosing a banner photo replaces it. <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>onChange({...record,cover_image:''})}>Stop using the design image</button></p>}
   </Card>;
 }
+// Search and link previews of a personal page: nothing here is visible on the page (app/crew/[slug]/page.tsx metadata and
+// structured data). The address comes from the person in People.
+function ProfileSeo({record,member,onChange,options}:{record:Row;member?:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>}){
+  const name=String(member?.name||''),big=String(record.subtitle||'')||String(member?.alias||'')||name;const path=`/crew/${String(member?.slug||record.slug||'')}`;
+  return <Card title="SEO" lead="Not shown on the page. It is how Google and link previews (WhatsApp, Instagram, LinkedIn…) present this person, as a portfolio: who they are and what they do.">
+    {member&&<p className="adm-help" style={{marginBottom:12}}>Address: <code>{path}</code>. It changes with the Slug of {name} in <Link href={`/admin/content?table=crew_members&edit=${String(member.id)}`}>People</Link>. Link previews show the banner photo.</p>}
+    <SeoPanel value={record} onChange={onChange} path={path} fallbackTitle={big} fallbackDescription={String(member?.bio||'')} fallbackSource={`the Biography of ${name||'the person'} in People`} image={record.cover_id||(String(record.cover_image||'').startsWith('/design/')?record.cover_image:member?.portrait_id)}/>
+    <div style={{marginTop:18}}><Fields fields={[{key:'tags',label:'What they do',type:'lines'},{...commonFields.find(f=>f.key==='title')!,label:'Name in the admin'}]} value={record} onChange={onChange} options={options} notes={{
+      tags:'One per line, e.g. Illustrator, Logo design, Wildlife photography. Search engines read them as what this person does; they are not shown on the page.',
+      title:'Only in the admin lists.'}}/></div>
+  </Card>;
+}
+
 function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fields:Field[];value:Row;onChange:(value:Row)=>void;options:Record<string,Row[]>;notes?:Record<string,string>;prefix?:string}) {
   const {errors,clear}=useContext(FieldErrors);const reload=useContext(ReloadOptions);
   return <div className="adm-fields">{fields.map(field=>{
@@ -216,6 +228,7 @@ export function EncountersCms(){
         payload.kind=kind;
         // The banner's design image (Wild Wonders) is not a form field; without it a save would show the portrait instead.
         if(typeof current.cover_image==='string')payload.cover_image=current.cover_image;
+        if(kind==='crew_member'&&Array.isArray(current.tags))payload.tags=(current.tags as unknown[]).map(t=>String(t).trim()).filter(Boolean);
         if(!current.updated_at){payload.status=current.status||'draft';}
         const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{})}:null;
         const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map(related_post_id=>({related_post_id,relation:['expedition','workshop'].includes(kind)?'result':'related'})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
@@ -317,8 +330,9 @@ export function EncountersCms(){
     {toolbar}{notice}
     <div className="adm-split"><div className="adm-stack">
       {kind==='crew_member'&&<ProfileBanner record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>}
-      <Card title="General information" lead={kind==='crew_member'?'How this page is named in the admin and summarised in lists. Nothing here is shown in the banner.':`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
-        <Fields fields={pick(commonFields,kind==='crew_member'?['title','slug','excerpt']:postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>
+      {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>
+      :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
+        <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
       <Card title={isCrewPage?'Sections of The Crew page':kind==='crew_member'?'Below the banner':'Content blocks'} lead={isCrewPage?'Each block says where it goes on the page. The crew cards and the strip of portraits come from People.':kind==='crew_member'?'Everything under the banner, block by block, in this order. Profile blocks have the design of the personal page; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
         {isCrewPage&&<ul className="adm-section-guide">{crewSections.slice(0,4).map(([key,text,hint])=><li key={key}><strong>{text}</strong> · {blocks.filter(b=>b.content.section===key).length} {blocks.filter(b=>b.content.section===key).length===1?'block':'blocks'}<small>{hint}</small></li>)}<li><strong>Not shown</strong> · {blocks.filter(b=>!b.content.section).length} blocks<small>For example, the biographies imported from the old site, now kept in People.</small></li></ul>}
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
@@ -351,7 +365,7 @@ export function EncountersCms(){
       </Card></>}
       {children[kind]&&<Card title={children[kind].label}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} prefix={`child-${i}-`} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
         <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setChildRows([...childRows,{id:crypto.randomUUID(),sort:childRows.length,...(kind==='expedition'?{status:'pending'}:{})}])}><Plus aria-hidden="true"/>Add {kind==='expedition'?'need':'session'}</button></div></div></Card>}
-      <Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>
+      {kind!=='crew_member'&&<Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>}
       {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} posts={options.posts||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))} children={childRows} related={related}/></div></section>}
     </div><aside>
       <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>

@@ -24,10 +24,12 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 
 ### Pendiente de prueba manual del CMS
 - **Página personal de Crew (2026-10-26, en prueba con Juani):**
-  - **Banner explícito:** título grande = Crew «Alias / project» (o Name); línea chica = la de la página, o «meet <primer nombre>» de Name; foto = la de la página, o el retrato. Tiene su tarjeta «Banner» arriba del editor.
+  - **Banner explícito:** título grande = «Large title» de la página (`posts.subtitle`), o Crew «Alias / project», o Name; línea chica = la de la página, o «meet <primer nombre>» de Name; foto = la de la página, o el retrato. Tiene su tarjeta «Banner» arriba del editor.
   - **Debajo del banner, solo bloques en orden.** Bloques de perfil: Large title, Opening text, Pinned photo pair, Photo row, Chapter y Dark gallery; además, los bloques comunes. Se acabó el selector «Place on the page».
   - Al abrir una página guardada antes, el admin la muestra convertida a esos bloques. **Hasta guardar, el sitio sigue igual.** La conversión de Wild Wonders y de los 3 ejemplos se comparó píxel por píxel con la página actual: es idéntica (Georgia: 5 píxeles de antialiasing, mismo alto).
-  - Pendiente: «Credited crew», «Related content» y «Search and sharing».
+  - **Tarjeta «SEO» (reemplaza «General information» y «Search and sharing»):** nada visible en la página. SEO title (vacío: el título del banner), descripción (vacío: Biography de People), «What they do» (`posts.tags`, una especialidad por línea), nombre en el admin y la dirección `/crew/<slug>` (se cambia en People). `/crew/<slug>` ahora usa esos campos en su metadata, comparte la foto del banner y publica JSON-LD `ProfilePage` + `Person` (nombre, alias, rol, descripción, imagen, redes en `sameAs`, especialidades en `knowsAbout`, miembro de la organización). Con los campos vacíos la página es idéntica píxel a píxel; probado lleno y vacío en el CMS local.
+  - Guardar conserva la imagen de diseño del banner (`cover_image`); antes se perdía y aparecía el retrato.
+  - Pendiente: «Credited crew» y «Related content».
 - **Carga y edición** por Juani, como los fundadores, con el contenido original: [guía de carga editorial](guia-carga-editorial.md). Cubre Crew y su página, el libro Encounters en Art, Expeditions, el workshop original con etapas, el Meaningful Message, Home, About y Contact.
 - **Contenido para corregir en el CMS:** líneas repetidas y «Australia.She» en Expeditions; foto de portada de Expeditions de 963 px.
 - **Decidir qué ejemplos retirar.** Se retiran de a uno con «Unpublish», o se conservan editándolos.

@@ -7,12 +7,12 @@ export function profileVisible(member: Row, posts: Row[]) {
 }
 // Hero of a crew profile, shared by the public page and the CMS preview.
 // Banner of a personal page: a photo, a small line and a large title, each from one explicit place.
-//   large title  the person's “Alias / project”, else the Name
+//   large title  the page's own large title (subtitle), else the person's “Alias / project”, else the Name
 //   small line   the page's own small line (kicker), else “meet <first name>” from the Name
 //   photo        the page's banner photo, else a design image saved on the page, else the portrait
 export const meetLine = (member: Row) => { const first = string(member.name).trim().split(/\s+/)[0]; return first ? `meet ${first.toLowerCase()}` : string(member.role); };
 export function profileHero(member: Row, post: Row, blocks: { type: string; content: Row }[]) {
-  const name = string(member.alias) || string(member.name) || string(post.title);
+  const name = string(post.subtitle) || string(member.alias) || string(member.name) || string(post.title);
   // Explicit profiles (blocks with sections).
   if (blocks.some(b => string(b.content.section) || string(b.content.layout).startsWith('profile-'))) {
     const design = string(post.cover_image).startsWith('/design/') ? string(post.cover_image) : undefined;

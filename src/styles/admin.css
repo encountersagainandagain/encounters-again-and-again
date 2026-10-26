@@ -266,5 +266,3 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-preview-note{position:fixed;top:8px;right:8px;z-index:100;margin:0;padding:6px 10px;border-radius:8px;background:rgba(6,24,38,.85);color:#eaf5fa;font:600 11px var(--font-body),Arial,sans-serif}
 @media(max-width:1100px){.adm .adm-split:has(.adm-page-preview){grid-template-columns:minmax(0,1fr)}.adm-page-preview{position:static}}
 
-/* Banner card of a personal page: what each part shows and where it comes from. */
-.adm-banner-parts p{display:flex;flex-direction:column;gap:4px;margin:0 0 14px}.adm-banner-parts small{color:var(--adm-muted,#5b6b73);font-size:13px}

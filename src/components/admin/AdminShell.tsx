@@ -82,8 +82,9 @@ async function loadThumb(id:string){
   return response.ok?URL.createObjectURL(await response.blob()):null;
 }
 export function AdminThumb({id,size=56,alt='',className=''}:{id:unknown;size?:number|string;alt?:string;className?:string}){
-  const key=typeof id==='string'?id:'';const [loaded,setLoaded]=useState<{key:string;url:string|null}>({key:'',url:null});const url=loaded.key===key?loaded.url:null;
-  useEffect(()=>{let live=true;if(!key)return;if(!thumbs.has(key))thumbs.set(key,loadThumb(key).catch(()=>null));void thumbs.get(key)!.then(u=>{if(live)setLoaded({key,url:u});});return()=>{live=false;};},[key]);
+  // A design image of the handoff (/design/…) is shown as is; anything else is a media id.
+  const key=typeof id==='string'?id:'';const design=key.startsWith('/design/');const [loaded,setLoaded]=useState<{key:string;url:string|null}>({key:'',url:null});const url=design?key:loaded.key===key?loaded.url:null;
+  useEffect(()=>{let live=true;if(!key||design)return;if(!thumbs.has(key))thumbs.set(key,loadThumb(key).catch(()=>null));void thumbs.get(key)!.then(u=>{if(live)setLoaded({key,url:u});});return()=>{live=false;};},[key,design]);
   const style=typeof size==='number'?{width:size,height:size}:{width:'100%'};
   return <span className={`adm-thumb ${url?'':'adm-thumb--empty'} ${className}`} style={style}>{url?<img src={url} alt={alt}/>:<ImageIcon aria-hidden="true"/>}</span>;
 }
