@@ -2,11 +2,11 @@
 import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
-import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Info,Plus,Trash2,Upload} from 'lucide-react';
+import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Info,LinkIcon,Plus,Trash2,Upload} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
-import {duplicateContent} from '@/features/encounters/presentation';
+import {duplicateContent,meetLine,safeHref} from '@/features/encounters/presentation';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
 import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
@@ -14,7 +14,6 @@ import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
 import {hasProfileBlocks,imagesOf,maxPhotos,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
 import {crewPageCredit,crewSections,crewStyles,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
-import {meetLine} from '@/features/encounters/presentation';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
 const tables=['posts',...Object.keys(entities)];
@@ -148,16 +147,19 @@ function FloatingActions({busy,dirty}:{busy:boolean;dirty:boolean}){
     <button type="submit" className={`adm-btn adm-btn--small${dirty?' adm-floating-dirty':''}`} disabled={busy}>{busy?'Saving…':dirty?'Save changes':'Save'}</button>
   </div>;
 }
-// Bold, italic and underline for a text of a profile block: wraps the selected words (or a placeholder) in **, * or ++
-// (ProfileStory.tsx marked) and keeps them selected.
-function MarkButtons({id,value,onChange,name}:{id:string;value:string;onChange:(value:string)=>void;name:string}){
+// Inline format buttons wrap the selected words with the same marks read by the public templates.
+function MarkButtons({id,value,onChange,name,link=false}:{id:string;value:string;onChange:(value:string)=>void;name:string;link?:boolean}){
   const mark=(m:string)=>{const el=document.getElementById(id) as HTMLInputElement|HTMLTextAreaElement|null;if(!el)return;
     const a=el.selectionStart??value.length,b=el.selectionEnd??value.length;const words=value.slice(a,b)||'text';onChange(value.slice(0,a)+m+words+m+value.slice(b));
     requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
+  const addLink=()=>{const el=document.getElementById(id) as HTMLInputElement|HTMLTextAreaElement|null;if(!el)return;const href=window.prompt('Paste a full web address or a site path such as /art.')?.trim();if(!href)return;if(!safeHref(href)){window.alert('Use a full web address starting with https://, or a site path starting with /.');el.focus();return;}
+    const a=el.selectionStart??value.length,b=el.selectionEnd??value.length;const words=value.slice(a,b)||'link text';onChange(`${value.slice(0,a)}[${words}](${href})${value.slice(b)}`);
+    requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+1,a+1+words.length);});};
   return <span className="adm-marks" role="group" aria-label={`Format ${name}`}>
     <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('**')} aria-label={`Bold in ${name}`} title="Bold"><b>B</b></button>
     <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('*')} aria-label={`Italic in ${name}`} title="Italic"><i>I</i></button>
     <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>mark('++')} aria-label={`Underline in ${name}`} title="Underline"><u>U</u></button>
+    {link&&<button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={addLink} aria-label={`Add a link in ${name}`} title="Link"><LinkIcon aria-hidden="true"/></button>}
   </span>;
 }
 // A text field of a profile block with its format buttons next to the label.
@@ -218,8 +220,7 @@ function BlockFields({block,index,media,onChange}:{block:{type:string;content:Ro
     {block.type==='image-pair'&&<BlockImages block={block} index={index} max={2} media={media} onChange={set}/>}
     {block.type==='carousel'&&<BlockImages block={block} index={index} max={8} media={media} onChange={set}/>}
     {block.type==='divider'&&<p className="adm-help">A line with a small diamond. Nothing to fill in.</p>}
-    <div className="adm-fields">{(blockText[block.type]||[]).map(([key,label,wide,hint])=><label key={key} className={`adm-field${wide?' adm-field--wide':''}`}>{label}{wide?<textarea aria-label={`Block ${index+1} ${label}`} rows={key==='text'?4:2} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value,...(key==='text'?{paragraphs:undefined}:{})})}/>:<input aria-label={`Block ${index+1} ${label}`} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value})}/>}{hint?<small>{hint}</small>:null}</label>)}
-      {block.type==='heading'&&<label className="adm-field">Index name<input value={String(block.anchor||'')} placeholder="e.g. leaving-late" onChange={e=>onChange({...block,anchor:e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+/,'')||undefined} as never)}/><small>Lowercase words joined with hyphens. The “In this post” index links here.</small></label>}
+    <div className="adm-fields">{(blockText[block.type]||[]).map(([key,label,wide,hint])=>block.type==='paragraph'&&key==='text'?<div key={key} className="adm-field adm-field--wide"><div className="adm-field-head"><label htmlFor={`block-${index}-text`}>{label}</label><MarkButtons id={`block-${index}-text`} value={String(c.text||'')} onChange={text=>set({...c,text,paragraphs:undefined})} name={`block ${index+1} text`} link/></div><textarea id={`block-${index}-text`} rows={4} value={String(c.text||'')} onChange={e=>set({...c,text:e.target.value,paragraphs:undefined})}/><small>Select words and use B, I, U or the link button. Leave an empty line between paragraphs.</small></div>:<label key={key} className={`adm-field${wide?' adm-field--wide':''}`}>{label}{wide?<textarea aria-label={`Block ${index+1} ${label}`} rows={key==='text'?4:2} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value,...(key==='text'?{paragraphs:undefined}:{})})}/>:<input aria-label={`Block ${index+1} ${label}`} value={String(c[key]||'')} onChange={e=>set({...c,[key]:e.target.value})}/>}{hint?<small>{hint}</small>:null}</label>)}
       {block.type==='list'&&<label className="adm-field adm-field--wide">Items<textarea rows={4} value={Array.isArray(c.items)?(c.items as unknown[]).map(x=>typeof x==='string'?x:String((x as Row).text||'')).join('\n'):''} onChange={e=>set({...c,items:e.target.value.split('\n')})}/><small>One item per line.</small></label>}</div>
     {rowsSpec&&(()=>{const items:Row[]=Array.isArray(c[rowsSpec.key])?(c[rowsSpec.key] as Row[]):[];const save=(next:Row[])=>set({...c,[rowsSpec.key]:next});
       return <fieldset className="adm-group"><legend>{rowsSpec.label}</legend>{items.map((row,n)=><div key={n} className="adm-list-item"><div className="adm-fields">{rowsSpec.columns.map(([key,label,wide])=><label key={key} className={`adm-field${wide?' adm-field--wide':''}`}>{label}{wide?<textarea rows={3} value={String(row[key]||'')} onChange={e=>save(items.map((x,k)=>k===n?{...x,[key]:e.target.value}:x))}/>:<input value={String(row[key]??row.value??'')} onChange={e=>save(items.map((x,k)=>k===n?{...x,[key]:e.target.value}:x))}/>}</label>)}</div><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>save(items.filter((_,k)=>k!==n))}>Remove</button></div>)}

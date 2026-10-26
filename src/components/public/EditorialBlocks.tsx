@@ -2,6 +2,7 @@ import {type ContentBlock} from '@/features/encounters/public-content';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {MediaImage} from './MediaImage';
 import {Carousel,MediaEmbed} from './EditorialInteractive';
+import {InlineText} from './InlineText';
 const list=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 export function EditorialBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[];media:Row[];showIndex?:boolean}) {
   const headings=blocks.filter(b=>b.type==='heading');
@@ -12,14 +13,14 @@ export function EditorialBlocks({blocks,media,showIndex=false}:{blocks:ContentBl
     const imgs=list(c.images).length?list(c.images):list(c.carouselImages).length?list(c.carouselImages):list(c.slides).length?list(c.slides):[{media_id:c.media_id,src:c.src,alt:c.alt,caption:c.caption},...(c.srcSecondary?[{src:c.srcSecondary,alt:c.altSecondary,caption:c.captionSecondary}]:[])];
     if(type==='divider')return <hr className="editorial-divider" key={block.id}/>;
     if(type==='toc')return <div key={block.id}>{index}</div>;
-    if(type==='heading')return <h2 className="block-heading" data-seq=".94,.4" id={anchor} key={block.id}>{string(c.kicker)&&<small>{string(c.kicker)}</small>}{text||string(c.title)}</h2>;
+    if(type==='heading')return <h2 className="block-heading" data-seq=".94,.4" id={anchor} key={block.id}>{string(c.kicker)&&<small><InlineText text={string(c.kicker)}/></small>}<InlineText text={text||string(c.title)}/></h2>;
     if(type==='quote')return <blockquote data-seq=".94,.4" key={block.id}>{text||string(c.quote)}{c.attribution?<cite>{string(c.attribution)}</cite>:null}</blockquote>;
     if(type==='carousel')return <Carousel key={block.id} label="images">{imgs.map((img,i)=>figure(img,i)).filter(Boolean)}</Carousel>;
     if(type==='image'||type==='image-pair')return <div className={`block-images ${type==='image-pair'||imgs.length===2?'image-pair':''}`} key={block.id} data-seq="1.02,.35">{imgs.map((img,i)=>figure(img,i))}</div>;
     if(type==='youtube'){let id=string(c.video_id);try{const url=new URL(string(c.youtubeUrl));id=url.hostname==='youtu.be'?url.pathname.slice(1):url.searchParams.get('v')||url.pathname.split('/').pop()||'';}catch{/* A validated direct video ID needs no URL. */}return <MediaEmbed key={block.id} kind="youtube" id={id}/>;}
     return <section className={`block-text block-${type}`} id={anchor} data-seq=".94,.4" key={block.id}>
       {c.lead?<p className="editorial-lead">{string(c.lead)}</p>:null}
-      {list(c.links).length&&type==='source'?null:Array.isArray(c.paragraphs)?c.paragraphs.map((p,i)=><p key={i}>{String(p)}</p>):text?<p>{text}</p>:null}
+      {list(c.links).length&&type==='source'?null:Array.isArray(c.paragraphs)?c.paragraphs.map((p,i)=><p key={i}><InlineText text={String(p)}/></p>):text?<p><InlineText text={text}/></p>:null}
       {c.title&&type!=='heading'?<h3>{string(c.title)}</h3>:null}
       {imgs.some(i=>i.media_id||i.src)&&<div className="block-images">{imgs.map((img,i)=>figure(img,i))}</div>}
       {Array.isArray(c.items)&&<ul>{c.items.map((item,i)=><li key={i}>{typeof item==='string'?item:string(item.text)||string(item.title)}</li>)}</ul>}

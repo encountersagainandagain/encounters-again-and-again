@@ -12,6 +12,7 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 ### Verificado técnicamente
 - **Crew (2026-10-26):** «read →» a la derecha del nombre en las tarjetas, alineado por la base del texto. Verificado en Chrome a 1440, 900 y 390 px, sin desbordes; typecheck, lint (excluyendo el build generado `.next-check`), tests y build correctos. Capturas en `.encounters-work/crew-inline-read/`.
 - **Editor de página personal (2026-10-26, pendiente de publicar):** el enlace desde Crew dice solo «Edit personal page»; una página nueva empieza con Main title y Opening text; Publication muestra únicamente el estado y explica su relación con Crew/Home; los controles de orden, fecha, destacado e índice que no afectan este tipo de página se ocultan; Visual preview incluye una ayuda en el icono de información. Migraciones `20261026000200_profile_default_blocks.sql` y `20261026000300_keep_legacy_profiles_convertible.sql`, probadas solo en local; no aplicadas a la base real.
+- **Bloque Paragraph (2026-10-26, pendiente de publicar):** el texto común permite marcar palabras en negrita, cursiva o subrayado y convertirlas en enlace; la página pública y Visual preview comparten el mismo render. Se retiró «Index name» del bloque Heading; el Number se conserva.
 - **Navbar:** Art al frente del grupo derecho, en 14 anchos.
 - **Historial y anclas:** ancla, otra página, Atrás y Adelante; también índice de posts guardados desde el CMS local, carga directa con hash, skip link y reduced motion.
 - **Portadas:**

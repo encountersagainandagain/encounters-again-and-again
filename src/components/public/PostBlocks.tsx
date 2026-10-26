@@ -3,6 +3,7 @@ import {useRef,useState,type ReactNode} from 'react';
 import {type ContentBlock} from '@/features/encounters/public-content';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {MediaImage} from './MediaImage';
+import {InlineText} from './InlineText';
 import {ramp,useFrame} from './useFrame';
 
 // Blocks of the Post template (Post.dc.html, handoff 04-editor-de-bloques.md). Content keys follow the
@@ -71,7 +72,7 @@ export function PostBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[]
     if(type==='link'||type==='source'){const links=blockLinks(c);if(!links.length)continue;out.push(<div className="pb pb-link" key={key}>{string(c.text)&&type==='link'&&<p>{string(c.text)}</p>}{links.map((l,i)=>{const href=safeHref(l.url)!;return <a key={i} href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(l.label)||href}<span aria-hidden="true">→</span></a>;})}</div>);continue;}
     // Paragraph (and imported text blocks): an optional lead in Garamond, then the body.
     const body=paragraphs(c);if(!string(c.lead)&&!body.length)continue;
-    out.push(<div className="pb pb-paragraph" id={b.anchor?anchorOf(b):undefined} key={key}><div data-seq="0.92,0.4">{string(c.lead)&&<p className="pb-lead">{string(c.lead)}</p>}{body.map((p,i)=><p key={i}>{p}</p>)}</div></div>);
+    out.push(<div className="pb pb-paragraph" id={b.anchor?anchorOf(b):undefined} key={key}><div data-seq="0.92,0.4">{string(c.lead)&&<p className="pb-lead"><InlineText text={string(c.lead)}/></p>}{body.map((p,i)=><p key={i}><InlineText text={p}/></p>)}</div></div>);
   }
   return <div ref={root} className="post-blocks">{out}</div>;
 }

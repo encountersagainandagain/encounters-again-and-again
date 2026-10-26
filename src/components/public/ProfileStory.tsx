@@ -6,6 +6,7 @@ import {composeProfile,imagesOf,maxPhotos,hasProfileBlocks,profileLayout,profile
 import {EditorialBlocks} from './EditorialBlocks';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
+import {InlineText} from './InlineText';
 
 // Crew profile template (Wild Wonders.dc.html): opening → sticky pair → chapters → dark galleries.
 // Where each block goes is explicit (content.section, see profile-sections.ts). Text, links and media stay in the CMS.
@@ -42,7 +43,7 @@ export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:
 // the previous section reading, so a converted page looks the same. Ordinary blocks in between use the post renderer.
 // Text of a profile block (titles, subtitles, paragraphs): **bold**, *italic* and ++underlined++ words, as in posts.
 const styleClass:Record<Paragraph['style'],string|undefined>={lead:'crew-lead',voice:'crew-voice',body:undefined};
-const marked=(text:string)=>text.split(/(\*\*[^*\n]+\*\*|\+\+[^+\n]+\+\+|\*[^*\n]+\*)/).map((part,i)=>part.length>4&&part.startsWith('**')&&part.endsWith('**')?<strong key={i}>{part.slice(2,-2)}</strong>:part.length>4&&part.startsWith('++')&&part.endsWith('++')?<u key={i}>{part.slice(2,-2)}</u>:part.length>2&&part.startsWith('*')&&part.endsWith('*')?<em key={i}>{part.slice(1,-1)}</em>:part);
+const marked=(text:string)=><InlineText text={text}/>;
 const paragraph=(p:Paragraph,key:number)=><p key={key} className={styleClass[p.style]}>{marked(p.text)}</p>;
 function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
   // Chapter photos and photo rows: up to maxPhotos, laid out by how many there are (profile-photo-set).
