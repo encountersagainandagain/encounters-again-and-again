@@ -1,5 +1,7 @@
 # Encounters Again and Again — ejecución
 
+> **Para agentes (Claude Code, Codex): empezar por [`AGENTS.md`](../../AGENTS.md)** — estado actual, reglas, decisiones y próximos pasos.
+
 La instrucción de Juani del 01/10/2026 actualiza el diseño y limita la ejecución al PASO 1. El ZIP vigente está conservado íntegro en `handoff-current/`, incluidos support.js, image-slot.js, assets y handoff. Home vigente: **Abismo Home v2.dc.html**. El archivo sin v2 es histórico. El instructivo original se conserva como evidencia; sus afirmaciones sobre prototipos ausentes ya no aplican.
 
 - [Estado de ejecución](bootstrap-status.md)
