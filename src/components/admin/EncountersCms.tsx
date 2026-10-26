@@ -2,7 +2,7 @@
 import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
-import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Plus,Trash2,Upload} from 'lucide-react';
+import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Info,Plus,Trash2,Upload} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
@@ -394,7 +394,7 @@ export function EncountersCms(){
     <div className="adm-toolbar-state"><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={back}><ArrowLeft aria-hidden="true"/>Back to list</button>{hasStatus&&<StatusBadge status={record.status}/>}<ExampleBadge row={record}/>{dirty?<span className="adm-badge adm-badge--dirty">Unsaved changes</span>:saved?<span>All changes saved</span>:<span>Not saved yet</span>}</div>
     <div className="adm-actions">
       {table==='posts'&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={duplicate} disabled={busy}><Copy aria-hidden="true"/>Duplicate as draft</button>}
-      {(table==='posts'||table==='art_categories'||table==='expedition_cards')&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button>}
+      {(table==='posts'||table==='art_categories'||table==='expedition_cards')&&<><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button><details className="adm-info-tip"><summary aria-label="What Visual preview does"><Info aria-hidden="true"/></summary><span>Shows how the page looks with the changes currently in the form, even before you save them.</span></details></>}
       {saved&&published&&['posts','art_categories','crew_members'].includes(table)&&(table!=='posts'||record.kind!=='crew_member')&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={publicPath(table,record,specific,options)} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
       {table==='posts'&&saved&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${record.id}/preview`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Full preview</a>}
       <button type="submit" className="adm-btn" disabled={busy}>{busy?'Saving…':'Save'}</button>
@@ -425,7 +425,7 @@ export function EncountersCms(){
   }
 
   const isCrewPage=kind==='page'&&record.source_role==='team';
-  const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above “The Crew” on the cover, e.g. “Meet the team”.',title:'Name of this page in the admin. The cover always says “The Crew”.'}:{})};const credit=kind==='crew_member'?crewPageCredit:creditLabels[kind]||defaultCredit;const pageOwner=kind==='crew_member'?crew.find(c=>String(c.page_post_id)===String(record.id)):undefined;const path=publicPath('posts',record,specific,options);
+  const crew=options.crew_members||[];const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above “The Crew” on the cover, e.g. “Meet the team”.',title:'Name of this page in the admin. The cover always says “The Crew”.'}:{})};const credit=kind==='crew_member'?crewPageCredit:creditLabels[kind]||defaultCredit;const pageOwner=kind==='crew_member'?crew.find(c=>String(c.page_post_id)===String(record.id)):undefined;const path=publicPath('posts',record,specific,options);const publicationFields=kind==='crew_member'?[{...commonFields.find(f=>f.key==='status')!,label:'Page status'}]:pick(commonFields,postGroups.publication);
   return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
@@ -472,7 +472,7 @@ export function EncountersCms(){
       {kind!=='crew_member'&&<Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>}
       {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} posts={options.posts||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))} children={childRows} related={related}/></div></section>}
     </div><aside>
-      <Card title="Publication"><Fields fields={pick(commonFields,postGroups.publication)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>
+      <Card title="Publication" lead={kind==='crew_member'?'Controls whether this personal page is private or available on the website.':undefined}><Fields fields={publicationFields} value={record} onChange={setRecord} options={options} notes={kind==='crew_member'?{...notes,status:'Draft keeps the personal page private. Published makes it available at its /crew/ address once the person is published and “Enable profile page” is on. “Show on The Crew page” is managed in Crew and controls whether the person also appears on The Crew page and Home.'}:notes}/></Card>
       {kind==='crew_member'?null:isCrewPage?<Card title="Cover"><p className="adm-help">The cover image of The Crew page is chosen in <Link href="/admin/settings">Settings → Art and Crew presentation</Link>. Its small line comes from “Kicker” above; the title “The Crew” is fixed by the design.</p></Card>:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
     </aside></div>
   </form></FieldErrors.Provider></ReloadOptions.Provider>;

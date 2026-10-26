@@ -72,6 +72,12 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-btn--danger{border-color:transparent;background:transparent;color:var(--adm-danger)!important}
 .adm-btn--danger:hover{background:var(--adm-danger-bg)}
 .adm-btn svg{width:16px;height:16px}
+.adm-info-tip{position:relative}
+.adm-info-tip summary{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--adm-sea);border-radius:50%;background:#fff;color:var(--adm-sea);cursor:pointer;list-style:none}
+.adm-info-tip summary::-webkit-details-marker{display:none}
+.adm-info-tip summary:hover{background:var(--adm-tint)}
+.adm-info-tip summary svg{width:17px;height:17px}
+.adm-info-tip>span{position:absolute;z-index:20;top:calc(100% + 8px);right:0;width:280px;padding:10px 12px;border:1px solid var(--adm-line);border-radius:9px;background:#fff;box-shadow:0 8px 24px rgba(6,24,38,.14);color:var(--adm-muted);font-size:13px;font-weight:400;line-height:1.4;white-space:normal}
 
 /* Status badges: always text plus colour */
 .adm-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.02em;background:var(--adm-tint);color:var(--adm-sea);white-space:nowrap}
