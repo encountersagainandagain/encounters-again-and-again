@@ -152,7 +152,9 @@ export function EncountersCms(){
   useEffect(()=>{if(markClean){setBaseline(snapshot);setMarkClean(false);}},[markClean,snapshot]);
   const dirty=!!record&&baseline!==''&&baseline!==snapshot;
   const kind=String(record?.kind||'news');
-  useEffect(()=>{setRecord(null);setMessage('');setLoaded(false);},[table,kindParam,pagesOnly,pageRole]);
+  useEffect(()=>{setRecord(null);setMessage('');},[table,kindParam,pagesOnly,pageRole]);
+  // Only another table is loaded again: two menu entries over posts (Personal pages, The Crew page) share the rows.
+  useEffect(()=>{setLoaded(false);},[table]);
   useEffect(()=>{let live=true;async function load(){if(!supabase)return;
     const client=supabase;
     const lists=['posts','crew_members','art_categories','media','artworks'];
@@ -247,7 +249,7 @@ export function EncountersCms(){
       media:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.id} size="100%" alt={String(row.alt||'')}/><div className="adm-item-body"><small>{needsAlt(row)?'No description yet':String(row.alt)}</small><div className="adm-item-meta">{needsAlt(row)?<span className="adm-badge adm-badge--dirty">Needs a description</span>:null}<span className="adm-badge adm-badge--plain">{row.width&&row.height?`${row.width} × ${row.height}`:'Size unknown'}</span>{row.fit?<span className="adm-badge adm-badge--plain">{String(row.fit)}</span>:null}</div>{editButton(row)}</div></article>)}</div>,
     };
     return <div className="adm-stack">
-      <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
+      <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'&&kindParam==='crew_member'?'The page of each person of the Crew: its banner and the blocks below it. Drafts stay private until you publish them.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
       </AdminHeader>
       {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person: it is created from that person in <Link href="/admin/content?table=crew_members">People</Link> (“Create personal page”).</p>}
