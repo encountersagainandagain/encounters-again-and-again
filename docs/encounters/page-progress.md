@@ -10,6 +10,7 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 - No se extiende a dispositivos o navegadores no probados.
 
 ### Verificado técnicamente
+- **Crew (2026-10-26):** «read →» a la derecha del nombre en las tarjetas, alineado por la base del texto. Verificado en Chrome a 1440, 900 y 390 px, sin desbordes; typecheck, lint (excluyendo el build generado `.next-check`), tests y build correctos. Capturas en `.encounters-work/crew-inline-read/`.
 - **Navbar:** Art al frente del grupo derecho, en 14 anchos.
 - **Historial y anclas:** ancla, otra página, Atrás y Adelante; también índice de posts guardados desde el CMS local, carga directa con hash, skip link y reduced motion.
 - **Portadas:**
