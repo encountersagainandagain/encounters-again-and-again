@@ -214,6 +214,8 @@ export function EncountersCms(){
       const payload:Row={id:current.id,...Object.fromEntries(allowed.filter(f=>current[f.key]!==undefined).map(f=>[f.key,current[f.key]]))};
       if(table==='posts'){
         payload.kind=kind;
+        // The banner's design image (Wild Wonders) is not a form field; without it a save would show the portrait instead.
+        if(typeof current.cover_image==='string')payload.cover_image=current.cover_image;
         if(!current.updated_at){payload.status=current.status||'draft';}
         const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{})}:null;
         const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map(related_post_id=>({related_post_id,relation:['expedition','workshop'].includes(kind)?'result':'related'})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
