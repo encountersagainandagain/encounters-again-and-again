@@ -1,5 +1,5 @@
 // Labels and help texts for the administration. Field keys and data stay as defined in cms-fields.
-export const kindLabels:Record<string,string>={page:'Page',crew_member:'Crew profile',expedition:'Expedition',workshop:'Workshop',artwork:'Artwork',message:'Meaningful message',news:'News',expedition_report:'Expedition report',workshop_report:'Workshop report'};
+export const kindLabels:Record<string,string>={page:'Page',crew_member:'Personal page',expedition:'Expedition',workshop:'Workshop',artwork:'Artwork',message:'Meaningful message',news:'News',expedition_report:'Expedition report',workshop_report:'Workshop report'};
 export const kindLabel=(kind:unknown)=>kindLabels[String(kind)]||String(kind||'—');
 // Singular names for create buttons and new-record titles.
 export const singular:Record<string,string>={posts:'content',crew_members:'crew member',art_categories:'art category',upcoming_items:'announcement',expedition_cards:'expedition card',media:'image'};
@@ -85,7 +85,7 @@ export const help:Record<string,string>={
 
 // Entries for creating content: each opens the editor with its type fixed.
 export const newKinds:[string,string][]=[['artwork','New artwork'],['expedition','New expedition'],['workshop','New workshop'],['message','New message'],['news','New news post'],['expedition_report','New expedition report'],['workshop_report','New workshop report']];
-export const kindListLabels:Record<string,string>={artwork:'Art works',expedition:'Expeditions',expedition_report:'Expedition results',workshop:'Workshops',workshop_report:'Workshop results',message:'Meaningful Messages',news:'News',crew_member:'Crew pages',page:'Pages'};
+export const kindListLabels:Record<string,string>={artwork:'Art works',expedition:'Expeditions',expedition_report:'Expedition results',workshop:'Workshops',workshop_report:'Workshop results',message:'Meaningful Messages',news:'News',crew_member:'Personal pages',page:'Pages'};
 export const tableLabels:Record<string,string>={posts:'All content',crew_members:'Crew · People',art_categories:'Art · Categories',upcoming_items:'Announcements',expedition_cards:'Expedition cards',media:'Media library'};
 export const tableLabel=(table:string)=>tableLabels[table]||table;
 

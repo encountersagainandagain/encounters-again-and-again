@@ -62,10 +62,9 @@ export function CrewPagePanel({member,posts,busy,onCreate}:{member:Row;posts:Row
     <p className="adm-help">The crew record is the person. The personal page is a separate page linked to it{text(member.alias)?<>, titled with the artistic name <strong>{text(member.alias)}</strong></>:''}. Works and activities credited to this person appear on that page automatically.</p>
     <div className="adm-toolbar-state"><span>Personal page:</span>{page?<StatusBadge status={page.status}/>:<span className="adm-badge adm-badge--plain">Not created</span>}{page&&!member.has_page?<span className="adm-badge adm-badge--dirty">Hidden: “Enable profile page” is off</span>:null}</div>
     {!saved?<p className="adm-help">Save this person first to create their page.</p>:page?<div className="adm-actions">
-      <Link className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/content?table=posts&edit=${page.id}`}>Edit personal page</Link>
+      <Link className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/content?table=posts&edit=${page.id}`}>Edit personal page (banner and blocks)</Link>
       <a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${page.id}/preview`} target="_blank" rel="noreferrer"><Eye aria-hidden="true"/>Preview</a>
       {live&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/crew/${text(member.slug)}`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
-      <Link className="adm-btn adm-btn--quiet adm-btn--small" href={`/admin/posts/${page.id}/edit`}>Detailed block editor</Link>
     </div>:<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={onCreate}><Plus aria-hidden="true"/>Create personal page (draft)</button>}
   </div>;
 }

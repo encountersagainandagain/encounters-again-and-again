@@ -145,7 +145,7 @@ export function EncountersCms(){
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
   const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
-  const [loaded,setLoaded]=useState(false);const [scope,setScope]=useState('publications');const [query,setQuery]=useState('');const [kindFilter,setKindFilter]=useState('');const [statusFilter,setStatusFilter]=useState('');
+  const [loaded,setLoaded]=useState(false);const [rowsTable,setRowsTable]=useState('');const [scope,setScope]=useState('publications');const [query,setQuery]=useState('');const [kindFilter,setKindFilter]=useState('');const [statusFilter,setStatusFilter]=useState('');
   // Unsaved changes are detected against the state captured after loading or saving.
   const snapshot=useMemo(()=>JSON.stringify([record,specific,blocks,contributors,contributorRoles,related,childRows]),[record,specific,blocks,contributors,contributorRoles,related,childRows]);
   const [baseline,setBaseline]=useState('');const [markClean,setMarkClean]=useState(false);
@@ -158,7 +158,7 @@ export function EncountersCms(){
     const lists=['posts','crew_members','art_categories','media','artworks'];
     const results=await Promise.all([table,...lists].map(t=>client.from(t).select('*').limit(1000)));
     if(!live)return;const error=results.find(r=>r.error)?.error;if(error){setMessage(error.message);return;}
-    setRows(results[0].data||[]);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
+    setRows(results[0].data||[]);setRowsTable(table);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
   }void load();return()=>{live=false;};},[table,revision]);
   // Presentation cards are shown only on the Expeditions program page.
   const programPages=(options.posts||[]).filter(p=>p.kind==='page'&&p.source_role==='encounters_expeditions');
@@ -184,11 +184,13 @@ export function EncountersCms(){
     }setRecord(row);setMarkClean(true);}catch(e){setMessage(e instanceof Error?e.message:'Could not load content');}finally{setBusy(false);}}
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
   const handled=useRef('');
-  useEffect(()=>{if(!loaded)return;const key=`${table}:${params.get('new')}:${params.get('edit')}`;if(handled.current===key)return;handled.current=key;
+  // Moving between admin pages keeps this view mounted: wait for the rows of the table now asked for, or a link such as
+  // “Edit personal page” (from People) would look for the page among the people and fall back to the list.
+  useEffect(()=>{if(!loaded||rowsTable!==table)return;const key=`${table}:${params.get('new')}:${params.get('edit')}:${pageRole}`;if(handled.current===key)return;handled.current=key;
     if(params.get('new'))start(params.get('new')!);
     else if(pageRole){const row=rows.find(r=>r.kind==='page'&&r.source_role===pageRole);if(row)void edit(row);}else if(params.get('edit')){const row=rows.find(r=>r.id===params.get('edit'));if(row)void edit(row);}
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[loaded,table,params,rows]);
+  },[loaded,rowsTable,table,params,rows]);
   // Required fields, address format and choices that no longer exist, checked before anything is sent.
   function validate(current:Row){
     const found:Record<string,string>={};const exists=(ref:string|undefined,v:unknown)=>!ref||!v||(options[ref]||[]).some(r=>r.id===v);
@@ -248,10 +250,11 @@ export function EncountersCms(){
       <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
       </AdminHeader>
-      {table==='posts'&&kindParam&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
+      {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person: it is created from that person in <Link href="/admin/content?table=crew_members">People</Link> (“Create personal page”).</p>}
+      {table==='posts'&&kindParam&&kindParam!=='crew_member'&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
       {table==='posts'&&pagesOnly&&<p className="adm-help">Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.</p>}
       {table==='posts'&&!kindParam&&!pagesOnly&&<div className="adm-stack" style={{gap:14}}>
-        <div className="adm-tabs" role="group" aria-label="Show">{[['publications','Activities and publications'],['pages','Site pages'],['profiles','Crew pages']].map(([key,text])=><button key={key} type="button" aria-pressed={scope===key} onClick={()=>{setScope(key);setKindFilter('');}}>{text}</button>)}</div>
+        <div className="adm-tabs" role="group" aria-label="Show">{[['publications','Activities and publications'],['pages','Site pages'],['profiles','Personal pages']].map(([key,text])=><button key={key} type="button" aria-pressed={scope===key} onClick={()=>{setScope(key);setKindFilter('');}}>{text}</button>)}</div>
         {scope==='publications'?<div className="adm-newbar">{newKinds.map(([k,text])=><button key={k} type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={()=>start(k)}><Plus aria-hidden="true"/>{text}</button>)}</div>:
          <p className="adm-help">{scope==='pages'?'Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.':<>Personal pages are created and opened from each person in <Link href="/admin/content?table=crew_members">Crew</Link>.</>}</p>}
       </div>}
