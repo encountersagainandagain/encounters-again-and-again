@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import Link from 'next/link';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {profileHero,safeHref,string,type Row} from '@/features/encounters/presentation';
 import {composeProfile,imagesOf,maxPhotos,hasProfileBlocks,profileLayout,profileParagraphs,type Block,type Paragraph,type Picture} from '@/features/encounters/profile-sections';
@@ -68,4 +69,17 @@ function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];
   }
   flush();
   return <>{out}</>;
+}
+
+// End of a personal page, a dark band that runs into the site footer: related encounters with the person's comment,
+// the crew they work with (Credited crew, its text as comment) and how to reach them (People → social links).
+export type FooterRelated={href:string;title:string;kind:string;note:string};
+export type FooterCrew={href?:string;name:string;note:string;portrait?:unknown};
+export function ProfileFooter({name,related,crew,contact,media}:{name:string;related:FooterRelated[];crew:FooterCrew[];contact:{href:string;label:string}[];media:Row[]}){
+  if(!related.length&&!crew.length&&!contact.length)return null;
+  return <section className="profile-footer" aria-label={`More about ${name}`}><div className="profile-footer-cols">
+    {related.length>0&&<div><h2 className="editorial-kicker">Related encounters</h2><ul>{related.map(r=><li key={r.href}>{r.kind&&<span>{r.kind}</span>}<Link href={r.href}>{r.title} <span aria-hidden="true">→</span></Link>{r.note&&<p>{marked(r.note)}</p>}</li>)}</ul></div>}
+    {crew.length>0&&<div><h2 className="editorial-kicker">Crew</h2><ul>{crew.map(c=><li key={c.name} className="profile-footer-person"><span className="profile-footer-portrait">{c.portrait?<MediaImage id={c.portrait} media={media} sizes="56px"/>:null}</span><div>{c.href?<Link href={c.href}>{c.name}</Link>:<strong>{c.name}</strong>}{c.note&&<p>{marked(c.note)}</p>}</div></li>)}</ul></div>}
+    {contact.length>0&&<div><h2 className="editorial-kicker">Contact</h2><ul className="profile-footer-contact">{contact.map(c=><li key={c.href}><a href={c.href} {...(c.href.startsWith('http')?{target:'_blank',rel:'noreferrer'}:{})}>{c.label} <span aria-hidden="true">↗</span></a></li>)}</ul></div>}
+  </div></section>;
 }

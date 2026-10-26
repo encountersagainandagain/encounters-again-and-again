@@ -96,6 +96,8 @@ export const creditLabels:Record<string,{title:string;lead:string;role:string}>=
   expedition:{title:'Participants',lead:'Crew who took part. The expedition appears on each participant’s personal page.',role:'e.g. Captain, Photography'},
   message:{title:'Credits',lead:'People who made this message. It appears on their personal pages.',role:'e.g. Illustration'},
 };
+// Credited crew of a personal page: the people this person works with, at the end of the page.
+export const crewPageCredit={title:'Credited crew',lead:'Other crew members this person works with. They are shown at the end of the personal page, each with the text you write as a comment.',role:'Comment, e.g. Co-author of the Encounters book'};
 export const defaultCredit={title:'Credited crew',lead:'People credited for this content. It appears on their personal pages.',role:'Role (optional)'};
 
 // Sections of The Crew page (The Crew.dc.html). Blocks of the Team page say where they go.

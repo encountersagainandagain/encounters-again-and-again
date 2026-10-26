@@ -333,3 +333,15 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 @media(min-width:760px) and (max-width:1080px){.profile-photo-set:not([data-count="1"]){grid-template-columns:repeat(2,minmax(0,1fr))}.profile-photo-set:not([data-count="1"]) figure{grid-column:auto}}
 /* A photo row has as much room above as below, so its band reads as one piece after a dark gallery. */
 .profile-row-photos{padding-top:clamp(90px,24vh,260px)}
+/* End of a personal page: related encounters, crew and contact on the footer's colour, just above it. */
+.profile-footer{background:#061826;color:rgba(234,245,250,.86);padding:clamp(80px,14vh,150px) max(var(--enc-page-padding),calc((100% - 1240px)/2)) clamp(60px,10vh,110px)}
+.profile-footer-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(48px,6vw,96px)}
+.profile-page .profile-footer h2.editorial-kicker{margin:0 0 28px;font:600 11px/1.4 var(--font-body),Arial,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#8fd9ea}
+.profile-footer ul{list-style:none;margin:0;padding:0;display:grid;gap:28px}
+.profile-footer li>span:not(.profile-footer-portrait){display:block;margin-bottom:6px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(234,245,250,.55)}
+.profile-footer a{color:#fff;text-decoration:none}.profile-footer li>a,.profile-footer-person a,.profile-footer-person strong{font:400 clamp(22px,2vw,28px)/1.2 var(--font-display),Georgia,serif}
+.profile-footer a:hover{text-decoration:underline;text-underline-offset:4px}.profile-footer a:focus-visible{outline:2px solid #8fd9ea;outline-offset:4px}
+.profile-footer p{margin:8px 0 0;font-family:var(--font-display),Georgia,serif;font-style:italic;font-size:clamp(16px,1.3vw,19px);line-height:1.45;color:rgba(234,245,250,.72)}
+.profile-footer-person{display:flex;gap:16px;align-items:flex-start}.profile-footer-portrait{flex:none;width:56px;height:56px;border-radius:50%;overflow:hidden;background:rgba(143,217,234,.18)}.profile-footer-portrait img{width:100%;height:100%;object-fit:cover}
+.profile-footer .profile-footer-contact{gap:14px}.profile-footer .profile-footer-contact a{font-size:13px;letter-spacing:.18em;text-transform:uppercase}
+.profile-footer p :is(strong,em,u){font:inherit}.profile-footer p strong{font-weight:600}.profile-footer p em{font-style:normal}
