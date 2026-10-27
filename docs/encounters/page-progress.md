@@ -727,13 +727,13 @@ No borra textos. Probada y **aplicada solo en Supabase local**. **No aplicada en
 
 - Menú por módulo, con **Crew → Crew page** y **Crew → People**.
 - En la página Crew:
-  - solo se editan el texto visible de portada y los bloques; los campos genéricos sin uso visible (*Subtitle* e *Information line*) y el antiguo *Excerpt* quedan ocultos sin borrar sus valores;
-  - el SEO vive en *Search and sharing*, separado del contenido visible y explicado campo por campo; el *Excerpt* anterior solo queda como respaldo de la descripción mientras *Short description* esté vacío;
-  - la tarjeta de bloques se llama *Content blocks* y ya no muestra la guía/resumen de secciones;
+  - orden del editor: *Banner* (imagen, línea chica y título grande) → *SEO* → *Below the banner*; el banner usa la portada de Settings, «Meet the team» y «The Crew» cuando sus campos están vacíos;
+  - el SEO queda separado del contenido visible y explicado campo por campo; el *Excerpt* anterior solo queda como respaldo de la descripción mientras *Short description* esté vacío;
+  - usa los mismos bloques completos que las páginas personales: *Main title*, *Opening text*, *Pinned photo pair*, *Photo row*, *Title, text & photos* y *Dark gallery*, más los bloques comunes;
+  - al abrir el formato anterior, el admin lo convierte en memoria conservando título, relato con estilos, par de fotos y proyecto; los bloques importados sin sección que nunca se mostraban (incluido «THE CREW») no entran al editor nuevo;
+  - todos los campos de texto ofrecen negrita, cursiva, subrayado y link; cada párrafo de *Opening text* y *Title, text & photos* conserva además su estilo visual;
+  - el par de fotos llena la altura disponible bajo el menú, igual que en las páginas personales;
   - *Publication* conserva solo *Page status*: fecha, orden, Home e índice no intervienen en `/crew` y quedan ocultos sin borrar valores; *Draft* oculta el texto y los bloques editables, no la ruta permanente ni las tarjetas de Crew;
-  - en cada bloque, «Place on the page» con su explicación, y «Text style» en los párrafos del relato y del proyecto;
-  - los bloques nuevos entran en Story;
-  - la card *Cover* explica que la imagen se elige en Settings y que el título es fijo;
   - se ocultan créditos y relacionados, que esta página no usa.
 - En las fichas de Crew: *Highlighted line* y *Favourite animal* con ayudas. El vínculo interno con la página personal ya no aparece como campo.
 

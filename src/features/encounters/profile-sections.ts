@@ -135,6 +135,27 @@ export function profileParagraphs(c:Row):Paragraph[]{
 export const hasProfileBlocks=(blocks:{content:Row}[])=>blocks.some(b=>profileLayout(b)!==null);
 const image=(p:Picture)=>({media_id:p.id,caption:p.caption||undefined,src:p.id?`/api/media/${String(p.id)}`:undefined});
 const strip=(b:Block)=>{const content={...b.content};delete content.section;delete content.in_pair;return {...b,content};};
+// The Crew page used older section markers. Present it through the same complete visual blocks as personal pages;
+// blocks without a section were imported duplicates that the public page never showed, so they stay outside the editor.
+export function toCrewProfileBlocks(blocks:Block[]):Block[]{
+  if(hasProfileBlocks(blocks))return blocks;
+  const of=(section:string)=>blocks.filter(b=>b.content.section===section);const out:Block[]=[];
+  const add=(type:string,content:Row,from?:Block)=>out.push({id:globalThis.crypto.randomUUID(),type,content,position:out.length,...(from?.anchor?{anchor:from.anchor}:{})});
+  const styled=(items:Block[],project=false)=>{const result:Paragraph[]=[];
+    for(const b of items.filter(x=>x.type!=='heading'))for(const text of paragraphs(b)){const style=str(b.content.style);
+      if(style==='aside'&&result.length){result[result.length-1].text+=` *${text}*`;continue;}
+      result.push({text,style:style==='lead'&&!project?'lead':style==='closing'||style==='lead'&&project?'voice':'body'});
+    }return result;};
+  const opening=of('opening').find(b=>b.type==='heading');if(opening)add('heading',{layout:'profile-title',text:title(opening)},opening);
+  const story=of('story'),storyKicker=story.find(b=>b.type==='heading'),storyParagraphs=styled(story);
+  if(storyKicker||storyParagraphs.length)add('paragraph',{layout:'profile-intro',kicker:storyKicker?title(storyKicker):'',paragraphs:storyParagraphs});
+  const pair=of('pair').flatMap(pictures);if(pair.length)add('image-pair',{layout:'profile-pair',images:pair.slice(0,2).map(image)});
+  if(pair.length>2)add('image',{layout:'profile-row',images:pair.slice(2).map(image)});
+  const project=of('project'),projectTitle=project.find(b=>b.type==='heading'),projectParagraphs=styled(project,true);
+  if(projectTitle||projectParagraphs.length)add('paragraph',{layout:'profile-chapter',title:projectTitle?title(projectTitle):'',paragraphs:projectParagraphs},projectTitle);
+  for(const b of of('extra'))out.push({...strip(b),position:out.length});
+  return out;
+}
 // The current page, whatever its markers, as profile blocks that show the same thing in the same order.
 export function toProfileBlocks(blocks:Block[]):Block[]{
   const {intro,pair,covers,segments}=composeProfile(blocks);const out:Block[]=[];

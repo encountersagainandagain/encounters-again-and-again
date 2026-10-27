@@ -207,7 +207,7 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 .crew-pair .profile-natural{display:flex;align-items:center;justify-content:center}
 .crew-pair .profile-natural img{width:auto;height:auto;max-width:100%;max-height:100%}
 .profile-chapter-title{display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
-.profile-chapter-title h2{text-transform:none}
+.profile-page .profile-chapter-title h2{text-transform:none}
 .profile-chapter-title span{font-family:var(--font-display),Georgia,serif;font-size:clamp(1.9rem,6vw,4.4rem);line-height:1;letter-spacing:.06em;text-transform:uppercase;color:var(--enc-marea)}
 .profile-link{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--enc-marea)}
 .profile-covers{padding-bottom:clamp(90px,24vh,260px);row-gap:clamp(40px,10vh,110px);align-items:start}
@@ -324,8 +324,8 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 .layout-audio .editorial-embed{width:100%;margin:8px 0 0;aspect-ratio:auto;height:352px}
 /* Personal page, pinned photo pair: the photos fill the height under the menu (one row of 73px from 981px, two rows
    of about 107px below it); the pin grows with them so the pair stays pinned as long as before (63vh of scroll). */
-@media(min-width:760px) and (prefers-reduced-motion:no-preference){.profile-page .crew-pair-pin{height:calc(100svh + 63vh)}.profile-page .crew-pair{top:74px}.profile-page .crew-pair>div{height:calc(100svh - 74px)}}
-@media(min-width:760px) and (max-width:980px) and (prefers-reduced-motion:no-preference){.profile-page .crew-pair{top:108px}.profile-page .crew-pair>div{height:calc(100svh - 108px)}}
+@media(min-width:760px) and (prefers-reduced-motion:no-preference){:is(.profile-page,.crew-page) .crew-pair-pin{height:calc(100svh + 63vh)}:is(.profile-page,.crew-page) .crew-pair{top:74px}:is(.profile-page,.crew-page) .crew-pair>div{height:calc(100svh - 74px)}}
+@media(min-width:760px) and (max-width:980px) and (prefers-reduced-motion:no-preference){:is(.profile-page,.crew-page) .crew-pair{top:108px}:is(.profile-page,.crew-page) .crew-pair>div{height:calc(100svh - 108px)}}
 /* Photos of a chapter or a photo row (up to four): one is centred; on wide screens three or four share one row, below 1081px two per
    row, and on phones one under another. Two keep the alternating halves of the photo row. */
 .profile-photo-set[data-count="1"] figure{grid-column:1/-1;align-items:center}

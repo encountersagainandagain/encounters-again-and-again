@@ -17,8 +17,8 @@ export function ProfileView({member,post,blocks,media,trail,children}:{member:Ro
   const hero=profileHero(member,post,blocks);
   return <><PhotoHero pinned title={hero.title} kicker={hero.kicker} cover={hero.cover} fallback={hero.fallback} media={media}/><div id="editorial-content">{trail}<ProfileStory blocks={blocks} media={media} kicker={string(member.alias)||string(member.name)}/>{children}</div></>;
 }
-export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
-  if(hasProfileBlocks(blocks as Block[]))return <ProfileBlocks blocks={blocks} media={media} kicker={kicker}/>;
+export function ProfileStory({blocks,media,kicker,variant='profile'}:{blocks:ContentBlock[];media:Row[];kicker?:string;variant?:'profile'|'crew'}){
+  if(hasProfileBlocks(blocks as Block[]))return <ProfileBlocks blocks={blocks} media={media} kicker={kicker} variant={variant}/>;
   const {intro,pair,covers:openingCovers,segments}=composeProfile(blocks as Block[]);
   // Small originals keep their own size on the tile instead of being enlarged.
   const small=(picture:Picture)=>Number(media.find(m=>m.id===picture.id)?.width||0)<600;
@@ -45,7 +45,7 @@ export function ProfileStory({blocks,media,kicker}:{blocks:ContentBlock[];media:
 const styleClass:Record<Paragraph['style'],string|undefined>={lead:'crew-lead',voice:'crew-voice',body:undefined};
 const marked=(text:string)=><InlineText text={text}/>;
 const paragraph=(p:Paragraph,key:number)=><p key={key} className={styleClass[p.style]}>{marked(p.text)}</p>;
-function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];kicker?:string}){
+function ProfileBlocks({blocks,media,kicker,variant}:{blocks:ContentBlock[];media:Row[];kicker?:string;variant:'profile'|'crew'}){
   // Chapter photos and photo rows: up to maxPhotos, laid out by how many there are (profile-photo-set).
   const covers=(images:Picture[],key:string,set?:'chapter'|'row')=>images.length>0&&<section className={`crew-row profile-covers${set?` profile-photo-set profile-${set}-photos`:''}`} data-count={set?images.length:undefined} key={key}>{images.map((picture,i)=><figure key={i} data-seq={i%2?'0.88,0.5':'1.05,0.5'}><div><MediaImage id={picture.id} media={media}/></div>{picture.caption&&<figcaption>[ {picture.caption} ]</figcaption>}</figure>)}</section>;
   const tiles=(images:Picture[],compact:boolean)=><div className={`crew-pairs profile-tiles${compact?' profile-tiles-compact':''}`}>{images.map((picture,i)=><figure key={i} data-seq={`${i%2?(compact?.9:.86):1},0.34,70`}><MediaImage id={picture.id} media={media} contain/>{picture.caption&&<figcaption>{picture.caption}</figcaption>}</figure>)}</div>;
@@ -54,7 +54,7 @@ function ProfileBlocks({blocks,media,kicker}:{blocks:ContentBlock[];media:Row[];
   for(let i=0;i<blocks.length;i++){const b=blocks[i],c=b.content as Row,layout=profileLayout(b);
     if(!layout){plain.push(b);continue;}
     flush();const key=b.id||i;
-    if(layout==='profile-title'){out.push(<section className="crew-opening profile-opening" key={key}><h2 data-seq="0.95,0.5" id={anchor(b)}>{marked(string(c.text))}</h2><Scribble variant="title"/></section>);continue;}
+    if(layout==='profile-title'){out.push(<section className={`crew-opening${variant==='profile'?' profile-opening':''}`} key={key}><h2 data-seq="0.95,0.5" id={anchor(b)}>{marked(string(c.text))}</h2><Scribble variant="title"/></section>);continue;}
     if(layout==='profile-intro'){const titled=i>0&&profileLayout(blocks[i-1])==='profile-title';const line=string(c.kicker)||kicker;
       out.push(<section className={`crew-row crew-origin${titled?'':' profile-untitled'}`} key={key}><div data-seq={titled?'1.42,0.6':'0.95,0.5'}>{line&&<span className="editorial-kicker">{marked(line)}</span>}{profileParagraphs(c).filter(p=>p.text.trim()).map(paragraph)}</div></section>);continue;}
     if(layout==='profile-pair'){const pair=imagesOf(c).slice(0,2);if(pair.length)out.push(<section className="crew-pair-pin" data-pair-pin key={key}><div className={`crew-pair${pair.length===1?' crew-pair-single':''}`}>{pair.map((picture,n)=><div key={n} data-pair={n?'b':'a'}><MediaImage id={picture.id} media={media}/></div>)}</div></section>);continue;}

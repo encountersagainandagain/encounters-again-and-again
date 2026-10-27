@@ -4,7 +4,7 @@
 // with subtitles and links, galleries and extra blocks.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {composeProfile,composeSections,toSections,hasSections} from '../src/features/encounters/profile-sections.ts';
+import {composeProfile,composeSections,toCrewProfileBlocks,toSections,hasSections} from '../src/features/encounters/profile-sections.ts';
 const str=v=>typeof v==='string'?v:'';const rows=v=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const safe=v=>typeof v==='string'&&(/^(https?:\/\/|mailto:|tel:)/i.test(v)||/^\/(?!\/)/.test(v)||/^#[\w-]+$/.test(v));
 // The previous reading (ProfileStory before explicit sections), kept here as the reference.
@@ -46,4 +46,21 @@ same('empty',[]);
 // An explicit profile is read only from its markers: text content never moves a block.
 const explicit=[{...P('A long sentence that the previous reading would have taken as a gallery title.'),content:{text:'x',section:'chapter'}},{...I('m'),content:{media_id:'m',section:'gallery'}}];
 const e=composeSections(explicit);assert.equal(e.segments[0].type,'chapter');assert.equal(e.segments[1].type,'gallery');
-console.log('PASS: explicit profile sections reproduce the approved reading (Wild Wonders + 5 cases) and follow markers only.');
+// The Crew page uses the same complete blocks as personal pages. Unshown imported duplicates do not become content.
+const team=[
+  {...P('THE CREW'),content:{text:'THE CREW'}},
+  {...H('FOLLOWING OUR NATURE'),content:{text:'FOLLOWING OUR NATURE',section:'opening'}},
+  {...H('THROUGH OUR ENCOUNTERS IN LIFE'),content:{text:'THROUGH OUR ENCOUNTERS IN LIFE',section:'story'}},
+  {...P('Opening'),content:{text:'Opening',section:'story',style:'lead'}},
+  {...P('— The Great Barrier Reef.'),content:{text:'— The Great Barrier Reef.',section:'story',style:'aside'}},
+  {...P('Closing'),content:{text:'Closing',section:'story',style:'closing'}},
+  {...I('left'),content:{media_id:'left',section:'pair'}},{...I('right'),content:{media_id:'right',section:'pair'}},
+  {...H('Project'),content:{text:'Project',section:'project'}},{...P('Project text'),content:{text:'Project text',section:'project',style:'body'}},
+  {...Q('Extra'),content:{text:'Extra',lead:'x',section:'extra'}},
+];
+const converted=toCrewProfileBlocks(team);assert.deepEqual(converted.map(b=>b.content.layout||b.type),['profile-title','profile-intro','profile-pair','profile-chapter','quote']);
+assert.equal(converted[0].content.text,'FOLLOWING OUR NATURE');assert.equal(converted[1].content.kicker,'THROUGH OUR ENCOUNTERS IN LIFE');
+assert.deepEqual(converted[1].content.paragraphs,[{text:'Opening *— The Great Barrier Reef.*',style:'lead'},{text:'Closing',style:'voice'}]);
+assert.deepEqual(converted[2].content.images.map(i=>i.media_id),['left','right']);assert.equal(converted[3].content.title,'Project');
+assert.ok(!JSON.stringify(converted).includes('THE CREW'),'unshown imported banner duplicate stays out of content blocks');
+console.log('PASS: profile sections preserve the approved reading and The Crew converts to the shared visual blocks.');
