@@ -255,9 +255,6 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-picker-panel button:hover{border-color:rgba(27,93,116,.4)}
 .adm-split>aside .adm-picker-current{grid-template-columns:minmax(0,1fr)}
 @media(max-width:860px){.adm-picker-current{grid-template-columns:minmax(0,1fr)}}
-.adm-section-guide{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:0 0 16px;padding:0;list-style:none}
-.adm-section-guide li{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--adm-line);border-radius:10px;background:#f6fafc;font-size:13px}
-.adm-section-guide small{color:var(--adm-muted)}
 /* Page presentation editor: fields beside the live preview of the public template. */
 .adm-tabs .adm-tab-link{padding:8px 14px;border-radius:9px;font:600 14px var(--font-body),Arial,sans-serif;color:var(--adm-sea);text-decoration:none}
 .adm-tabs .adm-tab-link[aria-current=page]{background:#fff;box-shadow:0 1px 3px rgba(6,24,38,.15)}

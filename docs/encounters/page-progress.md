@@ -727,7 +727,9 @@ No borra textos. Probada y **aplicada solo en Supabase local**. **No aplicada en
 
 - Menú por módulo, con **Crew → Crew page** y **Crew → People**.
 - En la página Crew:
-  - guía con las secciones y cuántos bloques tiene cada una;
+  - solo se editan el texto visible de portada y los bloques; los campos genéricos sin uso visible (*Subtitle* e *Information line*) y el antiguo *Excerpt* quedan ocultos sin borrar sus valores;
+  - el SEO vive en *Search and sharing*, separado del contenido visible y explicado campo por campo; el *Excerpt* anterior solo queda como respaldo de la descripción mientras *Short description* esté vacío;
+  - la tarjeta de bloques se llama *Content blocks* y ya no muestra la guía/resumen de secciones;
   - en cada bloque, «Place on the page» con su explicación, y «Text style» en los párrafos del relato y del proyecto;
   - los bloques nuevos entran en Story;
   - la card *Cover* explica que la imagen se elige en Settings y que el título es fijo;
