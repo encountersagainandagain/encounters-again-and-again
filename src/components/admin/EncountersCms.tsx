@@ -406,17 +406,17 @@ export function EncountersCms(){
   }
 
   const fields=table==='posts'?commonFields:entities[table].fields;
-  const hasStatus=fields.some(f=>f.key==='status');const saved=!!record.updated_at;const published=record.status==='published';
+  const hasStatus=fields.some(f=>f.key==='status');const saved=!!record.updated_at;const published=record.status==='published';const pageEditor=table==='posts'&&(record.kind==='page'||record.kind==='crew_member');
   const title=String(record.title||record.name||record.alt||'')||(saved?'Untitled':`New ${singular[table]}`);
   const toolbar=<div className="adm-toolbar">
     <div className="adm-toolbar-state"><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={back}><ArrowLeft aria-hidden="true"/>Back to list</button>{hasStatus&&<StatusBadge status={record.status}/>}<ExampleBadge row={record}/>{dirty?<span className="adm-badge adm-badge--dirty">Unsaved changes</span>:saved?<span>All changes saved</span>:<span>Not saved yet</span>}</div>
     <div className="adm-actions">
-      {table==='posts'&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={duplicate} disabled={busy}><Copy aria-hidden="true"/>Duplicate as draft</button>}
-      {(table==='posts'||table==='art_categories'||table==='expedition_cards')&&<><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button><details className="adm-info-tip"><summary aria-label="What Visual preview does"><Info aria-hidden="true"/></summary><span>Shows how the page looks with the changes currently in the form, even before you save them.</span></details></>}
+      {table==='posts'&&!pageEditor&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={duplicate} disabled={busy}><Copy aria-hidden="true"/>Duplicate as draft</button>}
+      {!pageEditor&&(table==='posts'||table==='art_categories'||table==='expedition_cards')&&<><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button><details className="adm-info-tip"><summary aria-label="What Visual preview does"><Info aria-hidden="true"/></summary><span>Shows how the page looks with the changes currently in the form, even before you save them.</span></details></>}
       {saved&&published&&['posts','art_categories','crew_members'].includes(table)&&(table!=='posts'||record.kind!=='crew_member')&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={publicPath(table,record,specific,options)} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
       {table==='posts'&&saved&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${record.id}/preview`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Full preview</a>}
       <button type="submit" className="adm-btn" disabled={busy}>{busy?'Saving…':'Save'}</button>
-      {hasStatus&&(published?<button type="button" className="adm-btn adm-btn--ghost" disabled={busy} onClick={()=>void save(undefined,{status:'draft'})}>Unpublish</button>:<button type="button" className="adm-btn adm-btn--publish" disabled={busy} onClick={()=>void save(undefined,{status:'published'})}>Save and publish</button>)}
+      {hasStatus&&!pageEditor&&(published?<button type="button" className="adm-btn adm-btn--ghost" disabled={busy} onClick={()=>void save(undefined,{status:'draft'})}>Unpublish</button>:<button type="button" className="adm-btn adm-btn--publish" disabled={busy} onClick={()=>void save(undefined,{status:'published'})}>Save and publish</button>)}
     </div></div>;
 
   if(table!=='posts'){

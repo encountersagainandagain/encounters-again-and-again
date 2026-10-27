@@ -734,6 +734,7 @@ No borra textos. Probada y **aplicada solo en Supabase local**. **No aplicada en
   - todos los campos de texto ofrecen negrita, cursiva, subrayado y link; cada párrafo de *Opening text* y *Title, text & photos* conserva además su estilo visual;
   - el par de fotos llena la altura disponible bajo el menú, igual que en las páginas personales;
   - *Publication* conserva solo *Page status*: fecha, orden, Home e índice no intervienen en `/crew` y quedan ocultos sin borrar valores; *Draft* oculta el texto y los bloques editables, no la ruta permanente ni las tarjetas de Crew;
+  - la barra superior de páginas conserva solo navegación, estado, *Open public page*, *Full preview* y *Save*: duplicar, el preview integrado y publicar/despublicar se ocultan; la publicación se controla una sola vez en la tarjeta *Publication*;
   - se ocultan créditos y relacionados, que esta página no usa.
 - En las fichas de Crew: *Highlighted line* y *Favourite animal* con ayudas. El vínculo interno con la página personal ya no aparece como campo.
 
