@@ -266,6 +266,7 @@ export function EncountersCms(){
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [preview,setPreview]=useState(false);
+  const [newProfileOpen,setNewProfileOpen]=useState(false);const [newProfileMember,setNewProfileMember]=useState('');
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
   const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
@@ -276,7 +277,7 @@ export function EncountersCms(){
   useEffect(()=>{if(markClean){setBaseline(snapshot);setMarkClean(false);}},[markClean,snapshot]);
   const dirty=!!record&&baseline!==''&&baseline!==snapshot;
   const kind=String(record?.kind||'news');
-  useEffect(()=>{setRecord(null);setMessage('');},[table,kindParam,pagesOnly,pageRole]);
+  useEffect(()=>{setRecord(null);setMessage('');setNewProfileOpen(false);setNewProfileMember('');},[table,kindParam,pagesOnly,pageRole]);
   // Only another table is loaded again: two menu entries over posts (Personal pages, The Crew page) share the rows.
   useEffect(()=>{setLoaded(false);},[table]);
   useEffect(()=>{let live=true;async function load(){if(!supabase)return;
@@ -362,6 +363,7 @@ export function EncountersCms(){
   function autoSlug(prev:Row,next:Row,source:string){if(prev.updated_at||!(source in next))return next;const following=!prev.slug||prev.slug===slugify(String(prev[source]||''));if(!following||next[source]===prev[source])return next;const slug=slugify(String(next[source]||''));if(slug&&errors.slug)errorContext.clear('slug');return {...next,slug};}
   function duplicate(){if(!record)return;setRecord(duplicateContent(record,crypto.randomUUID()));setBlocks(blocks.map(b=>({...b,id:crypto.randomUUID(),source_block_id:undefined})));setChildRows(childRows.map(c=>({...c,id:crypto.randomUUID()})));setMessage('New draft copy. Save when ready.');}
   async function createProfile(){if(!supabase||!record?.updated_at)return;setBusy(true);try{const r=await supabase.rpc('create_crew_profile',{member_id:record.id});if(r.error)throw r.error;setRecord({...record,page_post_id:r.data,has_page:true});setRevision(x=>x+1);setMessage('Draft profile created. Open its blocks to edit and publish.');}catch(e){setMessage((e as {message?:string}).message||'Could not create profile');}finally{setBusy(false);}}
+  async function createProfileFor(memberId:string){if(!supabase||!memberId)return;setBusy(true);setMessage('');try{const r=await supabase.rpc('create_crew_profile',{member_id:memberId});if(r.error)throw r.error;location.assign(`/admin/content?table=posts&edit=${String(r.data)}`);}catch(e){setMessage((e as {message?:string}).message||'Could not create profile');setBusy(false);}}
   async function upload(file:File){setBusy(true);try{const url=await uploadMediaFile(file,'posts');setRevision(x=>x+1);setMessage(`Image uploaded: ${url}`);}catch{setMessage('Image upload failed.');}finally{setBusy(false);}}
   function deletedMember(name:string){setRecord(null);setRevision(r=>r+1);setMessage(`${name} was deleted.`);void requestAdminRevalidation({scope:'posts'});}
   function back(){if(dirty&&!window.confirm('Leave without saving your changes?'))return;setRecord(null);setMessage('');}
@@ -381,11 +383,16 @@ export function EncountersCms(){
       art_categories:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.cover_id} size="100%"/><div className="adm-item-body"><strong>{String(row.name||'Unnamed')}</strong><small>/art/{String(row.slug||'')} · {String(row.layout||'gallery')}</small><div className="adm-item-meta"><StatusBadge status={row.status}/><ExampleBadge row={row}/>{row.featured?<span className="adm-badge adm-badge--plain">Featured</span>:null}</div>{editButton(row)}</div></article>)}</div>,
       media:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.id} size="100%" alt={String(row.alt||'')}/><div className="adm-item-body"><small>{needsAlt(row)?'No description yet':String(row.alt)}</small><div className="adm-item-meta">{needsAlt(row)?<span className="adm-badge adm-badge--dirty">Needs a description</span>:null}<span className="adm-badge adm-badge--plain">{row.width&&row.height?`${row.width} × ${row.height}`:'Size unknown'}</span>{row.fit?<span className="adm-badge adm-badge--plain">{String(row.fit)}</span>:null}</div>{editButton(row)}</div></article>)}</div>,
     };
+    const profileCandidates=(options.crew_members||[]).filter(member=>!member.page_post_id).sort((a,b)=>Number(a.sort||0)-Number(b.sort||0)||optionLabel(a).localeCompare(optionLabel(b)));
     return <div className="adm-stack">
       <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'&&kindParam==='crew_member'?'The page of each person of the Crew: its banner and the blocks below it. Drafts stay private until you publish them.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
+        {table==='posts'&&kindParam==='crew_member'&&<button type="button" className="adm-btn" onClick={()=>setNewProfileOpen(open=>!open)} disabled={busy}><Plus aria-hidden="true"/>New personal page</button>}
       </AdminHeader>
-      {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person: it is created from that person in <Link href="/admin/content?table=crew_members">Crew</Link> (“Create personal page”).</p>}
+      {table==='posts'&&kindParam==='crew_member'&&<p className="adm-help">Each personal page belongs to one person in <Link href="/admin/content?table=crew_members">Crew</Link>.</p>}
+      {table==='posts'&&kindParam==='crew_member'&&newProfileOpen&&<Card title="New personal page" lead="Choose a Crew member who does not have a personal page yet. A private draft will be created and opened for editing.">
+        {profileCandidates.length?<div className="adm-new-profile"><label className="adm-field">Crew member<select value={newProfileMember} onChange={e=>setNewProfileMember(e.target.value)}><option value="">Choose a person</option>{profileCandidates.map(member=><option key={String(member.id)} value={String(member.id)}>{optionLabel(member)}</option>)}</select></label><button type="button" className="adm-btn" disabled={busy||!newProfileMember} onClick={()=>void createProfileFor(newProfileMember)}>{busy?'Creating…':'Create draft and edit'}</button></div>:<p className="adm-help">Every Crew member already has a personal page.</p>}
+      </Card>}
       {table==='posts'&&kindParam&&kindParam!=='crew_member'&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
       {table==='posts'&&pagesOnly&&<p className="adm-help">Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.</p>}
       {table==='posts'&&!kindParam&&!pagesOnly&&<div className="adm-stack" style={{gap:14}}>
@@ -421,7 +428,7 @@ export function EncountersCms(){
 
   if(table!=='posts'){
     const seoKeys=table==='art_categories'?['seo_title','meta_description']:[];
-    const side=pick(fields,entitySide).filter(f=>f.key!=='page_post_id'&&(f.key!=='listed'||record.listed!==undefined));const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
+    const side=pick(fields,entitySide).filter(f=>f.key!=='page_post_id'&&f.key!=='has_page'&&(f.key!=='listed'||record.listed!==undefined));const crewListing=table==='crew_members'?side.filter(f=>f.key==='sort'||f.key==='listed').map(f=>f.key==='sort'?{...f,label:'Position on The Crew page'}:f):[];const publicationSide=table==='crew_members'?side.filter(f=>f.key==='status'):side;const imageFields=fields.filter(f=>f.reference==='media');const main=omit(fields,[...entitySide,...seoKeys,...imageFields.map(f=>f.key)]);
     const bytes=Number(record.bytes)||0;
     return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
       <AdminHeader kicker={tableLabel(table)} title={title}/>
@@ -435,7 +442,8 @@ export function EncountersCms(){
       </div><aside>
         {table==='crew_members'&&<Card title="Personal page"><CrewPagePanel member={record} posts={options.posts||[]} busy={busy} onCreate={()=>void createProfile()}/></Card>}
         {table==='media'&&<Card title="File">{needsAlt(record)&&<p className="adm-notice adm-notice--error" style={{marginBottom:12}}>Add a description: it is read aloud to people who cannot see the image.</p>}<dl className="adm-facts"><div><dt>Format</dt><dd>{String(record.mime_type||'—').replace('image/','').toUpperCase()}</dd></div><div><dt>Size</dt><dd>{record.width&&record.height?`${record.width} × ${record.height} px`:'—'}</dd></div><div><dt>Weight</dt><dd>{bytes?bytes>1048576?`${(bytes/1048576).toFixed(1)} MB`:`${Math.round(bytes/1024)} KB`:'—'}</dd></div></dl><p className="adm-help" style={{marginTop:12}}>Images stay private until they are used in published content. Uploading the same image again reuses this one.</p></Card>}
-        {side.length>0&&<Card title="Publication"><Fields fields={side} value={record} onChange={setRecord} options={options}/></Card>}
+        {publicationSide.length>0&&<Card title="Publication"><Fields fields={publicationSide} value={record} onChange={setRecord} options={options}/></Card>}
+        {crewListing.length>0&&<Card title="The Crew page" lead="Controls this person's card on The Crew page and in the Crew strip on Home. It does not switch their personal page on or off."><Fields fields={crewListing} value={record} onChange={setRecord} options={options} notes={{sort:'Lower numbers appear first. People with the same number keep their current order.',listed:'Untick to remove this person from The Crew page and the Home strip. Their personal page and credits keep working.'}}/></Card>}
         {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options}/></Card>}
         {table==='crew_members'&&saved&&<CrewRemoval member={record} page={(options.posts||[]).find(p=>p.id===record.page_post_id)} busy={busy} onHide={record.listed!==undefined&&record.listed!==false?()=>void save(undefined,{listed:false}):undefined} onDeleted={deletedMember}/>}
       </aside></div>

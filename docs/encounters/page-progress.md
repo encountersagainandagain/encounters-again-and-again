@@ -737,6 +737,8 @@ No borra textos. Probada y **aplicada solo en Supabase local**. **No aplicada en
   - la barra superior de páginas conserva solo navegación, estado, *Open public page*, *Full preview* y *Save*: duplicar, el preview integrado y publicar/despublicar se ocultan; la publicación se controla una sola vez en la tarjeta *Publication*;
   - se ocultan créditos y relacionados, que esta página no usa.
 - En las fichas de Crew: *Highlighted line* y *Favourite animal* con ayudas. El vínculo interno con la página personal ya no aparece como campo.
+- En *Personal pages*, *New personal page* permite elegir únicamente una persona de Crew que todavía no tenga página; crea el borrador y abre directamente su editor.
+- En las fichas de Crew, *Enable profile page* queda oculto porque duplica el estado de la página personal. *Publication* conserva solo el estado general de la persona; *Position on The Crew page* y *Show on The Crew page* quedan juntos en una tarjeta propia, con ayudas que explican que controlan la tarjeta de `/crew` y la tira de Home, no la página personal.
 
 **Plantilla compartida.** `CrewView` (`src/components/public/CrewView.tsx`) la usan `/crew`, el preview integrado y el preview por ruta de la página Team.
 

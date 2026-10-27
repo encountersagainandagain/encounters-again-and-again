@@ -60,7 +60,7 @@ export function CrewPagePanel({member,posts,busy,onCreate}:{member:Row;posts:Row
   const live=!!page&&page.status==='published'&&member.status==='published'&&member.has_page===true;
   return <div className="adm-stack" style={{gap:12}}>
     <p className="adm-help">The crew record is the person. The personal page is a separate page linked to it{text(member.alias)?<>, titled with the artistic name <strong>{text(member.alias)}</strong></>:''}. Works and activities credited to this person appear on that page automatically.</p>
-    <div className="adm-toolbar-state"><span>Personal page:</span>{page?<StatusBadge status={page.status}/>:<span className="adm-badge adm-badge--plain">Not created</span>}{page&&!member.has_page?<span className="adm-badge adm-badge--dirty">Hidden: “Enable profile page” is off</span>:null}</div>
+    <div className="adm-toolbar-state"><span>Personal page:</span>{page?<StatusBadge status={page.status}/>:<span className="adm-badge adm-badge--plain">Not created</span>}</div>
     {!saved?<p className="adm-help">Save this person first to create their page.</p>:page?<div className="adm-actions">
       <Link className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/content?table=posts&edit=${page.id}`}>Edit personal page</Link>
       <a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${page.id}/preview`} target="_blank" rel="noreferrer"><Eye aria-hidden="true"/>Preview</a>
