@@ -2,13 +2,30 @@
 
 | Entorno | Dirección | Datos | Para qué |
 |---|---|---|---|
+| Sitio gamma en producción | https://encounters-again-and-again-gamma.vercel.app | Supabase real `lzwmwofxoegkxykglneq` | Revisión actual de Juani; despliegue automático desde `main`, todavía con `noindex`. |
 | Revisión online (Vercel Preview) | https://encounters-review-juanimolfinos-projects.vercel.app | Supabase de pruebas (staging). **Pendiente:** el proyecto todavía no existe. | Que Juani revise la web y el admin desde cualquier dispositivo. |
 | Producción local | http://127.0.0.1:3221 | Supabase local (Docker) | Revisión en la Mac, con medición de rendimiento. |
 | Desarrollo local | http://127.0.0.1:3219 | Supabase local | Trabajo diario. |
 | Datos reales, solo lectura | http://127.0.0.1:3218 | Supabase real `lzwmwofxoegkxykglneq` | Comparar Crew y Wild Wonders con lo importado; nunca se escribe. |
 | Prototipos | http://127.0.0.1:3220 | `docs/encounters/handoff-current` | Referencia visual. |
 
-El lanzamiento (producción con el dominio del cliente) **no está configurado**: no hay dominio asociado ni despliegue de producción.
+El sitio gamma sí tiene despliegue de producción en Vercel. El **lanzamiento público definitivo** no está configurado: falta el
+dominio del cliente, las redirecciones y quitar `noindex`.
+
+## Producción gamma y los dos deployments de una entrega
+
+- Proyecto del cliente: `encountersagainandagains-projects/encounters-again-and-again`.
+- `main` despliega https://encounters-again-and-again-gamma.vercel.app.
+- El flujo vigente sube primero a `review` y luego adelanta `main` al mismo commit. El push a `review` también puede disparar un
+  Preview en el proyecto del cliente.
+- Como staging todavía no está configurado, ese Preview puede fallar en `/api/covers` con `Unexpected Encounters database
+  target`: el guard de `encountersSupabaseTarget.ts` rechaza correctamente el destino. No significa que el deployment posterior
+  de `main` haya fallado.
+- Caso comprobado: el Preview de `027e795` falló y luego el deployment de producción del mismo commit terminó con status Vercel
+  `success`; gamma respondió 200.
+- La carpeta `.vercel/project.json` del repo local apunta al proyecto histórico `encounters-review` de
+  `juanimolfinos-projects`. No usar `vercel inspect` sin comprobar equipo/proyecto para afirmar el estado del sitio del cliente;
+  confirmar el status del commit en GitHub/Vercel.
 
 ## Revisión online
 

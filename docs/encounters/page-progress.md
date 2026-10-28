@@ -1,6 +1,6 @@
 # Seguimiento por páginas
 
-## Estado actual (2026-10-24)
+## Estado actual (2026-10-28)
 
 Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel del cliente, despliegue automático desde `main`). Admin: https://encounters-again-and-again-gamma.vercel.app/admin, sobre el **proyecto real de Supabase `lzwmwofxoegkxykglneq`** (contenido importado + ejemplos marcados). Sin dominio propio y con `noindex`.
 
@@ -11,9 +11,14 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 
 ### Verificado técnicamente
 - **Crew (2026-10-26):** «read →» a la derecha del nombre en las tarjetas, alineado por la base del texto. Verificado en Chrome a 1440, 900 y 390 px, sin desbordes; typecheck, lint (excluyendo el build generado `.next-check`), tests y build correctos. Capturas en `.encounters-work/crew-inline-read/`.
-- **Editor de página personal (2026-10-26, pendiente de publicar):** el enlace desde Crew dice solo «Edit personal page»; una página nueva empieza con Main title y Opening text; Publication muestra únicamente el estado y explica su relación con Crew/Home; los controles de orden, fecha, destacado e índice que no afectan este tipo de página se ocultan; Visual preview incluye una ayuda en el icono de información. Migraciones `20261026000200_profile_default_blocks.sql` y `20261026000300_keep_legacy_profiles_convertible.sql`, probadas solo en local; no aplicadas a la base real.
-- **Bloque Paragraph (2026-10-26, pendiente de publicar):** el texto común permite marcar palabras en negrita, cursiva o subrayado y convertirlas en enlace; la página pública y Visual preview comparten el mismo render. Se retiró «Index name» del bloque Heading; el Number se conserva.
-- **Bloque YouTube en perfiles (2026-10-26, pendiente de publicar):** antes de reproducir muestra la miniatura real del video con un botón de play; al pulsarlo carga el reproductor privado de YouTube. Si no existe miniatura de máxima resolución, usa la estándar.
+- **CMS de Crew y páginas personales (2026-10-27, publicado):** `main` está en `027e795` (cambio funcional `6dd2c8f`) y Vercel terminó exitoso. Personal pages permite crear una página eligiendo solo una persona de Crew sin página; crea un Draft y abre el editor. En la ficha de Crew se ocultó `Enable profile page`; Publication conserva el estado de la persona y una tarjeta `The Crew page` explica Position y Show on The Crew page.
+- **Editor de página personal (publicado):** el enlace desde Crew dice solo `Edit personal page`; una página nueva se muestra con Main title y Opening text; Publication conserva únicamente el estado. Orden, fecha, destacado, Home e índice se ocultan. La barra superior no muestra Duplicate as draft, el Visual preview integrado, su icono ni Unpublish; conserva Full preview y Save.
+- **The Crew page (publicado):** Banner → SEO → Below the banner. `THE CREW` es parte del banner, no un bloque. Se retiraron Sections of The Crew page y Place on the page; usa los mismos bloques que una página personal. Publication conserva solo Page status.
+- **Bloque Paragraph (publicado):** el texto común permite marcar palabras en negrita, cursiva o subrayado y convertirlas en enlace; la página pública y los previews comparten el mismo render. Se retiró Index name del bloque Heading; Number se conserva.
+- **Bloque YouTube en perfiles (publicado):** antes de reproducir muestra la miniatura real con play y al pulsarlo carga el reproductor privado de YouTube. Si no existe miniatura de máxima resolución, usa la estándar.
+- **Migraciones todavía pendientes en la base real:** `20261026000200_profile_default_blocks.sql` y `20261026000300_keep_legacy_profiles_convertible.sql`, probadas localmente. El código desplegado funciona sin ellas mediante la conversión al abrir; aplicarlas juntas requiere autorización nueva, respaldo y dry run.
+- **SEO de The Crew cargado en producción:** título `Meet the Encounters Crew`; descripción `Meet the crew behind Encounters Again and Again, brought together by the ocean and a shared commitment to art, education and conservation.`
+- **Vercel:** el Preview automático de `review` puede fallar con `Unexpected Encounters database target` porque staging no está configurado. No confundirlo con producción: el deployment posterior de `main` para `027e795` terminó en success y gamma respondió 200. Detalle en `HANDOFF_2026-10-28.md`.
 - **Navbar:** Art al frente del grupo derecho, en 14 anchos.
 - **Historial y anclas:** ancla, otra página, Atrás y Adelante; también índice de posts guardados desde el CMS local, carga directa con hash, skip link y reduced motion.
 - **Portadas:**
@@ -632,11 +637,18 @@ Capturas: [verification/review-2026-10-19-newsletter/](verification/review-2026-
 
 **Guía para Juani:** [revision-integrada.md](revision-integrada.md).
 
-### Migraciones pendientes en la base remota (en orden; no aplicadas)
+### Migraciones en la base remota
 
-**Actualizado 2026-10-26:** `…20261017000100` y `…20261017000200` **ya están en la base real** (comprobado leyendo `crew_members.highlight`/`favourite_animal`, `workshops.note_title`/`outcome` y `expeditions.outcome` con la clave pública). **Ninguna pendiente.** La última, aplicada en la base real el 2026-10-26 con aprobación de Juani (respaldo previo de esquema y datos en `.encounters-work/backups/2026-10-26-before-20261026000100-*.sql`, dry run con solo esta migración, `production-migrate.mjs --apply`; 17 migraciones iguales en local y remoto):
+**Actualizado 2026-10-28:** hay 17 migraciones aplicadas en la base real. La última, aplicada el 2026-10-26 con aprobación de Juani (respaldo previo de esquema y datos en `.encounters-work/backups/2026-10-26-before-20261026000100-*.sql`, dry run con solo esta migración, `production-migrate.mjs --apply`), es:
 
 - `supabase/migrations/20261026000100_crew_listing_relation_notes.sql` — `crew_members.listed` (sacar a alguien de The Crew page y del Home sin borrar su página) y `post_relations.note` (comentario por relación); `save_content` igual salvo que guarda `note`. No convierte ni borra nada.
+
+Pendientes, en este orden, probadas localmente pero no aplicadas a producción:
+
+1. `supabase/migrations/20261026000200_profile_default_blocks.sql` — Main title para los perfiles que lo necesitan y RPC de creación con Main title + Opening text.
+2. `supabase/migrations/20261026000300_keep_legacy_profiles_convertible.sql` — conserva la conversión completa de perfiles legacy y corrige las posiciones que la migración anterior pudo tocar.
+
+Aplicarlas juntas requiere un OK explícito nuevo, respaldo, prueba local y dry run que muestre únicamente esas dos.
 
 Historial (ya aplicadas):
 
@@ -765,11 +777,11 @@ Capturas: [verification/review-2026-10-17-crew-page/](verification/review-2026-1
 ## Checklist para Juani — `/crew`
 
 1. Abrí `http://127.0.0.1:3219/admin` → **Crew → Crew page**.
-2. Cambiá el título de apertura (bloque «Opening title») y un párrafo del relato; probá su «Text style». Mirá «Visual preview».
-3. Guardá y abrí `http://127.0.0.1:3219/crew`: los cambios tienen que verse en su lugar.
-4. En **Crew → People**, editá una persona: «Highlighted line» y «Favourite animal». Guardá y mirá su tarjeta.
+2. Cambiá Main title y un párrafo de Opening text; probá su estilo y el formato inline. Guardá y abrí `Full preview`.
+3. Abrí `http://127.0.0.1:3219/crew`: si Page status está Published, los cambios tienen que verse en su lugar.
+4. En **Crew**, editá una persona: Highlighted line y Favourite animal. Guardá y mirá su tarjeta.
 5. Compará `http://127.0.0.1:3219/crew` con el prototipo `http://127.0.0.1:3220/The%20Crew.dc.html`.
-6. Decí si aprobás las secciones editables y si se puede preparar la aplicación de la migración en la base real.
+6. Decí si aprobás los bloques compartidos y, por separado, si se pueden preparar las migraciones `…00200` y `…00300` para la base real.
 
 ## Entrega «web completa» (2026-10-17)
 

@@ -1,6 +1,6 @@
 # Encounters Again and Again — guía para agentes (Claude Code, Codex y otros)
 
-Leé este archivo completo antes de tocar código. Resume el estado al **2026-10-26**, las reglas que no se negocian, las decisiones
+Leé este archivo completo antes de tocar código. Resume el estado al **2026-10-28**, las reglas que no se negocian, las decisiones
 tomadas y por dónde seguir. El detalle vive en `docs/encounters/`; acá están los punteros.
 
 > Prioridad de instrucciones: lo que diga Juani en la conversación actual → este archivo → `docs/encounters/page-progress.md`
@@ -19,14 +19,19 @@ emails ni el SEO.
 - **Sitio en revisión:** https://encounters-again-and-again-gamma.vercel.app (admin en `/admin`). Sin dominio propio, con `noindex`.
 - **Repositorio:** `encountersagainandagain/encounters-again-and-again`. Se trabaja en la rama `review`; `main` es lo desplegado.
 
-## 2. Estado al 2026-10-26
+## 2. Estado al 2026-10-28
 
 - **Todas las rutas públicas** usan su plantilla del prototipo (desde 2026-10-17). Juani aprobó visualmente la Home y lo que revisó
   en producción el 2026-10-24 (incluida Expeditions), solo en su computadora y navegador.
-- **En prueba con Juani: la página personal de Crew** (`/crew/<slug>`, ejemplo real: Georgia Webb / Wild Wonders). Se rehízo el
-  editor y la plantilla en esta etapa; ver §6.
+- **En prueba con Juani: Crew, The Crew page y páginas personales** (`/crew/<slug>`, ejemplo real: Georgia Webb / Wild
+  Wonders). El CMS quedó reducido a Banner → SEO → bloques y controles con efecto real; ver §6 y
+  `docs/encounters/HANDOFF_2026-10-28.md`.
 - **Base real** (`lzwmwofxoegkxykglneq`): 17 migraciones, todas aplicadas; local y remoto coinciden. La última es
-  `20261026000100_crew_listing_relation_notes.sql`.
+  `20261026000100_crew_listing_relation_notes.sql`. Las migraciones `20261026000200_profile_default_blocks.sql` y
+  `20261026000300_keep_legacy_profiles_convertible.sql` están versionadas y probadas localmente, pero **no aplicadas a la base
+  real**; requieren un OK nuevo de Juani, respaldo y el procedimiento de §3.
+- **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
+  `6dd2c8f`; `027e795` es un commit vacío de reintento.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
   (apagado), pruebas en Safari/iPhone/iPad/Android y red lenta, portadas pesadas (Crew 374 KB, Contact 220 KB).
 
@@ -72,6 +77,11 @@ El estado vivo y detallado por página está en `docs/encounters/page-progress.m
     `git fetch origin review:main` → `git push origin main`. **Push a `main` despliega producción** (Vercel del cliente,
     `encountersagainandagains-projects/encounters-again-and-again`). No hay force-push ni reset.
 14. Commits en inglés, descriptivos, con el pie de coautoría que indique la herramienta.
+
+**Vercel:** el push a `review` puede crear un Preview fallido en el proyecto del cliente con `Unexpected Encounters database
+target`, porque el staging de Supabase aún no está configurado y el guard falla cerrado. Después del push de `main`, verificar
+el status del mismo commit: no confundir ese Preview fallido con el deployment de producción. La carpeta `.vercel` local sigue
+vinculada al proyecto histórico `encounters-review`, no al proyecto del cliente. Detalle en el handoff del 2026-10-28.
 
 ## 4. Arquitectura
 
@@ -122,7 +132,7 @@ una migración aplicada; un push no es un despliegue verificado.
 - Marcas de texto en contenido editable: `**negrita**`, `*cursiva*`, `++subrayado++` (las mismas que los posts del blog).
 - El admin se divide por tarjetas que dicen qué muestran y de dónde sale cada valor «vacío» (fallback explícito).
 
-**Página personal de Crew (2026-10-26)** — editor en orden: Banner → SEO → bloques → Credited crew → Related content → Contact.
+**Página personal de Crew (actualizada 2026-10-28)** — editor en orden: Banner → SEO → bloques → Credited crew → Related content → Contact → Publication.
 - **Banner:** título grande = `posts.subtitle` («Large title») → si no, «Alias / project» de la persona → si no, el nombre;
   línea chica = `kicker` → si no, «meet <primer nombre>»; foto = `cover_id` → imagen de diseño (`cover_image` `/design/...`)
   → retrato. Guardar conserva `cover_image`.
@@ -144,6 +154,22 @@ una migración aplicada; un push no es un despliegue verificado.
   la página y los créditos siguen) y «Delete…» en dos pasos (qué se borra; escribir el nombre). Borrar elimina también la página
   personal; bloques, relaciones e historial caen por `on delete cascade`. Las fotos quedan en la biblioteca.
 - **Editor:** botones flotantes «Top» y «Save» (fuera de la barra superior: su `backdrop-filter` atraparía el `position:fixed`).
+- **Barra superior:** no muestra Duplicate as draft, el Visual preview integrado, su icono informativo ni Unpublish. Conserva
+  navegación/estado, Full preview y Save; Publication es el único lugar donde se cambia Draft/Published.
+- **Personal pages:** «New personal page» elige solamente una persona de Crew sin página, crea el borrador con
+  `create_crew_profile` y abre su editor. Una página personal nunca se crea sin una persona.
+- **Ficha de Crew:** «Enable profile page» está oculto por redundante. Publication conserva el estado general de la persona;
+  «Position on The Crew page» y «Show on The Crew page» viven en una tarjeta propia y controlan `/crew` y la tira de Home, no
+  la visibilidad de la página personal.
+- **Texto y video:** Paragraph y los textos de perfil permiten B / I / U y link; Heading conserva Number y no Index name. El
+  bloque YouTube muestra miniatura + play y carga el iframe al click.
+
+**The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
+- «THE CREW» es el título del banner, no un bloque. Se retiraron Sections of The Crew page y Place on the page.
+- Debajo del banner usa los mismos bloques completos que una página personal.
+- Publication conserva solo Page status; la barra superior usa la simplificación de páginas permanentes.
+- SEO real cargado con autorización: título `Meet the Encounters Crew`; descripción `Meet the crew behind Encounters Again and
+  Again, brought together by the ocean and a shared commitment to art, education and conservation.`
 
 ## 7. Estilo de código
 
@@ -162,12 +188,14 @@ una migración aplicada; un push no es un despliegue verificado.
 
 ## 9. Por dónde seguir
 
-1. **Cerrar la página personal de Crew con Juani** (pendiente de su prueba manual): cargar Related content, Credited crew y
-   contacto de Georgia en producción y revisar el cierre de la página.
-2. Seguir el orden de `page-progress.md` con el mismo método (prototipo ↔ implementación, campos explícitos, previews compartidas):
+1. **Prueba manual de Juani en producción:** New personal page, ficha de Crew simplificada, The Crew page y página personal.
+2. **Con OK explícito nuevo**, aplicar juntas `20261026000200` y `20261026000300` después de respaldo, prueba local y dry run.
+3. **Cerrar la página personal de Crew con Juani:** cargar/revisar Related content, Credited crew y contacto de Georgia y revisar
+   el cierre de la página.
+4. Seguir el orden de `page-progress.md` con el mismo método (prototipo ↔ implementación, campos explícitos, previews compartidas):
    Art → Expeditions → Workshops → Meaningful Messages → About y Contact → Newsletter.
-3. Contenido a corregir en el CMS (Juani): líneas repetidas y «Australia.She» en Expeditions; portada de Expeditions de 963 px.
-4. Lanzamiento (con Juani): dominio, redirecciones (`docs/encounters/encounters-redirects-plan.json`), quitar `noindex`,
+5. Contenido a corregir en el CMS (Juani): líneas repetidas y «Australia.She» en Expeditions; portada de Expeditions de 963 px.
+6. Lanzamiento (con Juani): dominio, redirecciones (`docs/encounters/encounters-redirects-plan.json`), quitar `noindex`,
    newsletter, pruebas en dispositivos, aligerar portadas, retirar `?scroll=native` y `?calc=a`.
 
 ## 10. Documentos útiles
@@ -175,6 +203,7 @@ una migración aplicada; un push no es un despliegue verificado.
 | Documento | Para qué |
 |---|---|
 | `docs/encounters/page-progress.md` | Estado vivo por página, decisiones recientes, migraciones. **Actualizalo en cada entrega.** |
+| `docs/encounters/HANDOFF_2026-10-28.md` | Resumen de la última ronda: decisiones de CMS, commits, migraciones pendientes y Vercel. |
 | `docs/encounters/entornos.md` | Entornos, scripts de staging y local, caché, portadas. (Su tabla inicial menciona un proyecto de Vercel `encounters-review` que no es el sitio en revisión actual: el sitio vivo es el `-gamma` de §1.) |
 | `docs/encounters/animation-performance-playbook.md` | Cómo están hechos el scroll, el agua y las animaciones; qué medir. |
 | `docs/encounters/guia-carga-editorial.md` | Cómo cargar el contenido real desde el admin. |

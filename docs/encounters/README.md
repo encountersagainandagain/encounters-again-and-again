@@ -16,5 +16,6 @@ La instrucción de Juani del 01/10/2026 actualiza el diseño y limita la ejecuci
 - [Rutas y SEO](routes-and-seo.md)
 - [Diseño y diferencias funcionales](design-decisions.md)
 - [Cobertura por página](page-progress.md)
+- [Handoff actual — Crew, páginas personales y CMS (2026-10-28)](HANDOFF_2026-10-28.md)
 
 El snapshot editorial completo está conservado en `migration-source/encounters-content-snapshot.zip` y validado en `migration-source/validation.json`; reemplaza como fuente canónica la copia truncada del starter kit. Bloqueo editorial resuelto. No es un respaldo restaurable de WordPress. No copiar backups, usuarios ni credenciales al repositorio. El seguimiento integrado aquí conserva el historial original y pasa a ser la copia activa; el starter kit queda como material de origen.

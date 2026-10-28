@@ -47,7 +47,8 @@ Para que Juani cargue y edite como lo harían los fundadores, con el contenido o
 ## 1. Crew y página personal
 - **Ya existe, para editar:**
   - **Crew · People:** Julian Lange, Fabrizio Ferrari, Georgia Webb (alias Wild Wonders), Hugo Delgado, Maja Koronska y Alexis Menage, todas publicadas.
-  - Solo **Georgia** tiene página personal: **Wild Wonders** (tipo crew profile).
+  - **Georgia** tiene la página personal **Wild Wonders** y **Fabrizio** tiene una página personal creada durante la revisión del
+    CMS. No borrar ni “corregir” esa página sin pedido de Juani.
 - **Falta crear:**
   - Nada obligatorio. El original no tiene páginas personales del resto, así que no se crean.
   - Para practicar la creación: «New crew member» con «PRUEBA —» en borrador.
@@ -55,11 +56,16 @@ Para que Juani cargue y edite como lo harían los fundadores, con el contenido o
   - Página «Meet The Team» del snapshot: nombre, rol, biografía y «FAVOURITE ANIMAL» de cada persona.
   - La página «Wild Wonders», para Georgia.
   - Imágenes: `DSC…`, `FabrizioFerrari-4-…`, `georgia-selfie-…` (ver `image-inventory.csv`, página `elementor-page-3462`).
-- **Campos (Crew · People → persona):**
+- **Campos (Crew → persona):**
   - Name, Role (p. ej. «Co Founder», tal cual en el original), Biography, Favourite animal, Portrait.
-  - «Enable profile page» + «Profile page» solo para quien tiene página (Georgia → Wild Wonders).
+  - Publication = estado general de la persona.
+  - The Crew page → Position ordena la tarjeta en `/crew` y Home; Show on The Crew page permite quitarla de esas listas sin
+    romper su página personal ni sus créditos.
+  - La tarjeta Personal page muestra el estado y las acciones. `Enable profile page` ya no se muestra porque duplicaba el estado
+    de la propia página.
 - **Página personal (Wild Wonders):**
-  - Se edita como contenido (See all content → Wild Wonders), con bloques: Heading «meet georgia», Paragraph, Image…
+  - Se edita en Crew → Personal pages → Wild Wonders: Banner, SEO y Below the banner con Main title, Opening text, fotos y los
+    demás bloques de perfil.
   - Textos e imágenes en la página «Wild Wonders» del snapshot (`georgia-selfie`, `encounters-cover-small`, `Backcover_encounters`, logos).
 - **Dónde se ve:** /crew (filas por persona) y /crew/wild-wonders. La persona también aparece como responsable en obras y mensajes.
 
@@ -160,6 +166,7 @@ Para que Juani cargue y edite como lo harían los fundadores, con el contenido o
 ---
 
 ## Después de cada carga
-- **Revisar:** «Visual preview» antes de guardar, y después la página pública en gamma.
+- **Revisar:** guardar y abrir `Full preview`; si ya está publicada, revisar también la página pública en gamma. Las páginas
+  permanentes y personales no tienen el preview integrado ni botones duplicados de publicación.
 - **Anotar** lo que resulte confuso en la interfaz: ese es el objetivo de esta prueba.
 - **Al terminar:** despublicar lo que tenga «PRUEBA —» y decidir qué ejemplos se retiran.

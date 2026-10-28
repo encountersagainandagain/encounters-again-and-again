@@ -29,11 +29,13 @@ Orden acordado:
 
 ## 2. Crew y página personal
 
-La ficha de cada integrante tiene una card **Personal page**:
+La ficha de cada integrante tiene una card **Personal page** (estado actual actualizado el 2026-10-28; esta sección reemplaza la descripción histórica inicial):
 
 - explica que la persona es el registro de Crew y la página es otra pieza vinculada, titulada con el nombre artístico (ej.: Georgia → Wild Wonders);
-- muestra el estado (no creada / borrador / publicada) y avisa si la página existe pero «Enable profile page» está apagado;
+- muestra el estado (no creada / borrador / publicada); `Enable profile page` ya no se expone porque duplicaba el estado de la propia página;
 - permite crear la página (borrador), editarla en el editor del CMS o el detallado, previsualizarla y abrir la página pública cuando está publicada.
+
+Además, Crew → Personal pages ofrece `New personal page`: solo permite elegir personas todavía sin página, crea el Draft y abre su editor. Position y Show on The Crew page controlan la tarjeta de `/crew` y Home, no la página personal.
 
 No se duplican integrantes para crear páginas. Los créditos históricos se conservan en `post_contributors`, y el perfil sigue separado de cualquier cuenta de acceso.
 
