@@ -13,7 +13,6 @@ const descriptions:Record<string,string>={
   '/admin/content?table=art_categories':'Collections that group the works on the Art page.',
   '/admin/content?table=posts&kind=expedition':'Expeditions with dates, needs and results.',
   '/admin/content?table=posts&kind=expedition_report':'Reports that tell what came out of an expedition.',
-  '/admin/content?table=expedition_cards':'Presentation cards shown on the Expeditions page.',
   '/admin/content?table=posts&kind=workshop':'Workshops with their sessions and facilitators.',
   '/admin/content?table=posts&kind=workshop_report':'Reports that tell what came out of a workshop.',
   '/admin/content?table=posts&kind=message':'Meaningful Messages and their illustrations.',

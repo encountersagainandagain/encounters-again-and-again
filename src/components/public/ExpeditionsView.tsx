@@ -1,14 +1,16 @@
 'use client';
 import Link from 'next/link';
-import {useEffect,useRef} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
-import {dateLabel,isFinished,pad,statusLabels,lines,type Activity} from '@/features/encounters/activities';
+import {countLabel,dateLabel,isFinished,pad,statusLabels,lines,type Activity} from '@/features/encounters/activities';
 import {Picture} from './MediaImage';
 import {pinProgress,ramp,useFrame} from './useFrame';
 import {DarkClosing} from './EditorialPieces';
 import {PostBlocks,blockLinks,headingText,images as blockImages,mediaId,paragraphs} from './PostBlocks';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {covers} from '@/features/encounters/covers';
+import {bannerCard,cardBackground} from '@/features/encounters/expeditions-page';
+import {InlineText} from './InlineText';
 
 const ORDER=[0,2,4,1,3,5];
 // Card windows (02-animations.md § 9). Five cards use the executable prototype's exact table; other counts
@@ -20,12 +22,12 @@ export function cardWindows(n:number){
   const step=n>1?.49/(n-1):0,enter=(i:number)=>.42+i*step,full=(i:number)=>enter(i)+Math.min(.08,Math.max(.06,step*.6));
   return Array.from({length:n},(_,i)=>i===n-1?[enter(i),Math.min(.97,full(i)),1.4,1.5]:[enter(i),full(i),enter(i+1),full(i+1)]);
 }
-// Without presentation cards (Expeditions → Presentation cards), the program page's own text is told the way the
+// Without cards of its own (Expeditions page → Cards) or presentation cards, the program page's own text is told the way the
 // prototype tells it: one card per heading inside the pinned banner, with its paragraphs (short lines and • items as a
 // list), one of the page's photos (the banner photo last) and the support link as the dark closing card. Only when
 // every block fits a card (headings, paragraphs, images, links and imported link sources, read as PostBlocks reads
 // them); otherwise the text keeps its place after the banner.
-// Saved presentation cards always win. Card ids start with "page-": they are not editable as cards.
+// The page's own cards (Expeditions page → Cards) win, then saved presentation cards. Card ids start with "page-".
 export function cardsFromBlocks(blocks:ContentBlock[],coverId:unknown):Row[]|null{
   if(!blocks.length||blocks.some(b=>!['heading','paragraph','image','link','source'].includes(b.type)))return null;
   type Group={title:string;text:string[];images:string[];link?:{label:string;url:string}};const groups:Group[]=[];
@@ -56,7 +58,8 @@ export const pinHeight=(n:number)=>n?220+88*n:240;
 export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{page?:Row;settings:Row;cards:Row[];list:Activity[];media:Row[];blocks:ContentBlock[]}){
   const section=useRef<HTMLElement>(null),sticky=useRef<HTMLDivElement>(null);
   const surface=covers.expeditions(settings,page),underwaterId=settings.underwater_id;
-  const fromPage=saved.length?null:cardsFromBlocks(blocks,surface.id);const cards=saved.length?saved:fromPage||[];
+  const own=Array.isArray(settings.cards)?settings.cards as Row[]:null;
+  const cards=(own||(saved.length?saved:cardsFromBlocks(blocks,surface.id)||[])).map(bannerCard);
   const windows=cardWindows(cards.length);
   // Card text keeps the prototype's sizes when it fits; longer text steps down (to 70%) instead of being cut.
   useEffect(()=>{const root=sticky.current;if(!root)return;
@@ -82,7 +85,7 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
       card.style.opacity=(p*(1-out)).toFixed(3);card.style.transform=`translate3d(0,${((1-p)*90-out*130).toFixed(1)}px,0) scale(${(.965+p*.035-out*.05).toFixed(4)})`;card.style.filter=blur<.05?'none':`blur(${blur.toFixed(2)}px)`;card.style.pointerEvents=p*(1-out)>.6?'auto':'none';
     });
   });
-  const upcoming=list.filter(a=>!isFinished(a)),finished=list.filter(isFinished);
+  const groups=listGroups(list);const [show,setShow]=useState('all');
   return <>
     <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
       <div ref={sticky} className="exp-sticky">
@@ -92,27 +95,40 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
         <div data-veil className="exp-veil"/>
         <div data-copy className="exp-copy"><p>{string(settings.kicker)||string(page?.kicker)||'following our nature'}</p><h1>{string(settings.title)||'Expeditions'}</h1></div>
         <a data-cue href="#expeditions-content" className="scroll-cue">Scroll <span aria-hidden="true"/></a>
-        {!!cards.length&&<div className="exp-cards">{cards.map((card,i)=>{const side=string(card.media_side)||(i%2===0?'left':'right');const items=lines(card.bullets);const href=safeHref(card.cta_url);
-          return <article key={string(card.id)} data-card data-card-id={string(card.id)} data-side={side} data-theme={card.theme==='dark'?'dark':'light'} className="exp-card">
-            <div className="exp-card-media"><Picture id={card.media_id} media={media}/></div>
+        {!!cards.length&&<div className="exp-cards">{cards.map((card,i)=>{const side=string(card.media_side)||(i%2===0?'left':'right');const items=lines(card.list);const href=safeHref(card.link_url);const bg=cardBackground(card.background);
+          return <article key={string(card.id)} data-card data-card-id={string(card.id)} data-side={side} data-theme={bg.dark?'dark':'light'} data-media={card.media_id?undefined:'none'} className="exp-card" style={{background:bg.color}}>
+            {card.media_id?<div className="exp-card-media"><Picture id={card.media_id} media={media}/></div>:null}
             <div className="exp-card-text"><span className="exp-card-kicker"><span>{pad(i+1)}</span>{string(card.kicker)}</span><h2>{string(card.title)}</h2>
-              {string(card.body).split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean).map((t,n)=><p key={n}>{t}</p>)}
+              {string(card.text).split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean).map((t,n)=><p key={n}><InlineText text={t}/></p>)}
               {items.length?<ol className="exp-card-list">{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>:null}
               {string(card.signature)&&<span className="exp-card-signature">{string(card.signature)}</span>}
-              {href&&string(card.cta_label)&&<a className="exp-card-cta" href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(card.cta_label)} →</a>}
+              {href&&string(card.link_label)&&<a className="exp-card-cta" href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(card.link_label)} →</a>}
             </div>
           </article>;})}</div>}
       </div>
     </section>
     <div id="expeditions-content" className="exp-after">
-      {!cards.length&&blocks.length?<div className="exp-blocks"><PostBlocks blocks={blocks} media={media}/></div>:null}
-      {!!list.length&&<section className="activity-list" aria-labelledby="expedition-list-title">
-        <div className="activity-list-head" data-seq="0.96,0.4"><h2 id="expedition-list-title">{string(settings.list_title)||'On the water'}</h2><span>{string(settings.list_note)||'where we are going, and where we have been'}</span></div>
-        <div className="activity-cards">{[...upcoming,...finished].map((a,i)=><ActivityCard key={string(a.post.id)} activity={a} media={media} seq={0.94-(i%3)*.04}/>)}</div>
+      {!own&&!cards.length&&blocks.length?<div className="exp-blocks"><PostBlocks blocks={blocks} media={media}/></div>:null}
+      {!!list.length&&<section id="expeditions-list" className="exp-list" aria-labelledby="expedition-list-title">
+        <div className="exp-list-top">
+          <div className="activity-list-head" data-seq="0.96,0.4"><h2 id="expedition-list-title">{string(settings.list_title)||'On the water'}</h2><span>{string(settings.list_note)||'where we are going, and where we have been'}</span></div>
+          {groups.length>1&&<div className="exp-filter" role="group" aria-label="Show expeditions">{[{key:'all',filter:'All',items:list},...groups].map(g=><button key={g.key} type="button" aria-pressed={show===g.key} onClick={()=>setShow(g.key)}>{g.filter}<span>{g.items.length}</span></button>)}</div>}
+        </div>
+        {groups.map(g=><section key={g.key} className="exp-group" data-group={g.key} hidden={show!=='all'&&show!==g.key} aria-labelledby={`expeditions-${g.key}`}>
+          <div className="exp-group-inner"><div className="exp-group-head"><h3 id={`expeditions-${g.key}`}>{g.title}</h3><span>{countLabel(g.items.length,'expeditions')}</span></div>
+            <div className="activity-cards">{g.items.map((a,i)=><ActivityCard key={string(a.post.id)} activity={a} media={media} seq={0.94-(i%3)*.04}/>)}</div></div>
+        </section>)}
       </section>}
     </div>
     <DarkClosing title={string(settings.closing)||'May the ocean be with you'}/>
   </>;
+}
+// The list of expeditions in the order of its note: where the boat is going, where it is now, where it has been.
+// Postponed ones wait with the upcoming; cancelled ones go with the past. Each card still says its own state.
+const GROUPS=[{key:'upcoming',filter:'Coming up',title:'Coming up'},{key:'now',filter:'On the water now',title:'On the water now'},{key:'past',filter:'Past',title:'Where we have been'}];
+export function listGroups(list:Activity[]){
+  const of=(a:Activity)=>a.detail.activity_status==='running'?'now':isFinished(a)||a.detail.activity_status==='cancelled'?'past':'upcoming';
+  return GROUPS.map(g=>({...g,items:list.filter(a=>of(a)===g.key)})).filter(g=>g.items.length);
 }
 // Card of an expedition or workshop in a list: upcoming ones lead to their page; finished ones to their result.
 export function ActivityCard({activity:a,media,seq=.94}:{activity:Activity;media:Row[];seq?:number}){

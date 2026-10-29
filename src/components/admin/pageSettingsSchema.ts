@@ -1,12 +1,16 @@
 // What each page lets the editor change, in the order of the page (prototypes in handoff-current).
 // Values live in site_settings: Home in `home`, the other pages in `pages.<key>`. Lists of content
 // (activities, works, crew, posts) are never typed here: they come from published content.
-export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections';help?:string;fields?:PageField[];max?:number;placeholder?:string};
+import {cardBackgrounds,expeditionsSeo} from '@/features/encounters/expeditions-page';
+// `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
+// B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description).
+export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo';help?:string;fields?:PageField[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
 const t=(key:string,label:string,help?:string,placeholder?:string):PageField=>({key,label,help,placeholder});
 const area=(key:string,label:string,help?:string):PageField=>({key,label,type:'textarea',help});
 const media=(key:string,label:string,help?:string):PageField=>({key,label,type:'media',help});
 const group=(key:string,label:string,fields:PageField[],help?:string):PageField=>({key,label,type:'group',fields,help});
 const list=(key:string,label:string,fields:PageField[],max:number,help?:string):PageField=>({key,label,type:'list',fields,max,help});
+const section=(key:string,label:string,help:string,fields:PageField[]):PageField=>({key,label,type:'section',fields,help});
 export type PageSchema={key:string;label:string;path:string;store:'home'|'pages';lead:string;fields:PageField[]};
 export const pageSchemas:PageSchema[]=[
   {key:'home',label:'Home',path:'/',store:'home',lead:'The descent, the order of the sections and their texts. The lists (what is coming, stories, art, crew) fill themselves with published content; tick “Featured on Home” in a content to put it first.',fields:[
@@ -27,9 +31,30 @@ export const pageSchemas:PageSchema[]=[
     group('about','About block',[t('kicker','Small line'),area('line','Phrase in italics','The block is hidden when the phrase is empty.'),area('body','Text'),t('cta_label','Button','Default: Read our story')]),
     group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
   ]},
-  {key:'expeditions',label:'Expeditions page',path:'/expeditions',store:'pages',lead:'Banner of the Expeditions page. The cards inside the banner are edited in Expeditions → Presentation cards.',fields:[
-    media('cover_id','Surface image','Default: the cover of the program page, or the design image.'),media('underwater_id','Underwater image','Revealed in six strips while scrolling.'),t('kicker','Small line above the title','Default: following our nature'),t('title','Title','Large capitals of the banner. Default: Expeditions'),
-    t('list_title','Title of the list of expeditions','Default: On the water'),t('list_note','Note of the list'),t('closing','Closing phrase','Default: May the ocean be with you')]},
+  {key:'expeditions',label:'Expeditions page',path:'/expeditions',store:'pages',lead:'Everything on the Expeditions page, in the order of the page: the banner, how it appears in search engines, the cards inside the banner, the list of expeditions and the closing. Each expedition is created and edited in Expeditions; its card in the list fills itself.',fields:[
+    section('banner','1 · Banner','The first screen. While scrolling, the surface photo opens in six strips onto the underwater photo.',[
+      media('cover_id','Surface image','Default: the cover of the program page, or the design image. Also the image shared on social networks.'),media('underwater_id','Underwater image','Revealed in six strips while scrolling.'),t('kicker','Small line above the title','Default: following our nature'),t('title','Title','Large capitals of the banner. Default: Expeditions')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says what you do, the easier it is for someone searching for conservation, research or ocean art expeditions to find you. We wrote a first version from the page’s own text; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. ocean conservation expeditions. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say what the expeditions are, where, and why to click. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:expeditionsSeo.title,fallbackDescription:expeditionsSeo.description}},
+      {key:'seo_topics',label:'What the expeditions are about',type:'lines',help:'One topic per line, e.g. Marine conservation. Not shown on the page: search engines read them as the subjects of this page. They help, but what matters most is the visible text, so use the same words in the cards below. Empty: the suggested topics are used.'}]),
+    section('cards','3 · Cards inside the banner','While the visitor scrolls the banner, these cards appear one after another over the underwater photo. Add as many as you need: each card makes the banner a little longer. Leave an empty line between paragraphs.',[
+      list('cards','Cards',[
+        {key:'background',label:'Background colour',type:'swatches',options:cardBackgrounds.map(b=>({value:b.key,label:b.label,color:b.color})),help:'From the site palette. On the dark colours the text turns white.'},
+        t('kicker','Small line above the title (optional)','Small capitals beside the card number, e.g. The boat.'),{key:'title',label:'Title',wide:true},{key:'text',label:'Text',type:'marked',help:'Leave an empty line between paragraphs. Select words and use B, I, U or the link button.'},
+        {key:'list',label:'List (optional)',type:'lines',help:'One item per line. Shown numbered under the text, e.g. the ways to support the expedition.'},
+        t('signature','Signature (optional)','A short line in italics after the text, e.g. a name.'),
+        t('link_label','Link text (optional)','Shown at the end of the card with an arrow, e.g. Join the expedition.'),
+        t('link_url','Link','Where it leads: a full address (https://…), a page of the site (/contact), or the list of expeditions on this page (#expeditions-list). Shown only with a link text.'),
+        media('media_id','Photo (optional)','Without a photo the text takes the whole card.'),
+        {key:'media_side',label:'Photo side',type:'select',options:[{value:'',label:'Alternate (left, right, left…)'},{value:'left',label:'Left'},{value:'right',label:'Right'}]},
+      ],12)]),
+    section('list','4 · List of expeditions','After the banner. The published expeditions are grouped by their state, each group on its own colour: Coming up (white), On the water now (lagoon) and Where we have been (sand), with a filter above them. The state is chosen in each expedition (Activity status): postponed ones show with the upcoming, cancelled ones with the past.',[
+      t('list_title','Title of the list','Default: On the water'),t('list_note','Note beside the title','Default: where we are going, and where we have been')]),
+    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: May the ocean be with you')]),
+  ]},
   {key:'workshops',label:'Workshops page',path:'/workshops',store:'pages',lead:'Banner and closing of the Workshops page. Each workshop is edited in Workshops.',fields:[
     media('cover_id','Banner image','Default: the design image.'),t('kicker','Small line above the title','Default: artsy animals'),t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]},
   {key:'messages',label:'Meaningful Messages page',path:'/meaningful-messages',store:'pages',lead:'Banner, introduction and closing. Each message is edited in Meaningful Messages → Messages.',fields:[

@@ -32,6 +32,26 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 - Implementación de animación y rendimiento documentada en el [playbook](animation-performance-playbook.md).
 
 ### Pendiente de prueba manual del CMS
+- **Expeditions page (2026-10-29, en revisión con Juani; sin desplegar).** Admin → Expeditions page, en el orden de la página:
+  1 · Banner → 2 · Search engines (SEO) → 3 · Cards inside the banner → 4 · List of expeditions → 5 · Closing. Todo en
+  `site_settings.pages.expeditions`: sin migración.
+  - **SEO propio:** `seo_title`, `meta_description` y `seo_topics` (uno por línea), con la vista previa de Google y de redes
+    (`SeoPanel`) y ayudas que explican para qué sirve cada campo. Vacío: el SEO de la página del programa, y si tampoco hay, los
+    textos sugeridos de `expeditions-page.ts` (escritos a partir del texto real de la página: Coquitlam, Western Australia, conservación,
+    investigación). `/expeditions` publica JSON-LD `CollectionPage` (keywords y about = los temas) con cada expedición con fecha como `Event`.
+  - **Cards dentro del banner:** cantidad libre. Cada una tiene color de fondo de la paleta (White, Foam, Sand, Gold, Coral, Lagoon,
+    Tide y Deep blue; los dos oscuros pasan el texto a blanco), una línea chica, el título, el texto con B / I / U / link (una línea
+    vacía separa párrafos), una lista, una firma, un link (dirección completa, `/página` o `#expeditions-list`) y una foto con su
+    lado. Todos los campos son opcionales salvo el título. Una card sin foto ocupa todo el ancho con el texto centrado.
+    Orden de prioridad: las cards de esta página → las de la tabla vieja `expedition_cards` → el texto de Pages → Encounters
+    Expeditions leído como cards. Al abrir, el admin muestra las cards que se ven hoy, convertidas; al guardar, quedan acá y la
+    página se ve igual. Comparado en local con fotos ocultas y con la lista de fotos de cada card: 0 píxeles distintos en 1440 y
+    390 px; en 900 px, diferencias de 1/255 en el degradé oscuro, que ya aparecían antes de guardar.
+    «Presentation cards» salió del menú.
+  - **Listado:** se agrupa por estado, cada grupo con su color: Coming up (blanco; incluye las postergadas), On the water now
+    (laguna) y Where we have been (arena; incluye las canceladas). Arriba hay un filtro: All, Coming up, On the water now y Past,
+    con la cantidad de cada uno. El filtro aparece solo si hay más de un grupo.
+  - Guardar una página de «Page presentation» ahora expira la caché pública (antes podía tardar hasta 5 minutos).
 - **Página personal de Crew (2026-10-26, en prueba con Juani):**
   - **Banner explícito:** título grande = «Large title» de la página (`posts.subtitle`), o Crew «Alias / project», o Name; línea chica = la de la página, o «meet <primer nombre>» de Name; foto = la de la página, o el retrato. Tiene su tarjeta «Banner» arriba del editor.
   - **Debajo del banner, solo bloques en orden.** Bloques de perfil: Large title, Opening text, Pinned photo pair, Photo row, Chapter y Dark gallery; además, los bloques comunes. Se acabó el selector «Place on the page».

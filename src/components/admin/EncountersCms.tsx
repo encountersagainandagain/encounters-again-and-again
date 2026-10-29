@@ -162,7 +162,7 @@ function FloatingActions({busy,dirty}:{busy:boolean;dirty:boolean}){
   </div>;
 }
 // Inline format buttons wrap the selected words with the same marks read by the public templates.
-function MarkButtons({id,value,onChange,name,link=false}:{id:string;value:string;onChange:(value:string)=>void;name:string;link?:boolean}){
+export function MarkButtons({id,value,onChange,name,link=false}:{id:string;value:string;onChange:(value:string)=>void;name:string;link?:boolean}){
   const mark=(m:string)=>{const el=document.getElementById(id) as HTMLInputElement|HTMLTextAreaElement|null;if(!el)return;
     const a=el.selectionStart??value.length,b=el.selectionEnd??value.length;const words=value.slice(a,b)||'text';onChange(value.slice(0,a)+m+words+m+value.slice(b));
     requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a+m.length,a+m.length+words.length);});};
