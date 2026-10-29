@@ -52,6 +52,26 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     (laguna) y Where we have been (arena; incluye las canceladas). Arriba hay un filtro: All, Coming up, On the water now y Past,
     con la cantidad de cada uno. El filtro aparece solo si hay más de un grupo.
   - Guardar una página de «Page presentation» ahora expira la caché pública (antes podía tardar hasta 5 minutos).
+- **Expeditions: estado automático, editor, historias y página de cada expedición (2026-10-29).**
+  - **Estado por fecha, hora de Perth** (`activityStatus` en `activities.ts`, aplicado por `activities()`: web, Home, previews;
+    vale también para workshops): antes del inicio Upcoming, del inicio al fin (ambos días incluidos) Running y después Finished.
+    Postponed y Cancelled son manuales y ganan siempre. Sin fecha de inicio se usa el estado elegido. Sin migración.
+  - **Editor de expedición (y workshop):** la barra superior queda sin Duplicate as draft, Visual preview, Example ni Unpublish,
+    y Publication cambia Draft/Published. Tarjeta **Status** con «On the site now» y botones Follow the dates / Postponed /
+    Cancelled; sin fechas, Upcoming / Running / Finished. Tarjeta **Delete** en dos pasos: primero qué se borra, después escribir
+    el título. Lo mismo para los reports. Las historias de una expedición borrada se conservan.
+  - **Historias:** la lista de Expeditions muestra el estado en la web, la columna Story («Story published/in draft →» o el
+    botón **Write about this adventure** si terminó) y Publication. El botón, que también está en la tarjeta de resultados del
+    editor, crea un borrador `expedition_report` con el título, la portada y los créditos de la expedición, lo enlaza como
+    `result` y abre su editor (banner, SEO, bloques). Results lista solo las historias y dice de qué expedición es cada una;
+    se inician desde la expedición. Probado en local de punta a punta, borrado incluido.
+  - **Página de cada expedición** (`ExpeditionGlance` en `PostView.tsx`; workshops sin cambios): estado con punto de color
+    y «Starts in N days» / «Day N of M»; When (rango compacto y cantidad de días), Where y Who (retrato, nombre con enlace y
+    rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
+    Contact (`cta_label`), junto a la foto submarina o la portada. Terminada: banda arena «How it went» con el outcome y
+    «Read the story →». «On board» del final no se repite.
+  - Las cards de Expeditions page en producción **no se escribieron en la base**: el admin las muestra convertidas desde
+    el texto actual y quedan guardadas cuando alguien guarda.
 - **Página personal de Crew (2026-10-26, en prueba con Juani):**
   - **Banner explícito:** título grande = «Large title» de la página (`posts.subtitle`), o Crew «Alias / project», o Name; línea chica = la de la página, o «meet <primer nombre>» de Name; foto = la de la página, o el retrato. Tiene su tarjeta «Banner» arriba del editor.
   - **Debajo del banner, solo bloques en orden.** Bloques de perfil: Large title, Opening text, Pinned photo pair, Photo row, Chapter y Dark gallery; además, los bloques comunes. Se acabó el selector «Place on the page».

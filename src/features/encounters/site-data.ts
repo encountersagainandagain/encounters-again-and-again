@@ -13,5 +13,5 @@ export type SiteData=Awaited<ReturnType<typeof siteData>>;
 export const pageFor=(data:SiteData,role:string)=>data.posts.find(p=>p.kind==='page'&&p.source_role===role) as ContentRow|undefined;
 // Crew credited on a content, linked when their personal page is public.
 export function peopleOf(id:unknown,data:SiteData){
-  return data.contributors.filter(c=>c.post_id===id).sort((a,b)=>Number(a.position||0)-Number(b.position||0)).flatMap(c=>{const m=data.crew.find(x=>x.id===c.crew_member_id&&x.status==='published');return m?[{name:String(m.name),role:String(c.role||''),href:profileVisible(m,data.posts)?`/crew/${m.slug}`:null}]:[];});
+  return data.contributors.filter(c=>c.post_id===id).sort((a,b)=>Number(a.position||0)-Number(b.position||0)).flatMap(c=>{const m=data.crew.find(x=>x.id===c.crew_member_id&&x.status==='published');return m?[{name:String(m.name),role:String(c.role||''),portrait_id:m.portrait_id||null,href:profileVisible(m,data.posts)?`/crew/${m.slug}`:null}]:[];});
 }

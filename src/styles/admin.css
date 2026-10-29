@@ -293,3 +293,15 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 @media(max-width:640px){.adm-floating{right:12px;bottom:12px}}
 /* Deleting a crew member: what goes, before confirming. */
 .adm-danger-zone{padding:14px;border:1px solid var(--adm-danger);border-radius:10px;background:var(--adm-danger-bg)}.adm-danger-zone ul{margin:0;padding-left:18px;display:grid;gap:4px}
+/* State of an expedition or workshop: what the site shows now and a one-click choice. */
+.adm-status-now{margin:0 0 10px;font-size:14px}.adm-status-now strong,.adm-state{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:600;font-size:13px;background:#eef3f5;color:#0e2a38}
+.adm-status-now strong[data-state=running],.adm-state[data-state=running]{background:#d8f2f8;color:#0b4a5c}
+.adm-status-now strong[data-state=finished],.adm-state[data-state=finished]{background:#f1e8d6;color:#5a4318}
+.adm-status-now strong[data-state=postponed],.adm-state[data-state=postponed],.adm-status-now strong[data-state=cancelled],.adm-state[data-state=cancelled]{background:#f7e2db;color:#7a2f18}
+.adm-segmented{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.adm-segmented button{padding:8px 12px;border:1px solid var(--adm-line);border-radius:9px;background:#fff;font:600 13px var(--font-body),Arial,sans-serif;color:var(--adm-sea);cursor:pointer}
+.adm-segmented button[aria-checked=true]{background:var(--adm-sea);border-color:var(--adm-sea);color:#fff}
+.adm-segmented button:focus-visible{outline:2px solid var(--adm-sea);outline-offset:2px}
+/* A finished activity without its story: the invitation to write it. */
+.adm-story-invite{display:grid;gap:10px;justify-items:start;margin-bottom:16px;padding:16px;border-radius:12px;background:#f1e8d6;border:1px solid #e3d3b4}.adm-story-invite p{margin:0;max-width:62ch}
+.adm-story{font-weight:600;color:var(--adm-sea)}

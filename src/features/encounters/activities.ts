@@ -9,10 +9,20 @@ export function resultOf(post:Row,data:Pick<ActivityData,'posts'|'relations'>){
   const ids=data.relations.filter(r=>r.post_id===post.id&&r.relation==='result').sort(byOrder).map(r=>r.related_post_id);
   return (ids.map(id=>data.posts.find(p=>p.id===id&&p.status==='published')).find(Boolean)||null) as Row|null;
 }
+// The state shown on the site follows the dates in Perth time, where the crew is: upcoming before the start, running
+// from the start to the end (both days included), finished after the end. Postponed and cancelled are chosen by hand
+// and always win; without a start date the chosen state is kept.
+export const perthToday=(now=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Perth',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+export const manualStatuses=['postponed','cancelled'];
+export function activityStatus(detail:Row,today=perthToday()){
+  const chosen=string(detail.activity_status)||'upcoming';const from=string(detail.starts_on).slice(0,10);
+  if(manualStatuses.includes(chosen)||!from)return chosen;const to=string(detail.ends_on).slice(0,10)||from;
+  return today<from?'upcoming':today>to?'finished':'running';
+}
 export function activities(data:ActivityData,kind?:'expedition'|'workshop'):Activity[]{
   return data.posts.filter(p=>p.status==='published'&&(kind?p.kind===kind:p.kind==='expedition'||p.kind==='workshop')).flatMap(post=>{
     const detail=(post.kind==='workshop'?data.workshops:data.expeditions).find(d=>d.id===post.id);
-    return detail?[{post,detail,kind:post.kind as Activity['kind'],path:activityPath(post),result:resultOf(post,data)}]:[];
+    return detail?[{post,detail:{...detail,activity_status:activityStatus(detail)},kind:post.kind as Activity['kind'],path:activityPath(post),result:resultOf(post,data)}]:[];
   }).sort((a,b)=>byOrder(a.post,b.post));
 }
 export const isUpcoming=(a:Activity)=>a.detail.activity_status==='upcoming'||a.detail.activity_status==='running';

@@ -113,7 +113,10 @@ export const crewStyles:[string,string][]=[['lead','Lead (larger serif)'],['body
 // Help that changes with the type of content.
 export const kindHelp:Record<string,Record<string,string>>={
   artwork:{title:'Name of the work.',slug:'Last part of the address: /art/category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',show_index:'Lists the headings of the text at the top. Rarely needed for a work.'},
-  expedition:{title:'Name of the expedition.',excerpt:'Short summary used in the Expeditions list and when shared.'},
+  expedition:{title:'Name of the expedition.',excerpt:'The invitation: one or two sentences on what this expedition is and why to come. Shown large, with the join button, on the expedition page, and on its card in the Expeditions list.',
+    place:'Where it goes, e.g. Ningaloo Reef, Western Australia. Shown under “Where” on the expedition page.',
+    cta_label:'Text of the join button, e.g. “Ask to join”. It leads to Contact. Empty: “Join the expedition”.',availability_label:'Short line on places, e.g. “Two berths open”. Shown beside the join button and on Home.',
+    outcome:'Two or three lines on how it went. Shown on the expedition page and its card once it has finished, before the link to its story.'},
   workshop:{title:'Name of the workshop.',excerpt:'Short summary used in the Workshops list and when shared.',subtitle:'Large grey line under the title on the Workshops page, e.g. “two afternoons”. Empty: the number of sessions.',
     activity_status:'Where the workshop stands. Independent from registration: an upcoming workshop can already be full.',
     registration_status:'Open shows the join button (the registration email, or Contact). Full and Closed show that state and no button. Not applicable hides it.',
