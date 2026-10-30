@@ -55,7 +55,7 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .exp-filter button:hover{border-color:#0f3b4c}
 .exp-filter button[aria-pressed=true]{background:#0f3b4c;border-color:#0f3b4c;color:#fff}
 .exp-filter button:focus-visible{outline:2px solid #0f3b4c;outline-offset:2px}
-.exp-group{background:#fff}.exp-group[data-group=now]{background:var(--enc-laguna)}.exp-group[data-group=past]{background:var(--enc-arena)}
+.exp-group{background:#fff}.exp-group[data-group=now]{background:var(--enc-laguna)}
 .exp-group[hidden]{display:none}
 .exp-group-inner{max-width:1240px;margin:0 auto;padding:clamp(40px,8vh,90px) var(--enc-page-padding);display:flex;flex-direction:column;gap:clamp(22px,4vh,40px)}
 .exp-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid rgba(14,42,56,.2);padding-bottom:14px}

@@ -49,7 +49,7 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     390 px; en 900 px, diferencias de 1/255 en el degradé oscuro, que ya aparecían antes de guardar.
     «Presentation cards» salió del menú.
   - **Listado:** se agrupa por estado, cada grupo con su color: Coming up (blanco; incluye las postergadas), On the water now
-    (laguna) y Where we have been (arena; incluye las canceladas). Arriba hay un filtro: All, Coming up, On the water now y Past,
+    (laguna) y Where we have been (blanco, pedido de Juani 2026-10-29; incluye las canceladas). Arriba hay un filtro: All, Coming up, On the water now y Past,
     con la cantidad de cada uno. El filtro aparece solo si hay más de un grupo.
   - Guardar una página de «Page presentation» ahora expira la caché pública (antes podía tardar hasta 5 minutos).
 - **Expeditions: estado automático, editor, historias y página de cada expedición (2026-10-29).**
