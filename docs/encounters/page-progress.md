@@ -69,6 +69,8 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     historia, cada una con **Write about this adventure**. En Results, la columna About enlaza a la expedición; una historia
     sin enlace (ej. «All post blocks (demo)», borrador) muestra un selector para elegirla. El editor de la historia tiene la
     tarjeta «Expedition it tells about» para cambiarla (`StoryOf`: reemplaza su único enlace `result`). Probado en local.
+    Solo un report cuenta como historia: las news enlazadas como `result` son novedades del viaje (Reef notes, en curso, ya no
+    marca «Story published»). La columna Story muestra el título de la historia para que se vea con cuál de Results coincide.
   - **Página de cada expedición** (`ExpeditionGlance` en `PostView.tsx`; workshops sin cambios): estado con punto de color
     y «Starts in N days» / «Day N of M»; When (rango compacto y cantidad de días), Where y Who (retrato, nombre con enlace y
     rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
