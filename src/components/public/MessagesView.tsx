@@ -8,11 +8,13 @@ import {DarkClosing,PhotoHero,Scribble} from './EditorialPieces';
 import {Picture} from './MediaImage';
 import {ramp,useFrame} from './useFrame';
 import {covers} from '@/features/encounters/covers';
+import type {Piece} from '@/features/encounters/message-text';
+import {MessageText} from './MessageText';
 
 // Meaningful Messages (Meaningful Messages.dc.html, 02-animations § 8): one message per screen, the
 // illustration at full height beside its text, sides alternating, crossing as the next one rises.
 // Pin of 120vh + 60vh per message; windows spread evenly, the first starting before the pin is taken.
-export type Message={post:Row;detail:Row};
+export type Message={post:Row;detail:Row;pieces:Piece[]};
 export function MessagesView({settings,messages,media}:{settings:Row;messages:Message[];media:Row[]}){
   const stage=useRef<HTMLElement>(null);const windows=stageWindows(messages.length);
   useFrame(({reduced})=>{
@@ -41,12 +43,12 @@ export function MessagesView({settings,messages,media}:{settings:Row;messages:Me
     <div id="editorial-content" className="mm-content">
       {(string(settings.intro)||string(settings.credit_line))&&<section className="mm-intro">{string(settings.intro)&&<><h2 data-seq="0.95,0.5">{string(settings.intro)}</h2><Scribble variant="title"/></>}{string(settings.credit_line)&&<span data-seq="0.85,0.45">{string(settings.credit_line)}</span>}</section>}
       {messages.length>0&&<section ref={stage} className="mm-stage pin-section" style={{height:`${120+60*messages.length}vh`}} aria-label="Messages">
-        <div className="mm-sticky">{messages.map(({post,detail},i)=>{const left=i%2===0;const side=left?'media-left':'media-right';const w=windows[i];
+        <div className="mm-sticky">{messages.map(({post,detail,pieces},i)=>{const left=i%2===0;const side=left?'media-left':'media-right';const w=windows[i];
           // The left column leads: the illustration on odd messages, the text on even ones.
           const mediaStage=(left?w.lead:w.follow).join(','),text=(left?w.follow:w.lead).join(',');
           return <article key={string(post.id)} className={`mm-message ${side}`} aria-label={`Message ${i+1}`} onFocus={()=>reveal(i)}>
             <div className="mm-media" data-stage={mediaStage}><Picture id={detail.illustration_id||post.cover_id} media={media}/></div>
-            <div className="mm-text" data-stage={text}><span>Message {pad(i+1)}</span><h2>{string(detail.message)||string(post.title)}</h2>{string(detail.body)&&<p>{string(detail.body)}</p>}{string(detail.credit)&&<em>{string(detail.credit)}</em>}<Link href={`/meaningful-messages/${string(post.slug)}`} className="mm-link">Read the message →</Link></div>
+            <div className="mm-text" data-stage={text}><span>Message {pad(i+1)}</span><MessageText pieces={pieces}/><Link href={`/meaningful-messages/${string(post.slug)}`} className="mm-link">Read the message →</Link></div>
           </article>;})}</div>
       </section>}
     </div>

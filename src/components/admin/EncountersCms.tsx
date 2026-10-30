@@ -8,6 +8,7 @@ import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
 import {duplicateContent,meetLine,safeHref} from '@/features/encounters/presentation';
 import {activityStatus,dateLabel,manualStatuses,statusLabels,withSessionDates} from '@/features/encounters/activities';
+import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
 import {explainError,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
@@ -168,20 +169,22 @@ function ActivityStatusCard({detail,sessions,onChange}:{detail:Row;sessions?:Row
   </Card>;
 }
 // Deleting content in two steps: first what goes and what stays, then its title typed.
-function ContentRemoval({post,busy,items,onDeleted}:{post:Row;busy:boolean;items:string[];onDeleted:(title:string)=>void}){
-  const [step,setStep]=useState(0);const [typed,setTyped]=useState('');const [error,setError]=useState('');const [working,setWorking]=useState(false);
-  const title=String(post.title||'').trim();
+const messageRemoval=['The message: its text, its choice of illustration and its credits.','Its place on Meaningful Messages and its own page.'];
+function ContentRemoval({post,busy,items,onDeleted,onCancel}:{post:Row;busy:boolean;items:string[];onDeleted:(title:string)=>void;onCancel?:()=>void}){
+  // From a list (onCancel) it opens at the first confirmation, and cancelling closes it.
+  const [step,setStep]=useState(onCancel?1:0);const [typed,setTyped]=useState('');const [error,setError]=useState('');const [working,setWorking]=useState(false);
+  const title=String(post.title||'').trim();const cancel=()=>{setStep(0);setTyped('');onCancel?.();};
   async function remove(){if(!supabase||typed.trim()!==title)return;setWorking(true);setError('');
     // Blocks, details, needs, credits and links follow the post (on delete cascade).
     const r=await supabase.from('posts').delete().eq('id',post.id);if(r.error){setError(r.error.message);setWorking(false);return;}onDeleted(title);}
-  return <Card title="Delete" lead="Remove it from the site and from the database.">
+  return <Card title={onCancel?`Delete “${title}”`:'Delete'} lead="Remove it from the site and from the database.">
     {step===0&&<button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={busy} onClick={()=>setStep(1)}><Trash2 aria-hidden="true"/>Delete…</button>}
     {step>0&&<div className="adm-stack adm-danger-zone" style={{gap:10}} role="alert">
       <p><strong>Delete “{title}” from the database?</strong> This cannot be undone. To only take it off the site, set Publication to Draft instead.</p>
       <ul className="adm-help">{items.map(t=><li key={t}>{t}</li>)}<li>Photos stay in the media library.</li></ul>
-      {step===1&&<div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setStep(0)}>Cancel</button><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setStep(2)}>Continue</button></div>}
+      {step===1&&<div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={cancel}>Cancel</button><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setStep(2)}>Continue</button></div>}
       {step===2&&<><label className="adm-field">Type “{title}” to confirm<input autoFocus value={typed} onChange={e=>setTyped(e.target.value)}/><small>The title as it is written above.</small></label>
-        <div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>{setStep(0);setTyped('');}}>Cancel</button><button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={working||typed.trim()!==title} onClick={()=>void remove()}><Trash2 aria-hidden="true"/>{working?'Deleting…':'Delete permanently'}</button></div></>}
+        <div className="adm-actions"><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={cancel}>Cancel</button><button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={working||typed.trim()!==title} onClick={()=>void remove()}><Trash2 aria-hidden="true"/>{working?'Deleting…':'Delete permanently'}</button></div></>}
       {error&&<p className="adm-notice adm-notice--error">{error}</p>}
     </div>}
   </Card>;
@@ -265,6 +268,37 @@ function ParagraphsField({content,index,onChange,legend='Paragraphs'}:{content:R
     <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>set([...list,{text:'',style:'body'}])}><Plus aria-hidden="true"/>Add paragraph</button></div>
   </fieldset>;
 }
+// A Meaningful Message as its page shows it: the illustration on one half of the screen, its text on the other. The
+// text is a list of parts (title, text, link), saved as the message's one block (message-text.ts).
+const pieceKinds:[Piece['kind'],string,string][]=[['title','Title','Large words, e.g. the phrase of the message. The first title is the largest.'],['text','Text','A paragraph. Select words and use B, I, U or the link button.'],['link','Link','A link in small capitals under the text, e.g. to a workshop or a book.']];
+function MessageEditor({detail,pieces,options,onDetail,onPieces}:{detail:Row;pieces:Piece[];options:Record<string,Row[]>;onDetail:(detail:Row)=>void;onPieces:(pieces:Piece[])=>void}){
+  const edit=(n:number,p:Partial<Piece>)=>onPieces(pieces.map((x,k)=>k===n?{...x,...p}:x));
+  const move=(n:number,step:number)=>{const next=[...pieces];[next[n+step],next[n]]=[next[n],next[n+step]];onPieces(next);};
+  const illustration=details.message.fields.filter(f=>f.key==='illustration_id');
+  return <Card title="The message" lead="As on the Meaningful Messages page: the illustration fills one half of the screen and the text the other half. The sides alternate with the order of the messages (illustration left, then right).">
+    <div className="adm-message-split">
+      <div><Fields fields={illustration} value={detail} onChange={onDetail} options={options} notes={{illustration_id:'Shown at the full height of the screen, cut to fill its half. An upright image works best.'}}/></div>
+      <fieldset className="adm-group"><legend>Text</legend>
+        <p className="adm-help">The words beside the illustration, part by part and in this order. Choose for each part whether it is a title, a text or a link.</p>
+        {pieces.map((p,n)=>{const id=`message-piece-${n}`;const kindOf=pieceKinds.find(k=>k[0]===p.kind)!;return <div key={n} className="adm-paragraph">
+          <div className="adm-paragraph-head">
+            <label className="adm-field">Part {n+1}<select aria-label={`Part ${n+1} is a`} value={p.kind} onChange={e=>edit(n,{kind:e.target.value as Piece['kind']})}>{pieceKinds.map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></label>
+            <div className="adm-block-tools">
+              {p.kind!=='link'&&<MarkButtons id={id} value={p.text} onChange={text=>edit(n,{text})} name={`part ${n+1}`} link/>}
+              <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===0} onClick={()=>move(n,-1)} aria-label={`Move part ${n+1} up`}><ArrowUp aria-hidden="true"/></button>
+              <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={n===pieces.length-1} onClick={()=>move(n,1)} aria-label={`Move part ${n+1} down`}><ArrowDown aria-hidden="true"/></button>
+              <button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>onPieces(pieces.filter((_,k)=>k!==n))} aria-label={`Remove part ${n+1}`}><Trash2 aria-hidden="true"/></button>
+            </div></div>
+          {p.kind==='link'?<div className="adm-fields"><label className="adm-field">Link text<input id={id} value={p.text} placeholder="e.g. Read the book" onChange={e=>edit(n,{text:e.target.value})}/></label><label className="adm-field">Link<input value={p.href||''} placeholder="https://… or /workshops" onChange={e=>edit(n,{href:e.target.value.trim()})}/></label></div>
+            :<textarea id={id} aria-label={`Part ${n+1}`} rows={p.kind==='title'?2:4} value={p.text} onChange={e=>edit(n,{text:e.target.value})}/>}
+          <small className="adm-help">{kindOf[2]}</small>
+          {p.kind==='link'&&p.href&&!safeHref(p.href)&&<small className="adm-help adm-warning">Use a full address starting with https://, or a page of the site starting with /. Until then the link is not shown.</small>}
+        </div>;})}
+        {pieces.length===0&&<p className="adm-empty">No text yet. Add a title and a text below.</p>}
+        <div className="adm-add" role="group" aria-label="Add a part">{pieceKinds.map(([k,l])=><button key={k} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>onPieces([...pieces,{kind:k,text:'',...(k==='link'?{href:''}:{})}])}><Plus aria-hidden="true"/>{l}</button>)}</div>
+      </fieldset>
+    </div></Card>;
+}
 function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
   const c=block.content;const layout=profileLayout(block);const kind=profileKinds.find(k=>k.layout===layout);const set=(content:Row)=>onChange({...block,content} as never);
   const text=(key:string,label:string,rows=2,hint?:string,placeholder?:string)=><MarkedText id={`block-${index}-${key}`} label={label} rows={rows} hint={hint} placeholder={placeholder} value={String(c[key]||'')} onChange={v=>set({...c,[key]:v})}/>;
@@ -324,7 +358,7 @@ export function EncountersCms(){
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [preview,setPreview]=useState(false);
-  const [newProfileOpen,setNewProfileOpen]=useState(false);const [newProfileMember,setNewProfileMember]=useState('');const [newStoryFor,setNewStoryFor]=useState<string|null>(null);
+  const [newProfileOpen,setNewProfileOpen]=useState(false);const [newProfileMember,setNewProfileMember]=useState('');const [newStoryFor,setNewStoryFor]=useState<string|null>(null);const [removing,setRemoving]=useState<Row|null>(null);
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
   const errorContext=useMemo(()=>({errors,clear:(key:string)=>setErrors(e=>{const n={...e};delete n[key];return n;})}),[errors]);
@@ -340,7 +374,7 @@ export function EncountersCms(){
   useEffect(()=>{setLoaded(false);},[table]);
   useEffect(()=>{let live=true;async function load(){if(!supabase)return;
     const client=supabase;
-    const lists=['posts','crew_members','art_categories','media','artworks','site_settings','expeditions','workshops','workshop_sessions','post_relations'];
+    const lists=['posts','crew_members','art_categories','media','artworks','site_settings','expeditions','workshops','workshop_sessions','post_relations','messages'];
     const results=await Promise.all([table,...lists].map(t=>client.from(t).select('*').limit(1000)));
     if(!live)return;const error=results.find(r=>r.error)?.error;if(error){setMessage(error.message);return;}
     setRows(results[0].data||[]);setRowsTable(table);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
@@ -370,7 +404,12 @@ export function EncountersCms(){
       setBlocks(loaded);setContributors((result[1].data||[]).map((r:Row)=>String(r.crew_member_id)));setContributorRoles(Object.fromEntries((result[1].data||[]).map((r:Row)=>[String(r.crew_member_id),String(r.role||'')])));setRelated((result[2].data||[]).map((r:Row)=>String(r.related_post_id)));
       // A comment per related item (personal pages), once the database has post_relations.note.
       if(k==='crew_member'){const rows=(result[2].data||[]) as Row[];const hasNote=rows.length?'note' in rows[0]:!(await supabase.from('post_relations').select('note').limit(1)).error;
-        setRelatedNotes(hasNote?Object.fromEntries(rows.map(r=>[String(r.related_post_id),String(r.note||'')])):null);}else setRelatedNotes(null);setSpecific((result[3].data||{}) as Row);setChildRows((result[4].data||[]) as Row[]);
+        setRelatedNotes(hasNote?Object.fromEntries(rows.map(r=>[String(r.related_post_id),String(r.note||'')])):null);}else setRelatedNotes(null);
+      // A message keeps its text in one block; one saved before opens with its phrase, text and credit as parts, and with
+      // the image the site shows (its cover) as illustration. Nothing changes publicly until it is saved.
+      let detail=(result[3].data||{}) as Row;
+      if(k==='message'){const pieces=messagePieces(row,detail,loaded);setBlocks([messageBlock(pieces,loaded.find(isMessageText)?.id)]);detail={...detail,...messageColumns(pieces),illustration_id:detail.illustration_id||row.cover_id||null};}
+      setSpecific(detail);setChildRows((result[4].data||[]) as Row[]);
     }setRecord(row);setMarkClean(true);}catch(e){setMessage(e instanceof Error?e.message:'Could not load content');}finally{setBusy(false);}}
   // Links from the dashboard: ?new=<kind> starts a record of that type, ?edit=<id> opens one.
   const handled=useRef('');
@@ -442,13 +481,18 @@ export function EncountersCms(){
     const scoped=table!=='posts'?rows:kindParam?rows.filter(r=>r.kind===kindParam):pagesOnly?rows.filter(r=>r.kind==='page'):rows.filter(r=>postScopes[scope](r.kind));
     const filtered=scoped.filter(r=>(!query||optionLabel(r).toLowerCase().includes(query.toLowerCase())||String(r.slug||'').includes(query.toLowerCase()))&&(!kindFilter||r.kind===kindFilter)&&(!statusFilter||r.status===statusFilter));
     const editButton=(row:Row)=><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={()=>void edit(row)}>Edit</button>;
-    const activityList=table==='posts'&&(kindParam==='expedition'||kindParam==='workshop');const reportList=table==='posts'&&(kindParam==='expedition_report'||kindParam==='workshop_report');
+    const activityList=table==='posts'&&(kindParam==='expedition'||kindParam==='workshop');const messageList=table==='posts'&&kindParam==='message';
+    const messageOf=(row:Row)=>(options.messages||[]).find(m=>m.id===row.id)||{};const reportList=table==='posts'&&(kindParam==='expedition_report'||kindParam==='workshop_report');
     const lists:Record<string,ReactNode>={
       posts:activityList?<table className="adm-table"><thead><tr><th scope="col">{kindLabel(kindParam)}</th><th scope="col">Status on the site</th><th scope="col">Story</th><th scope="col">Publication</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=>{const d=activityDetail(row);const shown=activityStatus(d);const story=storyOf(row);return <tr key={String(row.id)}>
         <td><span className="adm-row-title"><AdminThumb id={row.cover_id} size={52}/><span><strong>{optionLabel(row)}</strong><small>{dateLabel(d)||'No dates yet'}</small></span></span></td>
         <td><span className="adm-state" data-state={shown}>{statusLabels[shown]||shown}</span>{d.starts_on&&!manualStatuses.includes(String(d.activity_status))?<small className="adm-help"> · by its dates</small>:null}</td>
         <td>{story?<><Link className="adm-story" href={`/admin/content?table=posts&kind=${String(story.kind)}&edit=${String(story.id)}`}>Story {story.status==='published'?'published':'in draft'} →</Link><small className="adm-help adm-story-title">{optionLabel(story)}</small></>:shown==='finished'?<button type="button" className="adm-btn adm-btn--small" disabled={busy} onClick={()=>void startStory(row)}>Write about this adventure</button>:<span className="adm-help">After it ends</span>}</td>
         <td><StatusBadge status={row.status}/></td><td>{editButton(row)}</td></tr>;})}</tbody></table>
+      :messageList?<table className="adm-table"><thead><tr><th scope="col">Message</th><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Publication</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=>{const m=messageOf(row);const phrase=plainText(String(m.message||''));return <tr key={String(row.id)}>
+        <td><span className="adm-row-title"><AdminThumb id={m.illustration_id||row.cover_id} size={52}/><span><strong>{optionLabel(row)}</strong>{phrase&&phrase!==optionLabel(row)?<small>{phrase.length>90?`${phrase.slice(0,90)}…`:phrase}</small>:null}</span></span></td>
+        <td>{String(row.sort??0)}</td><td>{date(row.published_at)}</td><td><StatusBadge status={row.status}/> <ExampleBadge row={row}/></td>
+        <td><span className="adm-row-actions">{editButton(row)}<button type="button" className="adm-btn adm-btn--danger adm-btn--small" disabled={busy} onClick={()=>setRemoving(row)} aria-label={`Delete “${optionLabel(row)}”…`}><Trash2 aria-hidden="true"/>Delete…</button></span></td></tr>;})}</tbody></table>
       :reportList?<table className="adm-table"><thead><tr><th scope="col">Story</th><th scope="col">About</th><th scope="col">Publication</th><th scope="col">Last edited</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=>{const of=activityOfStory(row);return <tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={row.cover_id} size={52}/><span><strong>{optionLabel(row)}</strong><small>/posts/{String(row.slug||'')}</small></span></span></td><td>{of?<Link className="adm-story" href={`/admin/content?table=posts&kind=${String(of.kind)}&edit=${String(of.id)}`}>{optionLabel(of)} →</Link>:<><span className="adm-help">Not linked yet. Choose what it tells about:</span><StoryOf story={row} activities={(options.posts||[]).filter(p=>p.kind===(row.kind==='workshop_report'?'workshop':'expedition'))} onLinked={()=>setRevision(r=>r+1)}/></>}</td><td><StatusBadge status={row.status}/></td><td>{date(row.updated_at)}</td><td>{editButton(row)}</td></tr>;})}</tbody></table>
       :<table className="adm-table"><thead><tr><th scope="col">Content</th><th scope="col">Type</th><th scope="col">State</th><th scope="col">Last edited</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=><tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={withImage(row).cover_id} size={52}/><span><strong>{optionLabel(row)}</strong><small>/{String(row.slug||'')}</small></span></span></td><td>{kindLabel(row.kind)}</td><td><StatusBadge status={row.status}/> <ExampleBadge row={row}/></td><td>{date(row.updated_at)}</td><td>{editButton(row)}</td></tr>)}</tbody></table>,
       crew_members:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.portrait_id} size="100%"/><div className="adm-item-body"><strong>{String(row.name||'Unnamed')}</strong><small>{[row.alias,row.role].filter(Boolean).join(' · ')||'No role yet'}</small><div className="adm-item-meta"><StatusBadge status={row.status}/><ExampleBadge row={row}/><span className="adm-badge adm-badge--plain">{row.has_page?'Profile page':'No profile page'}</span></div>{editButton(row)}</div></article>)}</div>,
@@ -474,6 +518,8 @@ export function EncountersCms(){
             <small>Only finished {activityKind}s without a story are listed. One that is still on can be written about once it ends.</small></label>
             <button type="button" className="adm-btn" disabled={busy||!newStoryFor} onClick={()=>{const a=all.find(x=>x.id===newStoryFor);if(a)void startStory(a);}}>{busy?'Creating…':'Create draft and edit'}</button></div>
           :<p className="adm-help">Every finished {activityKind} already has its story. A story can be written once the {activityKind} ends.</p>}</Card>;})()}
+      {messageList&&<p className="adm-help">Each published message appears on the <Link href="/admin/page-settings?page=messages">Messages page</Link> as one screen, its illustration beside its text, in the order of the Order column (lower numbers first). Edit opens it; Delete asks twice before removing it.</p>}
+      {messageList&&removing&&<ContentRemoval key={String(removing.id)} post={removing} busy={busy} items={messageRemoval} onCancel={()=>setRemoving(null)} onDeleted={title=>{setRemoving(null);deletedPost(title);}}/>}
       {reportList&&<p className="adm-help">Each story tells how a finished {kindParam==='workshop_report'?'workshop':'expedition'} went. Start one with “New story” above, or from <Link href={`/admin/content?table=posts&kind=${kindParam==='workshop_report'?'workshop':'expedition'}`}>{kindParam==='workshop_report'?'Workshops':'Expeditions'}</Link> → “Write about this adventure”: it comes linked, with the title, cover and crew filled in. Here each story can be edited or deleted (Edit → Delete).</p>}
       {table==='posts'&&kindParam&&kindParam!=='crew_member'&&!reportList&&<div className="adm-newbar"><button type="button" className="adm-btn" disabled={busy} onClick={()=>start(kindParam)}><Plus aria-hidden="true"/>{(newKinds.find(([k])=>k===kindParam)||['',`New ${kindLabel(kindParam).toLowerCase()}`])[1]}</button></div>}
       {table==='posts'&&pagesOnly&&<p className="adm-help">Permanent pages such as Home, About or Contact. They are edited here and cannot be created or deleted from the admin.</p>}
@@ -495,7 +541,7 @@ export function EncountersCms(){
   }
 
   const fields=table==='posts'?commonFields:entities[table].fields;
-  const hasStatus=fields.some(f=>f.key==='status');const saved=!!record.updated_at;const published=record.status==='published';const activityKinds=['expedition','workshop','expedition_report','workshop_report'];const pageEditor=table==='posts'&&(record.kind==='page'||record.kind==='crew_member'||activityKinds.includes(String(record.kind)));
+  const hasStatus=fields.some(f=>f.key==='status');const saved=!!record.updated_at;const published=record.status==='published';const activityKinds=['expedition','workshop','expedition_report','workshop_report'];const pageEditor=table==='posts'&&(record.kind==='page'||record.kind==='crew_member'||record.kind==='message'||activityKinds.includes(String(record.kind)));
   const title=String(record.title||record.name||record.alt||'')||(saved?'Untitled':`New ${singular[table]}`);
   const toolbar=<div className="adm-toolbar">
     <div className="adm-toolbar-state"><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={back}><ArrowLeft aria-hidden="true"/>Back to list</button>{hasStatus&&<StatusBadge status={record.status}/>}{!pageEditor&&<ExampleBadge row={record}/>}{dirty?<span className="adm-badge adm-badge--dirty">Unsaved changes</span>:saved?<span>All changes saved</span>:<span>Not saved yet</span>}</div>
@@ -534,7 +580,9 @@ export function EncountersCms(){
 
   const isCrewPage=kind==='page'&&record.source_role==='team';
   const crew=options.crew_members||[];const site=((options.site_settings||[]).find(s=>s.key==='site')?.value||{}) as Row;const crewSettings=(((site.pages||{}) as Row).crew||{}) as Row;const crewCover=crewSettings.cover_id;
-  const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above the large banner title. Empty: “Meet the team”.',title:'Name of this page in the admin.'}:{})};const credit=kind==='crew_member'?crewPageCredit:creditLabels[kind]||defaultCredit;const pageOwner=kind==='crew_member'?crew.find(c=>String(c.page_post_id)===String(record.id)):undefined;const path=publicPath('posts',record,specific,options);const simplePublication=kind==='crew_member'||isCrewPage;const publicationFields=simplePublication?[{...commonFields.find(f=>f.key==='status')!,label:'Page status'}]:pick(commonFields,postGroups.publication);
+  const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above the large banner title. Empty: “Meet the team”.',title:'Name of this page in the admin.'}:{})};const credit=kind==='crew_member'?crewPageCredit:creditLabels[kind]||defaultCredit;const pageOwner=kind==='crew_member'?crew.find(c=>String(c.page_post_id)===String(record.id)):undefined;const path=publicPath('posts',record,specific,options);const simplePublication=kind==='crew_member'||isCrewPage;const publicationFields=simplePublication?[{...commonFields.find(f=>f.key==='status')!,label:'Page status'}]:kind==='message'?pick(commonFields,['status','published_at','sort']):pick(commonFields,postGroups.publication);
+  const isMessage=kind==='message';const messageText=blocks.find(isMessageText);const pieces=((messageText?.content.pieces||[]) as Piece[]);
+  const setPieces=(next:Piece[])=>{setBlocks([messageBlock(next,messageText?.id)]);setSpecific({...specific,...messageColumns(next)});};
   return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
@@ -543,8 +591,8 @@ export function EncountersCms(){
       {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>
       :isCrewPage?<CrewPageSeo record={record} onChange={setRecord} cover={crewCover}/>
       :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
-        <Fields fields={pick(commonFields,postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
-      <Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
+        <Fields fields={pick(commonFields,isMessage?['title','slug']:postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
+      {isMessage?<MessageEditor detail={specific} pieces={pieces} options={options} onDetail={setSpecific} onPieces={setPieces}/>:<Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{profileKinds.find(k=>k.layout===profileLayout(b))?.label||blockLabel(b.type)}</span><div className="adm-block-tools">
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===0} onClick={()=>moveBlock(i,-1)} aria-label={`Move block ${i+1} up`}><ArrowUp aria-hidden="true"/>Up</button>
@@ -559,30 +607,30 @@ export function EncountersCms(){
         </div>
         {(kind==='crew_member'||isCrewPage)&&<div className="adm-add" role="group" aria-label="Add a profile block">{profileKinds.map(k=><button key={k.layout} type="button" title={k.hint} className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type:k.type,position:blocks.length,content:{layout:k.layout}}])}><Plus aria-hidden="true"/>{k.label}</button>)}</div>}
         <div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
-      </Card>
-      {details[kind]&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status')} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
+      </Card>}
+      {details[kind]&&!isMessage&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status')} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
       {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>
         {crew.length===0?<p className="adm-help">There are no crew members yet.</p>:<div className="adm-people">{crew.filter(c=>c!==pageOwner).map(c=>{const on=contributors.includes(String(c.id));return <div className="adm-person" data-on={on} key={String(c.id)}>
           <label className="adm-check"><input type="checkbox" checked={on} onChange={e=>setContributors(e.target.checked?[...contributors,String(c.id)]:contributors.filter(id=>id!==c.id))}/><span style={{display:'flex',alignItems:'center',gap:10}}><AdminThumb id={c.portrait_id} size={36}/>{String(c.name)}</span></label>
           {on&&<input aria-label={`Contribution of ${c.name}`} placeholder={credit.role} value={contributorRoles[String(c.id)]||''} onChange={e=>setContributorRoles({...contributorRoles,[String(c.id)]:e.target.value})}/>}</div>;})}</div>}
       </Card>
-      <Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
+      {!isMessage&&<Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
         {['expedition','workshop'].includes(kind)&&saved&&activityStatus(withSessionDates(specific,kind==='workshop'?childRows:[]))==='finished'&&!related.some(id=>(options.posts||[]).some(p=>p.id===id&&String(p.kind).endsWith('_report')))&&<div className="adm-story-invite"><p><strong>This {kind} has ended.</strong> Tell people how it went: what you did, what you saw, photos and videos. The story gets its own page, linked from this {kind} and from the list.</p><button type="button" className="adm-btn" disabled={busy||dirty} onClick={()=>void startStory(record)}>Write about this adventure</button>{dirty&&<small className="adm-help">Save your changes first.</small>}</div>}
         <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:undefined}/>
         {kind==='crew_member'&&relatedNotes&&related.length>0&&<fieldset className="adm-group"><legend>Comments</legend><p className="adm-help">Optional. Shown under each item, e.g. why it matters to this person.</p>
           {related.map(id=>{const p=(options.posts||[]).find(x=>String(x.id)===id);return <MarkedText key={id} id={`related-note-${id}`} label={String(p?.title||'Related item')} value={relatedNotes[id]||''} onChange={v=>setRelatedNotes({...relatedNotes,[id]:v})} placeholder="e.g. I organise most of these workshops." hint={p?kindLabel(String(p.kind)):undefined}/>;})}</fieldset>}
-      </Card>
+      </Card>}
       {kind==='crew_member'&&<Card title="Contact" lead="Shown at the end of the personal page, after the crew.">{pageOwner?<p className="adm-help">The links come from <Link href={`/admin/content?table=crew_members&edit=${String(pageOwner.id)}`}>Crew → {String(pageOwner.name)}</Link> → Optional contact and social links. An email address becomes a mail link; a website can be written with or without https://. {Object.keys((pageOwner.social_links||{}) as Row).length?`Now: ${Object.keys((pageOwner.social_links||{}) as Row).join(', ')}.`:'Now there are none.'}</p>:<p className="adm-help">This page has no person yet.</p>}</Card>}</>}
       {children[kind]&&<Card title={children[kind].label} lead={kind==='workshop'?'One session or more. A single session is one meeting: a day and a place (write Online as the place for an online one); several make a series. Without dates of its own, the workshop runs from its first session to its last, and its status follows them.':undefined}><div className="adm-stack" style={{gap:12}}>{childRows.map((child,i)=><div className="adm-child" key={String(child.id)}><Fields fields={children[kind].fields} value={child} prefix={`child-${i}-`} onChange={value=>setChildRows(childRows.map((r,j)=>j===i?value:r))} options={options}/><div><button type="button" className="adm-btn adm-btn--danger adm-btn--small" onClick={()=>setChildRows(childRows.filter((_,j)=>j!==i))}><Trash2 aria-hidden="true"/>Remove</button></div></div>)}
         <div><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setChildRows([...childRows,{id:crypto.randomUUID(),sort:childRows.length,...(kind==='expedition'?{status:'pending'}:{})}])}><Plus aria-hidden="true"/>Add {kind==='expedition'?'need':'session'}</button></div></div></Card>}
-      {kind!=='crew_member'&&!isCrewPage&&<Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link. These fields do not appear inside the page."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||'')} image={record.cover_id||specific.media_id}/></Card>}
+      {kind!=='crew_member'&&!isCrewPage&&<Card title="Search and sharing" lead="How this page is presented by search engines and when someone shares its link. These fields do not appear inside the page."><SeoPanel value={record} onChange={setRecord} path={path} fallbackTitle={String(record.title||'')} fallbackDescription={String(record.excerpt||specific.caption||specific.message||'')} image={record.cover_id||specific.media_id||specific.illustration_id}/></Card>}
       {preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">Shows the current form, including unsaved changes.</span></header><div className="adm-preview-frame"><EditorialPreview record={record} blocks={blocks.map((b,i)=>({...b,id:b.id||String(i)}))} detail={specific} media={options.media||[]} crew={options.crew_members||[]} posts={options.posts||[]} categories={options.art_categories||[]} contributors={contributors.map(id=>({id,role:contributorRoles[id]||''}))} children={childRows} related={related}/></div></section>}
     </div><aside>
       {['expedition','workshop'].includes(kind)&&<ActivityStatusCard detail={specific} sessions={kind==='workshop'?childRows:undefined} onChange={setSpecific}/>}
       <Card title="Publication" lead={kind==='crew_member'?'Controls whether this personal page is private or available on the website.':isCrewPage?'Controls whether the editable cover text and blocks are used on The Crew page.':undefined}><Fields fields={publicationFields} value={record} onChange={setRecord} options={options} notes={kind==='crew_member'?{...notes,status:'Draft keeps the personal page private. Published makes it available at its /crew/ address once the person is published and “Enable profile page” is on. “Show on The Crew page” is managed in Crew and controls whether the person also appears on The Crew page and Home.'}:isCrewPage?{...notes,status:'Draft hides this page’s editable cover text and blocks. The permanent /crew address and the crew cards still exist. Published uses this content on /crew.'}:notes}/></Card>
-      {kind==='crew_member'||isCrewPage?null:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
+      {kind==='crew_member'||isCrewPage||isMessage?null:<Card title="Cover"><Fields fields={pick(commonFields,postGroups.cover)} value={record} onChange={setRecord} options={options} notes={notes}/></Card>}
       {saved&&kind.endsWith('_report')&&(()=>{const of=activityOfStory(record);return <Card title={kind==='workshop_report'?'Workshop it tells about':'Expedition it tells about'} lead={`The story is linked from that ${kind==='workshop_report'?'workshop':'expedition'}’s page and from its row in the list.`}>{of&&<p><Link className="adm-story" href={`/admin/content?table=posts&kind=${String(of.kind)}&edit=${String(of.id)}`}>{optionLabel(of)} →</Link></p>}<StoryOf key={String(of?.id||'')} story={record} current={of} activities={(options.posts||[]).filter(p=>p.kind===(kind==='workshop_report'?'workshop':'expedition'))} onLinked={()=>{setRevision(r=>r+1);setMessage('Saved. The story is linked.');}}/></Card>;})()}
-      {saved&&activityKinds.includes(kind)&&<ContentRemoval post={record} busy={busy} onDeleted={deletedPost} items={kind.endsWith('_report')?['The story, its blocks and its credits.','Its link from the activity it tells about (the activity stays).']:[`The ${kind}: its details, blocks${kind==='expedition'?', needs':', sessions'} and crew credits.`,'Its links to its stories. The stories themselves stay, in Results.']}/>}
+      {saved&&(activityKinds.includes(kind)||isMessage)&&<ContentRemoval post={record} busy={busy} onDeleted={deletedPost} items={isMessage?messageRemoval:kind.endsWith('_report')?['The story, its blocks and its credits.','Its link from the activity it tells about (the activity stays).']:[`The ${kind}: its details, blocks${kind==='expedition'?', needs':', sessions'} and crew credits.`,'Its links to its stories. The stories themselves stay, in Results.']}/>}
     </aside></div>
   </form></FieldErrors.Provider></ReloadOptions.Provider>;
 }

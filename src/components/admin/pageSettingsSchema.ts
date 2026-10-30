@@ -3,6 +3,7 @@
 // (activities, works, crew, posts) are never typed here: they come from published content.
 import {cardBackgrounds,expeditionsSeo} from '@/features/encounters/expeditions-page';
 import {workshopsSeo} from '@/features/encounters/workshops-page';
+import {messagesSeo} from '@/features/encounters/messages-page';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description).
 export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo';help?:string;fields?:PageField[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
@@ -69,8 +70,20 @@ export const pageSchemas:PageSchema[]=[
       t('list_title','Title of the list','Default: Workshops'),t('list_note','Note beside the title','Default: what is coming, and what we have already made together')]),
     section('closing','4 · Closing','The band at the end of the page, above the footer.',[t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]),
   ]},
-  {key:'messages',label:'Meaningful Messages page',path:'/meaningful-messages',store:'pages',lead:'Banner, introduction and closing. Each message is edited in Meaningful Messages → Messages.',fields:[
-    media('cover_id','Banner image','Full-screen image behind the title. Empty: the design illustration.'),t('title','Title','Default: Meaningful messages'),t('kicker','Small line above the title','Default: a few words'),area('intro','Introduction phrase','Large phrase after the banner, with a hand-drawn line under it. Empty: the introduction is hidden.'),t('credit_line','Credit line','Small capitals under the introduction, e.g. Illustrated by … Empty: hidden.'),t('closing','Closing phrase','Default: More to come')]},
+  {key:'messages',label:'Meaningful Messages page',path:'/meaningful-messages',store:'pages',lead:'Edited in the order of the page: banner, search engines, introduction, the list of messages and the closing. Each message is edited in Meaningful Messages → Messages.',fields:[
+    section('banner','1 · Banner','The first screen: the image darkens while the title rises away.',[
+      media('cover_id','Banner image','Full-screen image behind the title. Default: the design illustration. Also the image shared on social networks.'),t('kicker','Small line above the title','Default: a few words'),t('title','Title','Large title of the banner. Default: Meaningful messages')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says what the messages are, the easier it is for someone looking for illustrated ocean stories or poems to find you. We wrote a first version from the page’s own content; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. illustrated messages about the ocean. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say what the messages are and why to read them. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:messagesSeo.title,fallbackDescription:messagesSeo.description}},
+      {key:'seo_topics',label:'What the messages are about',type:'lines',help:'One topic per line, e.g. Ocean poetry. Not shown on the page: search engines read them as the subjects of this page. They help, but what matters most is the visible text. Empty: the suggested topics are used.'}]),
+    section('intro','3 · Introduction','Right after the banner, before the messages.',[
+      area('intro','Introduction phrase','Large phrase with a hand-drawn line under it. Empty: the introduction is hidden.'),t('credit_line','Credit line','Small capitals under the introduction, e.g. Illustrated by … Empty: hidden.')]),
+    section('list','4 · Messages','One message per screen: its illustration on one half, its text on the other, sides alternating (illustration left, then right). They appear in the order chosen in each message (Order), and only the published ones. Nothing to fill in here: each message is edited in Meaningful Messages → Messages.',[]),
+    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')]),
+  ]},
   {key:'about',label:'About page',path:'/about',store:'pages',lead:'The About page appears once the banner title is filled in; until then the imported About text is shown.',fields:[
     t('hero_kicker','Small line above the title','In italics above the title, e.g. What is our mission? Empty: hidden.'),t('hero_title','Banner title','Large capitals over the photos. Required: until it is filled the imported About text is shown.'),{key:'gallery',label:'Banner photos',type:'gallery',max:6,help:'Three to six photos. They change while the page is read.'},t('credit','Photo credit','Shown vertically on the banner.'),
     list('columns','Three columns under the banner',[t('label','Label'),area('text','Text')],3,'Short label in small capitals and two or three lines each. Empty columns are not shown.'),

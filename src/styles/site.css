@@ -267,6 +267,10 @@ body:has(.workshops-page) .editorial-nav{background:rgb(6 24 38/calc(var(--nav-k
 .mm-text p{max-width:46ch;font-size:clamp(14px,1.1vw,17px)!important;line-height:1.75!important;color:rgba(14,42,56,.86)}
 .mm-text em{font-family:var(--font-display),Georgia,serif;font-size:clamp(14px,1.15vw,18px);color:rgba(14,42,56,.7)}
 .mm-link{align-self:flex-start;font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#0f3b4c;text-decoration:none!important}
+/* Parts of a message after its first title, and the italics of its texts (as the credit line was). */
+.mm-text .mm-subtitle,.mm-letter .mm-subtitle{max-width:26ch;font-size:clamp(1.15rem,2vw,1.6rem)!important;line-height:1.2!important;color:#08222f}
+.mm-text p em,.mm-letter p em{font-family:var(--font-display),Georgia,serif}
+.mm-letter .mm-link{display:inline-block;margin-top:18px}
 .mm-letter{max-width:1000px;margin:0 auto;padding:clamp(60px,12vh,140px) var(--enc-page-padding) 0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,70px);align-items:center}
 .mm-letter img{width:100%;height:auto;max-height:80vh;object-fit:contain}
 .mm-letter h2{font-size:clamp(1.6rem,3.4vw,2.9rem)!important;line-height:1.14!important}

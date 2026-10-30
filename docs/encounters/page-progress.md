@@ -82,6 +82,23 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
     Contact (`cta_label`), junto a la foto submarina o la portada. Terminada: banda arena «How it went» con el outcome y
     «Read the story →». «On board» del final no se repite.
+- **Meaningful Messages (2026-10-30, pendiente de prueba de Juani):** misma forma de trabajo que Expeditions y Workshops.
+  - **Messages page:** Banner → **SEO** precargado (`messagesSeo` en `messages-page.ts`; metadata y JSON-LD `CollectionPage` con
+    cada mensaje como `CreativeWork`: nombre, dirección, texto, ilustración, fecha) → Introducción → Messages (solo explica) →
+    Cierre.
+  - **Cada mensaje (Messages):** la ilustración y, al lado, el **texto por partes** (Title / Text / Link; B, I, U y link en
+    títulos y textos), en una tarjeta «The message». Se guarda como **un bloque** del mensaje (`content.layout='message-text'`,
+    `message-text.ts`): sin migración. Un mensaje guardado antes se abre convertido, igual a como se ve (frase → Title, texto
+    adicional → Text, crédito → Text en cursiva; sin ilustración, su portada), y no cambia hasta guardar. Al guardar, las
+    columnas `messages.message`/`body` se actualizan con el texto plano (las usan la metadata y la lista del admin) y `credit`
+    queda vacío; los bloques viejos del mensaje se reemplazan.
+  - Barra superior como el resto (sin Duplicate, Visual preview ni Unpublish); Publication solo con estado, fecha y orden; sin
+    Cover, Content blocks ni Related content. Se conservan Credits y Search and sharing (su página propia).
+  - **Lista del admin:** Message (ilustración, título, frase), Order, Date, Publication, **Edit** y **Delete…** en dos pasos
+    (Continue → escribir el título), también desde el editor.
+  - Probado en local: conversión sin cambios pendientes, partes nuevas (link y negrita), guardado, `/meaningful-messages` en
+    1440/900/390 sin desbordes, página propia, JSON-LD, editor de la página (5 secciones, SEO precargado) y crear/borrar desde
+    la lista. Check: `scripts/check-message-text.mjs` (en `npm test`).
 - **Workshops (2026-10-30, pendiente de prueba de Juani):** la misma lógica que Expeditions, documentada en
   `docs/encounters/activities-logic.md`.
   - **Workshops page:** Banner (imagen, línea chica, título) → **SEO** precargado (`workshopsSeo` en `workshops-page.ts`; metadata
