@@ -5,6 +5,8 @@ const string=(value:unknown)=>typeof value==='string'?value:'';
 // It is saved as one block of the message (content.layout 'message-text'), so it needs no column of its own. A message
 // saved before reads its phrase as the title, its additional text as texts and its credit as a text in italics, the
 // way the site showed them; saving keeps that.
+// Messages have no page of their own: each one lives on Meaningful Messages, reached at its slug.
+export const messagePath=(slug:unknown)=>`/meaningful-messages#${encodeURIComponent(string(slug))}`;
 export type Piece={kind:'title'|'text'|'link';text:string;href?:string};
 export const messageTextLayout='message-text';
 export const isMessageText=(block:{content?:unknown})=>((block.content||{}) as Row).layout===messageTextLayout;

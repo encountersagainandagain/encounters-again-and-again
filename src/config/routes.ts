@@ -14,7 +14,7 @@ export const routes = {
   workshop: (slug: string) => `/workshops/${segment(slug)}`,
   artCategory: (slug: string) => `/art/${segment(slug)}`,
   artwork: (category: string, slug: string) => `/art/${segment(category)}/${segment(slug)}`,
-  message: (slug: string) => `/meaningful-messages/${segment(slug)}`,
+  message: (slug: string) => `/meaningful-messages#${segment(slug)}`,
   post: (slug: string) => `/posts/${segment(slug)}`,
   unsubscribe: (token: string) => `/unsubscribe/${segment(token)}`,
 } as const;

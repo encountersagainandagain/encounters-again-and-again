@@ -5,6 +5,7 @@ import {Check,ExternalLink,Eye,Plus,Search,X} from 'lucide-react';
 import {brand} from '@/config/brand';
 import {AdminThumb,StatusBadge} from './AdminShell';
 import {kindLabel} from './adminLabels';
+import {messagePath} from '@/features/encounters/message-text';
 type Row=Record<string,unknown>;
 const text=(v:unknown)=>typeof v==='string'?v:'';
 
@@ -19,7 +20,8 @@ export function publicPath(table:string,record:Row,detail:Row,options:Record<str
   if(kind==='page')return pagePaths[text(record.source_role)]||`/${slug}`;
   if(kind==='artwork'){const category=(options.art_categories||[]).find(c=>c.id===detail.category_id);return category?`/art/${text(category.slug)}/${slug}`:`/art/…/${slug}`;}
   if(kind==='crew_member'){const member=(options.crew_members||[]).find(c=>c.page_post_id===record.id);return `/crew/${text(member?.slug)||slug}`;}
-  return `/${({expedition:'expeditions',workshop:'workshops',message:'meaningful-messages'} as Record<string,string>)[kind]||'posts'}/${slug}`;
+  if(kind==='message')return messagePath(slug);
+  return `/${({expedition:'expeditions',workshop:'workshops'} as Record<string,string>)[kind]||'posts'}/${slug}`;
 }
 
 // Search and sharing, explained with the values that will actually be used.

@@ -8,7 +8,7 @@ const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root));
 assert.equal(routes.artwork('books', 'wild-wonders'), '/art/books/wild-wonders');
 assert.equal(routes.crewMember('wild-wonders'), '/crew/wild-wonders');
-assert.equal(routes.message('one-message'), '/meaningful-messages/one-message');
+assert.equal(routes.message('one-message'), '/meaningful-messages#one-message');
 for (const slug of ['', '.', '..', 'a/b', 'a?b', 'a#b', 'a\\b']) assert.throws(() => routes.post(slug));
 for (const [key, enabled] of Object.entries(modules)) {
   if (enabled) assert.doesNotThrow(() => assertModuleEnabled(key));

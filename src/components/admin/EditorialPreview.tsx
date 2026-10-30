@@ -7,7 +7,10 @@ import {ArtworkView,CategorySection,type Person} from '@/components/public/ArtVi
 import {CrewView} from '@/components/public/CrewView';
 import {PhotoHero} from '@/components/public/EditorialPieces';
 import {MediaEmbed} from '@/components/public/EditorialInteractive';
-import {ActivityView,MessageView,PostView} from '@/components/public/PostView';
+import {ActivityView,PostView} from '@/components/public/PostView';
+import {MessageText} from '@/components/public/MessageText';
+import {MediaImage} from '@/components/public/MediaImage';
+import {messagePieces} from '@/features/encounters/message-text';
 import {activityStatus,withSessionDates} from '@/features/encounters/activities';
 import {byOrder,string,type Row} from '@/features/encounters/presentation';
 import type {ContentBlock,ContentRow} from '@/features/encounters/public-content';
@@ -45,9 +48,8 @@ export function EditorialPreview({record,blocks,detail,media,crew=[],categories=
     const activity={post:record,detail:{...dates,activity_status:activityStatus(dates)},kind:record.kind as 'expedition'|'workshop',path:`/${record.kind==='workshop'?'workshops':'expeditions'}/${string(record.slug)}`,result:result as Row|null};
     return <section aria-label="Visual preview" className="editorial-page post-page activity-page">{status}<ActivityView activity={activity} blocks={blocks} media={images} needs={record.kind==='expedition'?children:[]} sessions={record.kind==='workshop'?children:[]} people={people} contactHref="/contact"/></section>;
   }
-  // A message: its own page (the illustration and the message first); it also appears on Meaningful Messages.
-  if(record.kind==='message'){const people=contributors.flatMap(c=>{const m=crew.find(x=>x.id===c.id);return m?[{name:string(m.name),role:c.role,href:null}]:[];});
-    return <section aria-label="Visual preview" className="editorial-page post-page message-page">{status}<MessageView post={record} detail={detail} blocks={blocks} media={images} people={people}/></section>;}
+  // A message: its illustration beside its text, as on Meaningful Messages (it has no page of its own).
+  if(record.kind==='message')return <section aria-label="Visual preview" className="editorial-page message-page">{status}<section className="mm-letter">{detail.illustration_id?<MediaImage id={detail.illustration_id} media={images} contain/>:null}<div><MessageText pieces={messagePieces(record,detail,blocks)}/></div></section></section>;
   if(['news','expedition_report','workshop_report'].includes(String(record.kind)))return <section aria-label="Visual preview" className="editorial-page post-page">{status}<PostView post={{...record,kicker:string(record.kicker)||({news:'News',expedition_report:'Expedition result',workshop_report:'Workshop result'} as Record<string,string>)[String(record.kind)]}} blocks={blocks} media={images}/></section>;
   return <section aria-label="Visual preview" className="editorial-page">{status}<PhotoHero title={string(record.title)} kicker={string(record.kicker)} meta={string(record.meta_line)} cover={record.cover_id||detail.media_id} media={images}/><div id="editorial-content"><MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><EditorialBlocks blocks={blocks} media={images} showIndex={!!record.show_index}/></div></section>;
 }

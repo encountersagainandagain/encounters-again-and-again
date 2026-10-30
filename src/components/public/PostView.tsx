@@ -7,8 +7,6 @@ import {PostBlocks} from './PostBlocks';
 import {MediaEmbed} from './EditorialInteractive';
 import {PhotoHero,Scribble} from './EditorialPieces';
 import {MediaImage} from './MediaImage';
-import {MessageText} from './MessageText';
-import {isMessageText,messagePieces} from '@/features/encounters/message-text';
 
 // Post template (Post.dc.html): cover with kicker, title and information line, then the blocks.
 // Expedition and workshop pages and their result reports use it; the activity adds its facts,
@@ -19,16 +17,6 @@ export function PostView({post,blocks,media,detail={},trail,children,before}:{po
     {trail}
     <div id="editorial-content" className="post-body">{before}<MediaEmbed kind={detail.embed_kind} id={detail.embed_id}/><PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>{children}</div>
   </>;
-}
-// A Meaningful Message on its own page: the illustration and the message first, then the
-// people credited for it (the same people whose profiles list it). Shared by the public page and the preview.
-// Its text is the message-text block (message-text.ts); any other block, from before, follows it.
-export function MessageView({post,detail,blocks,media,people,trail}:{post:Row;detail:Row;blocks:ContentBlock[];media:Row[];people:People;trail?:ReactNode}){
-  return <PostView post={{...post,kicker:string(post.kicker)||'Meaningful message'}} blocks={blocks.filter(b=>!isMessageText(b))} media={media} trail={trail}
-    before={<section className="mm-letter">{detail.illustration_id?<MediaImage id={detail.illustration_id} media={media} contain/>:null}<div><MessageText pieces={messagePieces(post,detail,blocks)} seq="0.94,0.4"/></div></section>}>
-    {people.length>0&&<section className="activity-people"><h2>Made by</h2><p>{people.map((p,i)=><span key={p.name+i}>{i>0?', ':''}{p.href?<Link href={p.href}>{p.name}</Link>:p.name}{p.role?` (${p.role})`:''}</span>)}</p></section>}
-    <p className="mm-back"><Link href="/meaningful-messages" className="editorial-link">← All messages</Link></p>
-  </PostView>;
 }
 export type People={name:string;role:string;href:string|null;portrait_id?:unknown}[];
 const xpStatus:Record<string,string>={upcoming:'Upcoming',running:'On the water now',finished:'Finished',postponed:'Postponed',cancelled:'Cancelled'};
