@@ -2,6 +2,7 @@
 // Values live in site_settings: Home in `home`, the other pages in `pages.<key>`. Lists of content
 // (activities, works, crew, posts) are never typed here: they come from published content.
 import {cardBackgrounds,expeditionsSeo} from '@/features/encounters/expeditions-page';
+import {workshopsSeo} from '@/features/encounters/workshops-page';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description).
 export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo';help?:string;fields?:PageField[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
@@ -51,12 +52,23 @@ export const pageSchemas:PageSchema[]=[
         media('media_id','Photo (optional)','Without a photo the text takes the whole card.'),
         {key:'media_side',label:'Photo side',type:'select',options:[{value:'',label:'Alternate (left, right, left…)'},{value:'left',label:'Left'},{value:'right',label:'Right'}]},
       ],12)]),
-    section('list','4 · List of expeditions','After the banner. The published expeditions are grouped by their state, each group on its own colour: Coming up (white), On the water now (lagoon) and Where we have been (sand), with a filter above them. The state is chosen in each expedition (Activity status): postponed ones show with the upcoming, cancelled ones with the past.',[
+    section('list','4 · List of expeditions','After the banner. The published expeditions are grouped by their state, each group on its own colour: Coming up (white), On the water now (lagoon) and Where we have been (white), with a filter above them. The state follows each expedition’s dates (its Status card): postponed ones show with the upcoming, cancelled ones with the past.',[
       t('list_title','Title of the list','Default: On the water'),t('list_note','Note beside the title','Default: where we are going, and where we have been')]),
     section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: May the ocean be with you')]),
   ]},
-  {key:'workshops',label:'Workshops page',path:'/workshops',store:'pages',lead:'Banner and closing of the Workshops page. Each workshop is edited in Workshops.',fields:[
-    media('cover_id','Banner image','Default: the design image.'),t('kicker','Small line above the title','Default: artsy animals'),t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]},
+  {key:'workshops',label:'Workshops page',path:'/workshops',store:'pages',lead:'Everything on the Workshops page, in the order of the page: the banner, how it appears in search engines, the list of workshops and the closing. Each workshop, with its sessions, is created and edited in Workshops; its screen in the list fills itself.',fields:[
+    section('banner','1 · Banner','The first screen: the photo sinks and darkens while the title rises away.',[
+      media('cover_id','Banner image','Default: the design image. Also the image shared on social networks.'),t('kicker','Small line above the title','Default: artsy animals'),t('title','Title','Large title of the banner. Default: the title of the program page, or Artsy Animals')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says what the workshops are, for whom and where, the easier it is for a school, a family or a group looking for art or ocean workshops to find you. We wrote a first version from the page’s own text; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. art workshops about ocean animals. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say what the workshops are, for whom, and why to click. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:workshopsSeo.title,fallbackDescription:workshopsSeo.description}},
+      {key:'seo_topics',label:'What the workshops are about',type:'lines',help:'One topic per line, e.g. Drawing workshops for kids. Not shown on the page: search engines read them as the subjects of this page. They help, but what matters most is the visible text, so use the same words in each workshop. Empty: the suggested topics are used.'}]),
+    section('list','3 · List of workshops','After the banner, one screen per workshop with its sessions. The published workshops are grouped by their state, with a filter above them: Coming up (white), Happening now (lagoon) and Past workshops (white). The state follows each workshop’s dates, or the dates of its sessions (its Status card): postponed ones show with the upcoming, cancelled ones with the past.',[
+      t('list_title','Title of the list','Default: Workshops'),t('list_note','Note beside the title','Default: what is coming, and what we have already made together')]),
+    section('closing','4 · Closing','The band at the end of the page, above the footer.',[t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]),
+  ]},
   {key:'messages',label:'Meaningful Messages page',path:'/meaningful-messages',store:'pages',lead:'Banner, introduction and closing. Each message is edited in Meaningful Messages → Messages.',fields:[
     media('cover_id','Banner image','Full-screen image behind the title. Empty: the design illustration.'),t('title','Title','Default: Meaningful messages'),t('kicker','Small line above the title','Default: a few words'),area('intro','Introduction phrase','Large phrase after the banner, with a hand-drawn line under it. Empty: the introduction is hidden.'),t('credit_line','Credit line','Small capitals under the introduction, e.g. Illustrated by … Empty: hidden.'),t('closing','Closing phrase','Default: More to come')]},
   {key:'about',label:'About page',path:'/about',store:'pages',lead:'The About page appears once the banner title is filled in; until then the imported About text is shown.',fields:[

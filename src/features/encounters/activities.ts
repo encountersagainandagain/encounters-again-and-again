@@ -19,9 +19,16 @@ export function activityStatus(detail:Row,today=perthToday()){
   if(manualStatuses.includes(chosen)||!from)return chosen;const to=string(detail.ends_on).slice(0,10)||from;
   return today<from?'upcoming':today>to?'finished':'running';
 }
+// A workshop is one session (a day and a place, or online) or several. Without dates of its own, it runs from its
+// first session to its last, so its state also follows the sessions.
+export function withSessionDates(detail:Row,sessions:Row[]=[]){
+  if(string(detail.starts_on))return detail;const days=sessions.map(s=>string(s.held_on).slice(0,10)).filter(Boolean).sort();
+  return days.length?{...detail,starts_on:days[0],ends_on:days.length>1?days[days.length-1]:null}:detail;
+}
 export function activities(data:ActivityData,kind?:'expedition'|'workshop'):Activity[]{
   return data.posts.filter(p=>p.status==='published'&&(kind?p.kind===kind:p.kind==='expedition'||p.kind==='workshop')).flatMap(post=>{
-    const detail=(post.kind==='workshop'?data.workshops:data.expeditions).find(d=>d.id===post.id);
+    const own=(post.kind==='workshop'?data.workshops:data.expeditions).find(d=>d.id===post.id);
+    const detail=own&&post.kind==='workshop'?withSessionDates(own,(data.sessions||[]).filter(s=>s.workshop_id===post.id)):own;
     return detail?[{post,detail:{...detail,activity_status:activityStatus(detail)},kind:post.kind as Activity['kind'],path:activityPath(post),result:resultOf(post,data)}]:[];
   }).sort((a,b)=>byOrder(a.post,b.post));
 }

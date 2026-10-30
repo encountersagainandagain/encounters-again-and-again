@@ -73,15 +73,30 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     marca «Story published»). La columna Story muestra el título de la historia para que se vea con cuál de Results coincide.
   - **Results (2026-10-30):** «New story» pregunta de qué expedición es; lista solo las terminadas sin historia y crea el
     borrador enlazado como «Write about this adventure». Desde Results cada historia se edita o se borra (Edit → Delete).
-    Ejemplo nuevo «Night watch at the sand patch» (terminada, sin historia): `node scripts/demo-finished-expedition.mjs`
+    Ejemplo nuevo «Night watch at the sand patch» (terminada, sin historia): `node scripts/demo-finished-examples.mjs` (también agrega «Rock pool sketches, online», workshop de una session online terminado sin historia)
     lo agrega solo (local; real con `--target=production --confirm-real`) y no toca nada más.
   - **Cierre (prueba 2026-10-30):** el garabato bajo «May the ocean be with you» se reemplazó por tres olas que rompen, en un solo
     trazo que se dibuja con el scroll (`Scribble` variante `waves`, solo en Expeditions; Art, Messages y Home siguen con el loop).
-  - **Página de cada expedición** (`ExpeditionGlance` en `PostView.tsx`; workshops sin cambios): estado con punto de color
+  - **Página de cada expedición** (`ActivityGlance` en `PostView.tsx`, compartido con workshops desde 2026-10-30): estado con punto de color
     y «Starts in N days» / «Day N of M»; When (rango compacto y cantidad de días), Where y Who (retrato, nombre con enlace y
     rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
     Contact (`cta_label`), junto a la foto submarina o la portada. Terminada: banda arena «How it went» con el outcome y
     «Read the story →». «On board» del final no se repite.
+- **Workshops (2026-10-30, pendiente de prueba de Juani):** la misma lógica que Expeditions, documentada en
+  `docs/encounters/activities-logic.md`.
+  - **Workshops page:** Banner (imagen, línea chica, título) → **SEO** precargado (`workshopsSeo` en `workshops-page.ts`; metadata
+    y JSON-LD `CollectionPage` con cada workshop como `Event`, sus sessions como `subEvent`, «Online» como `VirtualLocation`) →
+    Lista (título y nota) → Cierre.
+  - **Lista pública:** grupos Coming up / Happening now / Past workshops con filtro; cada grupo abre con una banda (blanco,
+    laguna, blanco) antes de las pantallas fijas de sus workshops, que no cambian.
+  - **Sessions:** una o más. Sin fechas propias, el workshop va de su primera a su última session (`withSessionDates`), y el
+    estado automático, la tarjeta Status, la lista del admin y la preview lo siguen.
+  - **Editor, historias y Results:** iguales que Expeditions (Status, Delete, aviso, Write about this adventure, New story).
+  - **Página de cada workshop:** el mismo vistazo (estado, When con cantidad de sessions, Where con el lugar o los de sus
+    sessions, Details con formato, idioma, lugares y precio, With) y la banda de invitación con el botón de inscripción por
+    email o Contact; Full / Registration closed lo dicen sin botón. Una sola session se titula «The session».
+  - Probado en local (1440/900/390, sin desbordes): lista y filtro, JSON-LD, admin (aviso, Status por sessions, New story) y las
+    páginas de un workshop de una session, uno lleno de tres, uno terminado online sin historia y uno terminado con historia.
   - Las cards de Expeditions page en producción **no se escribieron en la base**: el admin las muestra convertidas desde
     el texto actual y quedan guardadas cuando alguien guarda.
 - **Página personal de Crew (2026-10-26, en prueba con Juani):**

@@ -125,10 +125,12 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
 }
 // The list of expeditions in the order of its note: where the boat is going, where it is now, where it has been.
 // Postponed ones wait with the upcoming; cancelled ones go with the past. Each card still says its own state.
-const GROUPS=[{key:'upcoming',filter:'Coming up',title:'Coming up'},{key:'now',filter:'On the water now',title:'On the water now'},{key:'past',filter:'Past',title:'Where we have been'}];
-export function listGroups(list:Activity[]){
+// Workshops use the same groups (Juani, 2026-10-30) with their own words.
+const GROUPS={expedition:[{key:'upcoming',filter:'Coming up',title:'Coming up'},{key:'now',filter:'On the water now',title:'On the water now'},{key:'past',filter:'Past',title:'Where we have been'}],
+  workshop:[{key:'upcoming',filter:'Coming up',title:'Coming up'},{key:'now',filter:'Happening now',title:'Happening now'},{key:'past',filter:'Past',title:'Past workshops'}]};
+export function listGroups(list:Activity[],kind:'expedition'|'workshop'='expedition'){
   const of=(a:Activity)=>a.detail.activity_status==='running'?'now':isFinished(a)||a.detail.activity_status==='cancelled'?'past':'upcoming';
-  return GROUPS.map(g=>({...g,items:list.filter(a=>of(a)===g.key)})).filter(g=>g.items.length);
+  return GROUPS[kind].map(g=>({...g,items:list.filter(a=>of(a)===g.key)})).filter(g=>g.items.length);
 }
 // Card of an expedition or workshop in a list: upcoming ones lead to their page; finished ones to their result.
 export function ActivityCard({activity:a,media,seq=.94}:{activity:Activity;media:Row[];seq?:number}){

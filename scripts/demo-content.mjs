@@ -232,6 +232,14 @@ export function reviewSet(today=new Date()){
         {id:id(88,6),title:'Putting it up',body:'We cut the rolls into panels and hung them along the hall.',held_on:day(-68),media_id:img('wall-2'),sort:2}],
       crew:[['nerida','Facilitator'],['marea','Drawing']],results:['wild-wonders-pinned-to-the-wall'],
       blocks:[b.p('A workshop about the animals we meet at sea, for anyone who walked in.','Two afternoons, one wall.'),b.gallery([['wall-1','Crabs, first afternoon.'],['wall-2','Sea stars, by the window.'],['wall-3','Seahorses, the last panel to go up.']])]},
+    // One online session, finished and still without its story: the reminder and “Write about this adventure” in Workshops.
+    {id:id(87,4),slug:'rock-pool-sketches-online',title:'Rock pool sketches, online',cover:img('crab-2'),sort:4,
+      excerpt:'One evening on a video call: a rock pool on the screen, a pencil in every hand.',
+      detail:{activity_status:'finished',registration_status:'closed',place:'Online',language:'English',modality:'Online, one session',materials:['Paper and a pencil','A camera that can show your page'],
+        note_title:'Who it was for',audience_note:'Families at home, from anywhere. No drawing experience needed.'},
+      sessions:[{id:id(88,7),title:'One rock pool, many eyes',body:'We watched a rock pool filmed at low tide and drew what moved in it, then held our pages up to the camera.',held_on:day(-12),place:'Online',media_id:img('crab-2'),sort:1}],
+      crew:[['nerida','Facilitator'],['coral','Filming the rock pool']],
+      blocks:[b.p('A single evening session for families who could not come in person.','Drawing together, from home.')]},
   ];
 
   const messages=[

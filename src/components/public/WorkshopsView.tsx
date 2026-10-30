@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {useEffect,useRef} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {string,type Row} from '@/features/encounters/presentation';
 import {countLabel,dateLabel,isFinished,pad,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
@@ -8,6 +8,7 @@ import {PostBlocks} from './PostBlocks';
 import {ramp,useFrame} from './useFrame';
 import {MediaImage,Picture} from './MediaImage';
 import {covers} from '@/features/encounters/covers';
+import {listGroups} from './ExpeditionsView';
 
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
 // inside the card (their own snap and contained overscroll); the image crossfades with the rail position.
@@ -54,17 +55,23 @@ export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:
     document.querySelector('.editorial-nav')?.classList.toggle('ws-past-hero',el.getBoundingClientRect().bottom<160);
     const root=el.parentElement;root?.querySelectorAll<HTMLElement>('[data-wseq]').forEach(item=>{const r=item.getBoundingClientRect();if(reduced){item.style.opacity='1';item.style.transform='none';return;}const [start=.9,span=.25,shift=70]=(item.dataset.wseq||'').split(',').map(Number);const p=ramp((vh*start-r.top)/(vh*span),0,1,true);item.style.opacity=p.toFixed(3);item.style.transform=`translate3d(0,${((1-p)*shift).toFixed(1)}px,0)`;});
   });
-  const ordered=[...list.filter(a=>!isFinished(a)),...list.filter(isFinished)];
+  // Grouped by state like the expeditions (coming up, happening now, past), each workshop keeping its pinned screen.
+  const groups=listGroups(list,'workshop');const ordered=groups.flatMap(g=>g.items);const [show,setShow]=useState('all');
   return <>
     <span data-nav-theme="dark" hidden/>
     <section ref={hero} className="ws-hero" data-nav-hero aria-label={string(page?.title)||'Workshops'}>
       <div className="ws-hero-image hero-image"><div data-ws-img className="ws-fill"><Picture id={covers.workshops(settings,page).id} media={media} fallback={covers.workshops(settings,page).fallback} priority/></div></div>
       <div className="ws-hero-shade"/>
-      <div className="ws-hero-copy" data-ws-copy><p>{string(settings.kicker)||string(page?.kicker)||'artsy animals'}</p><h1>{string(page?.title)||'Workshops'}</h1></div>
+      <div className="ws-hero-copy" data-ws-copy><p>{string(settings.kicker)||string(page?.kicker)||'artsy animals'}</p><h1>{string(settings.title)||string(page?.title)||'Workshops'}</h1></div>
       <a href="#editorial-content" className="scroll-cue" data-ws-cue>Scroll <span aria-hidden="true"/></a>
     </section>
     <div id="editorial-content" className="ws-list">
-      {ordered.map((a,i)=><Workshop key={string(a.post.id)} activity={a} index={i} sessions={sessions.filter(s=>s.workshop_id===a.post.id)} media={media}/>)}
+      {!!ordered.length&&<div id="workshops-list" className="ws-list-top"><div className="activity-list-head" data-wseq="0.96,0.4"><h2>{string(settings.list_title)||'Workshops'}</h2><span>{string(settings.list_note)||'what is coming, and what we have already made together'}</span></div>
+        {groups.length>1&&<div className="exp-filter ws-filter" role="group" aria-label="Show workshops">{[{key:'all',filter:'All',items:list},...groups].map(g=><button key={g.key} type="button" aria-pressed={show===g.key} onClick={()=>setShow(g.key)}>{g.filter}<span>{g.items.length}</span></button>)}</div>}</div>}
+      {groups.map(g=><section key={g.key} className="ws-group" data-group={g.key} hidden={show!=='all'&&show!==g.key} aria-labelledby={`workshops-${g.key}`}>
+        <div className="ws-group-head"><h3 id={`workshops-${g.key}`}>{g.title}</h3><span>{countLabel(g.items.length,'workshops')}</span></div>
+        {g.items.map(a=><Workshop key={string(a.post.id)} activity={a} index={ordered.indexOf(a)} sessions={sessions.filter(s=>s.workshop_id===a.post.id)} media={media}/>)}
+      </section>)}
       {!ordered.length&&blocks.length>0&&<div className="ws-blocks"><PostBlocks blocks={blocks} media={media}/></div>}
     </div>
     <section className="ws-closing"><h2 data-wseq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Link data-wseq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>

@@ -8,6 +8,7 @@ import {CrewView} from '@/components/public/CrewView';
 import {PhotoHero} from '@/components/public/EditorialPieces';
 import {MediaEmbed} from '@/components/public/EditorialInteractive';
 import {ActivityView,MessageView,PostView} from '@/components/public/PostView';
+import {activityStatus,withSessionDates} from '@/features/encounters/activities';
 import {byOrder,string,type Row} from '@/features/encounters/presentation';
 import type {ContentBlock,ContentRow} from '@/features/encounters/public-content';
 import type {EditorialData} from '@/features/encounters/editorial-data';
@@ -39,7 +40,9 @@ export function EditorialPreview({record,blocks,detail,media,crew=[],categories=
   if(record.kind==='expedition'||record.kind==='workshop'){
     const result=related.map(id=>posts.find(p=>p.id===id&&p.status==='published')).find(Boolean)||null;
     const people=contributors.flatMap(c=>{const m=crew.find(x=>x.id===c.id);return m?[{name:string(m.name),role:c.role,href:null}]:[];});
-    const activity={post:record,detail,kind:record.kind as 'expedition'|'workshop',path:`/${record.kind==='workshop'?'workshops':'expeditions'}/${string(record.slug)}`,result:result as Row|null};
+    // The state as the site shows it: by its dates (a workshop's own, or its sessions').
+    const dates=record.kind==='workshop'?withSessionDates(detail,children):detail;
+    const activity={post:record,detail:{...dates,activity_status:activityStatus(dates)},kind:record.kind as 'expedition'|'workshop',path:`/${record.kind==='workshop'?'workshops':'expeditions'}/${string(record.slug)}`,result:result as Row|null};
     return <section aria-label="Visual preview" className="editorial-page post-page activity-page">{status}<ActivityView activity={activity} blocks={blocks} media={images} needs={record.kind==='expedition'?children:[]} sessions={record.kind==='workshop'?children:[]} people={people} contactHref="/contact"/></section>;
   }
   // A message: its own page (the illustration and the message first); it also appears on Meaningful Messages.

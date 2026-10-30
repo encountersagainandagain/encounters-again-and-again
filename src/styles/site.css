@@ -202,6 +202,18 @@ html:has(.pin-section),body:has(.pin-section){overflow-x:clip}
 .ws-indicator{position:absolute;z-index:3;left:0;bottom:0;display:flex;align-items:center;gap:14px;padding:clamp(14px,1.6vw,22px) clamp(24px,3vw,48px);font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:rgba(234,245,250,.72);background:linear-gradient(to top,rgba(14,42,56,.96),rgba(14,42,56,0));pointer-events:none}
 .ws-indicator>span:first-child{font-family:ui-monospace,monospace;letter-spacing:.1em}
 .ws-bar{position:relative;display:block;width:clamp(60px,8vw,120px);height:1px;background:rgba(234,245,250,.26)}.ws-bar span{position:absolute;inset:0 auto 0 0;background:#8fd9ea;transition:width 220ms ease}
+/* The list of workshops (Juani, 2026-10-30): its title and filter, then one group per state, each opened by a band in
+   the palette (white, lagoon, white) before the pinned screens of its workshops. */
+.ws-list-top{max-width:1240px;margin:0 auto;padding:var(--enc-section-gap) clamp(20px,4vw,60px) clamp(28px,5vh,56px);display:flex;flex-direction:column;gap:clamp(18px,3vh,30px)}
+.ws-list-top .activity-list-head h2{color:#fff}.ws-list-top .activity-list-head span{color:rgba(234,245,250,.7)}
+.ws-filter button{border-color:rgba(234,245,250,.36);color:#eaf5fa}.ws-filter button:hover{border-color:#8fd9ea}
+.ws-filter button[aria-pressed=true]{background:#8fd9ea;border-color:#8fd9ea;color:#08222f}.ws-filter button:focus-visible{outline-color:#8fd9ea}
+.ws-group[hidden]{display:none}
+.ws-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:clamp(22px,4vh,40px) clamp(20px,4vw,60px);background:#fff;color:#0e2a38}
+.ws-group[data-group=now] .ws-group-head{background:var(--enc-laguna)}
+.ws-group-head h3{display:flex;align-items:center;gap:12px;font-family:var(--font-display),Georgia,serif;font-style:italic;font-size:clamp(24px,2.6vw,38px)!important;line-height:1.1!important;color:inherit}
+.ws-group[data-group=now] .ws-group-head h3::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--enc-coral);box-shadow:0 0 0 4px rgba(224,138,110,.3)}
+.ws-group-head span{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;opacity:.7}
 .ws-blocks{padding:var(--enc-section-gap) 0;background:var(--enc-espuma);color:var(--enc-ink)}
 .ws-closing{padding:clamp(80px,20vh,220px) clamp(20px,5vw,72px) clamp(40px,8vh,90px);display:flex;flex-direction:column;align-items:center;gap:clamp(20px,4vh,44px);text-align:center}
 .ws-closing h2{max-width:24ch;font-size:clamp(1.9rem,min(7vw,10vh),5rem)!important;line-height:1!important;text-transform:uppercase;color:#fff}

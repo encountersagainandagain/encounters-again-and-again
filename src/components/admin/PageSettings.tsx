@@ -10,6 +10,7 @@ import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {cardsFromBlocks} from '@/components/public/ExpeditionsView';
 import {covers} from '@/features/encounters/covers';
 import {editableCard,expeditionsSeoOf} from '@/features/encounters/expeditions-page';
+import {workshopsSeoOf} from '@/features/encounters/workshops-page';
 import type {ContentBlock} from '@/features/encounters/public-content';
 type Row=Record<string,unknown>;
 const obj=(v:unknown):Row=>v&&typeof v==='object'&&!Array.isArray(v)?v as Row:{};
@@ -49,6 +50,11 @@ async function expeditionsDraft(current:Row):Promise<{draft:Row;converted:string
   const rows=saved.length?saved:cardsFromBlocks(blocks as ContentBlock[],covers.expeditions(current,page).id)||[];
   return {draft:{...draft,cards:rows.map(editableCard)},converted:!rows.length?'':saved.length?'the older presentation cards':'the text of Pages → Encounters Expeditions'};
 }
+// The Workshops page opens with the search texts it uses today (its own, the program page's or the suggested ones).
+async function workshopsDraft(current:Row):Promise<{draft:Row;converted:string}>{
+  const page=supabase?(await supabase.from('posts').select('seo_title,meta_description').eq('kind','page').eq('source_role','artsy_animals').eq('status','published').maybeSingle()).data as Row|null:null;
+  const seo=workshopsSeoOf(current,page);return {draft:{...current,seo_title:seo.title,meta_description:seo.description,seo_topics:seo.topics},converted:''};
+}
 // Clean a draft before saving: drop empty strings, empty list items and blank lines.
 function clean(v:unknown):unknown{if(Array.isArray(v))return v.map(clean).filter(x=>x!==undefined&&x!==''&&!(x&&typeof x==='object'&&!Array.isArray(x)&&!Object.keys(x).length));if(v&&typeof v==='object'){const out:Row={};for(const [k,x] of Object.entries(v)){const c=clean(x);if(c!==undefined&&c!=='')out[k]=c;}return out;}return typeof v==='string'?v.replace(/\s+$/,''):v;}
 
@@ -58,7 +64,7 @@ export function PageSettings({pageKey}:{pageKey:string}){
   const frame=useRef<HTMLIFrameElement>(null);
   const loadMedia=useCallback(()=>{void supabase?.from('media').select('*').order('created_at',{ascending:false}).then(({data})=>setMedia(data||[]));},[]);
   useEffect(()=>{let live=true;if(!supabase)return;void supabase.from('site_settings').select('value').eq('key','site').single().then(({data,error})=>{if(!live)return;if(error){setMessage('Settings could not be loaded.');return;}const value=obj(data?.value);const current=schema.store==='home'?obj(value.home):obj(obj(value.pages)[schema.key]);
-    void (schema.key==='expeditions'?expeditionsDraft(current):Promise.resolve({draft:current,converted:''})).then(({draft,converted})=>{if(!live)return;setDraft(draft);setSaved(JSON.stringify(draft));setConverted(converted);setMessage('');});});loadMedia();return()=>{live=false;};},[schema,loadMedia]);
+    void (schema.key==='expeditions'?expeditionsDraft(current):schema.key==='workshops'?workshopsDraft(current):Promise.resolve({draft:current,converted:''})).then(({draft,converted})=>{if(!live)return;setDraft(draft);setSaved(JSON.stringify(draft));setConverted(converted);setMessage('');});});loadMedia();return()=>{live=false;};},[schema,loadMedia]);
   // The preview frame renders the public template with this draft.
   const send=useCallback(()=>{if(draft)frame.current?.contentWindow?.postMessage({type:'page-draft',key:schema.key,value:clean(draft)},location.origin);},[draft,schema.key]);
   useEffect(()=>{const t=setTimeout(send,250);return()=>clearTimeout(t);},[send]);

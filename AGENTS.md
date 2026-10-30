@@ -203,6 +203,7 @@ una migración aplicada; un push no es un despliegue verificado.
 | Documento | Para qué |
 |---|---|
 | `docs/encounters/page-progress.md` | Estado vivo por página, decisiones recientes, migraciones. **Actualizalo en cada entrega.** |
+| `docs/encounters/activities-logic.md` | Cómo funcionan Expeditions y Workshops: estados por fecha (Perth), historias, Results, sessions. |
 | `docs/encounters/HANDOFF_2026-10-28.md` | Resumen de la última ronda: decisiones de CMS, commits, migraciones pendientes y Vercel. |
 | `docs/encounters/entornos.md` | Entornos, scripts de staging y local, caché, portadas. (Su tabla inicial menciona un proyecto de Vercel `encounters-review` que no es el sitio en revisión actual: el sitio vivo es el `-gamma` de §1.) |
 | `docs/encounters/animation-performance-playbook.md` | Cómo están hechos el scroll, el agua y las animaciones; qué medir. |
