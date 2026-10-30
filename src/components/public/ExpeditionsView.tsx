@@ -120,7 +120,7 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
         </section>)}
       </section>}
     </div>
-    <DarkClosing title={string(settings.closing)||'May the ocean be with you'}/>
+    <DarkClosing title={string(settings.closing)||'May the ocean be with you'} scribble="waves"/>
   </>;
 }
 // The list of expeditions in the order of its note: where the boat is going, where it is now, where it has been.
