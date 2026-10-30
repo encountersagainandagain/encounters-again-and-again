@@ -65,6 +65,10 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     editor, crea un borrador `expedition_report` con el título, la portada y los créditos de la expedición, lo enlaza como
     `result` y abre su editor (banner, SEO, bloques). Results lista solo las historias y dice de qué expedición es cada una;
     se inician desde la expedición. Probado en local de punta a punta, borrado incluido.
+  - **Recordatorio e historias sueltas (2026-10-30):** arriba de la lista de Expeditions, un aviso enumera las terminadas sin
+    historia, cada una con **Write about this adventure**. En Results, la columna About enlaza a la expedición; una historia
+    sin enlace (ej. «All post blocks (demo)», borrador) muestra un selector para elegirla. El editor de la historia tiene la
+    tarjeta «Expedition it tells about» para cambiarla (`StoryOf`: reemplaza su único enlace `result`). Probado en local.
   - **Página de cada expedición** (`ExpeditionGlance` en `PostView.tsx`; workshops sin cambios): estado con punto de color
     y «Starts in N days» / «Day N of M»; When (rango compacto y cantidad de días), Where y Who (retrato, nombre con enlace y
     rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
