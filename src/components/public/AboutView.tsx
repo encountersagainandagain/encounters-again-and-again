@@ -7,6 +7,7 @@ import type {Contact} from '@/features/encounters/contact';
 import {Picture} from './MediaImage';
 import {ramp,useFrame} from './useFrame';
 import {aboutFallbackGallery} from '@/features/encounters/covers';
+import {aboutBlocks} from '@/features/encounters/about-page';
 
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const texts=(v:unknown)=>Array.isArray(v)?v.map(String).filter(Boolean):[];
@@ -26,7 +27,7 @@ export function ContactLines({contact,dark=true}:{contact:Contact;dark?:boolean}
 export function AboutView({settings:s,contact,media}:{settings:Row;contact:Contact;media:Row[]}){
   const hero=useRef<HTMLElement>(null),main=useRef<HTMLDivElement>(null);
   const gallery=texts(s.gallery);const frames=gallery.length?gallery:aboutFallbackGallery;
-  const columns=rows(s.columns).filter(c=>string(c.label)||string(c.text)).slice(0,3);const manifesto=(s.manifesto||{}) as Row;const how=(s.how||{}) as Row;
+  const columns=rows(s.columns).filter(c=>string(c.label)||string(c.text)).slice(0,3);const blocks=aboutBlocks(s);
   useFrame(({vh,vw,reduced})=>{
     const el=hero.current;if(!el)return;const d=Math.min(1,scrollY/vh);const shrink=reduced?1:ramp(d,0,.22,true);
     const q=(sel:string)=>el.querySelector<HTMLElement>(sel);
@@ -45,7 +46,6 @@ export function AboutView({settings:s,contact,media}:{settings:Row;contact:Conta
     const idx=q('[data-idx]');if(idx)idx.textContent=pad(current+1);const bar=q('[data-bar]');if(bar)bar.style.setProperty('--p',`${Math.min(100,seq/Math.max(1,frames.length-1)*100).toFixed(1)}%`);
     const pct=main.current?.querySelector<HTMLElement>('[data-pct]');if(pct)pct.textContent=String(Math.round(g*100)).padStart(3,'0');
   });
-  const belief=string(s.belief),emphasis=string(s.belief_emphasis),cut=emphasis&&belief.includes(emphasis)?belief.indexOf(emphasis):-1;
   return <>
     <span data-nav-theme="light" hidden/>
     <section ref={hero} className="about-hero pin-section" data-nav-hero aria-label="Our mission">
@@ -63,23 +63,28 @@ export function AboutView({settings:s,contact,media}:{settings:Row;contact:Conta
     </section>
     <div ref={main} id="about-content" className="about-main">
       <div className="about-counter" aria-hidden="true"><span data-pct>000</span><span>%</span></div>
-      {(string(manifesto.first)||string(manifesto.big))&&<section className="about-manifesto">
-        {string(manifesto.first)&&<p data-seq="0.94,0.4">{string(manifesto.first)}</p>}
-        {string(manifesto.second)&&<p data-seq="0.9,0.4" className="about-aside">{string(manifesto.second)}</p>}
-        {string(manifesto.big)&&<div data-seq="0.88,0.4" className="about-big">{string(manifesto.label)&&<span>{string(manifesto.label)}</span>}<strong>{string(manifesto.big)}<em>.</em></strong></div>}
-      </section>}
-      {(string(how.kicker)||string(how.title))&&<section className="about-how">{string(how.kicker)&&<span data-seq="0.94,0.4">{string(how.kicker)}</span>}{string(how.title)&&<h2 data-seq="0.92,0.4">{string(how.title)}</h2>}</section>}
-      {rows(s.rows).filter(r=>string(r.title)||texts(r.items).length||r.media_id).map((r,i)=>{const href=safeHref(r.link_url);const items=texts(r.items);return <section key={i} className={`about-row${i%2?' about-row--photo-first':''}`}>
-        <div data-seq="0.94,0.4" className="about-row-text">{string(r.title)&&<h3>{string(r.title)}</h3>}{string(r.intro)&&<span>{string(r.intro)}</span>}{items.length>0&&<ol>{items.map((item,n)=><li key={n}><span>{pad(n+1)}</span>{item}</li>)}</ol>}</div>
-        <div data-seq="0.9,0.4" className="about-row-media">{r.media_id?<div className="about-row-image"><Picture id={r.media_id} media={media}/></div>:null}{href&&string(r.link_label)&&(href.startsWith('/')?<Link href={href}>{string(r.link_label)} →</Link>:<a href={href} target="_blank" rel="noopener">{string(r.link_label)} →</a>)}</div>
-      </section>;})}
-      {belief&&<section className="about-belief"><h2 data-seq="0.94,0.4">{cut<0?belief:<>{belief.slice(0,cut)}<em>{emphasis}</em>{belief.slice(cut+emphasis.length)}</>}</h2></section>}
-      <section id="contact" className="about-talk"><div>
-        <h2 data-seq="0.96,0.4">{string(s.talk_title)||'Talk to us'}</h2>
-        {string(s.talk_body)&&<p data-seq="0.92,0.4">{string(s.talk_body)}</p>}
-        <ContactLines contact={contact}/>
-        <Link className="about-write" href="/contact">Write to us →</Link>
-      </div></section>
+      {blocks.map((b,n)=>{
+        // Rows alternate their side among themselves: the second one shows its photo first.
+        if(b.type==='row'){const r=b;const href=safeHref(r.link_url);const items=texts(r.items);const side=blocks.slice(0,n).filter(x=>x.type==='row').length%2;return <section key={n} className={`about-row${side?' about-row--photo-first':''}`}>
+          <div data-seq="0.94,0.4" className="about-row-text">{string(r.title)&&<h3>{string(r.title)}</h3>}{string(r.intro)&&<span>{string(r.intro)}</span>}{items.length>0&&<ol>{items.map((item,k)=><li key={k}><span>{pad(k+1)}</span>{item}</li>)}</ol>}</div>
+          <div data-seq="0.9,0.4" className="about-row-media">{r.media_id?<div className="about-row-image"><Picture id={r.media_id} media={media}/></div>:null}{href&&string(r.link_label)&&(href.startsWith('/')?<Link href={href}>{string(r.link_label)} →</Link>:<a href={href} target="_blank" rel="noopener">{string(r.link_label)} →</a>)}</div>
+        </section>;}
+        if(b.type==='manifesto')return (string(b.first)||string(b.big))?(<section key={n} className="about-manifesto">
+          {string(b.first)&&<p data-seq="0.94,0.4">{string(b.first)}</p>}
+          {string(b.second)&&<p data-seq="0.9,0.4" className="about-aside">{string(b.second)}</p>}
+          {string(b.big)&&<div data-seq="0.88,0.4" className="about-big">{string(b.label)&&<span>{string(b.label)}</span>}<strong>{string(b.big)}<em>.</em></strong></div>}
+        </section>):null;
+        if(b.type==='title')return (string(b.kicker)||string(b.title))?<section key={n} className="about-how">{string(b.kicker)&&<span data-seq="0.94,0.4">{string(b.kicker)}</span>}{string(b.title)&&<h2 data-seq="0.92,0.4">{string(b.title)}</h2>}</section>:null;
+        if(b.type==='belief'){const belief=string(b.text),emphasis=string(b.emphasis),cut=emphasis&&belief.includes(emphasis)?belief.indexOf(emphasis):-1;
+          return belief?<section key={n} className="about-belief"><h2 data-seq="0.94,0.4">{cut<0?belief:<>{belief.slice(0,cut)}<em>{emphasis}</em>{belief.slice(cut+emphasis.length)}</>}</h2></section>:null;}
+        // The first Talk to us is the page's #contact.
+        return <section key={n} id={blocks.findIndex(x=>x.type==='talk')===n?'contact':undefined} className="about-talk"><div>
+          <h2 data-seq="0.96,0.4">{string(b.title)||'Talk to us'}</h2>
+          {string(b.body)&&<p data-seq="0.92,0.4">{string(b.body)}</p>}
+          <ContactLines contact={contact}/>
+          <Link className="about-write" href="/contact">Write to us →</Link>
+        </div></section>;
+      })}
     </div>
   </>;
 }

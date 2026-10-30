@@ -4,9 +4,11 @@
 import {cardBackgrounds,expeditionsSeo} from '@/features/encounters/expeditions-page';
 import {workshopsSeo} from '@/features/encounters/workshops-page';
 import {messagesSeo} from '@/features/encounters/messages-page';
+import {aboutSeo} from '@/features/encounters/about-page';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
-// B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description).
-export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo';help?:string;fields?:PageField[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
+// B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
+// an ordered list of parts, each of one of its `kinds` (saved with its `type`).
+export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
 const t=(key:string,label:string,help?:string,placeholder?:string):PageField=>({key,label,help,placeholder});
 const area=(key:string,label:string,help?:string):PageField=>({key,label,type:'textarea',help});
 const media=(key:string,label:string,help?:string):PageField=>({key,label,type:'media',help});
@@ -84,14 +86,25 @@ export const pageSchemas:PageSchema[]=[
     section('list','4 · Messages','One message per screen: its illustration on one half, its text on the other, sides alternating (illustration left, then right). They appear in the order chosen in each message (Order), and only the published ones. Nothing to fill in here: each message is edited in Meaningful Messages → Messages.',[]),
     section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')]),
   ]},
-  {key:'about',label:'About page',path:'/about',store:'pages',lead:'The About page appears once the banner title is filled in; until then the imported About text is shown.',fields:[
-    t('hero_kicker','Small line above the title','In italics above the title, e.g. What is our mission? Empty: hidden.'),t('hero_title','Banner title','Large capitals over the photos. Required: until it is filled the imported About text is shown.'),{key:'gallery',label:'Banner photos',type:'gallery',max:6,help:'Three to six photos. They change while the page is read.'},t('credit','Photo credit','Shown vertically on the banner.'),
-    list('columns','Three columns under the banner',[t('label','Label'),area('text','Text')],3,'Short label in small capitals and two or three lines each. Empty columns are not shown.'),
-    group('manifesto','Manifesto',[area('first','First phrase'),area('second','Second phrase, in italics on the right'),t('label','Small label','Above the large words, e.g. What is'),t('big','Large words','The biggest words of the page, e.g. Our nature')],'Reads as one sentence: first phrase, second phrase, then the large words.'),
-    group('how','How',[t('kicker','Small line','e.g. How?'),area('title','Title','Introduces the two rows below.')]),
-    list('rows','Rows with list and image',[t('title','Title'),t('intro','Introduction'),{key:'items',label:'List',type:'lines',help:'One item per line.'},media('media_id','Image'),t('link_label','Link text'),t('link_url','Link','A page such as /expeditions, or a full address.')],2,'Up to two rows. On phones the first shows its text first and the second its photo first.'),
-    area('belief','Belief phrase','Large centred phrase before the contact. Empty: the section is hidden.'),t('belief_emphasis','Words in italics','Part of the phrase shown in italics.'),
-    t('talk_title','Contact title','Default: Talk to us'),area('talk_body','Contact text','Email, phone and social links come from General and contact.'),
+  {key:'about',label:'About page',path:'/about',store:'pages',lead:'Everything on the About page, in the order of the page: the banner, how it appears in search engines and the blocks under the banner. The About page appears once the banner title is filled in; until then the imported About text is shown.',fields:[
+    section('banner','1 · Banner','The first screen: the photos change while you read, then the photo shrinks into a band and the three columns rise under it.',[
+      {key:'gallery',label:'Banner photos',type:'gallery',max:6,help:'Three to six photos. They change while the page is read. The first one is also the image shared on social networks.'},
+      t('hero_kicker','Small line above the title','In italics above the title, e.g. What is our mission? Empty: hidden.'),t('hero_title','Banner title','Large capitals over the photos. Required: until it is filled the imported About text is shown.'),t('credit','Photo credit','Shown vertically on the banner. Empty: hidden.'),
+      list('columns','Three columns under the banner',[t('label','Label'),area('text','Text')],3,'They rise under the photo when it shrinks. Short label in small capitals and two or three lines each. Empty columns are not shown.')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says who you are and what you do, the easier it is to find you. We wrote a first version from the page’s own text; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. art and ocean conservation collective. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say who you are and what you do. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:aboutSeo.title,fallbackDescription:aboutSeo.description}},
+      {key:'seo_topics',label:'What the page is about',type:'lines',help:'One topic per line, e.g. Ocean conservation. Not shown on the page: search engines read them as the subjects of this page. Empty: the suggested topics are used.'}]),
+    section('below','3 · Below the banner','The blocks of the page, in this order. Add, move or remove them; each kind can be used more than once.',[
+      {key:'blocks',label:'Blocks',type:'blocks',kinds:[
+        {type:'manifesto',label:'Manifesto',help:'Reads as one sentence: the first phrase, the second one in italics on the right, then the large words.',fields:[area('first','First phrase'),area('second','Second phrase, in italics on the right'),t('label','Small label','Above the large words, e.g. What is'),t('big','Large words','The biggest words of the page, e.g. Our nature')]},
+        {type:'title',label:'Title',help:'A small line and a large title, e.g. How? and what follows it.',fields:[t('kicker','Small line','e.g. How?'),area('title','Title')]},
+        {type:'row',label:'List and photo',help:'A title, an introduction and a numbered list beside a photo, with an optional link. Consecutive rows alternate sides; on phones the first shows its text first and the second its photo first.',fields:[t('title','Title'),t('intro','Introduction'),{key:'items',label:'List',type:'lines',help:'One item per line.'},media('media_id','Photo'),t('link_label','Link text'),t('link_url','Link','A page such as /expeditions, or a full address.')]},
+        {type:'belief',label:'Large phrase',help:'A large centred phrase.',fields:[area('text','Phrase'),t('emphasis','Words in italics','Part of the phrase shown in italics, written exactly as in the phrase.')]},
+        {type:'talk',label:'Talk to us',help:'A title and a text with the email, phone and social links of Settings → General and contact, and the Write to us button to Contact.',fields:[t('title','Title','Default: Talk to us'),area('body','Text')]},
+      ]}]),
   ]},
   {key:'contact',label:'Contact page',path:'/contact',store:'pages',lead:'Messages are not sent by the site: “Open my email app” opens the visitor’s email app with the message written to the public contact email (Settings), and the page says it still has to be sent there. Without that email the button is off. WhatsApp, donation and social links also come from Settings.',fields:[
     media('cover_id','Banner image','Default: the design image.'),t('title','Title','Default: Get in touch'),area('lead','Line under the title'),

@@ -82,6 +82,14 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     rol). Después, una banda azul profundo con la invitación: el Excerpt grande, Availability como línea chica y el botón a
     Contact (`cta_label`), junto a la foto submarina o la portada. Terminada: banda arena «How it went» con el outcome y
     «Read the story →». «On board» del final no se repite.
+- **About (2026-10-30, pendiente de prueba de Juani):** About page en el orden de la página: **1 · Banner** (fotos, línea
+  chica, título, crédito y las tres columnas) → **2 · SEO** precargado (`aboutSeo` en `about-page.ts`; metadata y JSON-LD
+  `AboutPage` de la organización) → **3 · Below the banner**: bloques que se agregan, mueven y quitan (Manifesto, Title, List
+  and photo, Large phrase, Talk to us), guardados en `pages.about.blocks`. Lo guardado antes se lee en el orden en que se
+  mostraba (`aboutBlocks`) y el editor lo abre así, sin cambios pendientes; al guardar quedan solo los bloques. Comprobado en
+  local con capturas de página completa (1440 y 390) antes y después del código y del guardado: 0 diferencias salvo ruido de
+  suavizado de 1–7 píxeles en «Our nature», que también aparece entre dos capturas del mismo código. Check:
+  `scripts/check-about-blocks.mjs`.
 - **Meaningful Messages (2026-10-30, pendiente de prueba de Juani):** misma forma de trabajo que Expeditions y Workshops.
   - **Messages page:** Banner → **SEO** precargado (`messagesSeo` en `messages-page.ts`; metadata y JSON-LD `CollectionPage` con
     cada mensaje como `CreativeWork`: nombre, dirección, texto, ilustración, fecha) → Introducción → Messages (solo explica) →
@@ -92,8 +100,12 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     adicional → Text, crédito → Text en cursiva; sin ilustración, su portada), y no cambia hasta guardar. Al guardar, las
     columnas `messages.message`/`body` se actualizan con el texto plano (las usan la metadata y la lista del admin) y `credit`
     queda vacío; los bloques viejos del mensaje se reemplazan.
-  - Barra superior como el resto (sin Duplicate, Visual preview ni Unpublish); Publication solo con estado, fecha y orden; sin
-    Cover, Content blocks ni Related content. Se conservan Credits y Search and sharing (su página propia).
+  - **Sin página propia** (pedido de Juani: son mensajes cortos): viven solo en `/meaningful-messages`, sin «Read the message →».
+    Cada mensaje tiene su ancla (`#<slug>`, `messagePath`): Home, páginas personales y el JSON-LD apuntan ahí y al abrirla el
+    mensaje entra completo. `/meaningful-messages/<slug>` redirige (308) a esa ancla.
+  - Barra superior como el resto (sin Duplicate, Visual preview, Full preview ni Unpublish); General information solo con el
+    título (el slug se crea solo); Publication solo con estado, fecha y orden; sin Cover, Content blocks, Related content ni
+    Search and sharing. Se conservan Credits (los mensajes aparecen en las páginas personales).
   - **Lista del admin:** Message (ilustración, título, frase), Order, Date, Publication, **Edit** y **Delete…** en dos pasos
     (Continue → escribir el título), también desde el editor.
   - Probado en local: conversión sin cambios pendientes, partes nuevas (link y negrita), guardado, `/meaningful-messages` en
