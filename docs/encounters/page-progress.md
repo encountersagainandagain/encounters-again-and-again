@@ -71,6 +71,10 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     tarjeta «Expedition it tells about» para cambiarla (`StoryOf`: reemplaza su único enlace `result`). Probado en local.
     Solo un report cuenta como historia: las news enlazadas como `result` son novedades del viaje (Reef notes, en curso, ya no
     marca «Story published»). La columna Story muestra el título de la historia para que se vea con cuál de Results coincide.
+  - **Results (2026-10-30):** «New story» pregunta de qué expedición es; lista solo las terminadas sin historia y crea el
+    borrador enlazado como «Write about this adventure». Desde Results cada historia se edita o se borra (Edit → Delete).
+    Ejemplo nuevo «Night watch at the sand patch» (terminada, sin historia): `node scripts/demo-finished-expedition.mjs`
+    lo agrega solo (local; real con `--target=production --confirm-real`) y no toca nada más.
   - **Cierre (prueba 2026-10-30):** el garabato bajo «May the ocean be with you» se reemplazó por tres olas que rompen, en un solo
     trazo que se dibuja con el scroll (`Scribble` variante `waves`, solo en Expeditions; Art, Messages y Home siguen con el loop).
   - **Página de cada expedición** (`ExpeditionGlance` en `PostView.tsx`; workshops sin cambios): estado con punto de color

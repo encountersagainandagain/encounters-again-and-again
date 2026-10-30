@@ -193,6 +193,12 @@ export function reviewSet(today=new Date()){
       detail:{activity_status:'finished',starts_on:day(-124),ends_on:day(-115),place:'Offshore islands, winter route',outcome:'Nine days, cold hands, a full logbook and a sketchbook that needed a second sketchbook.'},
       needs:[],crew:[['marea','Skipper’s mate'],['nerida','Logbook and drawings']],results:['winter-crossing-what-the-islands-gave-back'],
       blocks:[b.p('A short crossing in the cold months, when the water is clearest and the anchorages are empty.','The first crossing of the year.'),b.img('winter-island','Landfall on the third day.')]},
+    // Finished and still without its story: shows the reminder and “Write about this adventure” in the admin.
+    {id:id(85,4),slug:'night-watch-at-the-sand-patch',title:'Night watch at the sand patch',cover:img('edge-night'),sort:4,
+      excerpt:'Five nights anchored over a sand patch inside the reef, watching what comes out after dark.',meta:'Finished · five nights',
+      detail:{activity_status:'finished',starts_on:day(-40),ends_on:day(-36),place:'A sheltered sand patch inside the reef',availability_label:null,cta_label:null},
+      needs:[],crew:[['coral','Night photography'],['marea','Drawings']],
+      blocks:[b.p('Five nights at anchor over the same patch of sand. A red torch, a sketchbook and the hydrophone down until morning.','What comes out after dark.'),b.img('edge-night','A manta crossing the torchlight, drawn from memory.')]},
   ];
 
   const workshops=[
