@@ -7,7 +7,8 @@ import {supabase} from '@/lib/supabase';
 import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
 import {duplicateContent,meetLine,safeHref} from '@/features/encounters/presentation';
-import {activityStatus,dateLabel,manualStatuses,statusLabels,withSessionDates} from '@/features/encounters/activities';
+import {activityStatus,dateLabel,manualStatuses,perthToday,statusLabels,withSessionDates} from '@/features/encounters/activities';
+import {announceable,announcementShown,signupLink} from '@/features/encounters/announcements';
 import {embedFromUrl,embedLabels,embedLink,embedOf} from '@/features/encounters/art';
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
@@ -374,6 +375,31 @@ function CardPreview({record}:{record:Row}){
 function Card({title,lead,children,actions}:{title:string;lead?:string;children:ReactNode;actions?:ReactNode}){
   return <section className="adm-card"><div className="adm-card-head"><div><h2 className="adm-card-title">{title}</h2>{lead&&<p>{lead}</p>}</div>{actions}</div>{children}</section>;
 }
+// Announcements: what it announces, when, and the sign-up button, each in its own card. The last day and the button
+// are offered once the database has them.
+const announcementHelp:Record<string,string>={...help,
+  post_id:'Optional. If it is about something already on the site (a work, a message, a story), choose it: the card links to it with “Read more” and uses its title and image when those are empty here.',
+  title:'Large title of the card. Empty: the title of what it announces.',
+  body:'One or two lines: what it is, where and for whom.',
+  starts_on:'The day it happens, shown on the card.',
+  ends_on:'For something that lasts several days, such as an exhibition. The card is shown until this day (empty: until the day above) and then disappears by itself.',
+  cta_label:'Text of the button. Empty: “Sign up”.',
+  cta_url:'A link to the sign-up page (a form, Eventbrite…) or an email address: an email opens a message to it with the announcement as subject. Empty: no button.',
+  media_id:'Background of the card. Empty: the image of what it announces.',
+  status:'Drafts are private. Published announcements are shown on Home until their last day.',
+  sort:'Among announcements, lower numbers appear first. Expeditions and workshops that are coming are always shown before them.'};
+function AnnouncementCards({fields,record,onChange,options,ready}:{fields:Field[];record:Row;onChange:(v:Row)=>void;options:Record<string,Row[]>;ready:boolean}){
+  const by=(keys:string[])=>fields.filter(f=>keys.includes(f.key));const link=signupLink(record.cta_url);const typed=String(record.cta_url||'').trim();
+  // Expeditions and workshops are not offered: they are in What is coming by themselves.
+  const posts=(options.posts||[]).filter(p=>announceable.includes(String(p.kind))&&(p.status==='published'||p.id===record.post_id));
+  return <>
+    <Card title="What it announces" lead="Shown as a card in What is coming on Home."><Fields fields={by(['post_id','title','body'])} value={record} onChange={onChange} options={{...options,posts}} notes={announcementHelp}/></Card>
+    <Card title="When" lead={ready?'The card is shown until its last day and then disappears by itself.':'The card is shown until the day above and then disappears by itself. A last day for things that last several days arrives with the next database update.'}><Fields fields={by(ready?['starts_on','ends_on']:['starts_on'])} value={record} onChange={onChange} options={options} notes={announcementHelp}/></Card>
+    <Card title="Sign-up button" lead="Optional. So people can register right from the card.">{ready?<><Fields fields={by(['cta_label','cta_url'])} value={record} onChange={onChange} options={options} notes={announcementHelp}/>
+      {typed&&<p className={link?'adm-help':'adm-notice adm-notice--error'} role="status">{link?(link.href.startsWith('mailto:')?`Opens an email to ${link.href.slice(7).split('?')[0]}.`:`Opens ${link.href} in a new tab.`):'This is not a link or an email address: no button will be shown.'}</p>}</>
+      :<p className="adm-help">Arrives with the next database update.</p>}</Card>
+  </>;
+}
 const blankPost=(kind='news')=>({id:crypto.randomUUID(),title:'',slug:'',kind,status:'draft',sort:0,show_index:kind!=='artwork',featured:false});
 const postScopes:Record<string,(k:unknown)=>boolean>={publications:k=>k!=='page'&&k!=='crew_member',pages:k=>k==='page',profiles:k=>k==='crew_member'};
 export function EncountersCms(){
@@ -389,6 +415,9 @@ export function EncountersCms(){
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [embedReady,setEmbedReady]=useState(false);const [preview,setPreview]=useState(false);
   // The Video or audio block needs the database update of 2026-10-31; it is offered once the database has it.
   useEffect(()=>{let live=true;void supabase?.from('artworks').select('more_categories').limit(1).then(r=>{if(live)setEmbedReady(!r.error);});return()=>{live=false;};},[]);
+  // An announcement's last day and sign-up button need the database update of 2026-10-31 (second one).
+  const [announceReady,setAnnounceReady]=useState(false);const [announceAsk,setAnnounceAsk]=useState(false);
+  useEffect(()=>{let live=true;void supabase?.from('upcoming_items').select('cta_url').limit(1).then(r=>{if(live)setAnnounceReady(!r.error);});return()=>{live=false;};},[]);
   const [newProfileOpen,setNewProfileOpen]=useState(false);const [newProfileMember,setNewProfileMember]=useState('');const [newStoryFor,setNewStoryFor]=useState<string|null>(null);const [removing,setRemoving]=useState<Row|null>(null);
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
@@ -405,15 +434,15 @@ export function EncountersCms(){
   useEffect(()=>{setLoaded(false);},[table]);
   useEffect(()=>{let live=true;async function load(){if(!supabase)return;
     const client=supabase;
-    const lists=['posts','crew_members','art_categories','media','artworks','site_settings','expeditions','workshops','workshop_sessions','post_relations','messages'];
+    const lists=['posts','crew_members','art_categories','media','artworks','site_settings','expeditions','workshops','workshop_sessions','post_relations','messages','upcoming_items'];
     const results=await Promise.all([table,...lists].map(t=>client.from(t).select('*').limit(1000)));
     if(!live)return;const error=results.find(r=>r.error)?.error;if(error){setMessage(error.message);return;}
     setRows(results[0].data||[]);setRowsTable(table);setOptions(Object.fromEntries(lists.map((t,i)=>[t,results[i+1].data||[]])));setLoaded(true);
   }void load();return()=>{live=false;};},[table,revision]);
   // Presentation cards are shown only on the Expeditions program page.
   const programPages=(options.posts||[]).filter(p=>p.kind==='page'&&p.source_role==='encounters_expeditions');
-  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0,...(table==='expedition_cards'?{post_id:programPages[0]?.id||null,sort:(rows.length+1)}:{})});setSpecific({});setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setRelatedNotes(null);setPreview(false);setMessage('');setMarkClean(true);}
-  async function edit(row:Row){if(!supabase)return;setErrors({});setErrorDetail('');setBusy(true);setMessage('');setPreview(false);
+  function start(newKind?:string){setErrors({});setErrorDetail('');setRecord(table==='posts'?blankPost(newKind&&kinds.includes(newKind)?newKind:'news'):{id:crypto.randomUUID(),status:'draft',sort:0,...(table==='expedition_cards'?{post_id:programPages[0]?.id||null,sort:(rows.length+1)}:{}),...(table==='upcoming_items'&&params.get('about')?{post_id:params.get('about')}:{})});setSpecific({});setAnnounceAsk(false);setBlocks([]);setChildRows([]);setContributors([]);setContributorRoles({});setRelated([]);setRelatedNotes(null);setPreview(false);setMessage('');setMarkClean(true);}
+  async function edit(row:Row){if(!supabase)return;setAnnounceAsk(false);setErrors({});setErrorDetail('');setBusy(true);setMessage('');setPreview(false);
     try{if(table==='posts'){
       const k=String(row.kind);const result=await Promise.all([
         supabase.from('post_blocks').select('*').eq('post_id',row.id).order('position'),
@@ -483,7 +512,11 @@ export function EncountersCms(){
         const r=await supabase.from('media').update(Object.fromEntries(entities.media.fields.filter(f=>current[f.key]!==undefined).map(f=>[f.key,current[f.key]]))).eq('id',current.id);if(r.error)throw r.error;
       }else{const r=await supabase.rpc('save_entity',{entity:table,payload});if(r.error)throw r.error;}
       const fresh=await supabase.from(table).select('*').eq('id',current.id).single();if(fresh.error)throw fresh.error;setRecord(fresh.data);setRevision(x=>x+1);await requestAdminRevalidation({scope:'posts'});setMarkClean(true);
-      setMessage(patch.status==='published'?'Published.':patch.status==='draft'?'Moved back to draft.':'Saved.');
+      // Published content that can be announced, and is not yet, is offered an announcement on Home.
+      const nowPublished=(patch.status||current.status)==='published';
+      setAnnounceAsk(table==='posts'&&nowPublished&&announceable.includes(kind)&&!(options.upcoming_items||[]).some(u=>u.post_id===current.id));
+      const coming=table==='posts'&&nowPublished&&['expedition','workshop'].includes(kind)&&['upcoming','running'].includes(activityStatus(kind==='workshop'?withSessionDates(specific,childRows):specific));
+      setMessage(`${patch.status==='published'?'Published.':patch.status==='draft'?'Moved back to draft.':'Saved.'}${coming?' It is shown in What is coming on Home by itself until it ends: no announcement needed.':''}`);
       // Keep the saved record in the address, so a reload reopens it.
       {const url=new URL(location.href);url.searchParams.delete('new');url.searchParams.set('edit',String(current.id));history.replaceState(history.state,'',url);}
     }catch(e){const ex=explainError(e);setMessage(ex.message);setErrorDetail(ex.detail);if(ex.field&&ex.fieldMessage)setErrors({[ex.field]:ex.fieldMessage});if(ex.refresh)setRevision(x=>x+1);}finally{setBusy(false);}}
@@ -500,6 +533,7 @@ export function EncountersCms(){
   const activityDetail=(row:Row)=>{const d=((row.kind==='workshop'?options.workshops:options.expeditions)||[]).find(x=>x.id===row.id)||{};return row.kind==='workshop'?withSessionDates(d,(options.workshop_sessions||[]).filter(x=>x.workshop_id===row.id)):d;};
   const storyOf=(row:Row)=>{const ids=(options.post_relations||[]).filter(r=>r.post_id===row.id&&r.relation==='result').map(r=>r.related_post_id);return (options.posts||[]).find(p=>ids.includes(p.id)&&['expedition_report','workshop_report'].includes(String(p.kind)));};
   const activityOfStory=(row:Row)=>{const rel=(options.post_relations||[]).find(r=>r.related_post_id===row.id&&r.relation==='result');return rel?(options.posts||[]).find(p=>p.id===rel.post_id):undefined;};
+  const today=perthToday();const announced=(row:Row)=>row.post_id?(options.posts||[]).find(p=>p.id===row.post_id):undefined;
   function deletedMember(name:string){setRecord(null);setRevision(r=>r+1);setMessage(`${name} was deleted.`);void requestAdminRevalidation({scope:'posts'});}
   function back(){if(dirty&&!window.confirm('Leave without saving your changes?'))return;setRecord(null);setMessage('');}
   function moveBlock(i:number,step:number){const n=[...blocks];[n[i+step],n[i]]=[n[i],n[i+step]];setBlocks(n);}
@@ -528,11 +562,15 @@ export function EncountersCms(){
       :<table className="adm-table"><thead><tr><th scope="col">Content</th><th scope="col">Type</th><th scope="col">State</th><th scope="col">Last edited</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=><tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={withImage(row).cover_id} size={52}/><span><strong>{optionLabel(row)}</strong><small>/{String(row.slug||'')}</small></span></span></td><td>{kindLabel(row.kind)}</td><td><StatusBadge status={row.status}/> <ExampleBadge row={row}/></td><td>{date(row.updated_at)}</td><td>{editButton(row)}</td></tr>)}</tbody></table>,
       crew_members:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.portrait_id} size="100%"/><div className="adm-item-body"><strong>{String(row.name||'Unnamed')}</strong><small>{[row.alias,row.role].filter(Boolean).join(' · ')||'No role yet'}</small><div className="adm-item-meta"><StatusBadge status={row.status}/><ExampleBadge row={row}/><span className="adm-badge adm-badge--plain">{row.has_page?'Profile page':'No profile page'}</span></div>{editButton(row)}</div></article>)}</div>,
       art_categories:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.cover_id} size="100%"/><div className="adm-item-body"><strong>{String(row.name||'Unnamed')}</strong><small>/art/{String(row.slug||'')} · {String(row.layout||'gallery')}</small><div className="adm-item-meta"><StatusBadge status={row.status}/><ExampleBadge row={row}/>{row.featured?<span className="adm-badge adm-badge--plain">Featured</span>:null}</div>{editButton(row)}</div></article>)}</div>,
+      upcoming_items:<table className="adm-table"><thead><tr><th scope="col">Announcement</th><th scope="col">On Home</th><th scope="col">Button</th><th scope="col">Order</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{filtered.map(row=>{const of=announced(row);const until=String(row.ends_on||row.starts_on||'').slice(0,10);const link=signupLink(row.cta_url);
+        return <tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={row.media_id||of?.cover_id} size={52}/><span><strong>{String(row.title||'')||optionLabel(of||row)}</strong><small>{dateLabel(row)||'No date'}{of?` · ${kindLabel(of.kind)}`:''}</small></span></span></td>
+          <td>{row.status!=='published'?<StatusBadge status={row.status}/>:!announcementShown(row,today)?<span className="adm-help">Its date has passed: no longer shown</span>:<span className="adm-state" data-state="upcoming">{until?`Shown until ${date(`${until}T12:00:00`)}`:'Shown until unpublished'}</span>} <ExampleBadge row={row}/></td>
+          <td>{link?<span className="adm-help">{String(row.cta_label||'Sign up')}</span>:of?<span className="adm-help">Read more</span>:'—'}</td><td>{String(row.sort??0)}</td><td>{editButton(row)}</td></tr>;})}</tbody></table>,
       media:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.id} size="100%" alt={String(row.alt||'')}/><div className="adm-item-body"><small>{needsAlt(row)?'No description yet':String(row.alt)}</small><div className="adm-item-meta">{needsAlt(row)?<span className="adm-badge adm-badge--dirty">Needs a description</span>:null}<span className="adm-badge adm-badge--plain">{row.width&&row.height?`${row.width} × ${row.height}`:'Size unknown'}</span>{row.fit?<span className="adm-badge adm-badge--plain">{String(row.fit)}</span>:null}</div>{editButton(row)}</div></article>)}</div>,
     };
     const profileCandidates=(options.crew_members||[]).filter(member=>!member.page_post_id).sort((a,b)=>Number(a.sort||0)-Number(b.sort||0)||optionLabel(a).localeCompare(optionLabel(b)));
     return <div className="adm-stack">
-      <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'&&kindParam==='crew_member'?'The page of each person of the Crew: its banner and the blocks below it. Drafts stay private until you publish them.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Short notices for Home. To announce an expedition or workshop, create it in its own section and link this notice to it instead of copying its text.':undefined}>
+      <AdminHeader kicker="Content" title={label} lead={table==='media'?'Images used across the site. Add a description to each one so everyone can understand it.':table==='posts'&&kindParam==='crew_member'?'The page of each person of the Crew: its banner and the blocks below it. Drafts stay private until you publish them.':table==='posts'?'Activities, artworks, messages and news, plus the permanent pages of the site. Drafts stay private until you publish them.':table==='upcoming_items'?'Passing notices shown in What is coming on Home, after the expeditions and workshops that are coming (those appear by themselves). Each one disappears by itself after its last day.':undefined}>
         {table!=='media'&&table!=='posts'&&<button type="button" className="adm-btn" onClick={()=>start()} disabled={busy}><Plus aria-hidden="true"/>Create {singular[table]}</button>}
         {table==='posts'&&kindParam==='crew_member'&&<button type="button" className="adm-btn" onClick={()=>setNewProfileOpen(open=>!open)} disabled={busy}><Plus aria-hidden="true"/>New personal page</button>}
         {reportList&&<button type="button" className="adm-btn" onClick={()=>setNewStoryFor(v=>v===null?'':null)} disabled={busy}><Plus aria-hidden="true"/>New story</button>}
@@ -594,16 +632,17 @@ export function EncountersCms(){
       {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
         {table==='media'&&<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>}
-        <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={table==='expedition_cards'?{...options,posts:programPages}:options}/></Card>
+        {table==='upcoming_items'?<AnnouncementCards fields={main} record={record} onChange={setRecord} options={options} ready={announceReady}/>:
+        <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={table==='expedition_cards'?{...options,posts:programPages}:options}/></Card>}
         {table==='art_categories'&&<Card title="Search and sharing" lead="How the category page is presented by search engines and when its link is shared."><SeoPanel value={record} onChange={setRecord} path={publicPath(table,record,{},options)} fallbackTitle={String(record.title||record.name||'')} fallbackDescription={String(record.lead||'')} image={record.cover_id}/></Card>}
         {table==='expedition_cards'&&preview&&<CardPreview record={record}/>}
         {table==='art_categories'&&preview&&<section className="adm-preview" aria-label="Preview of unsaved changes"><header><strong>Visual preview</strong><span className="adm-help">The category section as it appears on the Art page and on its own page.</span></header><div className="adm-preview-frame"><CategoryPreview record={record} media={options.media||[]} posts={options.posts||[]} artworks={options.artworks||[]} categories={options.art_categories||[]} crew={options.crew_members||[]}/></div></section>}
       </div><aside>
         {table==='crew_members'&&<Card title="Personal page"><CrewPagePanel member={record} posts={options.posts||[]} busy={busy} onCreate={()=>void createProfile()}/></Card>}
         {table==='media'&&<Card title="File">{needsAlt(record)&&<p className="adm-notice adm-notice--error" style={{marginBottom:12}}>Add a description: it is read aloud to people who cannot see the image.</p>}<dl className="adm-facts"><div><dt>Format</dt><dd>{String(record.mime_type||'—').replace('image/','').toUpperCase()}</dd></div><div><dt>Size</dt><dd>{record.width&&record.height?`${record.width} × ${record.height} px`:'—'}</dd></div><div><dt>Weight</dt><dd>{bytes?bytes>1048576?`${(bytes/1048576).toFixed(1)} MB`:`${Math.round(bytes/1024)} KB`:'—'}</dd></div></dl><p className="adm-help" style={{marginTop:12}}>Images stay private until they are used in published content. Uploading the same image again reuses this one.</p></Card>}
-        {publicationSide.length>0&&<Card title="Publication"><Fields fields={publicationSide} value={record} onChange={setRecord} options={options}/></Card>}
+        {publicationSide.length>0&&<Card title="Publication"><Fields fields={publicationSide} value={record} onChange={setRecord} options={options} notes={table==='upcoming_items'?announcementHelp:help}/></Card>}
         {crewListing.length>0&&<Card title="The Crew page" lead="Controls this person's card on The Crew page and in the Crew strip on Home. It does not switch their personal page on or off."><Fields fields={crewListing} value={record} onChange={setRecord} options={options} notes={{sort:'Lower numbers appear first. People with the same number keep their current order.',listed:'Untick to remove this person from The Crew page and the Home strip. Their personal page and credits keep working.'}}/></Card>}
-        {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options}/></Card>}
+        {imageFields.length>0&&<Card title="Image"><Fields fields={imageFields} value={record} onChange={setRecord} options={options} notes={table==='upcoming_items'?announcementHelp:help}/></Card>}
         {table==='crew_members'&&saved&&<CrewRemoval member={record} page={(options.posts||[]).find(p=>p.id===record.page_post_id)} busy={busy} onHide={record.listed!==undefined&&record.listed!==false?()=>void save(undefined,{listed:false}):undefined} onDeleted={deletedMember}/>}
       </aside></div>
     </form></FieldErrors.Provider></ReloadOptions.Provider>;
@@ -617,6 +656,8 @@ export function EncountersCms(){
   return <ReloadOptions.Provider value={reloadOptions}><FieldErrors.Provider value={errorContext}><form onSubmit={save} className="adm-stack" noValidate>
     <AdminHeader kicker={kindLabel(kind)} title={title}/>
     {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
+    {announceAsk&&<div className="adm-story-invite" role="note"><p><strong>Announce this on the Home page?</strong> A notice in What is coming on Home, with the day it happens (a launch, an exhibition, a screening…) and, if people can sign up, a button. It disappears by itself after that day.</p>
+      <p className="adm-row-actions"><Link className="adm-btn adm-btn--small" href={`/admin/content?table=upcoming_items&new=1&about=${String(record.id)}`}>Announce it</Link><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setAnnounceAsk(false)}>Not now</button></p></div>}
     <div className="adm-split"><div className="adm-stack">
       {kind==='crew_member'?<ProfileBanner record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>:isCrewPage?<CrewPageBanner record={record} onChange={setRecord} options={options} fallbackCover={crewCover}/>:null}
       {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>

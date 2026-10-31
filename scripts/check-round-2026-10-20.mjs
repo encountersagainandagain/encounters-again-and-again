@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import os from 
 const root=path.resolve(import.meta.dirname,'..');const dir=path.join(root,'src/features/encounters');
 // The modules import each other without extensions: load copies that point to the .ts files.
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'enc-home-'));
-for(const name of ['presentation','activities','message-text','home'])fs.writeFileSync(path.join(tmp,`${name}.ts`),fs.readFileSync(path.join(dir,`${name}.ts`),'utf8').replace(/from '\.\/(presentation|activities|message-text)'/g,(_,m)=>`from './${m}.ts'`));
+for(const name of ['presentation','activities','message-text','announcements','home'])fs.writeFileSync(path.join(tmp,`${name}.ts`),fs.readFileSync(path.join(dir,`${name}.ts`),'utf8').replace(/from '\.\/(presentation|activities|message-text|announcements)'/g,(_,m)=>`from './${m}.ts'`));
 const {homeView}=await import(pathToFileURL(path.join(tmp,'home.ts')).href);
 const post=(id,kind,slug,extra={})=>({id,kind,slug,title:slug,status:'published',...extra});
 const posts=[post('w1','artwork','the-book'),post('m1','message','a-poem'),post('r1','expedition_report','a-result'),post('e1','expedition','a-trip'),post('e2','expedition','next-trip'),post('c1','crew_member','someone-page'),post('w2','artwork','hidden-work')];
@@ -17,5 +17,12 @@ const agenda=homeView(data).agenda;
 const links=Object.fromEntries(agenda.filter(a=>a.type==='Announcement').map(a=>[a.key,a.href]));
 assert.deepEqual(links,{'u-w1':'/art/books/the-book','u-m1':'/meaningful-messages#a-poem','u-r1':'/posts/a-result','u-e1':'/expeditions/a-trip'});
 assert.equal(agenda.filter(a=>a.title==='next-trip').length,1,'the upcoming expedition is listed once, not again as an announcement');
+// Passing notices: gone after their last day (Perth), kept while it lasts; the sign-up button only from a link or email.
+const dated={...data,upcoming:[{id:'past',title:'Past',status:'published',starts_on:'2026-10-30'},{id:'today',title:'Today',status:'published',starts_on:'2026-10-31',cta_url:'hello@encounters.org'},
+  {id:'long',title:'Long',status:'published',starts_on:'2026-10-01',ends_on:'2026-11-02',cta_label:'Book a place',cta_url:'forms.gle/x'},{id:'bad',title:'Bad',status:'published',cta_url:'not a link'}]};
+const shown=homeView(dated,'2026-10-31').agenda.filter(a=>a.type==='Announcement');
+assert.deepEqual(shown.map(a=>a.key),['today','long','bad']);
+assert.deepEqual(shown.map(a=>a.signup),[{label:'Sign up',href:'mailto:hello@encounters.org?subject=Today',external:false},{label:'Book a place',href:'https://forms.gle/x',external:true},null]);
+assert.equal(shown[1].date,'1 October 2026 – 2 November 2026');
 fs.rmSync(tmp,{recursive:true,force:true});
-console.log('PASS: Home announcements link to the page of their content, skip content without a page and never repeat an activity.');
+console.log('PASS: Home announcements link to the page of their content, skip content without a page and never repeat an activity; they retire after their last day and sign up from a link or email.');

@@ -84,7 +84,7 @@ export const help:Record<string,string>={
 };
 
 // Entries for creating content: each opens the editor with its type fixed.
-export const newKinds:[string,string][]=[['artwork','New artwork'],['expedition','New expedition'],['workshop','New workshop'],['message','New message'],['news','New news post'],['expedition_report','New expedition report'],['workshop_report','New workshop report']];
+export const newKinds:[string,string][]=[['artwork','New artwork'],['expedition','New expedition'],['workshop','New workshop'],['message','New message'],['expedition_report','New expedition report'],['workshop_report','New workshop report']];
 export const kindListLabels:Record<string,string>={artwork:'Art works',expedition:'Expeditions',expedition_report:'Expedition results',workshop:'Workshops',workshop_report:'Workshop results',message:'Meaningful Messages',news:'News',crew_member:'Personal pages',page:'Pages'};
 export const tableLabels:Record<string,string>={posts:'All content',crew_members:'Crew',art_categories:'Art · Categories',upcoming_items:'Announcements',expedition_cards:'Expedition cards',media:'Media library'};
 export const tableLabel=(table:string)=>tableLabels[table]||table;

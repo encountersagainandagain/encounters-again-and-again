@@ -32,7 +32,7 @@
     "staging": "node scripts/staging-cms.mjs",
     "review:deploy": "node scripts/review-deploy.mjs",
     "check:preparation": "node --experimental-strip-types scripts/check-preparation.mjs",
-    "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs && node --experimental-strip-types scripts/check-round-2026-10-19.mjs && node --experimental-strip-types scripts/check-round-2026-10-20.mjs && node scripts/check-round-2026-10-20b.mjs && node --experimental-strip-types scripts/check-message-text.mjs && node --experimental-strip-types scripts/check-about-blocks.mjs && node scripts/check-art.mjs"
+    "test": "node scripts/check-isolation.mjs && npm run check:preparation && node --experimental-strip-types scripts/check-phase4.mjs && node --experimental-strip-types scripts/check-profile-sections.mjs && node --experimental-strip-types scripts/check-round-2026-10-19.mjs && node --experimental-strip-types scripts/check-round-2026-10-20.mjs && node scripts/check-round-2026-10-20b.mjs && node --experimental-strip-types scripts/check-message-text.mjs && node --experimental-strip-types scripts/check-about-blocks.mjs && node scripts/check-art.mjs && node scripts/check-announcements.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",

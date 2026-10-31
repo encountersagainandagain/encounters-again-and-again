@@ -1,4 +1,5 @@
-import {activities,activityPath,dateLabel,isUpcoming,shortDate,type ActivityData} from './activities';
+import {activities,activityPath,dateLabel,isUpcoming,perthToday,shortDate,type ActivityData} from './activities';
+import {announcementShown,signupLink} from './announcements';
 import {artworkPath,byOrder,listedCrew,profileVisible,string,type Row} from './presentation';
 import {messagePath} from './message-text';
 // Home v2 (handoff 10-home.md). Everything listed here comes from published content; the section order,
@@ -7,7 +8,7 @@ import {messagePath} from './message-text';
 export type HomeData=ActivityData&{settings:Row;media:Row[];artworks:Row[];categories:Row[];crew:Row[];upcoming?:Row[]};
 export const homeSections=[['descent','The descent'],['reef','Reef'],['projects','Ongoing projects'],['upcoming','What is coming'],['happened','What already happened'],['art','New art'],['crew','Who is on board'],['about','About'],['newsletter','Newsletter']] as const;
 export type HomeSection=typeof homeSections[number][0];
-export type AgendaItem={key:string;type:string;chip:string;date:string;title:string;place:string;detail:string;cta:string;href:string|null;image:unknown};
+export type AgendaItem={key:string;type:string;chip:string;date:string;title:string;place:string;detail:string;cta:string;href:string|null;image:unknown;signup?:{label:string;href:string;external:boolean}|null};
 export type Card={key:string;href:string;label:string;date?:string;title:string;excerpt?:string;image:unknown;contain?:boolean};
 const featuredFirst=(a:Row,b:Row)=>Number(!!b.featured)-Number(!!a.featured)||(a.featured&&b.featured?Number(a.home_rank??999)-Number(b.home_rank??999):0);
 export const projectCards=[
@@ -15,7 +16,7 @@ export const projectCards=[
   {key:'workshops',title:'Artsy\nAnimals',href:'/workshops',fallback:'/design/ww-banner.webp'},
   {key:'messages',title:'Meaningful\nMessages',href:'/meaningful-messages',fallback:'/design/ww-backcover.webp'},
 ] as const;
-export function homeView(data:HomeData){
+export function homeView(data:HomeData,today=perthToday()){
   const home=(data.settings.home||{}) as Row;
   // Older settings call "What already happened" posts.
   const order=((Array.isArray(home.sections)?home.sections:[]) as string[]).map(k=>k==='posts'?'happened':k).filter(k=>homeSections.some(([s])=>s===k));
@@ -30,9 +31,10 @@ export function homeView(data:HomeData){
   // Each kind of linked content has its own address; content without a public page is not announced.
   const linkOf=(post:Row)=>post.kind==='expedition'||post.kind==='workshop'?activityPath(post):post.kind==='artwork'?artworkPath(post,data.artworks,data.categories):post.kind==='message'?messagePath(post.slug):string(post.kind) in {news:1,expedition_report:1,workshop_report:1}?`/posts/${string(post.slug)}`:null;
   for(const u of data.upcoming||[]){
-    if(u.post_id&&list.some(a=>a.post.id===u.post_id))continue;
+    if(u.post_id&&list.some(a=>a.post.id===u.post_id)||!announcementShown(u,today))continue;
     const post=u.post_id?data.posts.find(p=>p.id===u.post_id&&p.status==='published'):null;const href=post?linkOf(post):null;if(u.post_id&&!href)continue;
-    agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on}),title:string(u.title)||string(post?.title),place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id});
+    const title=string(u.title)||string(post?.title);const link=signupLink(u.cta_url,title);
+    agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on,ends_on:u.ends_on}),title,place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id,signup:link&&{label:string(u.cta_label)||'Sign up',...link}});
   }
   const shown=new Set(agenda.map(a=>a.key));
   const limit=Math.max(2,Math.min(6,Number(home.upcoming_limit)||4));

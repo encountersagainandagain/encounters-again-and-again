@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {useEffect,useState,type ReactNode} from 'react';
-import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Newspaper,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users} from 'lucide-react';
+import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users} from 'lucide-react';
 import {brand} from '@/config/brand';
 import {modules} from '@/config/modules';
 import {supabase} from '@/lib/supabase';
@@ -25,14 +25,12 @@ export const adminSections=[
   {href:'/admin/page-settings?page=workshops',label:'Workshops page',icon:PanelsTopLeft,group:'Workshops',enabled:modules.workshops},
   {href:'/admin/content?table=posts&kind=message',label:'Messages',icon:Feather,group:'Meaningful Messages',enabled:modules.messages},
   {href:'/admin/page-settings?page=messages',label:'Messages page',icon:PanelsTopLeft,group:'Meaningful Messages',enabled:modules.messages},
-  {href:'/admin/content?table=posts&kind=news',label:'News',icon:Newspaper,group:'News and announcements',enabled:modules.stories},
-  {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'News and announcements',enabled:modules.upcoming},
+  {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'Announcements',enabled:modules.upcoming},
   {href:'/admin/content?table=crew_members',label:'Crew',icon:Users,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&kind=crew_member',label:'Personal pages',icon:UserRound,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&page=team',label:'The Crew page (/crew)',icon:PanelsTopLeft,group:'Crew',enabled:modules.crew},
   {href:'/admin/page-settings?page=about',label:'About page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
   {href:'/admin/page-settings?page=contact',label:'Contact page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
-  {href:'/admin/content?table=posts&scope=pages',label:'Imported pages',icon:FileText,group:'Site',enabled:modules.cms},
   {href:'/admin/content?table=media',label:'Media library',icon:ImageIcon,group:'Site',enabled:modules.media},
   {href:'/admin/settings',label:'Settings',icon:Settings,group:'Site',enabled:modules.cms},
   {href:'/admin/newsletter',label:'Newsletter',icon:Mail,group:'Site',enabled:modules.newsletter},
