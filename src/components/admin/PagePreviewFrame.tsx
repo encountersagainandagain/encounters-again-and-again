@@ -3,6 +3,7 @@ import {useEffect,useState} from 'react';
 import {supabase} from '@/lib/supabase';
 import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {AboutView} from '@/components/public/AboutView';
+import {ArtLanding} from '@/components/public/ArtLanding';
 import {ContactView} from '@/components/public/ContactView';
 import {ExpeditionsView} from '@/components/public/ExpeditionsView';
 import {HomeView} from '@/components/public/HomeView';
@@ -11,13 +12,14 @@ import {WorkshopsView} from '@/components/public/WorkshopsView';
 import {activities} from '@/features/encounters/activities';
 import {contactOf} from '@/features/encounters/contact';
 import {homeView} from '@/features/encounters/home';
-import {byOrder,string,type Row} from '@/features/encounters/presentation';
+import {byOrder,publishedWorks,string,type Row} from '@/features/encounters/presentation';
+import type {EditorialData} from '@/features/encounters/editorial-data';
 import {cardWindows} from '@/components/public/ExpeditionsView';
 import {usePreviewImages} from './EditorialPreview';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {messagePieces} from '@/features/encounters/message-text';
 
-const tables=['posts','artworks','art_categories','crew_members','expeditions','workshops','post_relations','expedition_needs','workshop_sessions','expedition_cards','messages','upcoming_items','media','site_settings'] as const;
+const tables=['posts','artworks','art_categories','crew_members','expeditions','workshops','post_relations','expedition_needs','workshop_sessions','expedition_cards','messages','upcoming_items','media','site_settings','post_contributors'] as const;
 type Data=Record<(typeof tables)[number],Row[]>;
 // Inside the admin preview iframe: the public template of one page, with the draft sent by the editor.
 // Content is read with the admin session but filtered to what is public, so the preview matches the site.
@@ -54,6 +56,8 @@ export function PagePreviewFrame({pageKey,mode}:{pageKey:string;mode?:string}){
   if(pageKey==='workshops')return <>{note}<ScrollStage className="editorial-page workshops-page"><WorkshopsView page={program} settings={own||{}} list={activities(base,'workshop')} sessions={data.workshop_sessions.sort(byOrder)} media={images} blocks={[]}/></ScrollStage></>;
   if(pageKey==='messages')return <>{note}<ScrollStage className="editorial-page messages-page"><MessagesView settings={own||{}} media={images} messages={posts.filter(p=>p.kind==='message').sort(byOrder).flatMap(post=>{const detail=data.messages.find(m=>m.id===post.id);return detail?[{post,detail,pieces:messagePieces(post,detail,messageBlocks.filter(b=>b.post_id===post.id))}]:[];})}/></ScrollStage></>;
   if(pageKey==='about')return <>{note}<ScrollStage className="editorial-page about-page"><AboutView settings={own||{}} contact={contactOf(value)} media={images}/></ScrollStage></>;
+  if(pageKey==='art'){const categories=data.art_categories.filter(c=>c.status==='published').sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)||byOrder(a,b));const art={posts,categories,artworks:data.artworks,crew:data.crew_members.filter(c=>c.status==='published'),contributors:data.post_contributors,relations:data.post_relations,media:images,settings} as unknown as EditorialData;
+    return <>{note}<ArtLanding data={art} works={publishedWorks(art) as EditorialData['posts']}/></>;}
   if(pageKey==='contact')return <>{note}<ScrollStage className="editorial-page contact-page"><ContactView settings={own||{}} contact={contactOf(value)} media={images}/></ScrollStage></>;
   return <p className="p-4">Unknown page.</p>;
 }

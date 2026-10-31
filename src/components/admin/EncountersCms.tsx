@@ -8,6 +8,7 @@ import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
 import {duplicateContent,meetLine,safeHref} from '@/features/encounters/presentation';
 import {activityStatus,dateLabel,manualStatuses,statusLabels,withSessionDates} from '@/features/encounters/activities';
+import {embedFromUrl,embedLabels,embedLink,embedOf} from '@/features/encounters/art';
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {CategoryPreview,EditorialPreview} from './EditorialPreview';
 import {explainError,slugProblem,slugify} from './adminErrors';
@@ -89,7 +90,7 @@ function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fie
   })}</div>;
 }
 // Blocks of the Post template (handoff 04-editor-de-bloques.md). Keys match what the public renderer reads.
-const postBlockTypes=['paragraph','heading','image','image-pair','carousel','youtube','quote','list','quick_facts','costs','faq','accordion','link','divider','toc'];
+const postBlockTypes=['paragraph','heading','image','image-pair','carousel','youtube','embed','quote','list','quick_facts','costs','faq','accordion','link','divider','toc'];
 const blockRows:Record<string,{key:string;label:string;columns:[string,string,boolean?][];max:number;add:string}>={
   quick_facts:{key:'quickFactItems',label:'Facts',columns:[['label','Label'],['value','Value']],max:4,add:'Add fact'},
   costs:{key:'costItems',label:'Rows',columns:[['label','Concept'],['note','Detail'],['amount','Amount']],max:20,add:'Add row'},
@@ -100,6 +101,7 @@ const blockText:Record<string,[string,string,(boolean|string)?,string?][]>={
   paragraph:[['lead','Lead (optional, larger serif)',true],['text','Text',true,'Leave an empty line between paragraphs.']],
   heading:[['number','Number','','e.g. 01'],['kicker','Kicker','','Small line before the title, e.g. Leaving late'],['text','Title',true]],
   youtube:[['youtubeUrl','YouTube address'],['caption','Caption']],
+  embed:[['url','Link',true,'A video on YouTube or Vimeo, or an audio on Spotify or SoundCloud: paste its address as shown in the browser. Nothing loads from there until it is played.'],['caption','Caption']],
   quote:[['text','Quote',true],['attribution','Attribution']],
   list:[['text','Title']],
   costs:[['text','Title'],['total_label','Total label','','Default: Total'],['total_amount','Total amount'],['note','Note in italics']],
@@ -271,6 +273,33 @@ function ParagraphsField({content,index,onChange,legend='Paragraphs'}:{content:R
 // A Meaningful Message as its page shows it: the illustration on one half of the screen, its text on the other. The
 // text is a list of parts (title, text, link), saved as the message's one block (message-text.ts).
 const pieceKinds:[Piece['kind'],string,string][]=[['title','Title','Large words, e.g. the phrase of the message. The first title is the largest.'],['text','Text','A paragraph. Select words and use B, I, U or the link button.'],['link','Link','A link in small capitals under the text, e.g. to a workshop or a book.']];
+// A work as its card shows it on the Art page and on its categories: where it appears, its summary, what can be seen
+// or heard without leaving the page, and its size in the grid. Its date is the Publication date; its artists, Artists.
+// Other categories and Vimeo or SoundCloud links need the database update of 2026-10-31 (more_categories): until then
+// they are not offered, and the work keeps its one category.
+function ArtworkEditor({record,detail,options,onRecord,onDetail}:{record:Row;detail:Row;options:Record<string,Row[]>;onRecord:(record:Row)=>void;onDetail:(detail:Row)=>void}){
+  const fields=details.artwork.fields;const categories=options.art_categories||[];const more=Array.isArray(detail.more_categories)?(detail.more_categories as unknown[]).map(String):null;
+  const [link,setLink]=useState(()=>embedLink(detail.embed_kind,detail.embed_id));const found=link.trim()?embedFromUrl(link):null;
+  const later=(kind:string)=>more===null&&(kind==='vimeo'||kind==='soundcloud');
+  const setUrl=(text:string)=>{setLink(text);const e=embedFromUrl(text);const ok=e&&!later(e.kind)?e:null;onDetail({...detail,embed_kind:ok?.kind??null,embed_id:ok?.id??null});};
+  const saved=!link&&!!detail.embed_kind&&!embedOf(detail.embed_kind,detail.embed_id);
+  return <Card title="On the Art page" lead="How the work appears on the Art page and on the page of each of its categories: its image, title, categories and date, artists, summary and Read more, which opens the full work below. The date is the one in Publication; the artists are chosen in Artists.">
+    <div className="adm-stack" style={{gap:14}}>
+      <Fields fields={[{...pick(fields,['category_id'])[0],label:'Main category'}]} value={detail} onChange={v=>onDetail({...v,...(more?{more_categories:more.filter(id=>id!==v.category_id)}:{})})} options={options} notes={{category_id:'It gives the work its address, /art/category/work, and is named first on its card.'}}/>
+      {more?<fieldset className="adm-group"><legend>Also in</legend><p className="adm-help">Optional. The work also appears in these categories, with the same card and address.</p><div className="adm-checks">{categories.filter(c=>c.id!==detail.category_id).map(c=>{const id=String(c.id);return <label key={id} className="adm-check"><input type="checkbox" checked={more.includes(id)} onChange={e=>onDetail({...detail,more_categories:e.target.checked?[...more,id]:more.filter(x=>x!==id)})}/><span>{String(c.name)}{c.status!=='published'?' (draft)':''}</span></label>;})}</div></fieldset>
+        :<p className="adm-help">A work in more than one category will be available after the next database update.</p>}
+      <Fields fields={[{key:'excerpt',label:'Summary',type:'textarea'}]} value={record} onChange={onRecord} options={options} notes={{excerpt:'One or two sentences that say what the work is. Shown on its card, beside the artists, and when the work is shared. Longer text is cut after three lines.'}}/>
+      <Fields fields={[{...pick(fields,['media_id'])[0],label:'Image of the card'}]} value={detail} onChange={onDetail} options={options} notes={{media_id:'The drawing, photo, cover of the book or still of the film. Also the large image at the top of the work page when it has no Cover.'}}/>
+      <label className="adm-field adm-field--wide">Video or audio link (optional)<input value={link} placeholder="https://www.youtube.com/watch?v=… or https://open.spotify.com/episode/…" onChange={e=>setUrl(e.target.value)}/>
+        <small className="adm-help">The site does not keep video or audio files: upload them to YouTube or Vimeo (video), or Spotify or SoundCloud (audio), and paste the link here. A video plays inside the image of the card; an audio, under it. Both also play at the top of the work page.</small>
+        {found&&!later(found.kind)&&<small className="adm-help">Recognised: {embedLabels[found.kind]}.</small>}
+        {found&&later(found.kind)&&<small className="adm-help adm-warning">{embedLabels[found.kind]} links will be available after the next database update. Use YouTube or Spotify meanwhile.</small>}
+        {link.trim()&&!found&&<small className="adm-help adm-warning">This link is not recognised. Paste the address of one video or audio on YouTube, Vimeo, Spotify or SoundCloud, as shown in the browser.</small>}
+        {saved&&<small className="adm-help adm-warning">The saved video or audio could not be read. Paste its link again.</small>}</label>
+      <Fields fields={[{...pick(fields,['external_url'])[0],label:'Where to see or get the whole work (optional)'},{...pick(fields,['caption'])[0],label:'Description on the work page (optional)'}]} value={detail} onChange={onDetail} options={options} notes={{external_url:'e.g. the book shop, the full film or the gallery. Shown as “View the work ↗” on the work page.',caption:'Shown beside the summary at the top of the work page.'}}/>
+      <fieldset className="adm-group"><legend>Size on the Art page</legend><Fields fields={pick(fields,['span','full_height'])} value={detail} onChange={onDetail} options={options} notes={{span:'Width of the card in columns of six (1–6). Default 3, half the width. On phones every card takes the whole width.',full_height:'The image takes the whole height of the screen. Up to two cards of the remaining width stack beside it.'}}/></fieldset>
+    </div></Card>;
+}
 function MessageEditor({detail,pieces,options,onDetail,onPieces}:{detail:Row;pieces:Piece[];options:Record<string,Row[]>;onDetail:(detail:Row)=>void;onPieces:(pieces:Piece[])=>void}){
   const edit=(n:number,p:Partial<Piece>)=>onPieces(pieces.map((x,k)=>k===n?{...x,...p}:x));
   const move=(n:number,step:number)=>{const next=[...pieces];[next[n+step],next[n]]=[next[n],next[n+step]];onPieces(next);};
@@ -357,7 +386,9 @@ export function EncountersCms(){
   const [record,setRecord]=useState<Row|null>(null);const [specific,setSpecific]=useState<Row>({});const [blocks,setBlocks]=useState<Block[]>([]);
   const [contributorRoles,setContributorRoles]=useState<Record<string,string>>({});
   const [childRows,setChildRows]=useState<Row[]>([]);const [contributors,setContributors]=useState<string[]>([]);const [related,setRelated]=useState<string[]>([]);
-  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [preview,setPreview]=useState(false);
+  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [embedReady,setEmbedReady]=useState(false);const [preview,setPreview]=useState(false);
+  // The Video or audio block needs the database update of 2026-10-31; it is offered once the database has it.
+  useEffect(()=>{let live=true;void supabase?.from('artworks').select('more_categories').limit(1).then(r=>{if(live)setEmbedReady(!r.error);});return()=>{live=false;};},[]);
   const [newProfileOpen,setNewProfileOpen]=useState(false);const [newProfileMember,setNewProfileMember]=useState('');const [newStoryFor,setNewStoryFor]=useState<string|null>(null);const [removing,setRemoving]=useState<Row|null>(null);
   const reloadOptions=useMemo(()=>()=>setRevision(x=>x+1),[]);
   const [errors,setErrors]=useState<Record<string,string>>({});const [errorDetail,setErrorDetail]=useState('');
@@ -445,7 +476,7 @@ export function EncountersCms(){
         if(typeof current.cover_image==='string')payload.cover_image=current.cover_image;
         if(kind==='crew_member'&&Array.isArray(current.tags))payload.tags=(current.tags as unknown[]).map(t=>String(t).trim()).filter(Boolean);
         if(!current.updated_at){payload.status=current.status||'draft';}
-        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{})}:null;
+        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{}),...(kind==='artwork'&&Array.isArray(specific.more_categories)?{more_categories:specific.more_categories}:{})}:null;
         const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map((related_post_id,sort)=>({related_post_id,sort,relation:['expedition','workshop'].includes(kind)?'result':'related',...(relatedNotes?{note:relatedNotes[related_post_id]||''}:{})})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
       }else if(table==='media'){
         // save_entity inserts before resolving the conflict, so it cannot update media rows (storage path and hash are required). Media keeps its file and only updates the editable fields.
@@ -591,8 +622,9 @@ export function EncountersCms(){
       {kind==='crew_member'?<ProfileSeo record={record} member={crew.find(c=>String(c.page_post_id)===String(record.id))} onChange={setRecord} options={options}/>
       :isCrewPage?<CrewPageSeo record={record} onChange={setRecord} cover={crewCover}/>
       :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
-        <Fields fields={pick(commonFields,isMessage?['title']:postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
-      {isMessage?<MessageEditor detail={specific} pieces={pieces} options={options} onDetail={setSpecific} onPieces={setPieces}/>:<Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':'The page is built from these blocks, in this order.'}>
+        <Fields fields={pick(commonFields,isMessage?['title']:kind==='artwork'?postGroups.general.filter(k=>k!=='excerpt'&&k!=='subtitle'):postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
+      {kind==='artwork'&&<ArtworkEditor key={String(record.id)} record={record} detail={specific} options={options} onRecord={setRecord} onDetail={setSpecific}/>}
+      {isMessage?<MessageEditor detail={specific} pieces={pieces} options={options} onDetail={setSpecific} onPieces={setPieces}/>:<Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':kind==='artwork'?'The full story':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':kind==='artwork'?'What opens with Read more: the page of the work, under its title, summary and video or audio. Tell how it was made and show it, block by block: text, images, a carousel, a quote, a YouTube video, or a video or audio from another service.':'The page is built from these blocks, in this order.'}>
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{profileKinds.find(k=>k.layout===profileLayout(b))?.label||blockLabel(b.type)}</span><div className="adm-block-tools">
             <button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===0} onClick={()=>moveBlock(i,-1)} aria-label={`Move block ${i+1} up`}><ArrowUp aria-hidden="true"/>Up</button>
@@ -606,17 +638,17 @@ export function EncountersCms(){
           {blocks.length===0&&<p className="adm-empty">No blocks yet. Add the first one below.</p>}
         </div>
         {(kind==='crew_member'||isCrewPage)&&<div className="adm-add" role="group" aria-label="Add a profile block">{profileKinds.map(k=><button key={k.layout} type="button" title={k.hint} className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type:k.type,position:blocks.length,content:{layout:k.layout}}])}><Plus aria-hidden="true"/>{k.label}</button>)}</div>}
-        <div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
+        <div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes.filter(t=>t!=='embed'||embedReady)).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>
       </Card>}
-      {details[kind]&&!isMessage&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status')} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
+      {details[kind]&&!isMessage&&kind!=='artwork'&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status')} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
       {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>
         {crew.length===0?<p className="adm-help">There are no crew members yet.</p>:<div className="adm-people">{crew.filter(c=>c!==pageOwner).map(c=>{const on=contributors.includes(String(c.id));return <div className="adm-person" data-on={on} key={String(c.id)}>
           <label className="adm-check"><input type="checkbox" checked={on} onChange={e=>setContributors(e.target.checked?[...contributors,String(c.id)]:contributors.filter(id=>id!==c.id))}/><span style={{display:'flex',alignItems:'center',gap:10}}><AdminThumb id={c.portrait_id} size={36}/>{String(c.name)}</span></label>
           {on&&<input aria-label={`Contribution of ${c.name}`} placeholder={credit.role} value={contributorRoles[String(c.id)]||''} onChange={e=>setContributorRoles({...contributorRoles,[String(c.id)]:e.target.value})}/>}</div>;})}</div>}
       </Card>
-      {!isMessage&&<Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or story (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. Art is organised by category and authors; link an expedition or story only if the work came from it. Shown as “Related encounters” on the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
+      {!isMessage&&<Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or workshop (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. If the work came from an expedition or a workshop, or from its results, choose it here. Shown as “Related encounters” at the end of the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
         {['expedition','workshop'].includes(kind)&&saved&&activityStatus(withSessionDates(specific,kind==='workshop'?childRows:[]))==='finished'&&!related.some(id=>(options.posts||[]).some(p=>p.id===id&&String(p.kind).endsWith('_report')))&&<div className="adm-story-invite"><p><strong>This {kind} has ended.</strong> Tell people how it went: what you did, what you saw, photos and videos. The story gets its own page, linked from this {kind} and from the list.</p><button type="button" className="adm-btn" disabled={busy||dirty} onClick={()=>void startStory(record)}>Write about this adventure</button>{dirty&&<small className="adm-help">Save your changes first.</small>}</div>}
-        <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:undefined}/>
+        <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:kind==='artwork'?['expedition','workshop','expedition_report','workshop_report']:undefined}/>
         {kind==='crew_member'&&relatedNotes&&related.length>0&&<fieldset className="adm-group"><legend>Comments</legend><p className="adm-help">Optional. Shown under each item, e.g. why it matters to this person.</p>
           {related.map(id=>{const p=(options.posts||[]).find(x=>String(x.id)===id);return <MarkedText key={id} id={`related-note-${id}`} label={String(p?.title||'Related item')} value={relatedNotes[id]||''} onChange={v=>setRelatedNotes({...relatedNotes,[id]:v})} placeholder="e.g. I organise most of these workshops." hint={p?kindLabel(String(p.kind)):undefined}/>;})}</fieldset>}
       </Card>}

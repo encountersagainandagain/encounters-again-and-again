@@ -16,6 +16,7 @@ export const adminSections=[
   {href:'/admin/page-settings?page=home',label:'Home page',icon:LayoutPanelTop,group:'Overview',enabled:modules.cms},
   {href:'/admin/content?table=posts&kind=artwork',label:'Works',icon:Palette,group:'Art',enabled:modules.art},
   {href:'/admin/content?table=art_categories',label:'Categories',icon:Shapes,group:'Art',enabled:modules.art},
+  {href:'/admin/page-settings?page=art',label:'Art page',icon:PanelsTopLeft,group:'Art',enabled:modules.art},
   {href:'/admin/content?table=posts&kind=expedition',label:'Expeditions',icon:Ship,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/content?table=posts&kind=expedition_report',label:'Results',icon:FileText,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/page-settings?page=expeditions',label:'Expeditions page',icon:PanelsTopLeft,group:'Expeditions',enabled:modules.expeditions},

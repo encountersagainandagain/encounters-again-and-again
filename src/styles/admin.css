@@ -312,3 +312,5 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-message-split{display:grid;gap:20px}
 @media (min-width:900px){.adm-message-split{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:start}}
 .adm-row-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+.adm-checks{display:flex;flex-wrap:wrap;gap:8px 20px}

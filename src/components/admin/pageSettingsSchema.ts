@@ -6,6 +6,7 @@ import {workshopsSeo} from '@/features/encounters/workshops-page';
 import {messagesSeo} from '@/features/encounters/messages-page';
 import {aboutSeo} from '@/features/encounters/about-page';
 import {contactSeo} from '@/features/encounters/contact-page';
+import {artSeo} from '@/features/encounters/art';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
 // an ordered list of parts, each of one of its `kinds` (saved with its `type`).
@@ -35,6 +36,20 @@ export const pageSchemas:PageSchema[]=[
     t('crew_title','Crew: title'),
     group('about','About block',[t('kicker','Small line'),area('line','Phrase in italics','The block is hidden when the phrase is empty.'),area('body','Text'),t('cta_label','Button','Default: Read our story')]),
     group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
+  ]},
+  {key:'art',label:'Art page',path:'/art',store:'pages',lead:'Everything on the Art page, in the order of the page: the banner, how it appears in search engines, the categories, the works and the closing. Categories are edited in Art → Categories and each work in Art → Works; their tiles and cards fill themselves.',fields:[
+    section('banner','1 · Banner','The first screen: the drawn title over the lines, and a short line under it.',[
+      t('kicker','Small line above the title','Default: our'),t('title','Title','Large title of the banner. Default: Art'),area('introduction','Line under the title','One or two sentences about the art you make. Empty: hidden.'),
+      media('cover_id','Image shared on social networks','Not shown on the page: the banner has no photo. Shown when someone shares the link of the Art page.')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says what kinds of art you make and about what, the easier it is for someone looking for ocean drawings, films, books or podcasts to find you. We wrote a first version; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. ocean art and illustration. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say what kinds of art you make and why to look. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:artSeo.title,fallbackDescription:artSeo.description}},
+      {key:'seo_topics',label:'What the art is about',type:'lines',help:'One topic per line, e.g. Marine illustration. Not shown on the page: search engines read them as the subjects of this page. Empty: the suggested topics are used.'}]),
+    section('categories','3 · Categories','Under the banner: one tile per published category and a filter (All, then each category) that shows only that category below. Nothing to fill in here: categories, their order, cover and texts are edited in Art → Categories.',[]),
+    section('works','4 · Works','Then one section per category with its published works. Each card shows the work (its image; a video plays in the frame and an audio under it), its title, categories and date, its artists, its summary and Read more, which opens the full work. A work with several categories appears in each of them. Nothing to fill in here: each work is edited in Art → Works.',[]),
+    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')]),
   ]},
   {key:'expeditions',label:'Expeditions page',path:'/expeditions',store:'pages',lead:'Everything on the Expeditions page, in the order of the page: the banner, how it appears in search engines, the cards inside the banner, the list of expeditions and the closing. Each expedition is created and edited in Expeditions; its card in the list fills itself.',fields:[
     section('banner','1 · Banner','The first screen. While scrolling, the surface photo opens in six strips onto the underwater photo.',[

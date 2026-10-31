@@ -7,6 +7,7 @@ import {MediaImage} from './MediaImage';
 import {Breadcrumbs,DarkClosing,EmptyState,PhotoHero,Scribble} from './EditorialPieces';
 import {MediaEmbed,VideoFrame} from './EditorialInteractive';
 import {PostBlocks} from './PostBlocks';
+import {artCategoryIds,embedOf,inCategory,isAudio,workDate} from '@/features/encounters/art';
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
 export type Person={member:Row;role:string;href:string|null};
@@ -20,15 +21,18 @@ export function PeopleLine({people}:{people:Person[]}){
 }
 export function Responsible({postId,data,pathPrefix=''}:{postId:string;data:EditorialData;pathPrefix?:string}) {return <PeopleLine people={peopleFor(postId,data,pathPrefix)}/>;}
 
-// A work as the prototype shows it: a framed image and a monospace caption that opens the work.
-export function ArtworkCards({posts,data,layout='gallery',pathPrefix=''}:{posts:ContentRow[];data:EditorialData;layout?:string;pathPrefix?:string}) {
+// A work as the prototype shows it: a framed image and a monospace caption that opens the work. On the Art page and
+// the category pages (summary) the caption also tells what the work is: its categories and date, its artists, its
+// summary and Read more; a video plays in the frame and an audio under the caption, without leaving the page.
+export function ArtworkCards({posts,data,layout='gallery',pathPrefix='',summary=false}:{posts:ContentRow[];data:EditorialData;layout?:string;pathPrefix?:string;summary?:boolean}) {
   const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const spanOf=(post:ContentRow)=>Math.min(6,Math.max(1,Number(artOf(post).span)||3));
   const card=(post:ContentRow,i:number,half=false)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
     const span=layout==='gallery'?spanOf(post):layout==='feature'||layout==='more'?3:6;const tall=layout==='gallery'?art.full_height===true:layout!=='more';
-    const frame=layout==='video'&&art.embed_kind==='youtube'?<VideoFrame id={art.embed_id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
+    const play=embedOf(art.embed_kind,art.embed_id);const video=play&&!isAudio(play.kind)&&(summary||layout==='video')?play:null;const audio=play&&isAudio(play.kind)&&(summary||layout==='audio')?play:null;
+    const frame=video?<VideoFrame kind={video.kind} id={video.id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
     return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}${half?' art-work--half':''}`} style={half?undefined:{gridColumn:`span ${span}`}} data-seq={half?undefined:`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
-      <figcaption><Link href={href}>[ {post.title} ]</Link>{layout==='audio'&&art.embed_kind?<MediaEmbed kind={art.embed_kind} id={art.embed_id}/>:null}</figcaption>
+      <figcaption><Link href={href}>[ {post.title} ]</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary&&layout!=='audio'}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
     </figure>;};
   // Gallery (Art.dc.html, Drawings): up to two works that fill the columns left beside a full-height work
   // stack there at half height each, instead of wrapping to the next row.
@@ -38,6 +42,10 @@ export function ArtworkCards({posts,data,layout='gallery',pathPrefix=''}:{posts:
       if(stack.length===2){items.push(card(post,items.length));items.push(<div key={`stack-${post.id}`} className="art-stack" style={{gridColumn:`span ${rest}`}} data-seq={`${items.length%2?.86:1},0.45`}>{stack.map(p=>card(p,0,true))}</div>);i=j-1;continue;}}
     items.push(card(post,items.length));}
   return <div className={`art-works layout-${layout}`}>{items}</div>;
+}
+function WorkSummary({post,art,data,pathPrefix}:{post:ContentRow;art:Row;data:EditorialData;pathPrefix:string}){
+  const names=artCategoryIds(art).map(id=>data.categories.find(c=>c.id===id)).filter(Boolean).map(c=>string(c!.name));const date=workDate(post.published_at);
+  return <div className="art-work-summary">{(names.length||date)?<p className="art-work-meta">{[...names,date].filter(Boolean).join(' · ')}</p>:null}<PeopleLine people={peopleFor(post.id,data,pathPrefix)}/>{string(post.excerpt)?<p className="art-work-text">{string(post.excerpt)}</p>:null}</div>;
 }
 export function CategoryIntro({category,number,pathPrefix='',link=true}:{category:Row;number:string;pathPrefix?:string;link?:boolean}){
   const title=string(category.title)||string(category.name);
@@ -49,13 +57,13 @@ export function CategoryIntro({category,number,pathPrefix='',link=true}:{categor
 export function CategorySection({category,posts,data,pathPrefix='',link=true}:{category:Row;posts:ContentRow[];data:EditorialData;pathPrefix?:string;link?:boolean}) {
   return <section id={`category-${category.slug}`} className="art-section">
     <CategoryIntro category={category} number={categoryNumber(category,data)} pathPrefix={pathPrefix} link={link}/>
-    {posts.length?<ArtworkCards posts={posts} data={data} layout={string(category.layout)||'gallery'} pathPrefix={pathPrefix}/>:<EmptyState>No published works in this collection yet.</EmptyState>}
+    {posts.length?<ArtworkCards posts={posts} data={data} layout={string(category.layout)||'gallery'} pathPrefix={pathPrefix} summary/>:<EmptyState>No published works in this collection yet.</EmptyState>}
   </section>;
 }
 // Category entry tile: the cover, or the first work when the category has no cover.
 export function CategoryTile({category,number,image,data}:{category:Row;number:string;image:unknown;data:EditorialData}){
   // No cover and no image in the first work: a YouTube work lends its thumbnail, as the prototype's Films tile.
-  const video=!image&&category.layout==='video'?data.artworks.find(a=>a.category_id===category.id&&a.embed_kind==='youtube'&&/^[\w-]{11}$/.test(String(a.embed_id))&&data.posts.some(p=>p.id===a.id)):null;
+  const video=!image&&category.layout==='video'?data.artworks.find(a=>inCategory(a,category.id)&&a.embed_kind==='youtube'&&/^[\w-]{11}$/.test(String(a.embed_id))&&data.posts.some(p=>p.id===a.id)):null;
   return <>{image?<MediaImage id={image} media={data.media} contain={category.layout==='feature'}/>:video?<img src={`https://img.youtube.com/vi/${String(video.embed_id)}/maxresdefault.jpg`} alt="" loading="lazy"/>:null}<span><small>{number}</small>{string(category.name)}</span></>;
 }
 export function tileImage(category:Row,posts:ContentRow[],data:EditorialData){const first=posts[0];return category.cover_id||(first&&(data.artworks.find(a=>a.id===first.id)?.media_id||first.cover_id))||null;}
@@ -73,7 +81,7 @@ export function ArtworkView({post,art,category,number,people,blocks,media,pathPr
         <div className="art-intro-title" data-seq="1.2,0.5">{category?<span className="art-kicker"><small>{number}</small>{category.slug?<Link href={`${pathPrefix}/art/${category.slug}`}>{string(category.name)}</Link>:string(category.name)}</span>:null}<h2>{title}</h2><PeopleLine people={people}/></div>
         {(post.excerpt||art.caption||safeHref(art.external_url))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{safeHref(art.external_url)?<a className="art-cta" href={safeHref(art.external_url)}>View the work ↗</a>:null}</div>:null}
       </div></section>
-      {art.embed_kind==='youtube'?<div className="art-section art-embed"><div className="art-frame art-work--tall"><VideoFrame id={art.embed_id} title={title}>{art.media_id?<MediaImage id={art.media_id} media={media} alt=""/>:null}</VideoFrame></div></div>:<MediaEmbed kind={art.embed_kind} id={art.embed_id}/>}
+      {embedOf(art.embed_kind,art.embed_id)&&!isAudio(art.embed_kind)?<div className="art-section art-embed"><div className="art-frame art-work--tall"><VideoFrame kind={art.embed_kind} id={art.embed_id} title={title}>{art.media_id?<MediaImage id={art.media_id} media={media} alt=""/>:null}</VideoFrame></div></div>:<MediaEmbed kind={art.embed_kind} id={art.embed_id} audioHeight/>}
       {blocks.length>0&&<PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>}
       {related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{related.map(r=><Link key={r.href} href={r.href}>{r.title} →</Link>)}</section>}
       {more}

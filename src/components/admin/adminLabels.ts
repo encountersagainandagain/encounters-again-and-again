@@ -4,7 +4,7 @@ export const kindLabel=(kind:unknown)=>kindLabels[String(kind)]||String(kind||'�
 // Singular names for create buttons and new-record titles.
 export const singular:Record<string,string>={posts:'content',crew_members:'crew member',art_categories:'art category',upcoming_items:'announcement',expedition_cards:'expedition card',media:'image'};
 export const optionText=(value:string)=>value.charAt(0).toUpperCase()+value.slice(1).replace(/_/g,' ');
-export const blockLabels:Record<string,string>={paragraph:'Paragraph',heading:'Heading',image:'Image','image-pair':'Two images',quote:'Quote',divider:'Divider',link:'Simple link',youtube:'YouTube video',toc:'Post index',carousel:'Carousel',source:'Source links',list:'Title + list',quick_facts:'Quick facts',costs:'Cost breakdown',faq:'FAQs',accordion:'Accordion'};
+export const blockLabels:Record<string,string>={paragraph:'Paragraph',heading:'Heading',image:'Image','image-pair':'Two images',quote:'Quote',divider:'Divider',link:'Simple link',youtube:'YouTube video',embed:'Video or audio',toc:'Post index',carousel:'Carousel',source:'Source links',list:'Title + list',quick_facts:'Quick facts',costs:'Cost breakdown',faq:'FAQs',accordion:'Accordion'};
 export const blockLabel=(type:unknown)=>blockLabels[String(type)]||String(type);
 
 export const postGroups={
@@ -91,7 +91,7 @@ export const tableLabel=(table:string)=>tableLabels[table]||table;
 
 // How people credited on a content are named, and where that credit shows.
 export const creditLabels:Record<string,{title:string;lead:string;role:string}>={
-  artwork:{title:'Authors',lead:'Shown on the work page with links to their pages. The work also appears on the personal page of each author once both are published.',role:'Contribution, e.g. Illustration'},
+  artwork:{title:'Artists',lead:'The people of Crew who made the work. Shown on its card on the Art page and on the work page, with links to their personal pages; the work also appears on the personal page of each artist once both are published.',role:'What they did, e.g. Illustration'},
   workshop:{title:'Facilitators',lead:'Shown with the workshop. It also appears on each facilitator’s personal page.',role:'e.g. Facilitator'},
   expedition:{title:'Participants',lead:'Crew who took part. The expedition appears on each participant’s personal page.',role:'e.g. Captain, Photography'},
   message:{title:'Credits',lead:'People who made this message. It appears on their personal pages.',role:'e.g. Illustration'},
@@ -112,7 +112,7 @@ export const crewSections:[string,string,string][]=[
 export const crewStyles:[string,string][]=[['lead','Lead (larger serif)'],['body','Body text'],['aside','Continues the previous line, in italics'],['closing','Closing line in italics']];
 // Help that changes with the type of content.
 export const kindHelp:Record<string,Record<string,string>>={
-  artwork:{title:'Name of the work.',slug:'Last part of the address: /art/category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',show_index:'Lists the headings of the text at the top. Rarely needed for a work.'},
+  artwork:{title:'Name of the work.',slug:'Last part of the address: /art/main-category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',published_at:'Date of the work. Shown on its card on the Art page and read by search engines.',show_index:'Lists the headings of the text at the top. Rarely needed for a work.'},
   expedition:{title:'Name of the expedition.',excerpt:'The invitation: one or two sentences on what this expedition is and why to come. Shown large, with the join button, on the expedition page, and on its card in the Expeditions list.',
     place:'Where it goes, e.g. Ningaloo Reef, Western Australia. Shown under “Where” on the expedition page.',
     cta_label:'Text of the join button, e.g. “Ask to join”. It leads to Contact. Empty: “Join the expedition”.',availability_label:'Short line on places, e.g. “Two berths open”. Shown beside the join button and on Home.',

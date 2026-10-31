@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {audioHeight,embedLabels,embedOf,embedSrc,isAudio} from '@/features/encounters/art';
 
 export function ScrollStage({children,className=''}:{children:ReactNode;className?:string}) {
   const root=useRef<HTMLDivElement>(null);
@@ -77,18 +78,16 @@ export function Carousel({children,label,compact=false}:{children:ReactNode[];la
 }
 
 // Video work: the still image with a play button; the YouTube player loads only after the click.
-export function VideoFrame({id,title,children}:{id:unknown;title:string;children?:ReactNode}) {
-  const [open,setOpen]=useState(false);
-  if(typeof id!=='string'||!/^[\w-]{11}$/.test(id))return <>{children}</>;
-  if(open)return <iframe className="art-video" title={title} src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>;
-  // Without an image of its own, the video shows YouTube's thumbnail, as in the prototype.
-  return <button type="button" className="art-play" onClick={()=>setOpen(true)} aria-label={`Play ${title}`}>{children||<img src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy"/>}<span aria-hidden="true">▶</span></button>;
+export function VideoFrame({id,kind='youtube',title,children}:{id:unknown;kind?:unknown;title:string;children?:ReactNode}) {
+  const [open,setOpen]=useState(false);const video=embedOf(kind,id);
+  if(!video||isAudio(video.kind))return <>{children}</>;
+  if(open)return <iframe className="art-video" title={title} src={embedSrc(video.kind,video.id)} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>;
+  // Without an image of its own, a YouTube video shows YouTube's thumbnail, as in the prototype; a Vimeo one, the play sign.
+  return <button type="button" className="art-play" onClick={()=>setOpen(true)} aria-label={`Play ${title}`}>{children||(video.kind==='youtube'?<img src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`} alt="" loading="lazy"/>:null)}<span aria-hidden="true">▶</span></button>;
 }
-export function MediaEmbed({kind,id}:{kind:unknown;id:unknown}) {
-  const [open,setOpen]=useState(false);
-  if(typeof id!=='string')return null;
-  const youtube=kind==='youtube'&&/^[\w-]{11}$/.test(id);
-  const spotify=kind==='spotify'&&/^(episode|track|album|playlist|show)\/[a-zA-Z0-9]+$/.test(id);
-  if(!youtube&&!spotify)return null;
-  return <div className="editorial-embed">{open?<iframe title={youtube?'YouTube video':'Spotify audio'} src={youtube?`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`:`https://open.spotify.com/embed/${id}`} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>:youtube?<button type="button" className="editorial-video-play" onClick={()=>setOpen(true)} aria-label="Play YouTube video"><img src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=`https://img.youtube.com/vi/${id}/hqdefault.jpg`;}}/><span><i aria-hidden="true">▶</i><b>Play video</b></span></button>:<button type="button" onClick={()=>setOpen(true)}>Listen on Spotify <span aria-hidden="true">↗</span></button>}</div>;
+// A video or audio of YouTube, Vimeo, Spotify or SoundCloud. Nothing loads from those services until it is played.
+export function MediaEmbed({kind,id,audioHeight:fixed}:{kind:unknown;id:unknown;audioHeight?:boolean}) {
+  const [open,setOpen]=useState(false);const e=embedOf(kind,id);
+  if(!e)return null;const audio=isAudio(e.kind);const label=embedLabels[e.kind];
+  return <div className={`editorial-embed${audio&&fixed?' editorial-embed--audio':''}`} style={audio&&fixed?{height:audioHeight(e.kind,e.id)}:undefined}>{open?<iframe title={label} src={embedSrc(e.kind,e.id)} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>:e.kind==='youtube'?<button type="button" className="editorial-video-play" onClick={()=>setOpen(true)} aria-label="Play YouTube video"><img src={`https://img.youtube.com/vi/${e.id}/maxresdefault.jpg`} alt="" loading="lazy" onError={ev=>{ev.currentTarget.onerror=null;ev.currentTarget.src=`https://img.youtube.com/vi/${e.id}/hqdefault.jpg`;}}/><span><i aria-hidden="true">▶</i><b>Play video</b></span></button>:e.kind==='vimeo'?<button type="button" className="editorial-video-play" onClick={()=>setOpen(true)} aria-label="Play Vimeo video"><span><i aria-hidden="true">▶</i><b>Play video</b></span></button>:<button type="button" onClick={()=>setOpen(true)}>Listen on {e.kind==='spotify'?'Spotify':'SoundCloud'} <span aria-hidden="true">↗</span></button>}</div>;
 }

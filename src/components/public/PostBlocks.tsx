@@ -5,12 +5,13 @@ import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {MediaImage} from './MediaImage';
 import {InlineText} from './InlineText';
 import {ramp,useFrame} from './useFrame';
+import {audioHeight,embedFromUrl,embedLabels,embedSrc,isAudio,type EmbedKind} from '@/features/encounters/art';
 
 // Blocks of the Post template (Post.dc.html, handoff 04-editor-de-bloques.md). Content keys follow the
 // block editor: paragraph {lead,text}, heading {kicker,number,text}, image {media_id,caption,number},
 // image-pair/carousel {images}, youtube {youtubeUrl|video_id,caption}, list {text,items}, quote
 // {text,attribution}, quick_facts {quickFactItems}, costs {text,costItems,total_label,total_amount,note},
-// faq {text,faqItems}, accordion {accordionItems}, link {href,label}, divider, toc.
+// faq {text,faqItems}, accordion {accordionItems}, link {href,label}, divider, toc, embed {url,caption} (Video or audio).
 // Out of scope: tour/stay/affiliate blocks (their modules are disabled for Encounters).
 const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 const pad=(n:number)=>String(n).padStart(2,'0');
@@ -37,9 +38,15 @@ function Carousel({slides,media}:{slides:Row[];media:Row[]}){
   return <div className="pb-carousel"><div ref={rail} className="pb-carousel-rail" onScroll={measure} tabIndex={0} aria-label="Images">{slides.map((s,i)=><figure key={i}><div className="pb-frame"><MediaImage id={mediaId(s)} media={media} alt={string(s.alt)}/></div>{string(s.caption)&&<figcaption>{string(s.caption)}</figcaption>}</figure>)}</div>
     {slides.length>1&&<div className="pb-carousel-controls"><button type="button" onClick={()=>go(index-1)} disabled={index===0} aria-label="Previous image">←</button><output aria-live="polite">{pad(index+1)} / {pad(slides.length)}</output><button type="button" onClick={()=>go(index+1)} disabled={index===slides.length-1} aria-label="Next image">→</button></div>}</div>;
 }
-function YouTube({id,caption}:{id:string;caption:string}){
+// A video (YouTube, or Vimeo from the Video or audio block) behind its play button; nothing loads from there until played.
+function YouTube({id,caption,kind='youtube'}:{id:string;caption:string;kind?:EmbedKind}){
   const [open,setOpen]=useState(false);
-  return <figure className="pb-youtube" data-seq="0.95,0.4"><div className="pb-youtube-frame">{open?<iframe title={caption||'YouTube video'} src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>:<button type="button" onClick={()=>setOpen(true)} aria-label={`Play video${caption?`: ${caption}`:''}`}><img src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy"/><span><span aria-hidden="true">▶</span></span></button>}</div>{caption&&<figcaption>{caption}</figcaption>}</figure>;
+  return <figure className="pb-youtube" data-seq="0.95,0.4"><div className="pb-youtube-frame">{open?<iframe title={caption||embedLabels[kind]} src={embedSrc(kind,id)} allow="autoplay; encrypted-media; fullscreen" allowFullScreen/>:<button type="button" onClick={()=>setOpen(true)} aria-label={`Play video${caption?`: ${caption}`:''}`}>{kind==='youtube'?<img src={`https://img.youtube.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy"/>:null}<span><span aria-hidden="true">▶</span></span></button>}</div>{caption&&<figcaption>{caption}</figcaption>}</figure>;
+}
+// An audio of Spotify or SoundCloud: a band the height of its player, which loads when Listen is pressed.
+function Audio({kind,id,caption}:{kind:EmbedKind;id:string;caption:string}){
+  const [open,setOpen]=useState(false);
+  return <figure className="pb-youtube pb-audio" data-seq="0.95,0.4"><div className="pb-audio-frame" style={{height:audioHeight(kind,id)}}>{open?<iframe title={caption||embedLabels[kind]} src={embedSrc(kind,id)} allow="autoplay; encrypted-media"/>:<button type="button" onClick={()=>setOpen(true)}><span aria-hidden="true">▶</span>Listen on {kind==='spotify'?'Spotify':'SoundCloud'}</button>}</div>{caption&&<figcaption>{caption}</figcaption>}</figure>;
 }
 export function PostBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[];media:Row[];showIndex?:boolean}){
   const root=useRef<HTMLDivElement>(null);
@@ -56,6 +63,7 @@ export function PostBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[]
     if(type==='heading'){if(!headingText(b))continue;const kicker=[string(c.number),string(c.kicker)].filter(Boolean).join(' · ');out.push(<div className="pb pb-heading" id={anchorOf(b)} key={key}><div data-seq="0.94,0.4">{kicker&&<span>{kicker}</span>}<h2>{headingText(b)}</h2></div></div>);continue;}
     if(type==='quote'){const q=string(c.quote)||string(c.text);if(!q)continue;out.push(<div className="pb pb-quote" key={key}><figure data-seq="0.9,0.45"><blockquote>{/^[“"]/.test(q)?q:`“${q}”`}</blockquote>{string(c.attribution)&&<figcaption>{string(c.attribution)}</figcaption>}</figure></div>);continue;}
     if(type==='youtube'){const id=youtubeId(c);if(id)out.push(<div className="pb pb-video" key={key}><YouTube id={id} caption={string(c.caption)||string(c.videoTitle)}/></div>);continue;}
+    if(type==='embed'){const e=embedFromUrl(string(c.url));if(e)out.push(<div className="pb pb-video" key={key}>{isAudio(e.kind)?<Audio kind={e.kind} id={e.id} caption={string(c.caption)}/>:<YouTube kind={e.kind} id={e.id} caption={string(c.caption)}/>}</div>);continue;}
     if(type==='carousel'){const s=images(c);if(s.length)out.push(<div className="pb pb-wide" key={key}><Carousel slides={s} media={media}/></div>);continue;}
     if(type==='image-pair'){const s=images(c).slice(0,2);if(s.length)out.push(<div className="pb pb-wide" key={key}><div className="pb-pair">{s.map((img,i)=><figure key={i} data-seq={`${.95-i*.05},0.4`}><div className="pb-frame"><MediaImage id={mediaId(img)} media={media} alt={string(img.alt)}/></div>{string(img.caption)&&<figcaption>{string(img.caption)}</figcaption>}</figure>)}</div></div>);continue;}
     if(type==='image'){const s=images(c);if(!s.length)continue;

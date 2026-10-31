@@ -90,6 +90,25 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
   local con capturas de página completa (1440 y 390) antes y después del código y del guardado: 0 diferencias salvo ruido de
   suavizado de 1–7 píxeles en «Our nature», que también aparece entre dos capturas del mismo código. Check:
   `scripts/check-about-blocks.mjs`.
+- **Art (2026-10-31, pendiente de prueba de Juani):** misma forma de trabajo que las otras páginas.
+  - **Art page** (Page presentation, nuevo en el menú Art): **1 · Banner** (línea chica, título, línea debajo, imagen para
+    compartir) → **2 · SEO** precargado (`artSeo` en `art.ts`; metadata y JSON-LD `CollectionPage` con cada obra como
+    `CreativeWork`: categorías, artistas, fecha, imagen) → 3 · Categories y 4 · Works (solo explican) → **5 · Closing**.
+    Guardar deja la página idéntica (captura 1440: 0 diferencias).
+  - **Tarjeta de cada obra en /art y en las páginas de categoría** (cambio visible pedido): bajo `[ título ]` muestra
+    categorías · fecha (Publication date, mes y año), artistas (Credits → «Artists»), el resumen (excerpt, hasta 3 líneas) y
+    «Read more →». Un video (YouTube o Vimeo) se reproduce dentro de la imagen; un audio (Spotify o SoundCloud), debajo. En la
+    página personal de Crew y en «More from» las tarjetas siguen como estaban.
+  - **Editor de cada obra (Works):** General information → **On the Art page** (Main category, Also in, Summary, imagen,
+    link de video o audio pegado tal cual, dónde ver la obra completa, descripción, tamaño) → **The full story** (bloques) →
+    Artists → Related expedition or workshop → SEO. Nuevo bloque **Video or audio** (`embed`, `{url,caption}`) para YouTube,
+    Vimeo, Spotify o SoundCloud: el sitio no guarda archivos de audio o video, los reproduce desde esos servicios (nada carga
+    hasta darle play).
+  - **Migración `20261031000100_artwork_categories_and_media.sql` (no aplicada a la base real):** `artworks.more_categories`
+    (otras categorías; `category_id` sigue siendo la principal y da la dirección), `embed_kind` admite vimeo y soundcloud, y
+    `post_blocks.type` admite `embed`. Probada en local (aplicada, deshecha y reaplicada). Sin ella el código funciona: el
+    admin no ofrece Also in, Vimeo/SoundCloud ni el bloque Video or audio (sondeo de la columna), y lo público trata cada obra
+    con su categoría. Check: `scripts/check-art.mjs`.
 - **Contact (2026-10-31, pendiente de prueba de Juani):** Contact page en el orden de la página: **1 · Banner** (imagen, título,
   línea) → **2 · SEO** precargado (`contactSeo` en `contact-page.ts`; metadata con la imagen del banner y JSON-LD `ContactPage`
   de la organización) → **3 · The form** (pregunta, temas, nota) → **4 · Other ways to reach us** (links propios; email,

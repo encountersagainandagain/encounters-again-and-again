@@ -2,6 +2,7 @@ import {type ContentBlock} from '@/features/encounters/public-content';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import {MediaImage} from './MediaImage';
 import {Carousel,MediaEmbed} from './EditorialInteractive';
+import {embedFromUrl} from '@/features/encounters/art';
 import {InlineText} from './InlineText';
 const list=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
 export function EditorialBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[];media:Row[];showIndex?:boolean}) {
@@ -17,6 +18,7 @@ export function EditorialBlocks({blocks,media,showIndex=false}:{blocks:ContentBl
     if(type==='quote')return <blockquote data-seq=".94,.4" key={block.id}><InlineText text={text||string(c.quote)}/>{c.attribution?<cite><InlineText text={string(c.attribution)}/></cite>:null}</blockquote>;
     if(type==='carousel')return <Carousel key={block.id} label="images">{imgs.map((img,i)=>figure(img,i)).filter(Boolean)}</Carousel>;
     if(type==='image'||type==='image-pair')return <div className={`block-images ${type==='image-pair'||imgs.length===2?'image-pair':''}`} key={block.id} data-seq="1.02,.35">{imgs.map((img,i)=>figure(img,i))}</div>;
+    if(type==='embed'){const e=embedFromUrl(string(c.url));return e?<MediaEmbed key={block.id} kind={e.kind} id={e.id} audioHeight/>:null;}
     if(type==='youtube'){let id=string(c.video_id);try{const url=new URL(string(c.youtubeUrl));id=url.hostname==='youtu.be'?url.pathname.slice(1):url.searchParams.get('v')||url.pathname.split('/').pop()||'';}catch{/* A validated direct video ID needs no URL. */}return <MediaEmbed key={block.id} kind="youtube" id={id}/>;}
     return <section className={`block-text block-${type}`} id={anchor} data-seq=".94,.4" key={block.id}>
       {c.lead?<p className="editorial-lead"><InlineText text={string(c.lead)}/></p>:null}

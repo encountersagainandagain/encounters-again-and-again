@@ -1,4 +1,5 @@
 'use client';
+import {inCategory} from '@/features/encounters/art';
 import {useEffect,useState} from 'react';
 import {supabase} from '@/lib/supabase';
 import {EditorialBlocks} from '@/components/public/EditorialBlocks';
@@ -56,7 +57,7 @@ export function EditorialPreview({record,blocks,detail,media,crew=[],categories=
 // Art category: its public section with the published works it already has.
 export function CategoryPreview({record,media,posts=[],artworks=[],crew=[],categories=[],contributors=[]}:{record:Row;media:Row[];posts?:Row[];artworks?:Row[];crew?:Row[];categories?:Row[];contributors?:Row[]}){
   const category:Row={...record,status:'published'};
-  const works=posts.filter(p=>p.kind==='artwork'&&p.status==='published'&&artworks.some(a=>a.id===p.id&&a.category_id===record.id)) as ContentRow[];
+  const works=posts.filter(p=>p.kind==='artwork'&&p.status==='published'&&inCategory(artworks.find(a=>a.id===p.id),record.id)) as ContentRow[];
   const ids=JSON.stringify([record.cover_id,...works.map(w=>[w.cover_id,artworks.find(a=>a.id===w.id)?.media_id])]);
   const {images,error}=usePreviewImages(media,ids);
   const data={posts:works,categories:[category,...categories.filter(c=>c.id!==record.id&&c.status==='published')].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)||byOrder(a,b)),artworks,crew,contributors,relations:[],media:images,settings:{}} as unknown as EditorialData;

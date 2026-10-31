@@ -14,6 +14,7 @@ import {workshopsSeoOf} from '@/features/encounters/workshops-page';
 import {messagesSeoOf} from '@/features/encounters/messages-page';
 import {aboutBlocks,aboutSeoOf,legacyAboutKeys} from '@/features/encounters/about-page';
 import {contactSeoOf} from '@/features/encounters/contact-page';
+import {artSeoOf} from '@/features/encounters/art';
 import type {ContentBlock} from '@/features/encounters/public-content';
 type Row=Record<string,unknown>;
 const obj=(v:unknown):Row=>v&&typeof v==='object'&&!Array.isArray(v)?v as Row:{};
@@ -74,6 +75,8 @@ async function contactDraft(current:Row):Promise<{draft:Row;converted:string}>{
   const page=supabase?(await supabase.from('posts').select('seo_title,meta_description').eq('kind','page').eq('source_role','contact').eq('status','published').maybeSingle()).data as Row|null:null;
   const seo=contactSeoOf(current,page);return {draft:{...current,seo_title:seo.title,meta_description:seo.description,seo_topics:seo.topics},converted:''};
 }
+// The Art page opens with its search texts filled in, the suggested ones where nothing was written yet.
+function artDraft(current:Row){const seo=artSeoOf(current);return {draft:{...current,seo_title:seo.title,meta_description:seo.description,seo_topics:seo.topics},converted:''};}
 // Meaningful Messages opens with its search texts filled in, the suggested ones where nothing was written yet.
 function messagesDraft(current:Row){const seo=messagesSeoOf(current);return {draft:{...current,seo_title:seo.title,meta_description:seo.description,seo_topics:seo.topics},converted:''};}
 // The Workshops page opens with the search texts it uses today (its own, the program page's or the suggested ones).
@@ -90,7 +93,7 @@ export function PageSettings({pageKey}:{pageKey:string}){
   const frame=useRef<HTMLIFrameElement>(null);
   const loadMedia=useCallback(()=>{void supabase?.from('media').select('*').order('created_at',{ascending:false}).then(({data})=>setMedia(data||[]));},[]);
   useEffect(()=>{let live=true;if(!supabase)return;void supabase.from('site_settings').select('value').eq('key','site').single().then(({data,error})=>{if(!live)return;if(error){setMessage('Settings could not be loaded.');return;}const value=obj(data?.value);const current=schema.store==='home'?obj(value.home):obj(obj(value.pages)[schema.key]);
-    void (schema.key==='expeditions'?expeditionsDraft(current):schema.key==='workshops'?workshopsDraft(current):schema.key==='messages'?Promise.resolve(messagesDraft(current)):schema.key==='about'?aboutDraft(current):schema.key==='contact'?contactDraft(current):Promise.resolve({draft:current,converted:''})).then(({draft,converted})=>{if(!live)return;setDraft(draft);setSaved(JSON.stringify(draft));setConverted(converted);setMessage('');});});loadMedia();return()=>{live=false;};},[schema,loadMedia]);
+    void (schema.key==='expeditions'?expeditionsDraft(current):schema.key==='workshops'?workshopsDraft(current):schema.key==='messages'?Promise.resolve(messagesDraft(current)):schema.key==='art'?Promise.resolve(artDraft(current)):schema.key==='about'?aboutDraft(current):schema.key==='contact'?contactDraft(current):Promise.resolve({draft:current,converted:''})).then(({draft,converted})=>{if(!live)return;setDraft(draft);setSaved(JSON.stringify(draft));setConverted(converted);setMessage('');});});loadMedia();return()=>{live=false;};},[schema,loadMedia]);
   // The preview frame renders the public template with this draft.
   const send=useCallback(()=>{if(draft)frame.current?.contentWindow?.postMessage({type:'page-draft',key:schema.key,value:clean(draft)},location.origin);},[draft,schema.key]);
   useEffect(()=>{const t=setTimeout(send,250);return()=>clearTimeout(t);},[send]);

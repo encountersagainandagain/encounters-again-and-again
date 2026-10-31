@@ -28,8 +28,8 @@ emails ni el SEO.
   `docs/encounters/HANDOFF_2026-10-28.md`.
 - **Base real** (`lzwmwofxoegkxykglneq`): 17 migraciones, todas aplicadas; local y remoto coinciden. La última es
   `20261026000100_crew_listing_relation_notes.sql`. Las migraciones `20261026000200_profile_default_blocks.sql` y
-  `20261026000300_keep_legacy_profiles_convertible.sql` están versionadas y probadas localmente, pero **no aplicadas a la base
-  real**; requieren un OK nuevo de Juani, respaldo y el procedimiento de §3.
+  `20261026000300_keep_legacy_profiles_convertible.sql` (y desde 2026-10-31 `20261031000100_artwork_categories_and_media.sql`)
+  están versionadas y probadas localmente, pero **no aplicadas a la base real**; requieren un OK nuevo de Juani, respaldo y el procedimiento de §3.
 - **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
   `6dd2c8f`; `027e795` es un commit vacío de reintento.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
