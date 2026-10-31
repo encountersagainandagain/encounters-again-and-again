@@ -5,6 +5,7 @@ import {cardBackgrounds,expeditionsSeo} from '@/features/encounters/expeditions-
 import {workshopsSeo} from '@/features/encounters/workshops-page';
 import {messagesSeo} from '@/features/encounters/messages-page';
 import {aboutSeo} from '@/features/encounters/about-page';
+import {contactSeo} from '@/features/encounters/contact-page';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
 // an ordered list of parts, each of one of its `kinds` (saved with its `type`).
@@ -106,11 +107,20 @@ export const pageSchemas:PageSchema[]=[
         {type:'talk',label:'Talk to us',help:'A title and a text with the email, phone and social links of Settings → General and contact, and the Write to us button to Contact.',fields:[t('title','Title','Default: Talk to us'),area('body','Text')]},
       ]}]),
   ]},
-  {key:'contact',label:'Contact page',path:'/contact',store:'pages',lead:'Messages are not sent by the site: “Open my email app” opens the visitor’s email app with the message written to the public contact email (Settings), and the page says it still has to be sent there. Without that email the button is off. WhatsApp, donation and social links also come from Settings.',fields:[
-    media('cover_id','Banner image','Default: the design image.'),t('title','Title','Default: Get in touch'),area('lead','Line under the title'),
-    t('topics_title','Topics question','Default: What are you writing about?'),list('topics','Topics',[t('title','Topic'),t('hint','Hint'),area('reply','Text for this topic after the email app opens','e.g. We will tell you what the next crossing needs. Shown under “Send it from your email app”.')],6),
-    t('note','Note beside the button','Default: No newsletters, no lists. Just us writing back.'),
-    list('links','Other ways to reach us',[t('title','Label','e.g. Read the book'),t('label','Link text'),t('url','Link','Full address. Empty links are not shown.')],4),
+  {key:'contact',label:'Contact page',path:'/contact',store:'pages',lead:'Everything on the Contact page, in the order of the page: the banner, how it appears in search engines, the form and the other ways to reach you. Messages are not sent by the site: “Open my email app” opens the visitor’s email app with the message written to the public contact email (Settings), and the page says it still has to be sent there. The form appears once it has at least one topic; until then the imported Contact text is shown.',fields:[
+    section('banner','1 · Banner','The first screen: the photo sinks and darkens while the form rises over it.',[
+      media('cover_id','Banner image','Default: the design image. Also the image shared on social networks.'),t('title','Title','Default: Get in touch'),area('lead','Line under the title','Empty: hidden.')]),
+    section('seo','2 · Search engines (SEO)','Not shown on the page. This is what Google and other search engines read to decide when to show this page, and what people see in the results before they click: the better it says who can write to you and about what, the easier it is to find you. We wrote a first version from the page’s own content; rewrite it in your words whenever you like.',[
+      {key:'seo',label:'Search result',type:'seo',hints:{
+        title:'The blue link in Google. Put first the words someone would type to find you, e.g. contact ocean art collective. Around 50–60 characters; the site adds “| Encounters Again and Again” after it',
+        description:'The grey lines under the link. One or two sentences that say who can write to you and about what. Around 120–160 characters; longer text is cut off. Empty: the suggested text is used.',
+        fallbackTitle:contactSeo.title,fallbackDescription:contactSeo.description}},
+      {key:'seo_topics',label:'What the page is about',type:'lines',help:'One topic per line, e.g. Book a workshop. Not shown on the page: search engines read them as the subjects of this page. Empty: the suggested topics are used.'}]),
+    section('form','3 · The form','The panel over the banner: the visitor picks a topic, writes name, email, where from, when and a message, and the button opens their email app. Name and email are always asked.',[
+      t('topics_title','Topics question','Default: What are you writing about?'),list('topics','Topics',[t('title','Topic','Also the subject of the email.'),t('hint','Hint','A short line under the topic.'),area('reply','Text for this topic after the email app opens','e.g. We will tell you what the next crossing needs. Shown under “Send it from your email app”.')],6,'Up to six. Without topics the form is not shown.'),
+      t('note','Note beside the button','Default: No newsletters, no lists. Just us writing back.')]),
+    section('others','4 · Other ways to reach us','Under the form. The email, WhatsApp, donation link and social networks come from Settings → General and contact and show only when filled in there. Add here other links, such as a book or a podcast.',[
+      list('links','Other links',[t('title','Label','e.g. Read the book'),t('label','Link text','Default: the address without https://'),t('url','Link','Full address. Empty links are not shown.')],4)]),
   ]},
 ];
 export const homeSectionLabels:[string,string][]=[['descent','The descent'],['reef','Reef'],['projects','Ongoing projects'],['upcoming','What is coming'],['happened','What already happened'],['art','New art'],['crew','Who is on board'],['about','About'],['newsletter','Newsletter']];

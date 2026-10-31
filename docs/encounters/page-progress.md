@@ -90,6 +90,12 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
   local con capturas de página completa (1440 y 390) antes y después del código y del guardado: 0 diferencias salvo ruido de
   suavizado de 1–7 píxeles en «Our nature», que también aparece entre dos capturas del mismo código. Check:
   `scripts/check-about-blocks.mjs`.
+- **Contact (2026-10-31, pendiente de prueba de Juani):** Contact page en el orden de la página: **1 · Banner** (imagen, título,
+  línea) → **2 · SEO** precargado (`contactSeo` en `contact-page.ts`; metadata con la imagen del banner y JSON-LD `ContactPage`
+  de la organización) → **3 · The form** (pregunta, temas, nota) → **4 · Other ways to reach us** (links propios; email,
+  WhatsApp, donación y redes siguen saliendo de Settings). Sin bloques: la página es un formulario con partes fijas. El SEO
+  reemplaza la descripción importada de WordPress. Comprobado en local con capturas de página completa (1440 y 390) antes y
+  después del código y del guardado: 0 diferencias (salvo el ícono de desarrollo de Next en la primera captura).
 - **Meaningful Messages (2026-10-30, pendiente de prueba de Juani):** misma forma de trabajo que Expeditions y Workshops.
   - **Messages page:** Banner → **SEO** precargado (`messagesSeo` en `messages-page.ts`; metadata y JSON-LD `CollectionPage` con
     cada mensaje como `CreativeWork`: nombre, dirección, texto, ilustración, fecha) → Introducción → Messages (solo explica) →
