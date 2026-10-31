@@ -16,7 +16,7 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
 - **The Crew page (publicado):** Banner → SEO → Below the banner. `THE CREW` es parte del banner, no un bloque. Se retiraron Sections of The Crew page y Place on the page; usa los mismos bloques que una página personal. Publication conserva solo Page status.
 - **Bloque Paragraph (publicado):** el texto común permite marcar palabras en negrita, cursiva o subrayado y convertirlas en enlace; la página pública y los previews comparten el mismo render. Se retiró Index name del bloque Heading; Number se conserva.
 - **Bloque YouTube en perfiles (publicado):** antes de reproducir muestra la miniatura real con play y al pulsarlo carga el reproductor privado de YouTube. Si no existe miniatura de máxima resolución, usa la estándar.
-- **Migraciones todavía pendientes en la base real:** `20261026000200_profile_default_blocks.sql` y `20261026000300_keep_legacy_profiles_convertible.sql`, probadas localmente. El código desplegado funciona sin ellas mediante la conversión al abrir; aplicarlas juntas requiere autorización nueva, respaldo y dry run.
+- **Migraciones:** no hay pendientes. `20261026000200`, `20261026000300` y `20261031000100` se aplicaron juntas a la base real el 2026-10-31 con OK de Juani.
 - **SEO de The Crew cargado en producción:** título `Meet the Encounters Crew`; descripción `Meet the crew behind Encounters Again and Again, brought together by the ocean and a shared commitment to art, education and conservation.`
 - **Vercel:** el Preview automático de `review` puede fallar con `Unexpected Encounters database target` porque staging no está configurado. No confundirlo con producción: el deployment posterior de `main` para `027e795` terminó en success y gamma respondió 200. Detalle en `HANDOFF_2026-10-28.md`.
 - **Navbar:** Art al frente del grupo derecho, en 14 anchos.
@@ -104,7 +104,7 @@ Sitio de revisión: https://encounters-again-and-again-gamma.vercel.app (Vercel 
     Artists → Related expedition or workshop → SEO. Nuevo bloque **Video or audio** (`embed`, `{url,caption}`) para YouTube,
     Vimeo, Spotify o SoundCloud: el sitio no guarda archivos de audio o video, los reproduce desde esos servicios (nada carga
     hasta darle play).
-  - **Migración `20261031000100_artwork_categories_and_media.sql` (no aplicada a la base real):** `artworks.more_categories`
+  - **Migración `20261031000100_artwork_categories_and_media.sql` (aplicada a la base real el 2026-10-31):** `artworks.more_categories`
     (otras categorías; `category_id` sigue siendo la principal y da la dirección), `embed_kind` admite vimeo y soundcloud, y
     `post_blocks.type` admite `embed`. Probada en local (aplicada, deshecha y reaplicada). Sin ella el código funciona: el
     admin no ofrece Also in, Vimeo/SoundCloud ni el bloque Video or audio (sondeo de la columna), y lo público trata cada obra
@@ -760,18 +760,17 @@ Capturas: [verification/review-2026-10-19-newsletter/](verification/review-2026-
 
 ### Migraciones en la base remota
 
-**Actualizado 2026-10-28:** hay 17 migraciones aplicadas en la base real. La última, aplicada el 2026-10-26 con aprobación de Juani (respaldo previo de esquema y datos en `.encounters-work/backups/2026-10-26-before-20261026000100-*.sql`, dry run con solo esta migración, `production-migrate.mjs --apply`), es:
-
-- `supabase/migrations/20261026000100_crew_listing_relation_notes.sql` — `crew_members.listed` (sacar a alguien de The Crew page y del Home sin borrar su página) y `post_relations.note` (comentario por relación); `save_content` igual salvo que guarda `note`. No convierte ni borra nada.
-
-Pendientes, en este orden, probadas localmente pero no aplicadas a producción:
+**Actualizado 2026-10-31:** hay 20 migraciones aplicadas en la base real; local y remoto coinciden. Las tres últimas se aplicaron juntas el 2026-10-31 con aprobación de Juani (respaldo previo de esquema y datos en `.encounters-work/backups/2026-10-31-before-20261031000100_artwork_categories_and_media-*.sql`, dry run con solo estas tres, `production-migrate.mjs --apply`, verificación de `artworks.more_categories` con la clave pública):
 
 1. `supabase/migrations/20261026000200_profile_default_blocks.sql` — Main title para los perfiles que lo necesitan y RPC de creación con Main title + Opening text.
 2. `supabase/migrations/20261026000300_keep_legacy_profiles_convertible.sql` — conserva la conversión completa de perfiles legacy y corrige las posiciones que la migración anterior pudo tocar.
+3. `supabase/migrations/20261031000100_artwork_categories_and_media.sql` — `artworks.more_categories`, `embed_kind` con vimeo y soundcloud, bloque `embed`. Los valores nuevos solo se suman a los anteriores.
 
-Aplicarlas juntas requiere un OK explícito nuevo, respaldo, prueba local y dry run que muestre únicamente esas dos.
+No hay migraciones pendientes.
 
 Historial (ya aplicadas):
+
+- `supabase/migrations/20261026000100_crew_listing_relation_notes.sql` (2026-10-26) — `crew_members.listed` y `post_relations.note`.
 
 1. `supabase/migrations/20261017000100_crew_page_sections.sql` — campos `crew_members.highlight` y `favourite_animal`, conversión única de los textos importados y secciones explícitas de los bloques de la página Team.
 2. `supabase/migrations/20261017000200_activity_presentation.sql` — `workshops.note_title`, `workshops.outcome` y `expeditions.outcome` (textos opcionales; no convierte ni borra nada).

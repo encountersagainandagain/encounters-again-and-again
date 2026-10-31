@@ -26,10 +26,9 @@ emails ni el SEO.
 - **En prueba con Juani: Crew, The Crew page y páginas personales** (`/crew/<slug>`, ejemplo real: Georgia Webb / Wild
   Wonders). El CMS quedó reducido a Banner → SEO → bloques y controles con efecto real; ver §6 y
   `docs/encounters/HANDOFF_2026-10-28.md`.
-- **Base real** (`lzwmwofxoegkxykglneq`): 17 migraciones, todas aplicadas; local y remoto coinciden. La última es
-  `20261026000100_crew_listing_relation_notes.sql`. Las migraciones `20261026000200_profile_default_blocks.sql` y
-  `20261026000300_keep_legacy_profiles_convertible.sql` (y desde 2026-10-31 `20261031000100_artwork_categories_and_media.sql`)
-  están versionadas y probadas localmente, pero **no aplicadas a la base real**; requieren un OK nuevo de Juani, respaldo y el procedimiento de §3.
+- **Base real** (`lzwmwofxoegkxykglneq`): 20 migraciones, todas aplicadas; local y remoto coinciden. El 2026-10-31, con OK de
+  Juani, respaldo y dry run, se aplicaron juntas `20261026000200_profile_default_blocks.sql`,
+  `20261026000300_keep_legacy_profiles_convertible.sql` y `20261031000100_artwork_categories_and_media.sql` (la última).
 - **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
   `6dd2c8f`; `027e795` es un commit vacío de reintento.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
@@ -189,7 +188,7 @@ una migración aplicada; un push no es un despliegue verificado.
 ## 9. Por dónde seguir
 
 1. **Prueba manual de Juani en producción:** New personal page, ficha de Crew simplificada, The Crew page y página personal.
-2. **Con OK explícito nuevo**, aplicar juntas `20261026000200` y `20261026000300` después de respaldo, prueba local y dry run.
+2. Las migraciones de perfiles y de Art ya están aplicadas (2026-10-31): Juani puede probar Also in, Vimeo/SoundCloud y el bloque Video or audio en producción.
 3. **Cerrar la página personal de Crew con Juani:** cargar/revisar Related content, Credited crew y contacto de Georgia y revisar
    el cierre de la página.
 4. Seguir el orden de `page-progress.md` con el mismo método (prototipo ↔ implementación, campos explícitos, previews compartidas):
