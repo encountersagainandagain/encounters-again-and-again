@@ -37,7 +37,8 @@ export function homeView(data:HomeData,today=perthToday()){
     agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on,ends_on:u.ends_on}),title,place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id,signup:link&&{label:string(u.cta_label)||'Sign up',...link}});
   }
   const shown=new Set(agenda.map(a=>a.key));
-  const limit=Math.max(2,Math.min(6,Number(home.upcoming_limit)||4));
+  // Each card is a full screen while scrolling: 12 at most keeps Home a reasonable length (8 recommended in the admin).
+  const limit=Math.max(2,Math.min(12,Number(home.upcoming_limit)||4));
   const kinds:Record<string,string>={news:'Field note',expedition_report:'Expedition',workshop_report:'Workshop'};
   const happened:Card[]=data.posts.filter(p=>p.status==='published'&&string(p.kind) in kinds&&!shown.has(string(p.id))).sort((a,b)=>featuredFirst(a,b)||string(b.published_at).localeCompare(string(a.published_at))).slice(0,3)
     .map(p=>({key:string(p.id),href:`/posts/${string(p.slug)}`,label:kinds[string(p.kind)],date:shortDate(p.published_at),title:string(p.title),excerpt:string(p.excerpt),image:p.cover_id}));

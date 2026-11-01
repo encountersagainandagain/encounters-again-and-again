@@ -30,7 +30,7 @@ export const pageSchemas:PageSchema[]=[
       group('workshops','Artsy Animals',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
       group('messages','Meaningful Messages',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
     ],'Titles and links are fixed: each card leads to its page.'),
-    t('upcoming_title','What is coming: title'),t('upcoming_note','What is coming: note'),{key:'upcoming_limit',label:'What is coming: how many',type:'number',help:'From 2 to 6. Default 4. Upcoming and running expeditions and workshops, then the announcements.'},
+    t('upcoming_title','What is coming: title'),t('upcoming_note','What is coming: note'),{key:'upcoming_limit',label:'What is coming: how many',type:'number',help:'From 2 to 12. Recommended: up to 8, since each one fills the screen while scrolling and more make Home long. Empty: 4. Upcoming and running expeditions and workshops come first, then the announcements.'},
     t('happened_title','What already happened: title'),t('happened_note','What already happened: note'),
     t('art_title','New art: title'),{key:'art_limit',label:'New art: how many works',type:'number',help:'From 3 to 10. Default 5.'},
     t('crew_title','Crew: title'),
