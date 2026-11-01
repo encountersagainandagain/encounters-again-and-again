@@ -31,6 +31,7 @@ emails ni el SEO.
   `20261026000300_keep_legacy_profiles_convertible.sql` y `20261031000100_artwork_categories_and_media.sql` (la última).
   El 2026-11-01 se aplicó `20261031000200_announcement_until_and_signup.sql` (anuncios: último día y botón para anotarse):
   21 migraciones, sin pendientes. Redes que bloquean el puerto 5432 (aeropuertos) hacen fallar respaldo y migración.
+  Pendiente con OK de Juani: `20261101000100_media_title.sql` (título opcional de cada imagen), probada en local.
 - **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
   `6dd2c8f`; `027e795` es un commit vacío de reintento.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
@@ -203,6 +204,7 @@ una migración aplicada; un push no es un despliegue verificado.
 
 | Documento | Para qué |
 |---|---|
+| `docs/encounters/PENDIENTES.md` | Lo que espera al lanzamiento: mover el dominio desde WordPress y configurar Resend (Contact y newsletter). |
 | `docs/encounters/page-progress.md` | Estado vivo por página, decisiones recientes, migraciones. **Actualizalo en cada entrega.** |
 | `docs/encounters/activities-logic.md` | Cómo funcionan Expeditions y Workshops: estados por fecha (Perth), historias, Results, sessions. |
 | `docs/encounters/HANDOFF_2026-10-28.md` | Resumen de la última ronda: decisiones de CMS, commits, migraciones pendientes y Vercel. |
