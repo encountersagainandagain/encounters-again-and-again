@@ -9,6 +9,7 @@ type SendEmailInput = {
   text: string;
   replyTo?: string;
   headers?: Record<string, string>;
+  from?: string;
 };
 
 type SendEmailBatchOptions = {
@@ -63,10 +64,11 @@ export async function sendResendEmail({
   text,
   replyTo,
   headers,
+  from: sender,
 }: SendEmailInput) {
   assertModuleEnabled('newsletter');
   const apiKey = process.env.RESEND_API_KEY;
-  const from = getNewsletterFromEmail();
+  const from = sender || getNewsletterFromEmail();
 
   if (!apiKey || !from) {
     const missing = [

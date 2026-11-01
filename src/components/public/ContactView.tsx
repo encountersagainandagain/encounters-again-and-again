@@ -1,5 +1,5 @@
 'use client';
-import {useRef,useState,type FormEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
 import type {Contact} from '@/features/encounters/contact';
 import {Scribble} from './EditorialPieces';
@@ -12,20 +12,32 @@ const rows=(v:unknown):Row[]=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object
 // site: the button opens the visitor's email app addressed to the email in Settings, with the fields
 // already written, and the page says the message still has to be sent there. Without that email the
 // button stays off and says why. WhatsApp, donations and social links come from Settings when filled.
-export function ContactView({settings:s,contact,media}:{settings:Row;contact:Contact;media:Row[]}){
+// direct: the site sends the message itself (email delivery configured); otherwise it opens the visitor's email app.
+export function ContactView({settings:s,contact,media,direct=false}:{settings:Row;contact:Contact;media:Row[];direct?:boolean}){
   const hero=useRef<HTMLElement>(null);const topics=rows(s.topics).slice(0,6);
-  const [topic,setTopic]=useState(-1);const [problem,setProblem]=useState(false);const [prepared,setPrepared]=useState('');
+  const [topic,setTopic]=useState(-1);const [problem,setProblem]=useState(false);const [prepared,setPrepared]=useState('');const [sent,setSent]=useState('');const panel=useRef<HTMLDivElement>(null);
+  // The form gives way to the confirmation: bring it into view, under the menu.
+  useEffect(()=>{if(!sent&&!prepared)return;const el=panel.current;if(el&&el.getBoundingClientRect().top<0)window.scrollTo({top:scrollY+el.getBoundingClientRect().top-120});},[sent,prepared]);const [sending,setSending]=useState(false);const [failed,setFailed]=useState('');
   useFrame(({vh,reduced})=>{
     const el=hero.current;if(!el)return;const d=Math.min(1,scrollY/vh);
     const img=el.querySelector<HTMLElement>('[data-hero-img]');const k=reduced?0:ramp(d,0,.9);
     if(img){img.style.transform=`translate3d(0,${(k*8).toFixed(2)}%,0) scale(${1+k*.07})`;img.style.filter=`brightness(${1-k*.35})`;}
     const copy=el.querySelector<HTMLElement>('[data-copy]');if(copy)copy.style.transform=`translate3d(0,${(reduced?0:ramp(d,.04,.6))*-60}px,0)`;
   });
-  function submit(e:FormEvent<HTMLFormElement>){
-    e.preventDefault();const f=new FormData(e.currentTarget);const name=String(f.get('name')||'').trim(),email=String(f.get('email')||'').trim();
+  async function submit(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();const form=e.currentTarget;const f=new FormData(form);const name=String(f.get('name')||'').trim(),email=String(f.get('email')||'').trim();
     if(!name||!email.includes('@')){setProblem(true);return;}
-    setProblem(false);if(!contact.email)return;
-    const chosen=topics[topic];const body=[`Name: ${name}`,`Email: ${email}`,f.get('place')?`Where from: ${f.get('place')}`:'',f.get('when')?`When: ${f.get('when')}`:'','',String(f.get('message')||'')].filter((l,i)=>l||i>3).join('\n');
+    setProblem(false);setFailed('');if(!contact.email)return;
+    const chosen=topics[topic];
+    if(direct){setSending(true);
+      try{const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,topic:string(chosen?.title),place:f.get('place'),when:f.get('when'),message:f.get('message'),website:f.get('website')})});
+        const result=await r.json().catch(()=>({}));
+        if(r.ok){setSent(email);form.reset();return;}
+        // Not sent: say so; when the site cannot send, the visitor's email app is offered with the same message.
+        if(!result.fallback){setFailed(result.error||'Your message could not be sent. Nothing was sent.');return;}
+        setFailed('');
+      }catch{setFailed('We could not reach the site. Check your connection and try again. Nothing was sent.');return;}
+      finally{setSending(false);}}const body=[`Name: ${name}`,`Email: ${email}`,f.get('place')?`Where from: ${f.get('place')}`:'',f.get('when')?`When: ${f.get('when')}`:'','',String(f.get('message')||'')].filter((l,i)=>l||i>3).join('\n');
     const href=`mailto:${contact.email}?subject=${encodeURIComponent(string(chosen?.title)||'Hello from the website')}&body=${encodeURIComponent(body)}`;
     // Opening the email app does not prove anything was sent: the page says so and keeps the form.
     setPrepared(href);window.location.assign(href);
@@ -39,16 +51,18 @@ export function ContactView({settings:s,contact,media}:{settings:Row;contact:Con
       <div className="contact-hero-copy" data-copy><h1>{string(s.title)||'Get in touch'}</h1>{string(s.lead)&&<p>{string(s.lead)}</p>}</div>
     </section>
     <div id="editorial-content" className="contact-main">
-      <div className="contact-panel">
-        <form onSubmit={submit} onChange={()=>{if(problem)setProblem(false);}} noValidate hidden={!!prepared}>
+      <div className="contact-panel" ref={panel}>
+        <form onSubmit={e=>void submit(e)} onChange={()=>{if(problem)setProblem(false);}} noValidate hidden={!!prepared||!!sent}>
           {topics.length>0&&<fieldset><legend>{string(s.topics_title)||'What are you writing about?'}</legend><div className="contact-picks">{topics.map((t,i)=><button type="button" key={i} aria-pressed={topic===i} onClick={()=>setTopic(i)}><span>{string(t.title)}</span>{string(t.hint)&&<small>{string(t.hint)}</small>}</button>)}</div></fieldset>}
           <div className="contact-fields">{[['name','Your name','text','name','Georgia Webb'],['email','Email','email','email','you@somewhere.sea'],['place','Where from','text','address-level2','Wollongong, AU'],['when','When','text','off','This season · next season · no rush']].map(([n,l,t,auto,hint])=><label key={n}><span>{l}</span><input name={n} type={t} autoComplete={auto} placeholder={hint} required={n==='name'||n==='email'} aria-invalid={problem&&(n==='name'||n==='email')?true:undefined}/></label>)}</div>
           <label className="contact-message"><span>Your message</span><textarea name="message" rows={4} placeholder="Tell us about the encounter you have in mind."/></label>
           <div className="contact-submit">
-            <span className={problem?'is-problem':''} role="status">{problem?'We need a name and an email to write back.':contact.email?<>{string(s.note)||'No newsletters, no lists. Just us writing back.'}<small>The button opens your email app with this message written to {contact.email}. Nothing is sent until you press send there.</small></>:'Writing from here is not available yet: the contact email has not been added. You can still find us through the links below.'}</span>
-            <button type="submit" disabled={!contact.email}>Open my email app</button>
+            <span className={problem||failed?'is-problem':''} role="status">{problem?'We need a name and an email to write back.':failed?<>{failed}<small>You can also write to <a href={`mailto:${contact.email}`}>{contact.email}</a>.</small></>:contact.email?<>{string(s.note)||'No newsletters, no lists. Just us writing back.'}<small>{direct?'It reaches us directly. We write back to the email you give.':<>The button opens your email app with this message written to {contact.email}. Nothing is sent until you press send there.</>}</small></>:'Writing from here is not available yet: the contact email has not been added. You can still find us through the links below.'}</span>
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true"/>
+            <button type="submit" disabled={!contact.email||sending}>{direct?(sending?'Sending…':'Send message'):'Open my email app'}</button>
           </div>
         </form>
+        {sent&&<div className="contact-done" role="status"><span>Message sent</span><h2>Thank you, it reached us</h2><p>We write back ourselves, to {sent}.</p>{string(topics[topic]?.reply)&&<p>{string(topics[topic]?.reply)}</p>}<p className="contact-done-note"><button type="button" onClick={()=>{setSent('');setTopic(-1);}}>Write another message</button></p><Scribble variant="loop"/></div>}
         {prepared&&<div className="contact-done" role="status"><span>One more step</span><h2>Send it from your email app</h2><p>Your email app should have opened with the message to {contact.email}. It reaches us only when you press send there.</p>{string(topics[topic]?.reply)&&<p>{string(topics[topic]?.reply)}</p>}<p className="contact-done-note">Did it not open? <a href={prepared}>Open it again</a> or write to <a href={`mailto:${contact.email}`}>{contact.email}</a>. <button type="button" onClick={()=>setPrepared('')}>Edit the message</button></p><Scribble variant="loop"/></div>}
       </div>
       {(contact.email||contact.whatsapp||contact.donation||contact.socials.length>0||others.length>0)&&<section className="contact-others">

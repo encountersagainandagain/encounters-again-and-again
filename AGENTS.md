@@ -60,7 +60,7 @@ El estado vivo y detallado por página está en `docs/encounters/page-progress.m
 6. No usar credenciales, base, usuarios, suscriptores ni servicios de Katie. `legacy/` es código de Katie conservado como
    referencia: no se importa ni se despliega.
 7. Los módulos fuera de alcance están apagados en `src/config/modules.ts` (commerce, donations, reviews, affiliates, gallery,
-   analytics, contactForm, etc.). «Apagado» bloquea rutas, consultas y efectos; no los reactives sin pedido.
+   analytics, etc.). `contactForm` se encendió el 2026-11-01 para la ruta propia `/api/contact`. «Apagado» bloquea rutas, consultas y efectos; no los reactives sin pedido.
 8. No enviar emails reales (`ENCOUNTERS_EMAIL_ENABLED=false`), no tocar DNS, WordPress ni Hostinger.
 
 ### Diseño y contenido

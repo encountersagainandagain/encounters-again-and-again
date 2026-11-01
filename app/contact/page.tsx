@@ -1,3 +1,4 @@
+import {contactSendingReady} from '@/lib/contactEmail';
 import {ContactView} from '@/components/public/ContactView';
 import {ContactLines} from '@/components/public/AboutView';
 import {PostBlocks} from '@/components/public/PostBlocks';
@@ -21,7 +22,7 @@ export default async function Page(){
   // Search engines read it as the contact page of the organisation, with the ways to reach it.
   const seo=contactSeoOf(s,pageFor(data,'contact'));
   const ld=<JsonLd id="contact-jsonld" data={{'@context':'https://schema.org','@type':'ContactPage','@id':`${siteUrl}/contact#webpage`,url:`${siteUrl}/contact`,name:seo.title,description:seo.description,keywords:seo.topics.join(', '),about:{'@id':`${siteUrl}/#organization`},mainEntity:{'@id':`${siteUrl}/#organization`},publisher:{'@id':`${siteUrl}/#organization`}}}/>;
-  if(Array.isArray(s.topics)&&s.topics.length)return <ScrollStage className="editorial-page contact-page">{ld}<ContactView settings={s} contact={contact} media={data.media}/></ScrollStage>;
+  if(Array.isArray(s.topics)&&s.topics.length)return <ScrollStage className="editorial-page contact-page">{ld}<ContactView settings={s} contact={contact} media={data.media} direct={contactSendingReady()}/></ScrollStage>;
   const page=pageFor(data,'contact');const blocks=page?await readBlocks(page.id):[];
   return <ScrollStage className="editorial-page contact-page">{ld}<PhotoHero title={string(page?.title)||'Contact'} kicker={string(page?.kicker)} cover={covers.contact(s,page).id} media={data.media} fallback={covers.contact(s,page).fallback}/><div id="editorial-content" className="contact-legacy"><PostBlocks blocks={blocks} media={data.media}/><div className="contact-legacy-lines"><ContactLines contact={contact}/></div></div></ScrollStage>;
 }

@@ -10,9 +10,10 @@ const { isRouteEnabled, assertDataAccessEnabled } = await import(policyUrl);
 const { moduleFetch } = await import(compileUrl((await source('src/lib/moduleFetch.ts')).replace("'@/config/module-policy'", JSON.stringify(policyUrl))));
 const targetSource = async ref => compileUrl((await source('src/lib/encountersSupabaseTarget.ts')).replace("import staging from '@/config/staging.json';", `const staging = ${JSON.stringify({ ...JSON.parse(await source('src/config/staging.json')), ...(ref === undefined ? {} : { supabaseRef: ref }) })};`));
 const { isAllowedEncountersSupabaseTarget } = await import(await targetSource());
-const blocked = ['/shop','/shop/item','/cart','/checkout','/support-us','/gallery','/gear','/destinations','/blog/post','/r/token','/admin/orders','/admin/products','/admin/providers','/admin/reviews','/admin/comments','/admin/gallery','/admin/gear','/admin/countries','/api/shop/checkout','/api/stripe/webhook','/api/admin/orders/x/refund','/api/admin/pod/variants','/api/cron/cleanup-pending-orders','/api/post-likes','/api/post-comments','/api/contact'];
+const blocked = ['/shop','/shop/item','/cart','/checkout','/support-us','/gallery','/gear','/destinations','/blog/post','/r/token','/admin/orders','/admin/products','/admin/providers','/admin/reviews','/admin/comments','/admin/gallery','/admin/gear','/admin/countries','/api/shop/checkout','/api/stripe/webhook','/api/admin/orders/x/refund','/api/admin/pod/variants','/api/cron/cleanup-pending-orders','/api/post-likes','/api/post-comments'];
 for (const path of blocked) assert.equal(isRouteEnabled(path),false,path);
-for (const path of ['/','/admin/posts','/admin/newsletter','/api/newsletter/subscribe','/crew','/art','/posts/new-slug']) assert.equal(isRouteEnabled(path),true,path);
+// /api/contact is Encounters' own contact form route (2026-11-01), not Katie's.
+for (const path of ['/','/admin/posts','/admin/newsletter','/api/newsletter/subscribe','/api/contact','/crew','/art','/posts/new-slug']) assert.equal(isRouteEnabled(path),true,path);
 assert.equal(isAllowedEncountersSupabaseTarget('https://lzwmwofxoegkxykglneq.supabase.co'),true);
 assert.equal(isAllowedEncountersSupabaseTarget('https://another-project.supabase.co'),false);
 assert.equal(isAllowedEncountersSupabaseTarget('http://127.0.0.1:54321'),false);

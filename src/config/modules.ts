@@ -21,7 +21,7 @@ export const modules = {
   engagement: false,
   gallery: false,
   analytics: false,
-  contactForm: false,
+  contactForm: true,
 } as const;
 
 export type ModuleName = keyof typeof modules;
