@@ -21,27 +21,23 @@ export function PeopleLine({people}:{people:Person[]}){
 }
 export function Responsible({postId,data,pathPrefix=''}:{postId:string;data:EditorialData;pathPrefix?:string}) {return <PeopleLine people={peopleFor(postId,data,pathPrefix)}/>;}
 
+// Gallery cards on wide screens, in sixths of the row: one work takes it all, two share it, more go three per row and
+// the last rows go two per row, so no row is left with a hole. Narrower screens are in editorial.css.
+const gallerySpan=(i:number,n:number)=>{if(n===1)return 6;if(n===2)return 3;const pairs=n%3===1?4:n%3===2?2:0;return i>=n-pairs?3:2;};
 // A work as the prototype shows it: a framed image and a monospace caption that opens the work. On the Art page and
 // the category pages (summary) the caption also tells what the work is: its categories and date, its artists, its
 // summary and Read more; a video plays in the frame and an audio under the caption, without leaving the page.
 export function ArtworkCards({posts,data,layout='gallery',pathPrefix='',summary=false}:{posts:ContentRow[];data:EditorialData;layout?:string;pathPrefix?:string;summary?:boolean}) {
-  const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const spanOf=(post:ContentRow)=>Math.min(6,Math.max(1,Number(artOf(post).span)||3));
-  const card=(post:ContentRow,i:number,half=false)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
-    const span=layout==='gallery'?spanOf(post):layout==='feature'||layout==='more'?3:6;const tall=layout==='gallery'?art.full_height===true:layout!=='more';
+  const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const shown=posts.filter(p=>artworkPath(p,data.artworks,data.categories));
+  const card=(post:ContentRow,i:number)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
+    const span=layout==='gallery'?gallerySpan(i,shown.length):layout==='feature'||layout==='more'?3:6;const tall=layout!=='gallery'&&layout!=='more';
     const play=embedOf(art.embed_kind,art.embed_id);const video=play&&!isAudio(play.kind)&&(summary||layout==='video')?play:null;const audio=play&&isAudio(play.kind)&&(summary||layout==='audio')?play:null;
     const frame=video?<VideoFrame kind={video.kind} id={video.id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||(data.media.find(m=>m.id===image)?.alt as string)||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
-    return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}${half?' art-work--half':''}`} style={half?undefined:{gridColumn:`span ${span}`}} data-seq={half?undefined:`${i%2?.86:1},0.45`}>
+    return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}`} style={{gridColumn:`span ${span}`}} data-seq={`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
       <figcaption><Link href={href}>[ {post.title} ]</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary&&layout!=='audio'}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
     </figure>;};
-  // Gallery (Art.dc.html, Drawings): up to two works that fill the columns left beside a full-height work
-  // stack there at half height each, instead of wrapping to the next row.
-  const items:ReactNode[]=[];
-  for(let i=0;i<posts.length;i++){const post=posts[i];const art=artOf(post);const rest=6-spanOf(post);
-    if(layout==='gallery'&&art.full_height===true&&rest>0){const stack=[];let j=i+1;while(stack.length<2&&j<posts.length&&artOf(posts[j]).full_height!==true&&spanOf(posts[j])===rest&&artworkPath(posts[j],data.artworks,data.categories)){stack.push(posts[j]);j++;}
-      if(stack.length===2){items.push(card(post,items.length));items.push(<div key={`stack-${post.id}`} className="art-stack" style={{gridColumn:`span ${rest}`}} data-seq={`${items.length%2?.86:1},0.45`}>{stack.map(p=>card(p,0,true))}</div>);i=j-1;continue;}}
-    items.push(card(post,items.length));}
-  return <div className={`art-works layout-${layout}`}>{items}</div>;
+  return <div className={`art-works layout-${layout}`}>{shown.map((post,i)=>card(post,i))}</div>;
 }
 function WorkSummary({post,art,data,pathPrefix}:{post:ContentRow;art:Row;data:EditorialData;pathPrefix:string}){
   const names=artCategoryIds(art).map(id=>data.categories.find(c=>c.id===id)).filter(Boolean).map(c=>string(c!.name));const date=workDate(post.published_at);

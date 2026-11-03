@@ -14,7 +14,9 @@ const data={settings:{home:{upcoming_limit:6}},posts,relations:[],media:[],crew:
   expeditions:[{id:'e1',activity_status:'finished'},{id:'e2',activity_status:'upcoming',starts_on:'2099-01-01'}],workshops:[],
   upcoming:['w1','m1','r1','e1','e2','c1','w2'].map((post_id,sort)=>({id:`u-${post_id}`,post_id,title:`About ${post_id}`,status:'published',sort}))};
 const agenda=homeView(data).agenda;
-const links=Object.fromEntries(agenda.filter(a=>a.type==='Announcement').map(a=>[a.key,a.href]));
+const links=Object.fromEntries(agenda.filter(a=>a.key.startsWith('u-')).map(a=>[a.key,a.href]));
+// Each card says what it announces.
+assert.deepEqual(Object.fromEntries(agenda.filter(a=>a.key.startsWith('u-')).map(a=>[a.key,a.type])),{'u-w1':'Art','u-m1':'Meaningful Message','u-r1':'Expedition','u-e1':'Expedition'});
 assert.deepEqual(links,{'u-w1':'/art/books/the-book','u-m1':'/meaningful-messages#a-poem','u-r1':'/posts/a-result','u-e1':'/expeditions/a-trip'});
 assert.equal(agenda.filter(a=>a.title==='next-trip').length,1,'the upcoming expedition is listed once, not again as an announcement');
 // Passing notices: gone after their last day (Perth), kept while it lasts; the sign-up button only from a link or email.

@@ -1,5 +1,5 @@
 import {activities,activityPath,dateLabel,isUpcoming,perthToday,shortDate,type ActivityData} from './activities';
-import {announcementShown,signupLink} from './announcements';
+import {announcementShown,placeByOrder,signupLink} from './announcements';
 import {artworkPath,byOrder,listedCrew,profileVisible,string,type Row} from './presentation';
 import {messagePath} from './message-text';
 // Home v2 (handoff 10-home.md). Everything listed here comes from published content; the section order,
@@ -30,13 +30,19 @@ export function homeView(data:HomeData,today=perthToday()){
   const agenda:AgendaItem[]=list.map(a=>({key:string(a.post.id),type:a.kind==='workshop'?'Workshop':'Expedition',chip:string(a.detail.availability_label),date:dateLabel(a.detail),title:string(a.post.title),place:string(a.detail.place),detail:string(a.post.meta_line)||string(a.post.subtitle),cta:string(a.detail.cta_label)||(a.kind==='workshop'?'Join this workshop':'Ask about this expedition'),href:a.path,image:a.post.cover_id}));
   // Each kind of linked content has its own address; content without a public page is not announced.
   const linkOf=(post:Row)=>post.kind==='expedition'||post.kind==='workshop'?activityPath(post):post.kind==='artwork'?artworkPath(post,data.artworks,data.categories):post.kind==='message'?messagePath(post.slug):string(post.kind) in {news:1,expedition_report:1,workshop_report:1}?`/posts/${string(post.slug)}`:null;
+  // The card says what it announces: the category of a work, Meaningful Message, Expedition… Only a notice not linked to
+  // anything stays “Announcement”.
+  const typeOf=(post:Row|null|undefined)=>{if(!post)return 'Announcement';if(post.kind==='artwork'){const a=data.artworks.find(x=>x.id===post.id);return string(data.categories.find(c=>c.id===a?.category_id)?.name)||'Art';}
+    return ({message:'Meaningful Message',news:'Field note',expedition:'Expedition',expedition_report:'Expedition',workshop:'Workshop',workshop_report:'Workshop'} as Record<string,string>)[string(post.kind)]||'Announcement';};
+  const announcements:{item:AgendaItem;sort:number}[]=[];
   for(const u of data.upcoming||[]){
     if(u.post_id&&list.some(a=>a.post.id===u.post_id)||!announcementShown(u,today))continue;
     const post=u.post_id?data.posts.find(p=>p.id===u.post_id&&p.status==='published'):null;const href=post?linkOf(post):null;if(u.post_id&&!href)continue;
     const title=string(u.title)||string(post?.title);const link=signupLink(u.cta_url,title);
-    agenda.push({key:string(u.id),type:'Announcement',chip:'',date:dateLabel({starts_on:u.starts_on,ends_on:u.ends_on}),title,place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id,signup:link&&{label:string(u.cta_label)||'Sign up',...link}});
+    announcements.push({sort:Number(u.sort)||0,item:{key:string(u.id),type:typeOf(post),chip:'',date:dateLabel({starts_on:u.starts_on,ends_on:u.ends_on}),title,place:'',detail:string(u.body),cta:href?'Read more':'',href,image:u.media_id||post?.cover_id,signup:link&&{label:string(u.cta_label)||'Sign up',...link}}});
   }
-  const shown=new Set(agenda.map(a=>a.key));
+  const coming=placeByOrder(agenda,announcements);
+  const shown=new Set(coming.map(a=>a.key));
   // Each card is a full screen while scrolling: 12 at most keeps Home a reasonable length (8 recommended in the admin).
   const limit=Math.max(2,Math.min(12,Number(home.upcoming_limit)||4));
   const kinds:Record<string,string>={news:'Field note',expedition_report:'Expedition',workshop_report:'Workshop'};
@@ -45,6 +51,6 @@ export function homeView(data:HomeData,today=perthToday()){
   const art:Card[]=data.posts.filter(p=>p.kind==='artwork'&&artworkPath(p,data.artworks,data.categories)).sort((a,b)=>featuredFirst(a,b)||byOrder(a,b)).slice(0,Math.max(3,Math.min(10,Number(home.art_limit)||5))).map(p=>{const a=data.artworks.find(x=>x.id===p.id)!;const c=data.categories.find(x=>x.id===a.category_id);const m=data.media.find(x=>x.id===(a.media_id||p.cover_id));return {key:string(p.id),href:artworkPath(p,data.artworks,data.categories)!,label:string(c?.name),title:string(p.title),image:a.media_id||p.cover_id,contain:m?.fit==='contain'};});
   const crew=data.crew.filter(c=>c.status==='published'&&listedCrew(c)).sort(byOrder).slice(0,6).map(c=>({key:string(c.id),name:string(c.name),image:c.portrait_id,href:profileVisible(c,data.posts)?`/crew/${string(c.slug)}`:null}));
   const projects=((home.projects||{}) as Row);
-  return {home,sections:visible,agenda:agenda.slice(0,limit),happened,art,crew,projects:projectCards.map(p=>{const own=(projects[p.key]||{}) as Row;return {...p,media_id:own.media_id,status_label:string(own.status_label),body:string(own.body)};})};
+  return {home,sections:visible,agenda:coming.slice(0,limit),happened,art,crew,projects:projectCards.map(p=>{const own=(projects[p.key]||{}) as Row;return {...p,media_id:own.media_id,status_label:string(own.status_label),body:string(own.body)};})};
 }
 export type HomeView=ReturnType<typeof homeView>;

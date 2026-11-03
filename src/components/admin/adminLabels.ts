@@ -63,8 +63,6 @@ export const help:Record<string,string>={
   external_url:'Optional link to see the work elsewhere.',
   embed_kind:'Choose YouTube or Spotify to embed a player.',
   embed_id:'Only the identifier of the video or episode, not the full address.',
-  span:'How many of the six grid columns the work takes.',
-  full_height:'Shows the image at full screen height.',
   signature:'Short signature line.',
   social_links:'Optional links shown on the profile.',
   activity_status:'Upcoming and running activities show their date, place and contact button; finished ones link to their result.',

@@ -169,6 +169,8 @@ una migración aplicada; un push no es un despliegue verificado.
 **Categorías de Art (2026-11-03)** — solo organizan: Name, Slug, Description (`lead`), Layout, Cover, SEO, estado y Order (nueva = última).
 - Title, Number label, Credit, `body`, links y Featured no se editan ni se muestran; el número sale de la posición. Las columnas siguen en la base.
 
+**Obras y What is coming (2026-11-03):** la grilla Gallery es automática según la cantidad de obras (sin `span` ni `full_height` en el admin). En Home, Order de un anuncio es su lugar en What is coming; la etiqueta dice qué anuncia y un anuncio vencido queda como «Expired» en el admin.
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
