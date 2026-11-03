@@ -329,6 +329,10 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 }
 /* Audio works (16-art.md): the Spotify player is a card, not a video frame — the embed's own 352px height. */
 .layout-audio .editorial-embed{width:100%;margin:8px 0 0;aspect-ratio:auto;height:352px}
+/* Audio category: a podcast is a square image beside its text and player, not a full-screen image; stacked on phones. */
+.layout-audio>.art-work{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:clamp(20px,3vw,44px);align-items:center}
+.art-page .layout-audio .art-frame{height:auto;aspect-ratio:1}
+@media(max-width:759px){.layout-audio>.art-work{grid-template-columns:minmax(0,1fr);gap:12px}}
 /* Personal page, pinned photo pair: the photos fill the height under the menu (one row of 73px from 981px, two rows
    of about 107px below it); the pin grows with them so the pair stays pinned as long as before (63vh of scroll). */
 @media(min-width:760px) and (prefers-reduced-motion:no-preference){:is(.profile-page,.crew-page) .crew-pair-pin{height:calc(100svh + 63vh)}:is(.profile-page,.crew-page) .crew-pair{top:74px}:is(.profile-page,.crew-page) .crew-pair>div{height:calc(100svh - 74px)}}

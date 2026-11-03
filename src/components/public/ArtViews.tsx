@@ -30,12 +30,12 @@ const gallerySpan=(i:number,n:number)=>{if(n===1)return 6;if(n===2)return 3;cons
 export function ArtworkCards({posts,data,layout='gallery',pathPrefix='',summary=false}:{posts:ContentRow[];data:EditorialData;layout?:string;pathPrefix?:string;summary?:boolean}) {
   const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const shown=posts.filter(p=>artworkPath(p,data.artworks,data.categories));
   const card=(post:ContentRow,i:number)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
-    const span=layout==='gallery'?gallerySpan(i,shown.length):layout==='feature'||layout==='more'?3:6;const tall=layout!=='gallery'&&layout!=='more';
+    const span=layout==='gallery'?gallerySpan(i,shown.length):layout==='feature'||layout==='more'?3:6;const tall=layout==='feature'||layout==='video';
     const play=embedOf(art.embed_kind,art.embed_id);const video=play&&!isAudio(play.kind)&&(summary||layout==='video')?play:null;const audio=play&&isAudio(play.kind)&&(summary||layout==='audio')?play:null;
     const frame=video?<VideoFrame kind={video.kind} id={video.id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||(data.media.find(m=>m.id===image)?.alt as string)||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
     return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}`} style={{gridColumn:`span ${span}`}} data-seq={`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
-      <figcaption><Link href={href}>[ {post.title} ]</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary&&layout!=='audio'}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
+      <figcaption><Link href={href}>[ {post.title} ]</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
     </figure>;};
   return <div className={`art-works layout-${layout}`}>{shown.map((post,i)=>card(post,i))}</div>;
 }
