@@ -6,7 +6,7 @@ import {byOrder,profileVisible,publishedWorks,string,type Row} from './presentat
 import {siteUrl,brand} from '@/config/brand';
 export const editorialData=cache(async()=>{
   const [posts,categories,artworks,crew,contributors,relations,media,settings]=await Promise.all([readPosts(),readRows('art_categories'),readRows('artworks'),readRows('crew_members'),readRows('post_contributors'),readRows('post_relations'),readRows('media'),readRows('site_settings')]);
-  return {posts,categories:categories.sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)||byOrder(a,b)),artworks,crew:crew.sort(byOrder),contributors,relations,media,settings:(settings.find(s=>s.key==='site')?.value||{}) as Row};
+  return {posts,categories:categories.sort(byOrder),artworks,crew:crew.sort(byOrder),contributors,relations,media,settings:(settings.find(s=>s.key==='site')?.value||{}) as Row};
 });
 export type EditorialData=Awaited<ReturnType<typeof editorialData>>;
 export function visibleArt(data:EditorialData){return publishedWorks(data) as typeof data.posts;}

@@ -108,7 +108,7 @@ Mapa completo: `docs/encounters/schema-map.md`.
 ## 5. Cómo trabajar y verificar
 
 ```sh
-npm run typecheck && npm run lint && npm test
+npm run typecheck && npm run lint && npm test   # con Node 22.13: NODE_OPTIONS=--experimental-strip-types npm test; si lint cae en .next-*: npx eslint src app
 NEXT_DIST_DIR=.next-verify npx next build && rm -rf .next-verify   # build de producción sin pisar .next
 git checkout -- next-env.d.ts tsconfig.json                          # el dev server y el build los tocan; no se commitean
 ```
@@ -165,6 +165,11 @@ una migración aplicada; un push no es un despliegue verificado.
   la visibilidad de la página personal.
 - **Texto y video:** Paragraph y los textos de perfil permiten B / I / U y link; Heading conserva Number y no Index name. El
   bloque YouTube muestra miniatura + play y carga el iframe al click.
+
+**Categorías de Art (2026-11-03)** — solo organizan: Name, Slug, Description (`lead`), Layout, Cover, SEO, estado y Order (nueva = última).
+- Title, Number label, Credit, `body`, links y Featured no se editan ni se muestran; el número sale de la posición. Las columnas siguen en la base.
+
+**Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
 - «THE CREW» es el título del banner, no un bloque. Se retiraron Sections of The Crew page y Place on the page.

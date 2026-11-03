@@ -11,7 +11,7 @@ import {artCategoryIds,embedOf,inCategory,isAudio,workDate} from '@/features/enc
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
 export type Person={member:Row;role:string;href:string|null};
-export const categoryNumber=(category:Row,data:EditorialData)=>string(category.number_label)||String(data.categories.indexOf(category)+1).padStart(2,'0');
+export const categoryNumber=(category:Row,data:EditorialData)=>String(data.categories.indexOf(category)+1).padStart(2,'0');
 export function peopleFor(postId:string,data:EditorialData,pathPrefix=''):Person[]{
   return data.contributors.filter(c=>c.post_id===postId).sort((a,b)=>Number(a.position)-Number(b.position)).flatMap(c=>{const member=data.crew.find(m=>m.id===c.crew_member_id);return member?[{member,role:string(c.role),href:profileVisible(member,data.posts)?`${pathPrefix}/crew/${member.slug}`:null}]:[];});
 }
@@ -48,10 +48,10 @@ function WorkSummary({post,art,data,pathPrefix}:{post:ContentRow;art:Row;data:Ed
   return <div className="art-work-summary">{(names.length||date)?<p className="art-work-meta">{[...names,date].filter(Boolean).join(' · ')}</p>:null}<PeopleLine people={peopleFor(post.id,data,pathPrefix)}/>{string(post.excerpt)?<p className="art-work-text">{string(post.excerpt)}</p>:null}</div>;
 }
 export function CategoryIntro({category,number,pathPrefix='',link=true}:{category:Row;number:string;pathPrefix?:string;link?:boolean}){
-  const title=string(category.title)||string(category.name);
+  const title=string(category.name);
   return <div className="art-row">
-    <div className="art-intro-title" data-seq="1.2,0.5"><span className="art-kicker"><small>{number}</small>{string(category.name)}</span><h2>{link?<Link href={`${pathPrefix}/art/${category.slug}`}>{title}</Link>:title}</h2>{category.credit?<span className="art-credit">{string(category.credit)}</span>:null}</div>
-    {(category.lead||category.body||category.cta_label)?<div className="art-intro-copy" data-seq="1.05,0.5">{category.lead?<p className="art-lead">{string(category.lead)}</p>:null}{category.body?<p>{string(category.body)}</p>:null}{category.cta_label&&safeHref(category.cta_url)?<a className="art-cta" href={safeHref(category.cta_url)}>{string(category.cta_label)} →</a>:null}</div>:null}
+    <div className="art-intro-title" data-seq="1.2,0.5"><span className="art-kicker"><small>{number}</small></span><h2>{link?<Link href={`${pathPrefix}/art/${category.slug}`}>{title}</Link>:title}</h2></div>
+    {category.lead?<div className="art-intro-copy" data-seq="1.05,0.5"><p className="art-lead">{string(category.lead)}</p></div>:null}
   </div>;
 }
 export function CategorySection({category,posts,data,pathPrefix='',link=true}:{category:Row;posts:ContentRow[];data:EditorialData;pathPrefix?:string;link?:boolean}) {

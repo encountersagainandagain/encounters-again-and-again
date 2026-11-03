@@ -90,7 +90,7 @@ function clean(v:unknown):unknown{if(Array.isArray(v))return v.map(clean).filter
 export function PageSettings({pageKey}:{pageKey:string}){
   const schema=pageSchemas.find(p=>p.key===pageKey)||pageSchemas[0];
   const [draft,setDraft]=useState<Row|null>(null);const [converted,setConverted]=useState('');const [media,setMedia]=useState<Row[]>([]);const [message,setMessage]=useState('Loading…');const [saved,setSaved]=useState('');
-  const frame=useRef<HTMLIFrameElement>(null);
+  const [saving,setSaving]=useState(false);const frame=useRef<HTMLIFrameElement>(null);
   const loadMedia=useCallback(()=>{void supabase?.from('media').select('*').order('created_at',{ascending:false}).then(({data})=>setMedia(data||[]));},[]);
   useEffect(()=>{let live=true;if(!supabase)return;void supabase.from('site_settings').select('value').eq('key','site').single().then(({data,error})=>{if(!live)return;if(error){setMessage('Settings could not be loaded.');return;}const value=obj(data?.value);const current=schema.store==='home'?obj(value.home):obj(obj(value.pages)[schema.key]);
     void (schema.key==='expeditions'?expeditionsDraft(current):schema.key==='workshops'?workshopsDraft(current):schema.key==='messages'?Promise.resolve(messagesDraft(current)):schema.key==='art'?Promise.resolve(artDraft(current)):schema.key==='about'?aboutDraft(current):schema.key==='contact'?contactDraft(current):Promise.resolve({draft:current,converted:''})).then(({draft,converted})=>{if(!live)return;setDraft(draft);setSaved(JSON.stringify(draft));setConverted(converted);setMessage('');});});loadMedia();return()=>{live=false;};},[schema,loadMedia]);
@@ -98,7 +98,8 @@ export function PageSettings({pageKey}:{pageKey:string}){
   const send=useCallback(()=>{if(draft)frame.current?.contentWindow?.postMessage({type:'page-draft',key:schema.key,value:clean(draft)},location.origin);},[draft,schema.key]);
   useEffect(()=>{const t=setTimeout(send,250);return()=>clearTimeout(t);},[send]);
   useEffect(()=>{const ready=(e:MessageEvent)=>{if(e.origin===location.origin&&e.data?.type==='page-preview-ready')send();};addEventListener('message',ready);return()=>removeEventListener('message',ready);},[send]);
-  async function save(e:FormEvent){e.preventDefault();if(!supabase||!draft)return;setMessage('Saving…');
+  async function save(e:FormEvent){e.preventDefault();if(!supabase||!draft||saving)return;setSaving(true);setMessage('Saving…');
+    try{
     const current=await supabase.from('site_settings').select('value').eq('key','site').single();if(current.error){setMessage('Could not load the current settings. Nothing was saved.');return;}
     const value=obj(current.data.value);const next=clean(draft) as Row;
     // Home keeps keys it does not edit (older ones such as pinned content); a cleared field is removed.
@@ -109,6 +110,7 @@ export function PageSettings({pageKey}:{pageKey:string}){
     if(r.error){setMessage('Could not save. Check your connection and try again.');return;}
     // Public pages are cached: expire them so the change shows on the next visit.
     await requestAdminRevalidation({scope:'settings'}).catch(()=>{});setSaved(JSON.stringify(draft));setConverted('');setMessage(`Saved. It is live on ${schema.path}.`);
+    }catch{setMessage('Could not save. Check your connection and try again.');}finally{setSaving(false);}
   }
   const dirty=draft&&JSON.stringify(draft)!==saved;
   return <div className="adm-stack"><AdminHeader kicker="Page presentation" title={schema.label} lead={schema.lead}><Link className="adm-btn adm-btn--quiet" href={schema.path} target="_blank">Open page</Link></AdminHeader>
@@ -117,7 +119,7 @@ export function PageSettings({pageKey}:{pageKey:string}){
       <form onSubmit={save} className="adm-card adm-stack" style={{gap:18}}>
         {converted&&<p className="adm-notice">The cards below are the ones the page shows today, read from {converted}. Saving keeps them here, looking the same; from then on they are edited only on this page.</p>}
         {draft?<Fields fields={schema.fields} value={draft} onChange={setDraft} media={media} reload={loadMedia} prefix={`${schema.key}-`} path={schema.path}/>:null}
-        <div className="adm-actions adm-sticky-actions"><button className="adm-btn" disabled={!draft}>Save {schema.label}</button><p role="status" className="adm-help">{dirty&&!message?'Unsaved changes.':message}</p></div></form>
+        <div className="adm-actions adm-sticky-actions"><button className="adm-btn" disabled={!draft||saving}>{saving?'Saving…':`Save ${schema.label}`}</button><p role="status" className="adm-help">{dirty&&!message?'Unsaved changes.':message}</p></div></form>
       <section className="adm-preview adm-page-preview" aria-label="Visual preview"><header><strong>Visual preview</strong><span className="adm-help">The public template with these unsaved changes. Scroll inside it.</span></header><iframe ref={frame} title={`Preview of ${schema.label}`} src={`/admin/page-preview?page=${schema.key}`} onLoad={send}/></section>
     </div></div>;
 }
