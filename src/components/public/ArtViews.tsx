@@ -35,7 +35,7 @@ export function ArtworkCards({posts,data,layout='gallery',pathPrefix='',summary=
     const frame=video?<VideoFrame kind={video.kind} id={video.id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||(data.media.find(m=>m.id===image)?.alt as string)||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
     return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}`} style={{gridColumn:`span ${span}`}} data-seq={`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
-      <figcaption><Link href={href}>[ {post.title} ]</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
+      <figcaption><Link className="art-work-title" href={href}>{post.title}</Link>{summary?<WorkSummary post={post} art={art} data={data} pathPrefix={pathPrefix}/>:null}{audio?<MediaEmbed kind={audio.kind} id={audio.id} audioHeight={summary}/>:null}{summary?<Link className="art-cta art-work-more" href={href} aria-label={`Read more about ${post.title}`}>Read more →</Link>:null}</figcaption>
     </figure>;};
   return <div className={`art-works layout-${layout}`}>{shown.map((post,i)=>card(post,i))}</div>;
 }
