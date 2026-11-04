@@ -13,18 +13,45 @@ import {listGroups} from './ExpeditionsView';
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
 // inside the card (their own snap and contained overscroll); the image crossfades with the rail position.
 function SessionRail({id,sessions,media}:{id:string;sessions:Row[];media:Row[]}){
-  const rail=useRef<HTMLDivElement>(null),images=useRef<HTMLDivElement>(null),count=useRef<HTMLSpanElement>(null),bar=useRef<HTMLSpanElement>(null);
+  const card=useRef<HTMLElement>(null),rail=useRef<HTMLDivElement>(null),images=useRef<HTMLDivElement>(null),count=useRef<HTMLSpanElement>(null),bar=useRef<HTMLSpanElement>(null);
+  const [at,setAt]=useState(0);const [moved,setMoved]=useState(false);const many=sessions.length>1;
+  // One session up or down; false when the rail is already at that end (the page scrolls on instead).
+  const go=(step:number)=>{const r=rail.current;if(!r)return false;const i=Math.round(r.scrollTop/Math.max(1,r.clientHeight));const n=Math.max(0,Math.min(sessions.length-1,i+step));
+    if(n===i)return false;r.scrollTo({top:n*r.clientHeight,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});return true;};
   useEffect(()=>{
     const r=rail.current;if(!r)return;
     const sync=()=>{const raw=r.scrollTop/Math.max(1,r.clientHeight),i=Math.max(0,Math.min(sessions.length-1,Math.round(raw)));
       images.current?.querySelectorAll<HTMLElement>('[data-shot]').forEach((img,n)=>{const d=Math.min(1,Math.abs(raw-n));img.style.opacity=String(1-d);img.style.transform=`scale(${1+d*.04})`;});
-      if(count.current)count.current.textContent=`${pad(i+1)} / ${pad(sessions.length)}`;if(bar.current)bar.current.style.width=`${(i+1)/sessions.length*100}%`;};
+      if(count.current)count.current.textContent=`${pad(i+1)} / ${pad(sessions.length)}`;if(bar.current)bar.current.style.width=`${(i+1)/sessions.length*100}%`;
+      setAt(i);if(raw>.05)setMoved(true);};
     sync();r.addEventListener('scroll',sync,{passive:true});addEventListener('resize',sync);return()=>{r.removeEventListener('scroll',sync);removeEventListener('resize',sync);};
   },[sessions.length]);
-  return <article className="ws-card">
+  // The photo moves the sessions too: a wheel turn or a swipe over it goes to the next or previous session, until the
+  // last one; from there the page scrolls on as usual.
+  useEffect(()=>{
+    const m=images.current;if(!m||!many)return;let wait=0,acc=0,y=0,dir=0;
+    const step=(d:number)=>{const now=performance.now();if(now<wait)return true;acc+=d;if(Math.abs(acc)<30)return true;const ok=go(acc>0?1:-1);acc=0;if(ok)wait=now+650;return ok;};
+    const r=rail.current!;const can=(d:number)=>d>0?r.scrollTop+r.clientHeight<r.scrollHeight-4:r.scrollTop>4;
+    const wheel=(e:WheelEvent)=>{if(!can(e.deltaY)&&performance.now()>=wait)return;e.preventDefault();step(e.deltaY);};
+    const start=(e:TouchEvent)=>{y=e.touches[0].clientY;dir=0;};
+    const move=(e:TouchEvent)=>{const d=y-e.touches[0].clientY;if(!dir&&Math.abs(d)>8)dir=Math.sign(d);if(dir&&can(dir))e.preventDefault();};
+    const end=(e:TouchEvent)=>{const d=y-(e.changedTouches[0]?.clientY??y);if(Math.abs(d)>40&&can(d))go(d>0?1:-1);};
+    m.addEventListener('wheel',wheel,{passive:false});m.addEventListener('touchstart',start,{passive:true});m.addEventListener('touchmove',move,{passive:false});m.addEventListener('touchend',end,{passive:true});
+    return()=>{m.removeEventListener('wheel',wheel);m.removeEventListener('touchstart',start);m.removeEventListener('touchmove',move);m.removeEventListener('touchend',end);};
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[many,sessions.length]);
+  // The first time the card comes into view, the text lifts a little and shows the next session peeking from below.
+  useEffect(()=>{
+    const c=card.current;if(!c||!many||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const io=new IntersectionObserver(([e])=>{if(!e.isIntersecting)return;io.disconnect();c.classList.add('is-peeking');setTimeout(()=>c.classList.remove('is-peeking'),1600);},{threshold:.6});
+    io.observe(c);return()=>io.disconnect();
+  },[many]);
+  const last=at>=sessions.length-1;
+  return <article ref={card} className={`ws-card${many?' has-more':''}${moved?' is-moved':''}`}>
     <div ref={rail} className="ws-rail" tabIndex={0} aria-label="Sessions" id={`sessions-${id}`}>{sessions.map((s,i)=><section key={string(s.id)} className="ws-slide" aria-label={`Session ${i+1} of ${sessions.length}`}><span className="ws-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{(string(s.place)||string(s.held_on))&&<small>{[dateLabel({starts_on:s.held_on}),string(s.place)].filter(Boolean).join(' · ')}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div></section>)}</div>
     <div ref={images} className="ws-media" aria-hidden="true">{sessions.map((s,i)=><div key={string(s.id)} data-shot style={{opacity:i?0:1}}>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</div>)}</div>
-    <div className="ws-indicator"><span ref={count}>{`01 / ${pad(sessions.length)}`}</span><span className="ws-bar"><span ref={bar} style={{width:`${100/Math.max(1,sessions.length)}%`}}/></span><span>Sessions</span></div>
+    <div className="ws-indicator"><span ref={count}>{`01 / ${pad(sessions.length)}`}</span><span className="ws-bar"><span ref={bar} style={{width:`${100/Math.max(1,sessions.length)}%`}}/></span>
+      {many?<button type="button" className="ws-next" aria-controls={`sessions-${id}`} onClick={()=>{if(!go(last?-sessions.length:1))return;}}>{last?'First session':'Next session'}<i aria-hidden="true">{last?'↑':'↓'}</i></button>:<span>Session</span>}</div>
   </article>;
 }
 function Workshop({activity:a,index,sessions,media}:{activity:Activity;index:number;sessions:Row[];media:Row[]}){
