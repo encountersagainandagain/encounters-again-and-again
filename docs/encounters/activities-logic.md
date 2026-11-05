@@ -85,4 +85,4 @@ Clara de un vistazo: **qué** (título y banner), **estado** con punto de color 
 - **Inscripción**: el botón es el email de inscripción (si Registration = Open y hay email) o Contact; Full y Closed lo
   ocultan y lo dicen. Formato, idioma, lugares y precio aparecen como datos chicos del vistazo.
 - En `/workshops` cada workshop mantiene su pantalla fija con las sessions deslizables (prototipo); los grupos y el filtro
-  se agregan arriba de esas pantallas.
+  se agregan arriba de esas pantallas. Una nota o una session largas se desplazan en su lugar, sin agrandar la tarjeta.
