@@ -48,8 +48,10 @@ Editor en el orden de la página (`src/components/admin/pageSettingsSchema.ts`, 
 - **Excerpt = la invitación**: se muestra grande con el botón para sumarse en la página de la actividad.
 - **How it went** (`outcome`) se muestra solo con la actividad terminada. **Results of this activity** aparece desde que
   empieza o si ya tiene algo enlazado; antes de empezar no se muestra (2026-11-05).
-- **Content blocks:** van en la página propia de la actividad, debajo de la invitación y arriba de sesiones, «What to bring»
-  y needs. No aparecen en la lista de `/workshops` ni de `/expeditions`.
+- **Content blocks:** una expedición los usa en su página, debajo de la invitación y arriba de «What to bring» y needs; no
+  aparecen en la lista. **Un workshop no agrega bloques** (Juani, 2026-11-05): se comunica con sus sessions, y lo que pasó
+  después va en la historia de Results, que sí usa bloques. Un workshop que ya tenía bloques los sigue mostrando y permite
+  editarlos o quitarlos; sin bloques, la tarjeta no aparece.
 - Tarjeta de resultados: si terminó y no tiene historia, invita a **Write about this adventure**.
 
 ## 5. Historias

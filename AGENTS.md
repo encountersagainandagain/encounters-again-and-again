@@ -175,7 +175,7 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Obras y What is coming (2026-11-03):** la grilla Gallery es automática según la cantidad de obras (sin `span` ni `full_height` en el admin). En Home, Order de un anuncio es su lugar en What is coming; la etiqueta dice qué anuncia y un anuncio vencido queda como «Expired» en el admin.
 
-**Carga de actividades (2026-11-05):** How it went aparece recién con la actividad terminada; Results of this activity, desde que empieza o si ya tiene algo enlazado. Cada sesión de un workshop tiene Price per person, en la Currency del workshop.
+**Carga de actividades (2026-11-05):** How it went aparece recién con la actividad terminada; Results of this activity, desde que empieza o si ya tiene algo enlazado. Cada sesión de un workshop tiene Price per person, en la Currency del workshop. Un workshop no agrega Content blocks (se cuenta con sus sesiones; después, con su historia en Results): los que ya tenía se ven y se pueden editar o quitar.
 
 **Errores del admin (2026-11-05):** cada problema se lista con su lugar (tarjeta › campo) y lleva al campo. Lo que la base rechazaría se frena antes de enviar (`fieldProblem`) y sus reglas se traducen al campo (`explainError`, en `adminErrors.ts`): al agregar una regla nueva en una migración, sumala ahí.
 
