@@ -46,6 +46,8 @@ Editor en el orden de la página (`src/components/admin/pageSettingsSchema.ts`, 
 - **Status** (§ 3) y **Delete** en dos pasos (qué se borra y qué queda; escribir el título). Borrar la actividad borra
   detalles, bloques, créditos, needs/sessions y sus enlaces; **las historias se conservan** en Results.
 - **Excerpt = la invitación**: se muestra grande con el botón para sumarse en la página de la actividad.
+- **Orden** (2026-11-05): con Up/Down en la lista del admin; manda dentro de cada grupo de la página pública. Una actividad
+  nueva empieza primera. En Home, What is coming sigue por fecha.
 - **How it went** (`outcome`) se muestra solo con la actividad terminada. **Results of this activity** aparece desde que
   empieza o si ya tiene algo enlazado; antes de empezar no se muestra (2026-11-05).
 - **Content blocks:** una expedición los usa en su página, debajo de la invitación y arriba de «What to bring» y needs; no
