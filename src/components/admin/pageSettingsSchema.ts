@@ -10,7 +10,7 @@ import {artSeo} from '@/features/encounters/art';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
 // an ordered list of parts, each of one of its `kinds` (saved with its `type`).
-export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
+export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'signature'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
 const t=(key:string,label:string,help?:string,placeholder?:string):PageField=>({key,label,help,placeholder});
 const area=(key:string,label:string,help?:string):PageField=>({key,label,type:'textarea',help});
 const media=(key:string,label:string,help?:string):PageField=>({key,label,type:'media',help});
@@ -36,6 +36,9 @@ export const pageSchemas:PageSchema[]=[
     t('crew_title','Crew: title'),
     group('about','About block',[t('kicker','Small line'),area('line','Phrase in italics','The block is hidden when the phrase is empty.'),area('body','Text'),t('cta_label','Button','Default: Read our story')]),
     group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
+    section('closing_band','Closing','The dark band at the very end of Home, above the footer: a phrase and a signature that draws itself as visitors reach it.',[
+      t('closing','Closing phrase','Default: May the ocean be with you'),
+      {key:'signature',label:'Signature',type:'signature',help:'Pick the stroke drawn under the phrase. Point at one to see it draw.'}]),
   ]},
   {key:'art',label:'Art page',path:'/art',store:'pages',lead:'Everything on the Art page, in the order of the page: the banner, how it appears in search engines, the categories, the works and the closing. Categories are edited in Art → Categories and each work in Art → Works; their tiles and cards fill themselves.',fields:[
     section('banner','1 · Banner','The first screen: the drawn title over the lines, and a short line under it.',[

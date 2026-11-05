@@ -12,6 +12,7 @@ import {brand} from '@/config/brand';
 import {Picture} from './MediaImage';
 import {NewsletterSignup} from './NewsletterSignup';
 import {clamp01,useFrame} from './useFrame';
+import {signatureOf,signatures} from '@/features/encounters/signatures';
 import {creatures} from '@/features/encounters/home-creatures';
 import {createWater,waterMaxScale,type Water} from './homeWater';
 
@@ -295,6 +296,6 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       </div>
     </section>
     {sections.map(k=>blocks[k])}
-    <section className="home-closing"><h2 data-hseq="1.05,0.45">{closing}</h2><svg data-hscribble viewBox="0 0 600 120" aria-hidden="true"><path pathLength="1" d="M14 70 C 120 18, 300 14, 430 34 C 540 52, 520 86, 380 90 C 240 94, 120 78, 66 58 C 36 46, 70 34, 150 34" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg></section>
+    <section className="home-closing"><h2 data-hseq="1.05,0.45">{closing}</h2><svg data-hscribble data-signature={signatureOf(home.signature)} viewBox="0 0 600 120" aria-hidden="true">{signatures[signatureOf(home.signature)].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>)}</svg></section>
   </div>;
 }

@@ -11,7 +11,7 @@ import {MessagesView} from '@/components/public/MessagesView';
 import {WorkshopsView} from '@/components/public/WorkshopsView';
 import {activities} from '@/features/encounters/activities';
 import {contactOf} from '@/features/encounters/contact';
-import {homeView} from '@/features/encounters/home';
+import {homeClosing,homeView} from '@/features/encounters/home';
 import {byOrder,publishedWorks,string,type Row} from '@/features/encounters/presentation';
 import type {EditorialData} from '@/features/encounters/editorial-data';
 import {cardWindows} from '@/components/public/ExpeditionsView';
@@ -51,7 +51,7 @@ export function PagePreviewFrame({pageKey,mode}:{pageKey:string;mode?:string}){
   const base={posts,expeditions:data.expeditions,workshops:data.workshops,relations:data.post_relations};
   const own=(settings.pages as Row|undefined)?.[pageKey] as Row|undefined;
   const note=<p className="adm-preview-note" role="status">Preview · unsaved changes{imageError?` · ${imageError}`:''}</p>;
-  if(pageKey==='home')return <>{note}<div className="editorial-page home-page"><HomeView view={homeView({...base,settings,media:images,artworks:data.artworks,categories:data.art_categories,crew:data.crew_members,upcoming:data.upcoming_items.filter(u=>u.status==='published').sort(byOrder)})} media={images} closing={string(value.closing_line)||'May the ocean be with you'} newsletter={false}/></div></>;
+  if(pageKey==='home')return <>{note}<div className="editorial-page home-page"><HomeView view={homeView({...base,settings,media:images,artworks:data.artworks,categories:data.art_categories,crew:data.crew_members,upcoming:data.upcoming_items.filter(u=>u.status==='published').sort(byOrder)})} media={images} closing={homeClosing(settings)} newsletter={false}/></div></>;
   if(pageKey==='expeditions')return <>{note}<ScrollStage className="editorial-page expeditions-page"><ExpeditionsView page={program} settings={own||{}} cards={program?[...data.expedition_cards.filter(c=>c.post_id===program.id&&c.id!==card?.id),...(card&&card.post_id===program.id?[card]:[])].sort(byOrder):[]} list={activities(base,'expedition')} media={images} blocks={programBlocks}/></ScrollStage></>;
   if(pageKey==='workshops')return <>{note}<ScrollStage className="editorial-page workshops-page"><WorkshopsView page={program} settings={own||{}} list={activities(base,'workshop')} sessions={data.workshop_sessions.sort(byOrder)} media={images} blocks={[]}/></ScrollStage></>;
   if(pageKey==='messages')return <>{note}<ScrollStage className="editorial-page messages-page"><MessagesView settings={own||{}} media={images} messages={posts.filter(p=>p.kind==='message').sort(byOrder).flatMap(post=>{const detail=data.messages.find(m=>m.id===post.id);return detail?[{post,detail,pieces:messagePieces(post,detail,messageBlocks.filter(b=>b.post_id===post.id))}]:[];})}/></ScrollStage></>;

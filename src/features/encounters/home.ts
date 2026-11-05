@@ -8,6 +8,8 @@ import {messagePath} from './message-text';
 export type HomeData=ActivityData&{settings:Row;media:Row[];artworks:Row[];categories:Row[];crew:Row[];upcoming?:Row[]};
 export const homeSections=[['descent','The descent'],['reef','Reef'],['projects','Ongoing projects'],['upcoming','What is coming'],['happened','What already happened'],['art','New art'],['crew','Who is on board'],['about','About'],['newsletter','Newsletter']] as const;
 export type HomeSection=typeof homeSections[number][0];
+// The closing phrase of Home: Home page → Closing; before it moved there it lived in Settings (closing_line).
+export const homeClosing=(settings:Row)=>string(((settings.home||{}) as Row).closing)||string(settings.closing_line)||'May the ocean be with you';
 export type AgendaItem={key:string;type:string;chip:string;date:string;title:string;place:string;detail:string;cta:string;href:string|null;image:unknown;signup?:{label:string;href:string;external:boolean}|null};
 export type Card={key:string;href:string;label:string;date?:string;title:string;excerpt?:string;image:unknown;contain?:boolean};
 const featuredFirst=(a:Row,b:Row)=>Number(!!b.featured)-Number(!!a.featured)||(a.featured&&b.featured?Number(a.home_rank??999)-Number(b.home_rank??999):0);

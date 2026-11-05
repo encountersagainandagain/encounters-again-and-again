@@ -15,6 +15,7 @@ import {messagesSeoOf} from '@/features/encounters/messages-page';
 import {aboutBlocks,aboutSeoOf,legacyAboutKeys} from '@/features/encounters/about-page';
 import {contactSeoOf} from '@/features/encounters/contact-page';
 import {artSeoOf} from '@/features/encounters/art';
+import {signatureKeys,signatureOf,signatures} from '@/features/encounters/signatures';
 import type {ContentBlock} from '@/features/encounters/public-content';
 type Row=Record<string,unknown>;
 const obj=(v:unknown):Row=>v&&typeof v==='object'&&!Array.isArray(v)?v as Row:{};
@@ -26,6 +27,7 @@ function Fields({fields,value,onChange,media,reload,prefix,path}:{fields:PageFie
     const id=`${prefix}${f.key}`;const help=f.help?<small id={`${id}-help`}>{f.help}</small>:null;const described=f.help?`${id}-help`:undefined;const raw=value[f.key];
     if(f.type==='section')return <section key={f.key} className="adm-field adm-field--wide adm-page-section" aria-labelledby={`${id}-title`}><h2 id={`${id}-title`}>{f.label}</h2>{f.help&&<p className="adm-help">{f.help}</p>}<Fields fields={f.fields!} value={value} onChange={onChange} media={media} reload={reload} prefix={prefix} path={path}/></section>;
     if(f.type==='seo'&&f.hints)return <div key={f.key} className="adm-field adm-field--wide"><SeoPanel value={value} onChange={onChange} path={path} image={value.cover_id||arr(value.gallery)[0]} fallbackTitle={f.hints.fallbackTitle} fallbackDescription={f.hints.fallbackDescription} titleHint={f.hints.title} descriptionHint={f.hints.description}/></div>;
+    if(f.type==='signature'){const current=signatureOf(raw);return <fieldset key={f.key} className="adm-field adm-field--wide adm-signatures" aria-describedby={described}><legend>{f.label}</legend>{help}<div>{signatureKeys.map(k=><label key={k} title={signatures[k].hint}><input type="radio" name={id} value={k} checked={current===k} onChange={()=>set(f.key,k)}/><svg viewBox="0 0 600 120" aria-hidden="true">{signatures[k].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>)}</svg><span>{signatures[k].label}</span></label>)}</div></fieldset>;}
     if(f.type==='swatches'){const current=String(raw||f.options?.[0]?.value||'');return <fieldset key={f.key} className="adm-field adm-field--wide adm-swatches" aria-describedby={described}><legend>{f.label}</legend><div>{f.options!.map(o=><label key={o.value}><input type="radio" name={id} value={o.value} checked={current===o.value} onChange={()=>set(f.key,o.value)}/><span style={{background:o.color}} aria-hidden="true"/>{o.label}</label>)}</div>{help}</fieldset>;}
     if(f.type==='marked')return <div key={f.key} className="adm-field adm-field--wide"><div className="adm-field-head"><label htmlFor={id}>{f.label}</label><MarkButtons id={id} value={String(raw??'')} onChange={v=>set(f.key,v)} name={f.label.toLowerCase()} link/></div><textarea id={id} rows={6} aria-describedby={described} value={String(raw??'')} onChange={e=>set(f.key,e.target.value)}/>{help}</div>;
     if(f.type==='group')return <fieldset key={f.key} className="adm-field adm-field--wide adm-group"><legend>{f.label}</legend>{help}<Fields fields={f.fields!} value={obj(raw)} onChange={v=>set(f.key,v)} media={media} reload={reload} prefix={`${id}-`} path={path}/></fieldset>;
@@ -104,7 +106,9 @@ export function PageSettings({pageKey}:{pageKey:string}){
     const value=obj(current.data.value);const next=clean(draft) as Row;
     // Home keeps keys it does not edit (older ones such as pinned content); a cleared field is removed.
     let merged:Row;
-    if(schema.store==='home'){const home={...obj(value.home)};for(const f of schema.fields){if(f.key==='sections')continue;if(f.key in next)home[f.key]=next[f.key];else delete home[f.key];}if(next.sections){home.sections=next.sections;home.hidden_sections=next.hidden_sections??[];}merged={...value,home};}
+    if(schema.store==='home'){const home={...obj(value.home)};
+      // A section only groups fields on screen: its fields are saved flat, like the others.
+      for(const f of schema.fields.flatMap(x=>x.type==='section'?x.fields||[]:[x])){if(f.key==='sections')continue;if(f.key in next)home[f.key]=next[f.key];else delete home[f.key];}if(next.sections){home.sections=next.sections;home.hidden_sections=next.hidden_sections??[];}merged={...value,home};}
     else merged={...value,pages:{...obj(value.pages),[schema.key]:next}};
     const r=await supabase.from('site_settings').update({value:merged}).eq('key','site');
     if(r.error){setMessage('Could not save. Check your connection and try again.');return;}

@@ -270,6 +270,18 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-page-section>h2{margin:0;font:600 18px var(--font-body),Arial,sans-serif;color:var(--adm-sea)}.adm-page-section>.adm-help{margin:0;max-width:70ch}
 /* Colour choice of a card: one swatch per palette colour, with its name. */
 .adm-swatches>div{display:flex;flex-wrap:wrap;gap:6px}
+/* Signature picker: each option shows its stroke on the dark of the closing band; pointing at it (or choosing it) draws it. */
+.adm-signatures>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:8px}
+.adm-signatures label{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--adm-line);border-radius:10px;background:#061826;color:rgba(234,245,250,.82);cursor:pointer}
+.adm-signatures label span{font-size:12px;font-weight:600;color:#eaf5fa}
+.adm-signatures svg{width:100%;height:auto;display:block}
+.adm-signatures path{stroke-dasharray:1;stroke-dashoffset:0}
+.adm-signatures label:hover path,.adm-signatures label:has(input:checked) path{animation:adm-sign 1.6s ease-out}
+.adm-signatures label:has(input:checked){border-color:var(--adm-lagoon);box-shadow:0 0 0 2px rgba(143,217,234,.45)}
+.adm-signatures label:has(input:focus-visible){outline:2px solid var(--adm-sea);outline-offset:2px}
+.adm-signatures input{position:absolute;opacity:0;pointer-events:none}
+@keyframes adm-sign{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.adm-signatures label path{animation:none!important}}
 .adm-swatches label{display:inline-flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border:1px solid var(--adm-line);border-radius:999px;font-size:13px;cursor:pointer}
 .adm-swatches label:has(input:checked){border-color:var(--adm-sea);box-shadow:0 0 0 2px rgba(27,93,116,.25);font-weight:600}
 .adm-swatches label:has(input:focus-visible){outline:2px solid var(--adm-sea);outline-offset:2px}
