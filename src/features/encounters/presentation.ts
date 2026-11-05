@@ -36,7 +36,7 @@ export function artworkPath(post: Row, artworks: Row[], categories: Row[]) {
   return category && post.status === 'published' ? `/art/${category.slug}/${post.slug}` : null;
 }
 export function publishedWorks(data: { posts: Row[]; artworks: Row[]; categories: Row[] }) {
-  return data.posts.filter(p => p.kind === 'artwork' && artworkPath(p, data.artworks, data.categories)).sort((a, b) => Number(b.featured) - Number(a.featured) || byOrder(a, b));
+  return data.posts.filter(p => p.kind === 'artwork' && artworkPath(p, data.artworks, data.categories)).sort(byOrder);
 }
 export function duplicateContent(record: Row, id: string) {
   const copy = { ...record, id, slug: `${record.slug}-copy-${id.slice(0, 8)}`, status: 'draft', title: `${record.title || record.name} (copy)`, published_at: null };

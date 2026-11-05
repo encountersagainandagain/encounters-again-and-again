@@ -10,11 +10,11 @@ export const blockLabel=(type:unknown)=>blockLabels[String(type)]||String(type);
 export const postGroups={
   general:['title','slug','subtitle','kicker','excerpt','meta_line'],
   cover:['cover_id','cover_alt'],
-  publication:['status','published_at','sort','featured','home_rank','show_index'],
+  publication:['status','published_at','sort','show_index'],
   seo:['seo_title','meta_description'],
 };
 // Entity fields shown beside the form, in the publication card.
-export const entitySide=['status','sort','featured','has_page','listed','page_post_id'];
+export const entitySide=['status','sort','has_page','listed','page_post_id'];
 
 export const help:Record<string,string>={
   title:'Main title shown on the page and in lists.',
@@ -29,8 +29,6 @@ export const help:Record<string,string>={
   cover_id:'Large image at the top of the page.',
   cover_alt:'Describe the cover for people who cannot see it.',
   sort:'Lower numbers appear first.',
-  featured:'Highlight it in the featured places of the site.',
-  home_rank:'Order among featured content on Home. Lower numbers appear first.',
   published_at:'Date shown with the content.',
   show_index:'Shows an “In this post” list built from the headings.',
   name:'The person’s name, as on The Crew page. On the personal page it makes the small line of the banner, “meet <first name>”, unless that page sets its own.',
@@ -133,8 +131,6 @@ export const kindHelp:Record<string,Record<string,string>>={
   page:{slug:'Address of this permanent page. Changing it can break existing links.'},
   crew_member:{title:'Name of this page in the admin. The banner title comes from Crew → “Alias / project”.',excerpt:'Summary used in lists and when the link is shared. Not shown on the page.',slug:'Internal address of the page content. The public address uses the person’s slug: /crew/…'},
 };
-help.featured='Publishing makes it visible on its own page. It does not put it first on Home; tick this to feature it there.';
-help.home_rank='Order among the featured items on Home. Lower numbers appear first. Empty: after the numbered ones.';
 help.post_id='Content this notice points to, such as an expedition or workshop. Its title and dates are used, so nothing is duplicated.';
 // A category only organises the works: its help says what each field does on the Art page.
 export const categoryHelp:Record<string,string>={...help,name:'Generic name of the group, e.g. Books or Drawings. Shown on its tile and as the title of its section.',slug:'Address of the category: /art/this-part. Changing it also changes the address of its works.',lead:'Optional. A short introduction shown beside the title of the section, on the Art page and on the page of the category.',cover_id:'Image of its tile on the Art page. Empty: the image of its first work.',layout:'How its works are shown: Gallery (image cards), Feature (a book or a single piece), Video or Audio (players).',status:'Published: the category appears on the Art page with its works. Draft: only you can see it.',sort:'Its position on the Art page. A new category goes last; lower numbers appear first.'};
