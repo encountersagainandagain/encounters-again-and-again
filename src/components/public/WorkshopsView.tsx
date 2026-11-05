@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useEffect,useRef,useState} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {string,type Row} from '@/features/encounters/presentation';
-import {countLabel,dateLabel,isFinished,pad,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
+import {countLabel,dateLabel,isFinished,pad,sessionLine,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
 import {PostBlocks} from './PostBlocks';
 import {ramp,useFrame} from './useFrame';
 import {MediaImage,Picture} from './MediaImage';
@@ -14,7 +14,7 @@ import {Signature} from './EditorialPieces';
 
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
 // inside the card (their own snap and contained overscroll); the image crossfades with the rail position.
-function SessionRail({id,sessions,media}:{id:string;sessions:Row[];media:Row[]}){
+function SessionRail({id,sessions,media,currency}:{id:string;sessions:Row[];media:Row[];currency:unknown}){
   const card=useRef<HTMLElement>(null),rail=useRef<HTMLDivElement>(null),images=useRef<HTMLDivElement>(null),count=useRef<HTMLSpanElement>(null),bar=useRef<HTMLSpanElement>(null);
   const [at,setAt]=useState(0);const [moved,setMoved]=useState(false);const many=sessions.length>1;
   // One session up or down; false when the rail is already at that end (the page scrolls on instead).
@@ -50,7 +50,7 @@ function SessionRail({id,sessions,media}:{id:string;sessions:Row[];media:Row[]})
   },[many]);
   const last=at>=sessions.length-1;
   return <article ref={card} className={`ws-card${many?' has-more':''}${moved?' is-moved':''}`}>
-    <div ref={rail} className="ws-rail" tabIndex={0} aria-label="Sessions" id={`sessions-${id}`}>{sessions.map((s,i)=><section key={string(s.id)} className="ws-slide" aria-label={`Session ${i+1} of ${sessions.length}`}><span className="ws-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{(string(s.place)||string(s.held_on))&&<small>{[dateLabel({starts_on:s.held_on}),string(s.place)].filter(Boolean).join(' · ')}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div></section>)}</div>
+    <div ref={rail} className="ws-rail" tabIndex={0} aria-label="Sessions" id={`sessions-${id}`}>{sessions.map((s,i)=><section key={string(s.id)} className="ws-slide" aria-label={`Session ${i+1} of ${sessions.length}`}><span className="ws-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{sessionLine(s,currency)&&<small>{sessionLine(s,currency)}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div></section>)}</div>
     <div ref={images} className="ws-media" aria-hidden="true">{sessions.map((s,i)=><div key={string(s.id)} data-shot style={{opacity:i?0:1}}>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</div>)}</div>
     <div className="ws-indicator"><span ref={count}>{`01 / ${pad(sessions.length)}`}</span><span className="ws-bar"><span ref={bar} style={{width:`${100/Math.max(1,sessions.length)}%`}}/></span>
       {many?<button type="button" className="ws-next" aria-controls={`sessions-${id}`} onClick={()=>{if(!go(last?-sessions.length:1))return;}}>{last?'First session':'Next session'}<i aria-hidden="true">{last?'↑':'↓'}</i></button>:<span>Session</span>}</div>
@@ -67,7 +67,7 @@ function Workshop({activity:a,index,sessions,media}:{activity:Activity;index:num
           <div className="ws-links">{!isFinished(a)&&signup&&<a href={signup} className="ws-button">{string(detail.signup_label)||'Join the workshop'} →</a>}<Link href={a.path} className="ws-more">{[dateLabel(detail),string(detail.place)].filter(Boolean).join(' · ')||'More about it'} →</Link></div></div>
       </div>
       {finished?<article className="ws-card ws-done" data-wseq="0.9,0.4"><div className="ws-rail ws-static"><span className="ws-number">—</span><div><h3>How it went</h3>{(string(detail.outcome)||string(post.excerpt))&&<p>{string(detail.outcome)||string(post.excerpt)}</p>}<Link className="ws-result" href={a.result?`/posts/${string(a.result.slug)}`:a.path}>{a.result?'See the result':'Read about it'} →</Link></div></div><div className="ws-media"><div><Picture id={post.cover_id||a.result?.cover_id} media={media}/></div></div></article>
-        :<SessionRail id={string(post.id)} sessions={sessions} media={media}/>}
+        :<SessionRail id={string(post.id)} sessions={sessions} media={media} currency={detail.currency}/>}
     </div></div>
   </div>;
 }

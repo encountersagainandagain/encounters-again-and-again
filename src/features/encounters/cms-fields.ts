@@ -23,5 +23,5 @@ export const entities:Record<string,{label:string;fields:Field[]}>={
 entities.crew_members.fields.push({key:'social_links',label:'Optional contact and social links',type:'links'});
 export const children:Record<string,{table:string;foreignKey:string;label:string;fields:Field[]}>= {
   expedition:{table:'expedition_needs',foreignKey:'expedition_id',label:'Needs',fields:[{...f('title','Need'),required:true},f('body','Description','textarea'),choice('status','State',['pending','obtained','closed']),f('contact_url','Contact link'),f('sort','Order','number')]},
-  workshop:{table:'workshop_sessions',foreignKey:'workshop_id',label:'Sessions',fields:[{...f('title','Session title'),required:true},f('body','Description','textarea'),f('place','Place'),f('held_on','Date','date'),ref('media_id','Image','media'),f('sort','Order','number')]},
+  workshop:{table:'workshop_sessions',foreignKey:'workshop_id',label:'Sessions',fields:[{...f('title','Session title'),required:true},f('body','Description','textarea'),f('place','Place'),f('held_on','Date','date'),f('price','Price per person','number'),ref('media_id','Image','media'),f('sort','Order','number')]},
 };

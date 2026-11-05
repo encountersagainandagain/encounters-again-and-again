@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type {ReactNode} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
 import {safeHref,string,type Row} from '@/features/encounters/presentation';
-import {countLabel,dateLabel,isFinished,lines,pad,perthToday,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
+import {countLabel,dateLabel,isFinished,lines,pad,perthToday,priceLabel,sessionLine,signupHref,statusLabels,type Activity} from '@/features/encounters/activities';
 import {PostBlocks} from './PostBlocks';
 import {MediaEmbed} from './EditorialInteractive';
 import {PhotoHero,Scribble} from './EditorialPieces';
@@ -40,7 +40,7 @@ function ActivityGlance({activity:a,media,people,sessions,action,actionLabel,clo
   const invitation=string(post.excerpt);const outcome=string(detail.outcome);
   const places=[...new Set(sessions.map(x=>string(x.place)).filter(Boolean))];const where=string(detail.place)||(places.length>3?countLabel(places.length,'places'):places.join(' · '));
   const span=workshop&&sessions.length>1?countLabel(sessions.length):length>1?`${length} days`:'';
-  const price=detail.price!=null&&detail.price!==''?Number(detail.price)===0?'Free':`${detail.price}${string(detail.currency)?` ${string(detail.currency)}`:''}`:'';
+  const price=priceLabel(detail.price,detail.currency);
   const practical=workshop?[string(detail.modality),string(detail.language),detail.capacity?`${detail.capacity} places`:'',price].filter(Boolean):[];
   // Beside the invitation, the expedition's underwater photo, or the cover.
   const photo=detail.underwater_id||post.cover_id;const side=photo?<div className="xp-join-media" aria-hidden="true"><MediaImage id={photo} media={media}/></div>:null;
@@ -80,7 +80,7 @@ export function ActivityView({activity:a,blocks,media,needs,sessions,people,trai
   return <PostView post={{...post,kicker:string(post.kicker)||`${a.kind==='workshop'?'Workshop':'Expedition'}${status?` · ${status}`:''}`,meta_line:meta}} blocks={blocks} media={media} trail={trail}
     before={<ActivityGlance activity={a} media={media} people={people} sessions={sessions} action={invites&&action?action:null} actionLabel={actionLabel} closed={closed}/>}>
     {a.kind==='workshop'&&(string(detail.note_title)||string(detail.audience_note))&&<section className="activity-note" data-seq="0.94,0.4"><h2>{string(detail.note_title)||'Who it is for'}</h2>{string(detail.audience_note)&&<p>{string(detail.audience_note)}</p>}</section>}
-    {sessions.length>0&&<section className="activity-sessions" aria-labelledby="sessions-title"><h2 id="sessions-title" data-seq="0.96,0.4">{sessions.length===1?'The session':'Sessions'}</h2><ol>{sessions.map((s,i)=><li key={string(s.id)} data-seq="0.94,0.4"><span className="activity-session-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{(string(s.place)||string(s.held_on))&&<small>{[dateLabel({starts_on:s.held_on}),string(s.place)].filter(Boolean).join(' · ')}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</li>)}</ol></section>}
+    {sessions.length>0&&<section className="activity-sessions" aria-labelledby="sessions-title"><h2 id="sessions-title" data-seq="0.96,0.4">{sessions.length===1?'The session':'Sessions'}</h2><ol>{sessions.map((s,i)=><li key={string(s.id)} data-seq="0.94,0.4"><span className="activity-session-number">{pad(i+1)}</span><div><h3>{string(s.title)}</h3>{sessionLine(s,detail.currency)&&<small>{sessionLine(s,detail.currency)}</small>}{string(s.body)&&<p>{string(s.body)}</p>}</div>{s.media_id?<MediaImage id={s.media_id} media={media}/>:null}</li>)}</ol></section>}
     {a.kind==='workshop'&&string(detail.includes)&&<section className="activity-note" data-seq="0.94,0.4"><h2>What is included</h2><p>{string(detail.includes)}</p></section>}
     {materials.length>0&&<section className="activity-list-block"><h2 data-seq="0.96,0.4">What to bring</h2><ol>{materials.map((m,i)=><li key={i}><span>{pad(i+1)}</span>{m}</li>)}</ol></section>}
     {needs.length>0&&<section className="activity-list-block activity-needs"><h2 data-seq="0.96,0.4">What the boat needs</h2><ol>{needs.map((n,i)=>{const href=safeHref(n.contact_url);return <li key={string(n.id)} data-status={string(n.status)}><span>{pad(i+1)}</span><div><strong>{string(n.title)}</strong>{string(n.body)&&<p>{string(n.body)}</p>}</div><em>{n.status==='obtained'?'Obtained':n.status==='closed'?'Closed':'Still needed'}</em>{href&&n.status==='pending'&&<a href={href} className="editorial-link">Offer it →</a>}</li>;})}</ol></section>}

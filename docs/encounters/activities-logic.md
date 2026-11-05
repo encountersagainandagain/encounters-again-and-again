@@ -46,6 +46,10 @@ Editor en el orden de la página (`src/components/admin/pageSettingsSchema.ts`, 
 - **Status** (§ 3) y **Delete** en dos pasos (qué se borra y qué queda; escribir el título). Borrar la actividad borra
   detalles, bloques, créditos, needs/sessions y sus enlaces; **las historias se conservan** en Results.
 - **Excerpt = la invitación**: se muestra grande con el botón para sumarse en la página de la actividad.
+- **How it went** (`outcome`) se muestra solo con la actividad terminada. **Results of this activity** aparece desde que
+  empieza o si ya tiene algo enlazado; antes de empezar no se muestra (2026-11-05).
+- **Content blocks:** van en la página propia de la actividad, debajo de la invitación y arriba de sesiones, «What to bring»
+  y needs. No aparecen en la lista de `/workshops` ni de `/expeditions`.
 - Tarjeta de resultados: si terminó y no tiene historia, invita a **Write about this adventure**.
 
 ## 5. Historias
@@ -71,7 +75,7 @@ Clara de un vistazo: **qué** (título y banner), **estado** con punto de color 
 
 ### Lo propio de Workshops: sessions
 
-- Un workshop tiene **una o más sessions** (`workshop_sessions`: título, descripción, lugar, fecha, imagen, orden). Una
+- Un workshop tiene **una o más sessions** (`workshop_sessions`: título, descripción, lugar, fecha, precio por persona, imagen, orden). Una
   sola session es un encuentro (un día y un lugar, u «Online» como lugar); varias, un ciclo.
 - **Fechas**: si el workshop no tiene `starts_on`/`ends_on`, se toman de sus sessions (primera y última fecha;
   `withSessionDates`). Así el estado automático también sigue a las sessions.

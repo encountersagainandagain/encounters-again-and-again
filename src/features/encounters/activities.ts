@@ -32,6 +32,10 @@ export function activities(data:ActivityData,kind?:'expedition'|'workshop'):Acti
     return detail?[{post,detail:{...detail,activity_status:activityStatus(detail)},kind:post.kind as Activity['kind'],path:activityPath(post),result:resultOf(post,data)}]:[];
   }).sort((a,b)=>byOrder(a.post,b.post));
 }
+// A price as the site writes it: 0 is free, empty says nothing.
+export const priceLabel=(value:unknown,currency:unknown)=>value==null||value===''?'':Number(value)===0?'Free':`${value}${string(currency)?` ${string(currency)}`:''}`;
+// The small line of a session: its date, its place and what it costs per person, in the currency of its workshop.
+export const sessionLine=(session:Row,currency:unknown)=>{const price=priceLabel(session.price,currency);return [dateLabel({starts_on:session.held_on}),string(session.place),price&&price!=='Free'?`${price} per person`:price].filter(Boolean).join(' · ');};
 export const isUpcoming=(a:Activity)=>a.detail.activity_status==='upcoming'||a.detail.activity_status==='running';
 export const isFinished=(a:Activity)=>a.detail.activity_status==='finished';
 export const statusLabels:Record<string,string>={upcoming:'Upcoming',running:'Running',finished:'Finished',postponed:'Postponed',cancelled:'Cancelled'};
