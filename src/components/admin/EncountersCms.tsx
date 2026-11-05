@@ -12,6 +12,7 @@ import {announceable,announcementShown,signupLink} from '@/features/encounters/a
 import {artCategoryIds,embedFromUrl,embedLabels,embedLink,embedOf} from '@/features/encounters/art';
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {MediaRemoval} from './MediaRemoval';
+import {modules} from '@/config/modules';
 import {explainError,fieldProblem,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
@@ -437,7 +438,7 @@ function AnnouncementCards({fields,record,onChange,options,ready}:{fields:Field[
   </>;
 }
 const blankPost=(kind='news')=>({id:crypto.randomUUID(),title:'',slug:'',kind,status:'draft',sort:0,show_index:kind!=='artwork'});
-const postScopes:Record<string,(k:unknown)=>boolean>={publications:k=>k!=='page'&&k!=='crew_member',pages:k=>k==='page',profiles:k=>k==='crew_member'};
+const postScopes:Record<string,(k:unknown)=>boolean>={publications:k=>k!=='page'&&k!=='crew_member'&&(modules.fieldNotes||k!=='news'),pages:k=>k==='page',profiles:k=>k==='crew_member'};
 export function EncountersCms(){
   const params=useSearchParams();
   const table=tables.includes(params.get('table')||'')?params.get('table')!:'posts';
@@ -728,7 +729,7 @@ export function EncountersCms(){
   const isCrewPage=kind==='page'&&record.source_role==='team';
   const crew=options.crew_members||[];const site=((options.site_settings||[]).find(s=>s.key==='site')?.value||{}) as Row;const crewSettings=(((site.pages||{}) as Row).crew||{}) as Row;const crewCover=crewSettings.cover_id;
   const notes={...help,...(kindHelp[kind]||{}),...(isCrewPage?{kicker:'Small line above the large banner title. Empty: “Meet the team”.',title:'Name of this page in the admin.'}:{})};const credit=kind==='crew_member'?crewPageCredit:creditLabels[kind]||defaultCredit;const pageOwner=kind==='crew_member'?crew.find(c=>String(c.page_post_id)===String(record.id)):undefined;const path=publicPath('posts',record,specific,options);const simplePublication=kind==='crew_member'||isCrewPage;const publicationFields=simplePublication?[{...commonFields.find(f=>f.key==='status')!,label:'Page status'}]:kind==='message'?pick(commonFields,['status','published_at','sort']):pick(commonFields,postGroups.publication.filter(k=>k!=='sort'||!orderedInList.includes(kind)));
-  // An activity asks how it went once it has ended; its results can be linked from its first day (news from the trip).
+  // An expedition asks how it went once it has ended (a workshop tells it in its story in Results); its results can be linked from its first day (news from the trip).
   const isActivity=['expedition','workshop'].includes(kind);const stage=isActivity?activityStatus(withSessionDates(specific,kind==='workshop'?childRows:[])):'';
   const isMessage=kind==='message';const messageText=blocks.find(isMessageText);const pieces=((messageText?.content.pieces||[]) as Piece[]);
   const setPieces=(next:Piece[])=>{setBlocks([messageBlock(next,messageText?.id)]);setSpecific({...specific,...messageColumns(next)});};
@@ -760,7 +761,7 @@ export function EncountersCms(){
         {(kind==='crew_member'||isCrewPage)&&<div className="adm-add" role="group" aria-label="Add a profile block">{profileKinds.map(k=><button key={k.layout} type="button" title={k.hint} className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type:k.type,position:blocks.length,content:{layout:k.layout}}])}><Plus aria-hidden="true"/>{k.label}</button>)}</div>}
         {kind!=='workshop'&&<div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes.filter(t=>t!=='embed'||embedReady)).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>}
       </Card>}
-      {details[kind]&&!isMessage&&kind!=='artwork'&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status'&&(f.key!=='outcome'||stage==='finished'))} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
+      {details[kind]&&!isMessage&&kind!=='artwork'&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status'&&(f.key!=='outcome'||(kind==='expedition'&&stage==='finished')))} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
       {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>
         {crew.length===0?<p className="adm-help">There are no crew members yet.</p>:<div className="adm-people">{crew.filter(c=>c!==pageOwner).map(c=>{const on=contributors.includes(String(c.id));return <div className="adm-person" data-on={on} key={String(c.id)}>
           <label className="adm-check"><input type="checkbox" checked={on} onChange={e=>setContributors(e.target.checked?[...contributors,String(c.id)]:contributors.filter(id=>id!==c.id))}/><span style={{display:'flex',alignItems:'center',gap:10}}><AdminThumb id={c.portrait_id} size={36}/>{String(c.name)}</span></label>
@@ -768,7 +769,7 @@ export function EncountersCms(){
       </Card>
       {!isMessage&&(!isActivity||stage==='running'||stage==='finished'||related.length>0)&&<Card title={['expedition','workshop'].includes(kind)?'Results of this activity':kind==='artwork'?'Related expedition or workshop (optional)':'Related content'} lead={['expedition','workshop'].includes(kind)?'Reports and news that tell what came out of it. They are listed on this activity’s page.':kind==='artwork'?'Optional. If the work came from an expedition or a workshop, or from its results, choose it here. Shown as “Related encounters” at the end of the work page.':kind==='crew_member'?'Shown at the end of the personal page, under “Related encounters”.':'Shown as related content on this page.'}>
         {['expedition','workshop'].includes(kind)&&saved&&activityStatus(withSessionDates(specific,kind==='workshop'?childRows:[]))==='finished'&&!related.some(id=>(options.posts||[]).some(p=>p.id===id&&String(p.kind).endsWith('_report')))&&<div className="adm-story-invite"><p><strong>This {kind} has ended.</strong> Tell people how it went: what you did, what you saw, photos and videos. The story gets its own page, linked from this {kind} and from the list.</p><button type="button" className="adm-btn" disabled={busy||dirty} onClick={()=>void startStory(record)}>Write about this adventure</button>{dirty&&<small className="adm-help">Save your changes first.</small>}</div>}
-        <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?['news','expedition_report','workshop_report']:kind==='artwork'?['expedition','workshop','expedition_report','workshop_report']:undefined}/>
+        <RelatedPicker label="Related content" posts={(options.posts||[]).map(withImage)} selected={related} onChange={setRelated} exclude={record.id} kinds={['expedition','workshop'].includes(kind)?[...(modules.fieldNotes?['news']:[]),'expedition_report','workshop_report']:kind==='artwork'?['expedition','workshop','expedition_report','workshop_report']:undefined}/>
         {kind==='crew_member'&&relatedNotes&&related.length>0&&<fieldset className="adm-group"><legend>Comments</legend><p className="adm-help">Optional. Shown under each item, e.g. why it matters to this person.</p>
           {related.map(id=>{const p=(options.posts||[]).find(x=>String(x.id)===id);return <MarkedText key={id} id={`related-note-${id}`} label={String(p?.title||'Related item')} value={relatedNotes[id]||''} onChange={v=>setRelatedNotes({...relatedNotes,[id]:v})} placeholder="e.g. I organise most of these workshops." hint={p?kindLabel(String(p.kind)):undefined}/>;})}</fieldset>}
       </Card>}

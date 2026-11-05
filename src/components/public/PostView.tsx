@@ -37,7 +37,8 @@ function ActivityGlance({activity:a,media,people,sessions,action,actionLabel,clo
   const {post,detail}=a;const state=string(detail.activity_status);const finished=isFinished(a);const workshop=a.kind==='workshop';
   const from=day(detail.starts_on),to=day(detail.ends_on)??from,today=day(perthToday());const length=from!=null&&to!=null?to-from+1:0;
   const when=from==null||today==null?'':state==='upcoming'&&from>today?(from-today===1?'Starts tomorrow':`Starts in ${from-today} days`):state==='running'&&to!=null&&length>1?`Day ${Math.min(length,today-from+1)} of ${length}`:state==='running'?'Today':'';
-  const invitation=string(post.excerpt);const outcome=string(detail.outcome);
+  // How a workshop went is told in its story in Results, not in a few lines here (Juani, 2026-11-05).
+  const invitation=string(post.excerpt);const outcome=workshop?'':string(detail.outcome);
   const places=[...new Set(sessions.map(x=>string(x.place)).filter(Boolean))];const where=string(detail.place)||(places.length>3?countLabel(places.length,'places'):places.join(' · '));
   const span=workshop&&sessions.length>1?countLabel(sessions.length):length>1?`${length} days`:'';
   const price=priceLabel(detail.price,detail.currency);
@@ -60,7 +61,7 @@ function ActivityGlance({activity:a,media,people,sessions,action,actionLabel,clo
         <div className="xp-join-actions">{action&&<a className="xp-join-button" href={action}>{actionLabel} →</a>}{a.result&&<Link className="xp-join-link" href={`/posts/${string(a.result.slug)}`}>Read the latest update →</Link>}</div></div>
       {side}</section>:null}
     {finished&&(outcome||a.result)?<section className="xp-join xp-join--done" data-photo={photo?'':undefined} aria-label="How it went">
-      <div><span className="xp-join-kicker">How it went</span>{outcome?<p className="xp-join-text">{outcome}</p>:invitation&&<p className="xp-join-text">{invitation}</p>}
+      <div><span className="xp-join-kicker">{workshop?'Finished':'How it went'}</span>{outcome?<p className="xp-join-text">{outcome}</p>:invitation&&<p className="xp-join-text">{invitation}</p>}
         {a.result&&<div className="xp-join-actions"><Link className="xp-join-button" href={`/posts/${string(a.result.slug)}`}>Read the story →</Link></div>}</div>
       {side}</section>:null}
   </>;

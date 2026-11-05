@@ -66,7 +66,7 @@ function Workshop({activity:a,index,sessions,media}:{activity:Activity;index:num
         <div className="ws-note">{(string(detail.note_title)||string(detail.audience_note))&&<><span>{string(detail.note_title)}</span>{string(detail.audience_note)&&<p>{string(detail.audience_note)}</p>}</>}
           <div className="ws-links">{!isFinished(a)&&signup&&<a href={signup} className="ws-button">{string(detail.signup_label)||'Join the workshop'} →</a>}<Link href={a.path} className="ws-more">{[dateLabel(detail),string(detail.place)].filter(Boolean).join(' · ')||'More about it'} →</Link></div></div>
       </div>
-      {finished?<article className="ws-card ws-done" data-wseq="0.9,0.4"><div className="ws-rail ws-static"><span className="ws-number">—</span><div><h3>How it went</h3>{(string(detail.outcome)||string(post.excerpt))&&<p>{string(detail.outcome)||string(post.excerpt)}</p>}<Link className="ws-result" href={a.result?`/posts/${string(a.result.slug)}`:a.path}>{a.result?'See the result':'Read about it'} →</Link></div></div><div className="ws-media"><div><Picture id={post.cover_id||a.result?.cover_id} media={media}/></div></div></article>
+      {finished?<article className="ws-card ws-done" data-wseq="0.9,0.4"><div className="ws-rail ws-static"><span className="ws-number">—</span><div>{string(post.excerpt)&&<p>{string(post.excerpt)}</p>}<Link className="ws-result" href={a.result?`/posts/${string(a.result.slug)}`:a.path}>{a.result?'See the result':'Read about it'} →</Link></div></div><div className="ws-media"><div><Picture id={post.cover_id||a.result?.cover_id} media={media}/></div></div></article>
         :<SessionRail id={string(post.id)} sessions={sessions} media={media} currency={detail.currency}/>}
     </div></div>
   </div>;

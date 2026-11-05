@@ -181,6 +181,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Featured y orden de obras (2026-11-05):** se retiraron del admin Featured on Home, Home order, Duplicate as draft y el Visual preview del editor de contenido (la tarjeta de Expeditions conserva el suyo). Home ya no lee `featured` ni `home_rank` (las columnas siguen): What is coming va por fecha, What already happened por lo más nuevo, y Art en el orden de la lista. Obras, expediciones y workshops se ordenan con Up/Down en su lista, sin campo Order en el formulario; uno nuevo empieza primero.
 
+**Field notes y How it went (2026-11-05):** las Field notes (posts `news`) están ocultas con `modules.fieldNotes=false`: la web no las lee y el admin no las ofrece; no se borró nada. Un workshop no tiene How it went: lo cuenta su historia en Results (las expediciones lo conservan).
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.

@@ -22,6 +22,8 @@ export const modules = {
   gallery: false,
   analytics: false,
   contactForm: true,
+  // Field notes (news posts): hidden for now (Juani, 2026-11-05). Off, they are not read by the site nor offered in the admin.
+  fieldNotes: false,
 } as const;
 
 export type ModuleName = keyof typeof modules;

@@ -1,6 +1,7 @@
 import 'server-only';
 import {createClient} from '@supabase/supabase-js';
 import {cache} from 'react';
+import {modules} from '@/config/modules';
 import {assertEncountersSupabaseTarget} from '@/lib/encountersSupabaseTarget';
 import {messagePath} from './message-text';
 export type ContentRow={id:string;kind:string;slug:string;title:string;excerpt:string;cover_id:string|null;cover_alt:string;source_role:string|null;featured:boolean;home_rank:number|null;sort:number;[key:string]:unknown};
@@ -13,7 +14,7 @@ export const publicClient=()=>{
   assertEncountersSupabaseTarget(url);
   return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,next:{revalidate:300,tags:[PUBLIC_CONTENT_TAG]}})}});
 };
-export const readPosts=cache(async()=>{const {data,error}=await publicClient().from('posts').select('*').eq('status','published').order('sort').order('published_at',{ascending:false});if(error)throw error;return (data||[]) as ContentRow[];});
+export const readPosts=cache(async()=>{const {data,error}=await publicClient().from('posts').select('*').eq('status','published').order('sort').order('published_at',{ascending:false});if(error)throw error;return ((data||[]) as ContentRow[]).filter(p=>modules.fieldNotes||p.kind!=='news');});
 export const readRows=cache(async(table:string)=>{const {data,error}=await publicClient().from(table).select('*');if(error)throw error;return (data||[]) as Record<string,unknown>[];});
 export async function readBlocks(id:string){const {data,error}=await publicClient().from('post_blocks').select('*').eq('post_id',id).order('position');if(error)throw error;return (data||[]) as ContentBlock[];}
 export async function contentPath(post:ContentRow){

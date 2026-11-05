@@ -48,7 +48,9 @@ Editor en el orden de la página (`src/components/admin/pageSettingsSchema.ts`, 
 - **Excerpt = la invitación**: se muestra grande con el botón para sumarse en la página de la actividad.
 - **Orden** (2026-11-05): con Up/Down en la lista del admin; manda dentro de cada grupo de la página pública. Una actividad
   nueva empieza primera. En Home, What is coming sigue por fecha.
-- **How it went** (`outcome`) se muestra solo con la actividad terminada. **Results of this activity** aparece desde que
+- **How it went** (`outcome`) es solo de expediciones, con la actividad terminada; un workshop lo cuenta en su historia de
+  Results (2026-11-05). Las Field notes (news) están ocultas (`modules.fieldNotes`).
+- **How it went** (`outcome`, expediciones) se muestra solo con la actividad terminada. **Results of this activity** aparece desde que
   empieza o si ya tiene algo enlazado; antes de empezar no se muestra (2026-11-05).
 - **Content blocks:** una expedición los usa en su página, debajo de la invitación y arriba de «What to bring» y needs; no
   aparecen en la lista. **Un workshop no agrega bloques** (Juani, 2026-11-05): se comunica con sus sessions, y lo que pasó
