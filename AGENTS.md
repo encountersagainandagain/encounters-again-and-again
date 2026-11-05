@@ -183,6 +183,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Field notes y How it went (2026-11-05):** las Field notes (posts `news`) están ocultas con `modules.fieldNotes=false`: la web no las lee y el admin no las ofrece; no se borró nada. Un workshop no tiene How it went: lo cuenta su historia en Results (las expediciones lo conservan).
 
+**Settings (2026-11-05):** una sola tarjeta con lo que es de todo el sitio: email, teléfono, WhatsApp, redes (Instagram, Facebook, TikTok, YouTube, LinkedIn, X, Pinterest), página de donaciones y texto del pie. Cada uno se muestra solo si tiene valor. Guardar escribe solo esas claves. Se retiraron Site name, Tagline y Description (la web no los leía) y la tarjeta Art and Crew presentation (repetía Art page y The Crew page).
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
