@@ -88,7 +88,7 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
   });
   const groups=listGroups(list);const [show,setShow]=useState('all');
   return <>
-    <section ref={section} className="exp-dissolve pin-section" data-nav-hero style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
+    <section ref={section} className="exp-dissolve pin-section" data-nav-hero suppressHydrationWarning style={{height:`${pinHeight(cards.length)}vh`}} aria-label="Expeditions">
       <div ref={sticky} className="exp-sticky">
         <div className="exp-surface hero-image"><div data-surface className="exp-fill"><Picture id={surface.id} media={media} fallback={surface.fallback} priority/></div></div>
         <div data-under className="exp-under" aria-hidden="true"><Picture id={underwaterId} media={media} fallback="/design/reef-turtle-web.jpg"/></div>

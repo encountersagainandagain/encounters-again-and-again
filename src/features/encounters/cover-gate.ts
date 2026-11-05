@@ -8,6 +8,7 @@
 //   skip  → the visitor scrolled more than 40 px while waiting: no entrance replayed, the final state fades in
 // A photo that fails releases the gate at once; a banner removed by a navigation is ignored. Without JavaScript nothing
 // is gated. A photo already complete (cached or preloaded) is never gated.
+// data-cover can land on the banner before React hydrates it, so every banner carries suppressHydrationWarning.
 export const coverGateScript=`(()=>{if(!window.MutationObserver)return;const seen=new WeakSet(),BOUND=1500,MOVED=40;
 const gate=hero=>{const box=hero.closest('[data-nav-hero],[data-photo-hero]');if(!box||seen.has(box))return;
 const img=[...hero.querySelectorAll('img')].find(i=>!i.closest('[aria-hidden=true]'));if(!img)return;seen.add(box);

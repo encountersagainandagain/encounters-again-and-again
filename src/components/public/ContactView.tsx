@@ -45,7 +45,7 @@ export function ContactView({settings:s,contact,media,direct=false}:{settings:Ro
   const others=rows(s.links).filter(l=>safeHref(l.url)&&string(l.title));
   return <>
     <span data-nav-theme="dark" hidden/>
-    <section ref={hero} className="contact-hero" data-nav-hero>
+    <section ref={hero} className="contact-hero" data-nav-hero suppressHydrationWarning>
       <div className="contact-hero-image hero-image"><div data-hero-img className="contact-fill"><Picture id={covers.contact(s).id} media={media} fallback={covers.contact(s).fallback} priority/></div></div>
       <div className="contact-hero-shade"/>
       <div className="contact-hero-copy" data-copy><h1>{string(s.title)||'Get in touch'}</h1>{string(s.lead)&&<p>{string(s.lead)}</p>}</div>

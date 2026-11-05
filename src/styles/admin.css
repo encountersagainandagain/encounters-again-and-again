@@ -134,6 +134,10 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-notice{padding:12px 16px;border-radius:10px;background:var(--adm-tint);color:var(--adm-sea);font-size:14px}
 .adm-notice--error{background:var(--adm-danger-bg);color:var(--adm-danger)}
 .adm-notice--ok{background:var(--adm-ok-bg);color:var(--adm-ok)}
+.adm-problems{display:grid;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.adm-problems button{display:block;width:100%;padding:8px 10px;border:1px solid currentColor;border-radius:8px;background:#fff;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.adm-problems button:hover,.adm-problems button:focus-visible{background:var(--adm-danger-bg)}
+.adm-problems b{display:block;font-weight:700}
 
 /* Editor */
 .adm-toolbar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:-8px 0 20px;padding:12px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border:1px solid var(--adm-line);border-radius:14px;box-shadow:0 8px 20px -16px rgba(6,24,38,.5)}

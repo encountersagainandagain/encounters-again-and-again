@@ -177,6 +177,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Carga de actividades (2026-11-05):** How it went aparece recién con la actividad terminada; Results of this activity, desde que empieza o si ya tiene algo enlazado. Cada sesión de un workshop tiene Price per person, en la Currency del workshop.
 
+**Errores del admin (2026-11-05):** cada problema se lista con su lugar (tarjeta › campo) y lleva al campo. Lo que la base rechazaría se frena antes de enviar (`fieldProblem`) y sus reglas se traducen al campo (`explainError`, en `adminErrors.ts`): al agregar una regla nueva en una migración, sumala ahí.
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.

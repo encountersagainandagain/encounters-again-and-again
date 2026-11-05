@@ -1,4 +1,5 @@
 'use client';
+import {explainError} from './adminErrors';
 import Link from 'next/link';
 import {useCallback,useEffect,useRef,useState,type FormEvent} from 'react';
 import {supabase} from '@/lib/supabase';
@@ -112,10 +113,10 @@ export function PageSettings({pageKey}:{pageKey:string}){
       for(const f of schema.fields.flatMap(x=>x.type==='section'?x.fields||[]:[x])){if(f.key==='sections')continue;if(f.key in next)home[f.key]=next[f.key];else delete home[f.key];}if(next.sections){home.sections=next.sections;home.hidden_sections=next.hidden_sections??[];}merged={...value,home};}
     else merged={...value,pages:{...obj(value.pages),[schema.key]:next}};
     const r=await supabase.from('site_settings').update({value:merged}).eq('key','site');
-    if(r.error){setMessage('Could not save. Check your connection and try again.');return;}
+    if(r.error){setMessage(explainError(r.error).message);return;}
     // Public pages are cached: expire them so the change shows on the next visit.
     await requestAdminRevalidation({scope:'settings'}).catch(()=>{});setSaved(JSON.stringify(draft));setConverted('');setMessage(`Saved. It is live on ${schema.path}.`);
-    }catch{setMessage('Could not save. Check your connection and try again.');}finally{setSaving(false);}
+    }catch(error){setMessage(explainError(error).message);}finally{setSaving(false);}
   }
   const dirty=draft&&JSON.stringify(draft)!==saved;
   return <div className="adm-stack"><AdminHeader kicker="Page presentation" title={schema.label} lead={schema.lead}><Link className="adm-btn adm-btn--quiet" href={schema.path} target="_blank">Open page</Link></AdminHeader>

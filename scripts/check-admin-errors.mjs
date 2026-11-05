@@ -1,0 +1,20 @@
+// The admin says which value is wrong and where, before sending when it can, and from the database's words otherwise.
+import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {pathToFileURL} from 'node:url';
+const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'enc-errors-'));fs.copyFileSync('src/components/admin/adminErrors.ts',path.join(tmp,'adminErrors.ts'));
+const {fieldProblem,explainError}=await import(pathToFileURL(path.join(tmp,'adminErrors.ts')).href);
+const ok=(k,v,r)=>assert.equal(fieldProblem(k,v,r),'',`${k}=${v}`);const bad=(k,v,r)=>assert.ok(fieldProblem(k,v,r),`${k}=${v} should be refused`);
+bad('ends_on','2027-03-01',{starts_on:'2027-03-10'});ok('ends_on','2027-03-10',{starts_on:'2027-03-10'});ok('ends_on','2027-03-01',{});ok('ends_on',null,{starts_on:'2027-03-10'});
+bad('price',-1);ok('price',0);ok('price',12.5);ok('price',null);bad('capacity',0);bad('capacity',1.5);ok('capacity',8);ok('capacity',null);
+bad('sort',null);bad('sort',1.5);ok('sort',0);ok('sort',undefined);ok('home_rank',null);bad('home_rank',2.5);bad('sort',3e9);
+bad('registration_status',null);bad('layout',null);ok('media_side',null);ok('embed_kind',null);bad('focal_x',1.2);ok('focal_x',0.5);bad('focal_y',null);
+const label=k=>({ends_on:'Ends on',sort:'Order',title:'Title'}[k]||k);
+const check=(rule,relation='workshops')=>explainError({code:'23514',message:`new row for relation "${relation}" violates check constraint "${rule}"`},label);
+let e=check('workshops_check');assert.equal(e.field,'ends_on');assert.match(e.message,/“Ends on”.*before the start date/);assert.match(e.detail,/workshops_check/,'the technical detail stays');
+assert.equal(check('expeditions_check','expeditions').field,'ends_on');assert.equal(check('upcoming_items_dates_check','upcoming_items').field,'ends_on');
+assert.equal(check('posts_slug_check','posts').field,'slug');assert.equal(check('posts_title_check','posts').field,'title');assert.equal(check('crew_members_name_check','crew_members').field,'name');
+e=check('something_new','workshop_sessions');assert.equal(e.field,undefined);assert.match(e.message,/in Sessions/);assert.doesNotMatch(e.message,/marked in red/,'never points at red fields that are not there');
+e=explainError({code:'23502',message:'null value in column "sort" of relation "workshop_sessions" violates not-null constraint'},label);assert.equal(e.field,'sort');assert.match(e.message,/“Order” in Sessions cannot be empty/);
+e=explainError({code:'22P02',message:'invalid input syntax for type integer: "1.5"'},label);assert.match(e.message,/number/);assert.ok(!e.refresh);
+e=explainError({code:'22P02',message:'invalid input syntax for type uuid: "x"'},label);assert.ok(e.refresh);
+assert.equal(explainError({code:'23505',message:'duplicate key value violates unique constraint "posts_slug_key"'},label).field,'slug');
+fs.rmSync(tmp,{recursive:true});console.log('admin errors ok');

@@ -13,7 +13,7 @@ import {artCategoryIds,embedFromUrl,embedLabels,embedLink,embedOf} from '@/featu
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {EditorialPreview} from './EditorialPreview';
 import {MediaRemoval} from './MediaRemoval';
-import {explainError,slugProblem,slugify} from './adminErrors';
+import {explainError,fieldProblem,slugProblem,slugify} from './adminErrors';
 import {CrewPagePanel,MediaPicker,RelatedPicker,SeoPanel,publicPath} from './AdminWidgets';
 import {requestAdminRevalidation} from '@/lib/adminRevalidation';
 import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
@@ -33,6 +33,7 @@ const needsAlt=(m:Row)=>!String(m.alt||'').trim()||/\.(jpe?g|png|webp|gif|svg)$/
 const date=(v:unknown)=>v?new Date(String(v)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
 
 // Problems found before or while saving, keyed by field (children rows use a prefix).
+const NOT_SAVED='Not saved yet.';
 const FieldErrors=createContext<{errors:Record<string,string>;clear:(key:string)=>void}>({errors:{},clear:()=>{}});
 // Lets image fields refresh the media list after an upload.
 const ReloadOptions=createContext<()=>void>(()=>{});
@@ -519,18 +520,30 @@ export function EncountersCms(){
     const check=(fields:Field[],value:Row,prefix='')=>fields.forEach(f=>{const v=value[f.key];
       if(f.required&&(v==null||String(v).trim()===''))found[prefix+f.key]=`Required: add the ${f.label.toLowerCase()}.`;
       else if(f.key==='slug'&&slugProblem(v))found[prefix+f.key]=slugProblem(v);
-      else if(f.key==='price'&&v!=null&&Number(v)<0)found[prefix+f.key]='The price cannot be negative.';
-      else if(f.key==='capacity'&&v!=null&&Number(v)<1)found[prefix+f.key]='Write at least 1 place, or leave it empty.';
+      else if(fieldProblem(f.key,v,value))found[prefix+f.key]=fieldProblem(f.key,v,value);
       else if(f.reference&&f.reference!=='media'&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
-    if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(specific.starts_on&&specific.ends_on&&String(specific.ends_on).slice(0,10)<String(specific.starts_on).slice(0,10))found.ends_on='This date is before “Starts on”. Change one of the two.';if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
+    if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
     else check(entities[table].fields,current);
+    if(table==='upcoming_items'&&!current.post_id&&!String(current.title||'').trim())found.title='Choose what it announces, or write a title for the card.';
     return found;
   }
+  // Where a problem is, in the words of the form: card, then field. Fields are looked up by their key; a session or a
+  // need adds its number.
+  function fieldLabel(key:string){const all=table==='posts'?[...commonFields,...(details[kind]?.fields||[])]:entities[table]?.fields||[];return all.find(f=>f.key===key)?.label||key;}
+  function problemPlace(key:string){
+    const child=key.match(/^child-(\d+)-(.+)$/);
+    if(child){const group=children[kind];return [group?.label,`${kind==='workshop'?'Session':'Need'} ${Number(child[1])+1}`,group?.fields.find(f=>f.key===child[2])?.label||child[2]].join(' › ');}
+    if(table!=='posts'||kind==='crew_member'||kind==='artwork'||kind==='message'||record?.source_role==='team')return fieldLabel(key);
+    const card=details[kind]?.fields.some(f=>f.key===key)?`${kindLabel(kind)} details`:postGroups.general.includes(key)?'General information':postGroups.cover.includes(key)?'Cover':postGroups.publication.includes(key)?'Publication':postGroups.seo.includes(key)?'Search and sharing':'';
+    return [card,fieldLabel(key)].filter(Boolean).join(' › ');
+  }
+  function goToField(key:string){const el=document.getElementById(key.startsWith('child-')?`field-${key.replace(/^child-\d+-/,'')}-${key.replace(/-[^-]+$/,'').replace(/\W/g,'')}`:`field-${key}`);el?.scrollIntoView({block:'center'});el?.focus();}
   async function save(event?:FormEvent,patch:Row={}){event?.preventDefault();if(!supabase||!record)return;const current={...record,...patch};
     if(table==='media'&&!current.id){setMessage('Choose a photo first: its details can be added once it is uploaded.');return;}
     const problems=validate(current);setErrorDetail('');
-    if(Object.keys(problems).length){setErrors(problems);const n=Object.keys(problems).length;setMessage(`Not saved yet: ${n===1?'one field needs':`${n} fields need`} attention. ${n===1?'It is':'They are'} marked in red below.`);
-      const first=Object.keys(problems)[0];requestAnimationFrame(()=>{const el=document.getElementById(first.startsWith('child-')?`field-${first.replace(/^child-\d+-/,'')}-${first.replace(/-[^-]+$/,'').replace(/\W/g,'')}`:`field-${first}`);el?.scrollIntoView({block:'center'});el?.focus();});return;}
+    if(Object.keys(problems).length){setErrors(problems);setMessage(NOT_SAVED);const keys=Object.keys(problems);
+      // One problem: straight to its field. Several: to the list, which names each one and goes to it.
+      requestAnimationFrame(()=>{if(keys.length===1)goToField(keys[0]);else document.getElementById('adm-problems')?.scrollIntoView({block:'center'});});return;}
     setErrors({});setBusy(true);setMessage('');
     try{
       const allowed=table==='posts'?commonFields:entities[table].fields;
@@ -555,7 +568,7 @@ export function EncountersCms(){
       setMessage(`${patch.status==='published'?'Published.':patch.status==='draft'?'Moved back to draft.':'Saved.'}${coming?' It is shown in What is coming on Home by itself until it ends: no announcement needed.':''}`);
       // Keep the saved record in the address, so a reload reopens it.
       {const url=new URL(location.href);url.searchParams.delete('new');url.searchParams.set('edit',String(current.id));history.replaceState(history.state,'',url);}
-    }catch(e){const ex=explainError(e);setMessage(ex.message);setErrorDetail(ex.detail);if(ex.field&&ex.fieldMessage)setErrors({[ex.field]:ex.fieldMessage});if(ex.refresh)setRevision(x=>x+1);}finally{setBusy(false);}}
+    }catch(e){const ex=explainError(e,fieldLabel);setErrorDetail(ex.detail);if(ex.field&&ex.fieldMessage){const field=ex.field,text=ex.fieldMessage;setErrors({[field]:text});setMessage(NOT_SAVED);requestAnimationFrame(()=>goToField(field));}else setMessage(ex.message);if(ex.refresh)setRevision(x=>x+1);}finally{setBusy(false);}}
   // While a record is new, its address follows the title until someone edits the address by hand.
   function autoSlug(prev:Row,next:Row,source:string){if(prev.updated_at||!(source in next))return next;const following=!prev.slug||prev.slug===slugify(String(prev[source]||''));if(!following||next[source]===prev[source])return next;const slug=slugify(String(next[source]||''));if(slug&&errors.slug)errorContext.clear('slug');return {...next,slug};}
   function duplicate(){if(!record)return;setRecord(duplicateContent(record,crypto.randomUUID()));setBlocks(blocks.map(b=>({...b,id:crypto.randomUUID(),source_block_id:undefined})));setChildRows(childRows.map(c=>({...c,id:crypto.randomUUID()})));setMessage('New draft copy. Save when ready.');}
@@ -586,7 +599,8 @@ export function EncountersCms(){
   const label=kindParam?kindListLabels[kindParam]||kindLabel(kindParam):pagesOnly?'Pages':tableLabel(table);
   // Artworks keep their image in the artwork details; use it as thumbnail when there is no cover.
   const withImage=(p:Row)=>({...p,cover_id:p.cover_id||(options.artworks||[]).find(a=>a.id===p.id)?.media_id});
-  const notice=message&&<div className={`adm-notice ${/^(Saved|Published|Moved|New draft|Draft profile|Image uploaded)|was deleted\.$/.test(message)?'adm-notice--ok':'adm-notice--error'}`}><p role="status">{message}</p>{errorDetail&&<details className="adm-detail"><summary>Technical detail</summary><code>{errorDetail}</code></details>}</div>;
+  const problemKeys=Object.keys(errors);const allFixed=message===NOT_SAVED&&!problemKeys.length;
+  const notice=message&&<div className={`adm-notice ${allFixed||/^(Saved|Published|Moved|New draft|Draft profile|Image uploaded)|was deleted\.$/.test(message)?'adm-notice--ok':'adm-notice--error'}`}><p role="status">{allFixed?'All fixed. Save again to keep your changes.':message===NOT_SAVED?`${message} ${problemKeys.length===1?'One thing to fix':`${problemKeys.length} things to fix`}:`:message}</p>{!allFixed&&message===NOT_SAVED&&<ul id="adm-problems" className="adm-problems">{problemKeys.map(key=><li key={key}><button type="button" onClick={()=>goToField(key)}><b>{problemPlace(key)}</b>{errors[key]}</button></li>)}</ul>}{errorDetail&&<details className="adm-detail"><summary>Technical detail</summary><code>{errorDetail}</code></details>}</div>;
 
   if(!record){
     const scoped=table!=='posts'?rows:kindParam?rows.filter(r=>r.kind===kindParam):pagesOnly?rows.filter(r=>r.kind==='page'):rows.filter(r=>postScopes[scope](r.kind));

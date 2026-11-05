@@ -48,7 +48,7 @@ export function AboutView({settings:s,contact,media}:{settings:Row;contact:Conta
   });
   return <>
     <span data-nav-theme="light" hidden/>
-    <section ref={hero} className="about-hero pin-section" data-nav-hero aria-label="Our mission">
+    <section ref={hero} className="about-hero pin-section" data-nav-hero suppressHydrationWarning aria-label="Our mission">
       <div className="about-sticky">
         <div className="about-frame" data-frame>
           <div className="about-photos hero-image">{frames.map((id,i)=><div key={id+i} data-photo style={{opacity:i?0:1}}><Picture id={id} media={media} fallback={id.startsWith('/design/')?id:undefined} priority={i===0}/></div>)}</div>

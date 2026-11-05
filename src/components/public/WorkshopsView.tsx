@@ -88,7 +88,7 @@ export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:
   const groups=listGroups(list,'workshop');const ordered=groups.flatMap(g=>g.items);const [show,setShow]=useState('all');
   return <>
     <span data-nav-theme="dark" hidden/>
-    <section ref={hero} className="ws-hero" data-nav-hero aria-label={string(page?.title)||'Workshops'}>
+    <section ref={hero} className="ws-hero" data-nav-hero suppressHydrationWarning aria-label={string(page?.title)||'Workshops'}>
       <div className="ws-hero-image hero-image"><div data-ws-img className="ws-fill"><Picture id={covers.workshops(settings,page).id} media={media} fallback={covers.workshops(settings,page).fallback} priority/></div></div>
       <div className="ws-hero-shade"/>
       <div className="ws-hero-copy" data-ws-copy><p>{string(settings.kicker)||string(page?.kicker)||'artsy animals'}</p><h1>{string(settings.title)||string(page?.title)||'Workshops'}</h1></div>
