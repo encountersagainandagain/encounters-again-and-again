@@ -11,6 +11,7 @@ import type {ContentBlock} from '@/features/encounters/public-content';
 import {covers} from '@/features/encounters/covers';
 import {bannerCard,cardBackground} from '@/features/encounters/expeditions-page';
 import {InlineText} from './InlineText';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
 
 const ORDER=[0,2,4,1,3,5];
 // Card windows (02-animations.md § 9). Five cards use the executable prototype's exact table; other counts
@@ -120,7 +121,7 @@ export function ExpeditionsView({page,settings,cards:saved,list,media,blocks}:{p
         </section>)}
       </section>}
     </div>
-    <DarkClosing title={string(settings.closing)||'May the ocean be with you'} scribble="waves"/>
+    <DarkClosing title={string(settings.closing)||'May the ocean be with you'} signature={signatureOf(settings.signature,closingSignature.expeditions)}/>
   </>;
 }
 // The list of expeditions in the order of its note: where the boat is going, where it is now, where it has been.

@@ -8,6 +8,8 @@ import {Breadcrumbs,DarkClosing} from '@/components/public/EditorialPieces';
 import {JsonLd} from '@/components/JsonLd';
 import {siteUrl} from '@/config/brand';
 import {inCategory} from '@/features/encounters/art';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
+import type {Row} from '@/features/encounters/presentation';
 export const revalidate=300;
 export const dynamicParams = true;
 type Props={params:Promise<{category:string}>};
@@ -18,4 +20,4 @@ export default async function Page({params}:Props){const {category}=await params
     <JsonLd id="collection-jsonld" data={{'@context':'https://schema.org','@type':'CollectionPage',name:string(c.name),url:`${siteUrl}/art/${category}`,description:string(c.meta_description)||string(c.lead)||undefined,hasPart:works.map(p=>({'@type':'CreativeWork',name:p.title,url:siteUrl+(artworkPath(p,data.artworks,data.categories)||`/art/${category}/${p.slug}`)}))}}/>
     <CategorySection category={c} posts={works} data={data} link={false}/>
     {others.length>0&&<section className="art-others"><span className="art-kicker">Other collections</span><div className="category-tiles" style={{gridTemplateColumns:`repeat(${Math.min(4,others.length)},minmax(0,1fr))`}}>{others.slice(0,4).map(o=><Link key={string(o.id)} className="category-tile" href={`/art/${o.slug}`}><CategoryTile category={o} number={categoryNumber(o,data)} image={tileImage(o,all.filter(p=>inCategory(data.artworks.find(a=>a.id===p.id),o.id)),data)} data={data}/></Link>)}</div></section>}
-    <DarkClosing title="More to come"/></ScrollStage>;}
+    <DarkClosing title="More to come" signature={signatureOf((((data.settings.pages||{}) as Row).art as Row|undefined)?.signature,closingSignature.art)}/></ScrollStage>;}

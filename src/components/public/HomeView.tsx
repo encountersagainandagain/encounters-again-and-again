@@ -12,7 +12,7 @@ import {brand} from '@/config/brand';
 import {Picture} from './MediaImage';
 import {NewsletterSignup} from './NewsletterSignup';
 import {clamp01,useFrame} from './useFrame';
-import {signatureOf,signatures} from '@/features/encounters/signatures';
+import {closingSignature,signatureOf,signatures} from '@/features/encounters/signatures';
 import {creatures} from '@/features/encounters/home-creatures';
 import {createWater,waterMaxScale,type Water} from './homeWater';
 
@@ -255,6 +255,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     // Closing scribble: drawn with the scroll (prototype armFooterScribble).
     n.scribbles.forEach((path,i)=>{const p=reduced?1:clamp01((vh-scribR[i].top)/(vh*.4));path.style.strokeDasharray='1';path.style.strokeDashoffset=String(1-p);});
   });
+  const homeSignature=signatureOf(home.signature,closingSignature.home);
   const blocks:Record<string,ReactNode>={
     descent:(string(descent.title)||string(descent.body))?<section key="descent" id="descenso" className="home-descent" data-clear><h2>{string(descent.title)}</h2>{string(descent.body)&&<p>{emphasize(string(descent.body),string(descent.emphasis))}</p>}</section>:null,
     reef:<section key="reef" className="home-reef" data-reef data-clear><Picture id={reef.media_id} media={media} fallback="/design/reef-ridge-v3.webp" sizes="100vw"/><Creature name="fish"/>{(string(reef.caption)||string(reef.place))&&<div><span>{string(reef.caption)}</span><small>{string(reef.place)}</small></div>}</section>,
@@ -296,6 +297,6 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       </div>
     </section>
     {sections.map(k=>blocks[k])}
-    <section className="home-closing"><h2 data-hseq="1.05,0.45">{closing}</h2><svg data-hscribble data-signature={signatureOf(home.signature)} viewBox="0 0 600 120" aria-hidden="true">{signatures[signatureOf(home.signature)].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>)}</svg></section>
+    <section className="home-closing"><h2 data-hseq="1.05,0.45">{closing}</h2>{homeSignature!=='none'&&<svg data-hscribble data-signature={homeSignature} viewBox="0 0 600 120" aria-hidden="true">{signatures[homeSignature].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>)}</svg>}</section>
   </div>;
 }

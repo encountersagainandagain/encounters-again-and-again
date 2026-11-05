@@ -10,13 +10,18 @@ import {artSeo} from '@/features/encounters/art';
 // `section` only titles a part of the editor (its fields stay on the page's own values); `marked` is a text with
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
 // an ordered list of parts, each of one of its `kinds` (saved with its `type`).
-export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'signature'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
+import {closingSignature} from '@/features/encounters/signatures';
+export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'signature'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];fallback?:string;allowNone?:boolean;hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
 const t=(key:string,label:string,help?:string,placeholder?:string):PageField=>({key,label,help,placeholder});
 const area=(key:string,label:string,help?:string):PageField=>({key,label,type:'textarea',help});
 const media=(key:string,label:string,help?:string):PageField=>({key,label,type:'media',help});
 const group=(key:string,label:string,fields:PageField[],help?:string):PageField=>({key,label,type:'group',fields,help});
 const list=(key:string,label:string,fields:PageField[],max:number,help?:string):PageField=>({key,label,type:'list',fields,max,help});
 const section=(key:string,label:string,help:string,fields:PageField[]):PageField=>({key,label,type:'section',fields,help});
+// Closing block of a page: its phrase (one or more fields) and the signature drawn under it. Empty signature: the stroke
+// the page has always had (closingSignature); some pages may show none.
+const closing=(label:string,help:string,fields:PageField[],page:keyof typeof closingSignature):PageField=>section('closing',label,help,[...fields,
+  {key:'signature',label:'Signature',type:'signature',fallback:closingSignature[page],allowNone:true,help:'The stroke drawn under the phrase as visitors reach it. Point at one to see it draw.'}]);
 export type PageSchema={key:string;label:string;path:string;store:'home'|'pages';lead:string;fields:PageField[]};
 export const pageSchemas:PageSchema[]=[
   {key:'home',label:'Home',path:'/',store:'home',lead:'The descent, the order of the sections and their texts. The lists (what is coming, stories, art, crew) fill themselves with published content; tick “Featured on Home” in a content to put it first.',fields:[
@@ -36,9 +41,7 @@ export const pageSchemas:PageSchema[]=[
     t('crew_title','Crew: title'),
     group('about','About block',[t('kicker','Small line'),area('line','Phrase in italics','The block is hidden when the phrase is empty.'),area('body','Text'),t('cta_label','Button','Default: Read our story')]),
     group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
-    section('closing_band','Closing','The dark band at the very end of Home, above the footer: a phrase and a signature that draws itself as visitors reach it.',[
-      t('closing','Closing phrase','Default: May the ocean be with you'),
-      {key:'signature',label:'Signature',type:'signature',help:'Pick the stroke drawn under the phrase. Point at one to see it draw.'}]),
+    closing('Closing','The dark band at the very end of Home, above the footer: a phrase and a signature that draws itself as visitors reach it.',[t('closing','Closing phrase','Default: May the ocean be with you')],'home'),
   ]},
   {key:'art',label:'Art page',path:'/art',store:'pages',lead:'Everything on the Art page, in the order of the page: the banner, how it appears in search engines, the categories, the works and the closing. Categories are edited in Art → Categories and each work in Art → Works; their tiles and cards fill themselves.',fields:[
     section('banner','1 · Banner','The first screen: the drawn title over the lines, and a short line under it.',[
@@ -52,7 +55,7 @@ export const pageSchemas:PageSchema[]=[
       {key:'seo_topics',label:'What the art is about',type:'lines',help:'One topic per line, e.g. Marine illustration. Not shown on the page: search engines read them as the subjects of this page. Empty: the suggested topics are used.'}]),
     section('categories','3 · Categories','Under the banner: one tile per published category and a filter (All, then each category) that shows only that category below. Nothing to fill in here: categories, their order, cover and texts are edited in Art → Categories.',[]),
     section('works','4 · Works','Then one section per category with its published works. Each card shows the work (its image; a video plays in the frame and an audio under it), its title, categories and date, its artists, its summary and Read more, which opens the full work. A work with several categories appears in each of them. Nothing to fill in here: each work is edited in Art → Works.',[]),
-    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')]),
+    closing('5 · Closing','The dark band at the end of the page, above the footer. The category pages and each work end with the same signature.',[t('closing','Closing phrase','Default: More to come')],'art'),
   ]},
   {key:'expeditions',label:'Expeditions page',path:'/expeditions',store:'pages',lead:'Everything on the Expeditions page, in the order of the page: the banner, how it appears in search engines, the cards inside the banner, the list of expeditions and the closing. Each expedition is created and edited in Expeditions; its card in the list fills itself.',fields:[
     section('banner','1 · Banner','The first screen. While scrolling, the surface photo opens in six strips onto the underwater photo.',[
@@ -76,7 +79,7 @@ export const pageSchemas:PageSchema[]=[
       ],12)]),
     section('list','4 · List of expeditions','After the banner. The published expeditions are grouped by their state, each group on its own colour: Coming up (white), On the water now (lagoon) and Where we have been (white), with a filter above them. The state follows each expedition’s dates (its Status card): postponed ones show with the upcoming, cancelled ones with the past.',[
       t('list_title','Title of the list','Default: On the water'),t('list_note','Note beside the title','Default: where we are going, and where we have been')]),
-    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: May the ocean be with you')]),
+    closing('5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: May the ocean be with you')],'expeditions'),
   ]},
   {key:'workshops',label:'Workshops page',path:'/workshops',store:'pages',lead:'Everything on the Workshops page, in the order of the page: the banner, how it appears in search engines, the list of workshops and the closing. Each workshop, with its sessions, is created and edited in Workshops; its screen in the list fills itself.',fields:[
     section('banner','1 · Banner','The first screen: the photo sinks and darkens while the title rises away.',[
@@ -89,7 +92,7 @@ export const pageSchemas:PageSchema[]=[
       {key:'seo_topics',label:'What the workshops are about',type:'lines',help:'One topic per line, e.g. Drawing workshops for kids. Not shown on the page: search engines read them as the subjects of this page. They help, but what matters most is the visible text, so use the same words in each workshop. Empty: the suggested topics are used.'}]),
     section('list','3 · List of workshops','After the banner, one screen per workshop with its sessions. The published workshops are grouped by their state, with a filter above them: Coming up (white), Happening now (lagoon) and Past workshops (white). The state follows each workshop’s dates, or the dates of its sessions (its Status card): postponed ones show with the upcoming, cancelled ones with the past.',[
       t('list_title','Title of the list','Default: Workshops'),t('list_note','Note beside the title','Default: what is coming, and what we have already made together')]),
-    section('closing','4 · Closing','The band at the end of the page, above the footer.',[t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')]),
+    closing('4 · Closing','The band at the end of the page, above the footer.',[t('closing','Closing question','Default: Want one of these in your room?'),t('closing_cta','Closing button','It leads to Contact. Default: Write to us')],'workshops'),
   ]},
   {key:'messages',label:'Meaningful Messages page',path:'/meaningful-messages',store:'pages',lead:'Edited in the order of the page: banner, search engines, introduction, the list of messages and the closing. Each message is edited in Meaningful Messages → Messages.',fields:[
     section('banner','1 · Banner','The first screen: the image darkens while the title rises away.',[
@@ -103,7 +106,7 @@ export const pageSchemas:PageSchema[]=[
     section('intro','3 · Introduction','Right after the banner, before the messages.',[
       area('intro','Introduction phrase','Large phrase with a hand-drawn line under it. Empty: the introduction is hidden.'),t('credit_line','Credit line','Small capitals under the introduction, e.g. Illustrated by … Empty: hidden.')]),
     section('list','4 · Messages','One message per screen: its illustration on one half, its text on the other, sides alternating (illustration left, then right). They appear in the order chosen in each message (Order), and only the published ones. Nothing to fill in here: each message is edited in Meaningful Messages → Messages.',[]),
-    section('closing','5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')]),
+    closing('5 · Closing','The dark band at the end of the page, above the footer.',[t('closing','Closing phrase','Default: More to come')],'messages'),
   ]},
   {key:'about',label:'About page',path:'/about',store:'pages',lead:'Everything on the About page, in the order of the page: the banner, how it appears in search engines and the blocks under the banner. The About page appears once the banner title is filled in; until then the imported About text is shown.',fields:[
     section('banner','1 · Banner','The first screen: the photos change while you read, then the photo shrinks into a band and the three columns rise under it.',[

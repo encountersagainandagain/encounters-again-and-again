@@ -1,4 +1,5 @@
 'use client';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
 import Link from 'next/link';
 import {useEffect,useRef,useState} from 'react';
 import type {ContentBlock} from '@/features/encounters/public-content';
@@ -9,6 +10,7 @@ import {ramp,useFrame} from './useFrame';
 import {MediaImage,Picture} from './MediaImage';
 import {covers} from '@/features/encounters/covers';
 import {listGroups} from './ExpeditionsView';
+import {Signature} from './EditorialPieces';
 
 // Workshops (Workshops.dc.html, 02-animations § 10): one pinned screen per workshop. The sessions scroll
 // inside the card (their own snap and contained overscroll); the image crossfades with the rail position.
@@ -101,6 +103,6 @@ export function WorkshopsView({page,settings,list,sessions,media,blocks}:{page?:
       </section>)}
       {!ordered.length&&blocks.length>0&&<div className="ws-blocks"><PostBlocks blocks={blocks} media={media}/></div>}
     </div>
-    <section className="ws-closing"><h2 data-wseq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Link data-wseq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>
+    <section className="ws-closing"><h2 data-wseq="1.05,0.45">{string(settings.closing)||'Want one of these in your room?'}</h2><Signature signature={signatureOf(settings.signature,closingSignature.workshops)}/><Link data-wseq="0.95,0.4" href="/contact" className="ws-closing-cta">{string(settings.closing_cta)||'Write to us'}</Link></section>
   </>;
 }

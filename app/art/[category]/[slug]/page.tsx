@@ -7,6 +7,8 @@ import {ScrollStage} from '@/components/public/EditorialInteractive';
 import {JsonLd} from '@/components/JsonLd';
 import {siteUrl} from '@/config/brand';
 import {artCategoryIds,inCategory} from '@/features/encounters/art';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
+import type {Row} from '@/features/encounters/presentation';
 export const revalidate=300;
 export const dynamicParams = true;
 type Props={params:Promise<{category:string;slug:string}>};
@@ -16,4 +18,4 @@ export default async function Page({params}:Props){const {category,slug}=await p
   const related=await Promise.all(data.posts.filter(p=>p.id!==post.id&&data.relations.some(r=>r.post_id===post.id&&r.related_post_id===p.id||r.related_post_id===post.id&&r.post_id===p.id)).map(async p=>({title:p.title,href:await contentPath(p)})));
   const more=all.filter(p=>p.id!==post.id&&inCategory(data.artworks.find(a=>a.id===p.id),cat.id)).slice(0,4);
   return <ScrollStage className="editorial-page artwork-page"><JsonLd id="artwork-jsonld" data={{'@context':'https://schema.org','@type':'CreativeWork',name:post.title,url:siteUrl+path,description:post.excerpt||string(art.caption)||undefined,genre:artCategoryIds(art).map(id=>data.categories.find(c=>c.id===id)).filter(Boolean).map(c=>string(c!.name)),datePublished:string(post.published_at).slice(0,10)||undefined,image:(post.cover_id||art.media_id)?`${siteUrl}/api/media/${string(post.cover_id||art.media_id)}`:undefined,creator:people.map(p=>({'@type':'Person',name:string(p.member.name),...(p.href?{url:siteUrl+p.href}:{})})),isPartOf:{'@type':'CollectionPage',name:string(cat.name),url:`${siteUrl}/art/${cat.slug}`}}}/>
-    <ArtworkView post={post} art={art} category={cat} number={categoryNumber(cat,data)} people={people} blocks={blocks} media={data.media} related={related} trail={<ArtworkTrail category={cat} title={post.title} path={path}/>} more={more.length?<section className="art-section art-more"><span className="art-kicker">More from {string(cat.name)}</span><ArtworkCards posts={more} data={data} layout="more"/></section>:null}/></ScrollStage>;}
+    <ArtworkView post={post} art={art} category={cat} number={categoryNumber(cat,data)} people={people} blocks={blocks} media={data.media} related={related} signature={signatureOf((((data.settings.pages||{}) as Row).art as Row|undefined)?.signature,closingSignature.art)} trail={<ArtworkTrail category={cat} title={post.title} path={path}/>} more={more.length?<section className="art-section art-more"><span className="art-kicker">More from {string(cat.name)}</span><ArtworkCards posts={more} data={data} layout="more"/></section>:null}/></ScrollStage>;}

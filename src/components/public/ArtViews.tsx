@@ -8,6 +8,7 @@ import {Breadcrumbs,DarkClosing,EmptyState,PhotoHero,Scribble} from './Editorial
 import {MediaEmbed,VideoFrame} from './EditorialInteractive';
 import {PostBlocks} from './PostBlocks';
 import {artCategoryIds,embedOf,inCategory,isAudio,workDate} from '@/features/encounters/art';
+import type {SignatureChoice} from '@/features/encounters/signatures';
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
 export type Person={member:Row;role:string;href:string|null};
@@ -69,7 +70,7 @@ export function ArtHero({title,kicker,children}:{title:string;kicker:string;chil
 }
 
 // Single work: banner, credits, text, embed and blocks; the CMS preview passes unsaved values.
-export function ArtworkView({post,art,category,number,people,blocks,media,pathPrefix='',trail,related=[],more}:{post:Row;art:Row;category:Row|null;number:string;people:Person[];blocks:ContentBlock[];media:Row[];pathPrefix?:string;trail?:ReactNode;related?:{title:string;href:string}[];more?:ReactNode}){
+export function ArtworkView({post,art,category,number,people,blocks,media,pathPrefix='',trail,related=[],more,signature='loop'}:{signature?:SignatureChoice;post:Row;art:Row;category:Row|null;number:string;people:Person[];blocks:ContentBlock[];media:Row[];pathPrefix?:string;trail?:ReactNode;related?:{title:string;href:string}[];more?:ReactNode}){
   const title=string(post.title)||'Untitled work';
   return <><PhotoHero title={title} kicker={string(post.kicker)||string(category?.name)} meta={string(post.meta_line)} cover={post.cover_id||art.media_id} media={media}/>
     <div id="editorial-content">{trail}
@@ -82,7 +83,7 @@ export function ArtworkView({post,art,category,number,people,blocks,media,pathPr
       {related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{related.map(r=><Link key={r.href} href={r.href}>{r.title} →</Link>)}</section>}
       {more}
     </div>
-    <DarkClosing title="More to come"/></>;
+    <DarkClosing title="More to come" signature={signature}/></>;
 }
 export function ArtworkTrail({category,title,path,pathPrefix=''}:{category:Row;title:string;path:string;pathPrefix?:string}){
   return <Breadcrumbs items={[{label:'Art',href:`${pathPrefix}/art`},{label:string(category.name),href:`${pathPrefix}/art/${category.slug}`},{label:title,href:path}]}/>;

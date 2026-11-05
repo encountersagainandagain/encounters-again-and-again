@@ -9,6 +9,7 @@ import {ramp,useFrame} from './useFrame';
 import {covers} from '@/features/encounters/covers';
 import type {Piece} from '@/features/encounters/message-text';
 import {MessageText} from './MessageText';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
 
 // Meaningful Messages (Meaningful Messages.dc.html, 02-animations § 8): one message per screen, the
 // illustration at full height beside its text, sides alternating, crossing as the next one rises.
@@ -53,6 +54,6 @@ export function MessagesView({settings,messages,media}:{settings:Row;messages:Me
           </article>;})}</div>
       </section>}
     </div>
-    <DarkClosing title={string(settings.closing)||'More to come'}/>
+    <DarkClosing title={string(settings.closing)||'More to come'} signature={signatureOf(settings.signature,closingSignature.messages)}/>
   </>;
 }
