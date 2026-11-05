@@ -9,14 +9,12 @@ import {modules} from '@/config/modules';
 import {supabase} from '@/lib/supabase';
 
 // Admin sections. Content tables live in /admin/content and are selected with ?table=.
-// The menu follows the modules of the site. Content lives in /admin/content: ?table= picks the table,
+// The menu follows the site's navbar, left to right (Juani, 2026-11-05): Expeditions, Workshops, Meaningful Messages, Art,
+// About us, The Crew, Contact; then what belongs to the whole site. The menu follows the modules of the site. Content lives in /admin/content: ?table= picks the table,
 // ?kind= one type of content, ?scope=pages the permanent pages and ?page=team the Crew page itself.
 export const adminSections=[
   {href:'/admin',label:'Dashboard',icon:Home,group:'Overview',enabled:modules.cms},
   {href:'/admin/page-settings?page=home',label:'Home page',icon:LayoutPanelTop,group:'Overview',enabled:modules.cms},
-  {href:'/admin/content?table=posts&kind=artwork',label:'Works',icon:Palette,group:'Art',enabled:modules.art},
-  {href:'/admin/content?table=art_categories',label:'Categories',icon:Shapes,group:'Art',enabled:modules.art},
-  {href:'/admin/page-settings?page=art',label:'Art page',icon:PanelsTopLeft,group:'Art',enabled:modules.art},
   {href:'/admin/content?table=posts&kind=expedition',label:'Expeditions',icon:Ship,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/content?table=posts&kind=expedition_report',label:'Results',icon:FileText,group:'Expeditions',enabled:modules.expeditions},
   {href:'/admin/page-settings?page=expeditions',label:'Expeditions page',icon:PanelsTopLeft,group:'Expeditions',enabled:modules.expeditions},
@@ -25,12 +23,15 @@ export const adminSections=[
   {href:'/admin/page-settings?page=workshops',label:'Workshops page',icon:PanelsTopLeft,group:'Workshops',enabled:modules.workshops},
   {href:'/admin/content?table=posts&kind=message',label:'Messages',icon:Feather,group:'Meaningful Messages',enabled:modules.messages},
   {href:'/admin/page-settings?page=messages',label:'Messages page',icon:PanelsTopLeft,group:'Meaningful Messages',enabled:modules.messages},
-  {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'Announcements',enabled:modules.upcoming},
+  {href:'/admin/content?table=posts&kind=artwork',label:'Works',icon:Palette,group:'Art',enabled:modules.art},
+  {href:'/admin/content?table=art_categories',label:'Categories',icon:Shapes,group:'Art',enabled:modules.art},
+  {href:'/admin/page-settings?page=art',label:'Art page',icon:PanelsTopLeft,group:'Art',enabled:modules.art},
+  {href:'/admin/page-settings?page=about',label:'About page',icon:PanelsTopLeft,group:'About us',enabled:modules.cms},
   {href:'/admin/content?table=crew_members',label:'Crew',icon:Users,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&kind=crew_member',label:'Personal pages',icon:UserRound,group:'Crew',enabled:modules.crew},
   {href:'/admin/content?table=posts&page=team',label:'The Crew page (/crew)',icon:PanelsTopLeft,group:'Crew',enabled:modules.crew},
-  {href:'/admin/page-settings?page=about',label:'About page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
-  {href:'/admin/page-settings?page=contact',label:'Contact page',icon:PanelsTopLeft,group:'Site',enabled:modules.cms},
+  {href:'/admin/page-settings?page=contact',label:'Contact page',icon:PanelsTopLeft,group:'Contact',enabled:modules.cms},
+  {href:'/admin/content?table=upcoming_items',label:'Announcements',icon:Megaphone,group:'Site',enabled:modules.upcoming},
   {href:'/admin/content?table=media',label:'Media library',icon:ImageIcon,group:'Site',enabled:modules.media},
   {href:'/admin/settings',label:'Settings',icon:Settings,group:'Site',enabled:modules.cms},
   {href:'/admin/newsletter',label:'Newsletter',icon:Mail,group:'Site',enabled:modules.newsletter},
