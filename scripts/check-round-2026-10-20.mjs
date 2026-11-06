@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import os from 
 const root=path.resolve(import.meta.dirname,'..');const dir=path.join(root,'src/features/encounters');
 // The modules import each other without extensions: load copies that point to the .ts files.
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'enc-home-'));
-for(const name of ['presentation','activities','message-text','announcements','home'])fs.writeFileSync(path.join(tmp,`${name}.ts`),fs.readFileSync(path.join(dir,`${name}.ts`),'utf8').replace(/from '\.\/(presentation|activities|message-text|announcements)'/g,(_,m)=>`from './${m}.ts'`));
+for(const name of ['presentation','activities','message-text','announcements','home-defaults','home'])fs.writeFileSync(path.join(tmp,`${name}.ts`),fs.readFileSync(path.join(dir,`${name}.ts`),'utf8').replace(/from '\.\/(presentation|activities|message-text|announcements|home-defaults)'/g,(_,m)=>`from './${m}.ts'`));
 const {homeView}=await import(pathToFileURL(path.join(tmp,'home.ts')).href);
 const post=(id,kind,slug,extra={})=>({id,kind,slug,title:slug,status:'published',...extra});
 const posts=[post('w1','artwork','the-book'),post('m1','message','a-poem'),post('r1','expedition_report','a-result'),post('e1','expedition','a-trip'),post('e2','expedition','next-trip'),post('c1','crew_member','someone-page'),post('w2','artwork','hidden-work')];

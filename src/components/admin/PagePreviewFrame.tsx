@@ -36,7 +36,9 @@ export function PagePreviewFrame({pageKey,mode}:{pageKey:string;mode?:string}){
   useEffect(()=>{let live=true;if(!supabase||!messageIds)return;void supabase.from('post_blocks').select('*').in('post_id',messageIds.split(',')).order('position').then(r=>{if(live&&!r.error)setMessageBlocks((r.data||[]) as Row[]);});return()=>{live=false;};},[messageIds]);
   useEffect(()=>{let live=true;if(!supabase)return;
     void Promise.all(tables.map(t=>supabase!.from(t).select('*'))).then(results=>{if(!live)return;const failed=results.find(r=>r.error);if(failed){setError('The preview could not load the content.');return;}setData(Object.fromEntries(tables.map((t,i)=>[t,results[i].data||[]])) as Data);});
-    const receive=(e:MessageEvent)=>{if(e.origin!==location.origin)return;if(e.data?.type==='page-draft'&&e.data.key===pageKey)setDraft(e.data.value);if(e.data?.type==='card-draft')setCard(e.data.value);};
+    const receive=(e:MessageEvent)=>{if(e.origin!==location.origin)return;if(e.data?.type==='page-draft'&&e.data.key===pageKey)setDraft(e.data.value);if(e.data?.type==='card-draft')setCard(e.data.value);
+      // The editor tells which section is being edited: show it (Home marks its sections with data-home-section).
+      if(e.data?.type==='page-scroll'){const key=String(e.data.section||'');const el=key==='sections'?document.querySelector<HTMLElement>('[data-home-section=hero]'):document.querySelector<HTMLElement>(`[data-home-section="${CSS.escape(key)}"]`);if(el)scrollTo({top:Math.max(0,el.getBoundingClientRect().top+scrollY-(key==='upcoming'?0:40)),behavior:'auto'});}};
     addEventListener('message',receive);parent.postMessage({type:'page-preview-ready'},location.origin);return()=>{live=false;removeEventListener('message',receive);};
   },[pageKey]);
   const value=(data?.site_settings.find(s=>s.key==='site')?.value||{}) as Row;
@@ -48,7 +50,7 @@ export function PagePreviewFrame({pageKey,mode}:{pageKey:string;mode?:string}){
   if(error)return <p className="p-4" role="alert">{error}</p>;
   if(!data||(!draft&&!(mode==='card'&&card)))return <p className="p-4" role="status">Loading the preview…</p>;
   const posts=data.posts.filter(p=>p.status==='published');const page=(pageKey==='expeditions'?'encounters_expeditions':pageKey==='workshops'?'artsy_animals':'');const program=posts.find(p=>p.kind==='page'&&p.source_role===page);
-  const base={posts,expeditions:data.expeditions,workshops:data.workshops,relations:data.post_relations};
+  const base={posts,expeditions:data.expeditions,workshops:data.workshops,relations:data.post_relations,sessions:data.workshop_sessions};
   const own=(settings.pages as Row|undefined)?.[pageKey] as Row|undefined;
   const note=<p className="adm-preview-note" role="status">Preview · unsaved changes{imageError?` · ${imageError}`:''}</p>;
   if(pageKey==='home')return <>{note}<div className="editorial-page home-page"><HomeView view={homeView({...base,settings,media:images,artworks:data.artworks,categories:data.art_categories,crew:data.crew_members,upcoming:data.upcoming_items.filter(u=>u.status==='published').sort(byOrder)})} media={images} closing={homeClosing(settings)} newsletter={false}/></div></>;

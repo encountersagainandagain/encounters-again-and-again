@@ -2,6 +2,7 @@ import {activities,activityPath,dateLabel,isUpcoming,perthToday,shortDate,type A
 import {announcementShown,placeByOrder,signupLink} from './announcements';
 import {artworkPath,byOrder,listedCrew,profileVisible,string,type Row} from './presentation';
 import {messagePath} from './message-text';
+import {homeDefaults} from './home-defaults';
 // Home v2 (handoff 10-home.md). Everything listed here comes from published content; the section order,
 // the hidden sections and the texts come from Settings → Home. What is coming goes by date, what already happened by
 // the newest, and art in the order of the Art works list.
@@ -9,7 +10,7 @@ export type HomeData=ActivityData&{settings:Row;media:Row[];artworks:Row[];categ
 export const homeSections=[['descent','The descent'],['reef','Reef'],['projects','Ongoing projects'],['upcoming','What is coming'],['happened','What already happened'],['art','New art'],['crew','Who is on board'],['about','About'],['newsletter','Newsletter']] as const;
 export type HomeSection=typeof homeSections[number][0];
 // The closing phrase of Home: Home page → Closing; before it moved there it lived in Settings (closing_line).
-export const homeClosing=(settings:Row)=>string(((settings.home||{}) as Row).closing)||string(settings.closing_line)||'May the ocean be with you';
+export const homeClosing=(settings:Row)=>string(((settings.home||{}) as Row).closing)||string(settings.closing_line)||homeDefaults.closing;
 export type AgendaItem={key:string;type:string;chip:string;date:string;title:string;place:string;detail:string;cta:string;href:string|null;image:unknown;signup?:{label:string;href:string;external:boolean}|null};
 export type Card={key:string;href:string;label:string;date?:string;title:string;excerpt?:string;image:unknown;contain?:boolean};
 export const projectCards=[
@@ -45,11 +46,11 @@ export function homeView(data:HomeData,today=perthToday()){
   const coming=placeByOrder(agenda,announcements);
   const shown=new Set(coming.map(a=>a.key));
   // Each card is a full screen while scrolling: 12 at most keeps Home a reasonable length (8 recommended in the admin).
-  const limit=Math.max(2,Math.min(12,Number(home.upcoming_limit)||4));
+  const limit=Math.max(2,Math.min(12,Number(home.upcoming_limit)||homeDefaults.upcoming_limit));
   const kinds:Record<string,string>={news:'Field note',expedition_report:'Expedition',workshop_report:'Workshop'};
   const happened:Card[]=data.posts.filter(p=>p.status==='published'&&string(p.kind) in kinds&&!shown.has(string(p.id))).sort((a,b)=>string(b.published_at).localeCompare(string(a.published_at))).slice(0,3)
     .map(p=>({key:string(p.id),href:`/posts/${string(p.slug)}`,label:kinds[string(p.kind)],date:shortDate(p.published_at),title:string(p.title),excerpt:string(p.excerpt),image:p.cover_id}));
-  const art:Card[]=data.posts.filter(p=>p.kind==='artwork'&&artworkPath(p,data.artworks,data.categories)).sort(byOrder).slice(0,Math.max(3,Math.min(10,Number(home.art_limit)||5))).map(p=>{const a=data.artworks.find(x=>x.id===p.id)!;const c=data.categories.find(x=>x.id===a.category_id);const m=data.media.find(x=>x.id===(a.media_id||p.cover_id));return {key:string(p.id),href:artworkPath(p,data.artworks,data.categories)!,label:string(c?.name),title:string(p.title),image:a.media_id||p.cover_id,contain:m?.fit==='contain'};});
+  const art:Card[]=data.posts.filter(p=>p.kind==='artwork'&&artworkPath(p,data.artworks,data.categories)).sort(byOrder).slice(0,Math.max(3,Math.min(10,Number(home.art_limit)||homeDefaults.art_limit))).map(p=>{const a=data.artworks.find(x=>x.id===p.id)!;const c=data.categories.find(x=>x.id===a.category_id);const m=data.media.find(x=>x.id===(a.media_id||p.cover_id));return {key:string(p.id),href:artworkPath(p,data.artworks,data.categories)!,label:string(c?.name),title:string(p.title),image:a.media_id||p.cover_id,contain:m?.fit==='contain'};});
   const crew=data.crew.filter(c=>c.status==='published'&&listedCrew(c)).sort(byOrder).slice(0,6).map(c=>({key:string(c.id),name:string(c.name),image:c.portrait_id,href:profileVisible(c,data.posts)?`/crew/${string(c.slug)}`:null}));
   const projects=((home.projects||{}) as Row);
   return {home,sections:visible,agenda:coming.slice(0,limit),happened,art,crew,projects:projectCards.map(p=>{const own=(projects[p.key]||{}) as Row;return {...p,media_id:own.media_id,status_label:string(own.status_label),body:string(own.body)};})};

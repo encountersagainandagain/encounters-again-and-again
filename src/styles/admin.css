@@ -333,3 +333,21 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 /* Session lost while editing: above everything, and the form stays underneath. */
 .adm-session-ended{position:fixed;z-index:1000;left:50%;top:12px;transform:translateX(-50%);width:min(680px,calc(100vw - 32px));margin:0;padding:12px 16px;border-radius:8px;background:#7a1f1f;color:#fff;font-size:14px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .adm-session-ended a{color:inherit;text-decoration:underline;font-weight:600}
+/* Page editors (Juani, 2026-11-05): each section of the page is its own card, so the editor reads like the page. */
+.adm-page-form{min-width:0}
+.adm-page-form>.adm-fields{display:flex;flex-direction:column;gap:18px}
+.adm-page-form .adm-page-section,.adm-page-form .adm-page-section:first-child{padding:20px 22px;border:1px solid var(--adm-line);border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(6,24,38,.04);scroll-margin-top:20px}
+.adm-page-section>h2{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.adm-page-form .adm-sticky-actions{padding:12px 16px;border:1px solid var(--adm-line);border-radius:12px;box-shadow:0 -4px 16px rgba(6,24,38,.06)}
+.adm-coming>span{font-weight:600}
+.adm-coming ol{list-style:none;margin:0;padding:0;border:1px solid var(--adm-line);border-radius:12px}
+.adm-coming li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--adm-line)}
+.adm-coming li:last-child{border-bottom:0}
+.adm-coming li b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--adm-tint);color:var(--adm-sea);font-size:12px}
+.adm-coming li strong{display:block}.adm-coming li small{color:var(--adm-muted);font-size:12px}
+.adm-coming li[data-over]{opacity:.55}
+/* The site's global overflow on html/body makes body a scroll container that never scrolls, which breaks every sticky
+   element of the admin (the page preview). Clip keeps sideways overflow hidden without creating one. */
+html:has(.adm),body:has(.adm){overflow:visible;overflow-x:clip}
+.adm .adm-split:has(.adm-page-preview)>.adm-page-preview{top:16px}
+.adm-page-preview iframe{height:calc(100vh - 90px)}

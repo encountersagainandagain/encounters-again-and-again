@@ -11,11 +11,13 @@ import {artSeo} from '@/features/encounters/art';
 // B / I / U and link; `seo` is the search result editor with its previews (seo_title and meta_description); `blocks` is
 // an ordered list of parts, each of one of its `kinds` (saved with its `type`).
 import {closingSignature} from '@/features/encounters/signatures';
-export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'select'|'swatches'|'signature'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];fallback?:string;allowNone?:boolean;hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
+export type PageField={key:string;label:string;type?:'text'|'textarea'|'media'|'gallery'|'lines'|'number'|'group'|'list'|'sections'|'section'|'coming'|'select'|'swatches'|'signature'|'marked'|'seo'|'blocks';help?:string;fields?:PageField[];kinds?:{type:string;label:string;help:string;fields:PageField[]}[];max?:number;placeholder?:string;wide?:boolean;options?:{value:string;label:string;color?:string}[];fallback?:string;allowNone?:boolean;bare?:boolean;hints?:{title:string;description:string;fallbackTitle:string;fallbackDescription:string}};
 const t=(key:string,label:string,help?:string,placeholder?:string):PageField=>({key,label,help,placeholder});
 const area=(key:string,label:string,help?:string):PageField=>({key,label,type:'textarea',help});
 const media=(key:string,label:string,help?:string):PageField=>({key,label,type:'media',help});
 const group=(key:string,label:string,fields:PageField[],help?:string):PageField=>({key,label,type:'group',fields,help});
+// The values of one part saved together (e.g. home.hero) and shown without a frame of their own, inside their section.
+const bare=(key:string,fields:PageField[]):PageField=>({key,label:'',type:'group',fields,bare:true});
 const list=(key:string,label:string,fields:PageField[],max:number,help?:string):PageField=>({key,label,type:'list',fields,max,help});
 const section=(key:string,label:string,help:string,fields:PageField[]):PageField=>({key,label,type:'section',fields,help});
 // Closing block of a page: its phrase (one or more fields) and the signature drawn under it. Empty signature: the stroke
@@ -24,24 +26,25 @@ const closing=(label:string,help:string,fields:PageField[],page:keyof typeof clo
   {key:'signature',label:'Signature',type:'signature',fallback:closingSignature[page],allowNone:true,help:'The stroke drawn under the phrase as visitors reach it. Point at one to see it draw.'}]);
 export type PageSchema={key:string;label:string;path:string;store:'home'|'pages';lead:string;fields:PageField[]};
 export const pageSchemas:PageSchema[]=[
-  {key:'home',label:'Home',path:'/',store:'home',lead:'The descent, the order of the sections and their texts. The lists (what is coming, stories, art, crew) fill themselves with published content.',fields:[
-    {key:'sections',label:'Sections, order and visibility',type:'sections',help:'Sections without content are hidden automatically.'},
-    group('hero','Banner',[t('kicker','Small line above the title','Default: Welcome to'),t('title','Title','Default: Encounters'),t('subtitle','Line under the title','Default: again and again'),t('tagline','Tagline in capitals','Hidden when empty.'),t('lead','Line under the tagline','Hidden when empty.'),t('cue','Scroll invitation','Default: follow the current …where will it lead you..')]),
-    group('descent','The descent',[area('title','Title','Shown in capitals, aligned to the right. The section is hidden when title and text are empty.'),area('body','Text'),t('emphasis','Words in italics','Part of the text shown in italics, e.g. Again and again.')]),
-    group('reef','Reef',[media('media_id','Reef image','Default: the reef of the design.'),t('caption','Caption in italics'),t('place','Place')]),
-    t('projects_title','Ongoing projects title','Default: Ongoing projects'),
-    group('projects','Ongoing projects cards',[
-      group('expeditions','Encounters Expeditions',[media('media_id','Image'),t('status_label','State','Use | to separate two parts, e.g. Sail boat | In refit'),area('body','Text','One or two sentences.')]),
-      group('workshops','Artsy Animals',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
-      group('messages','Meaningful Messages',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
-    ],'Titles and links are fixed: each card leads to its page.'),
-    t('upcoming_title','What is coming: title'),t('upcoming_note','What is coming: note'),{key:'upcoming_limit',label:'What is coming: how many',type:'number',help:'From 2 to 12. Recommended: up to 8, since each one fills the screen while scrolling and more make Home long. Empty: 4. Announcements take the place of their Order; upcoming and running expeditions and workshops fill the rest, by date.'},
-    t('happened_title','What already happened: title'),t('happened_note','What already happened: note'),
-    t('art_title','New art: title'),{key:'art_limit',label:'New art: how many works',type:'number',help:'From 3 to 10. Default 5.'},
-    t('crew_title','Crew: title'),
-    group('about','About block',[t('kicker','Small line'),area('line','Phrase in italics','The block is hidden when the phrase is empty.'),area('body','Text'),t('cta_label','Button','Default: Read our story')]),
-    group('newsletter','Newsletter',[t('title','Title','Default: Stay in touch'),area('body','Text')],'Subscriptions are only recorded. No email is sent from the site.'),
-    closing('Closing','The dark band at the very end of Home, above the footer: a phrase and a signature that draws itself as visitors reach it.',[t('closing','Closing phrase','Default: May the ocean be with you')],'home'),
+  {key:'home',label:'Home',path:'/',store:'home',lead:'Home, section by section, in the order of the page. Every text shows what the page says today: change it and the preview beside it shows the result at once. The lists (what is coming, stories, art, crew) fill themselves with published content.',fields:[
+    section('sections','Sections of the page','Untick a section to hide it, or move it up. A section without content hides by itself.',[{key:'sections',label:'Sections, order and visibility',type:'sections'}]),
+    section('hero','1 · Banner','The first screen: the large title over the sea.',[bare('hero',[t('kicker','Small line above the title'),t('title','Title'),t('subtitle','Line under the title'),t('tagline','Tagline in capitals','Empty: hidden.'),t('lead','Line under the tagline','Empty: hidden.'),t('cue','Scroll invitation','The small line at the bottom that invites to scroll.')])]),
+    section('descent','2 · The descent','The words that appear as visitors start going down. The section hides when title and text are empty.',[bare('descent',[area('title','Title','Shown in capitals, aligned to the right.'),area('body','Text'),t('emphasis','Words in italics','Part of the text shown in italics, e.g. Again and again.')])]),
+    section('reef','3 · Reef','The wide image of the reef, with a caption.',[bare('reef',[media('media_id','Reef image','Empty: the reef of the design.'),t('caption','Caption in italics'),t('place','Place')])]),
+    section('projects','4 · Ongoing projects','Three cards, one per project. Their titles and links are fixed: each card leads to its page.',[t('projects_title','Title'),
+      group('projects','Cards',[
+        group('expeditions','Encounters Expeditions',[media('media_id','Image'),t('status_label','State','Use | to separate two parts, e.g. Sail boat | In refit'),area('body','Text','One or two sentences.')]),
+        group('workshops','Artsy Animals',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
+        group('messages','Meaningful Messages',[media('media_id','Image'),t('status_label','State'),area('body','Text')]),
+      ])]),
+    section('upcoming','5 · What is coming','One full screen per card while scrolling. Upcoming and running expeditions and workshops come in by themselves, by date, and leave once they end; announcements take the place of their Order.',[t('upcoming_title','Title'),t('upcoming_note','Note beside the title'),
+      {key:'upcoming_limit',label:'How many cards',type:'number',help:'From 2 to 12. Up to 8 is best: each card fills the screen, and more make Home long.'},{key:'coming',label:'On Home now',type:'coming'}]),
+    section('happened','6 · What already happened','The three newest stories of Results.',[t('happened_title','Title'),t('happened_note','Note beside the title')]),
+    section('art','7 · New art','The first works of the Art works list, in its order.',[t('art_title','Title'),{key:'art_limit',label:'How many works',type:'number',help:'From 3 to 10.'}]),
+    section('crew','8 · Who is on board','Up to six people of Crew, in their order on The Crew page.',[t('crew_title','Title')]),
+    section('about','9 · About','A phrase and a short text about the project, with a button to About. The block hides when the phrase is empty.',[bare('about',[t('kicker','Small line'),area('line','Phrase in italics'),area('body','Text'),t('cta_label','Button')])]),
+    section('newsletter','10 · Newsletter','An invitation to subscribe. Subscriptions are only recorded: no email is sent from the site.',[bare('newsletter',[t('title','Title'),area('body','Text')])]),
+    closing('11 · Closing','The dark band at the very end of Home, above the footer: a phrase and a signature that draws itself as visitors reach it.',[t('closing','Closing phrase')],'home'),
   ]},
   {key:'art',label:'Art page',path:'/art',store:'pages',lead:'Everything on the Art page, in the order of the page: the banner, how it appears in search engines, the categories, the works and the closing. Categories are edited in Art → Categories and each work in Art → Works; their tiles and cards fill themselves.',fields:[
     section('banner','1 · Banner','The first screen: the drawn title over the lines, and a short line under it.',[

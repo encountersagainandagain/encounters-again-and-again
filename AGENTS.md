@@ -185,6 +185,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Settings (2026-11-05):** una sola tarjeta con lo que es de todo el sitio: email, teléfono, WhatsApp, redes (Instagram, Facebook, TikTok, YouTube, LinkedIn, X, Pinterest), página de donaciones y texto del pie. Cada uno se muestra solo si tiene valor. Guardar escribe solo esas claves. Se retiraron Site name, Tagline y Description (la web no los leía) y la tarjeta Art and Crew presentation (repetía Art page y The Crew page).
 
+**Editor de Home (2026-11-06):** por secciones en el orden de la página, textos abiertos con lo que hoy se ve (`src/features/encounters/home-defaults.ts`, compartido con `HomeView`), lista «On Home now» en What is coming y vista previa fija que sigue a la sección editada (`data-home-section`). Si cambiás un texto por defecto de Home, cambialo en `home-defaults.ts`.
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
