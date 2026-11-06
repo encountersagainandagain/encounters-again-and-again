@@ -284,11 +284,20 @@ export async function optimizeImageFile(file: File, options: ImageOptimizationOp
   return optimizedFile;
 }
 
-export async function uploadMediaFile(
+// The name a file is stored under, without its extension: two uploads of "Turtle.JPG" and "turtle.webp" share it.
+export const mediaNameOf=(fileName:string)=>sanitizeFileName(fileName).replace(/\.[^.]+$/,'');
+// An image of the library stored under the same name as this file (its path ends in <sha256>-<name>.<ext>).
+export function sameNameIn(media:Record<string,unknown>[],fileName:string){
+  const name=mediaNameOf(fileName);return media.find(m=>typeof m.storage_path==='string'&&new RegExp(`/[a-f0-9]{64}-${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\.[a-z0-9]+$`).test(m.storage_path))||null;
+}
+// Uploads an image to the library and says whether it was already there: the same photo (same bytes once optimised)
+// is never stored twice, the existing one is used instead.
+export async function uploadMediaFile(file:File,folder='posts',options:ImageOptimizationOptions={}){return `/api/media/${(await uploadMedia(file,folder,options)).id}`;}
+export async function uploadMedia(
   file: File,
   folder = 'posts',
   options: ImageOptimizationOptions = {}
-) {
+):Promise<{id:string;reused:boolean}> {
   const client = requireSupabase();
   const uploadFile = await optimizeImageFile(file, options);
   const cleanFolder = folder
@@ -298,7 +307,7 @@ export async function uploadMediaFile(
   const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await uploadFile.arrayBuffer()))).map(x=>x.toString(16).padStart(2,'0')).join('');
   const existing=await client.from('media').select('id').eq('sha256',sha256).maybeSingle();
   if(existing.error)throw existing.error;
-  if(existing.data)return `/api/media/${existing.data.id}`;
+  if(existing.data)return {id:String(existing.data.id),reused:true};
   const id=crypto.randomUUID();
   const filePath = `${safeFolder}/${sha256}-${sanitizeFileName(uploadFile.name)}`;
 
@@ -312,5 +321,5 @@ export async function uploadMediaFile(
   const image=await loadImage(uploadFile);
   const saved=await client.from('media').insert({id,storage_path:filePath,sha256,mime_type:uploadFile.type,bytes:uploadFile.size,alt:'',width:image.naturalWidth,height:image.naturalHeight});
   if(saved.error)throw saved.error;
-  return `/api/media/${id}`;
+  return {id,reused:false};
 }

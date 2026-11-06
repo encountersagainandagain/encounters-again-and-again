@@ -2,10 +2,12 @@
 import { useId, useState, type FormEvent } from 'react';
 // Newsletter signup. It only records the subscription with consent; no email is sent from the site
 // (campaign sending is disabled in the modules configuration).
-export function NewsletterSignup({title='Stay in touch',body=''}:{title?:string;body?:string}) {
+// In the admin preview the form is shown as on the site but records nothing.
+export function NewsletterSignup({title='Stay in touch',body='',preview=false}:{title?:string;body?:string;preview?:boolean}) {
   const [message, setMessage] = useState(''); const [pending, setPending] = useState(false); const [ok, setOk] = useState(false); const id = useId();
   async function subscribe(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (preview) { setOk(false); setMessage('Preview: subscriptions are not recorded from here.'); return; }
     const form = event.currentTarget; const data = new FormData(form);
     // Checked here first so the visitor reads the same messages as the server gives, in this line.
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.get('email')||'').trim())) { setOk(false); setMessage('Please enter a valid email address.'); return; }

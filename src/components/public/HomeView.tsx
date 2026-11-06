@@ -96,7 +96,7 @@ function FocusPhoto({id,media,fallback}:{id:unknown;media:Row[];fallback?:string
   const position=item?`${Number(item.focal_x??.5)*100}% ${Number(item.focal_y??.5)*100}%`:undefined;
   return <img data-pfocus src={src} alt="" aria-hidden="true" decoding="async" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',...(position?{objectPosition:position}:{}),opacity:0}}/>;
 }
-export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];closing:string;newsletter:boolean}){
+export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];closing:string;newsletter:boolean|'preview'}){
   const {home,sections,agenda,happened,art,crew,projects}=view;const hero=(home.hero||{}) as Row,descent=(home.descent||{}) as Row,reef=(home.reef||{}) as Row,about=(home.about||{}) as Row,letters=(home.newsletter||{}) as Row;
   const root=useRef<HTMLDivElement>(null),snow=useRef<HTMLCanvasElement>(null);const flakes=useMemo(()=>makeSnow(),[]);
   const state=useRef({eased:0,brandWidth:0});
@@ -273,7 +273,7 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
     art:art.length?<section key="art" data-home-section="art" className="home-section home-art"><div className="home-inner"><Head title={string(home.art_title)||d.art_title} link={<Link href="/art">Everything we make →</Link>}/></div><ArtRail items={art} media={media}/></section>:null,
     crew:crew.length?<section key="crew" data-home-section="crew" className="home-section home-crew-section"><div className="home-inner"><Head title={string(home.crew_title)||d.crew_title} link={<Link href="/crew">Meet the crew →</Link>}/><div className="home-crew" data-hseq="0.92,0.4">{crew.map(c=>{const body=<><div className="home-crew-image"><Picture id={c.image} media={media} sizes="(max-width: 760px) 46vw, (max-width: 1080px) 62vw, 14vw"/></div><span>{c.name}</span></>;return c.href?<Link key={c.key} href={c.href}>{body}</Link>:<div key={c.key}>{body}</div>;})}</div></div></section>:null,
     about:string(about.line)?<section key="about" data-home-section="about" className="home-section home-about"><div className="home-creature-band" aria-hidden="true"><Creature name="whale"/></div><div className="home-about-inner">{string(about.kicker)&&<span data-hseq="1.0,0.4">{string(about.kicker)}</span>}<p className="home-about-line" data-hseq="0.96,0.45">{string(about.line)}</p>{string(about.body)&&<p data-hseq="0.92,0.4">{string(about.body)}</p>}<Link href="/about" className="home-about-cta" data-hseq="0.88,0.4">{string(about.cta_label)||d.about.cta_label}</Link></div></section>:null,
-    newsletter:newsletter?<section key="newsletter" data-home-section="newsletter" className="home-section home-letters"><div className="home-inner"><NewsletterSignup title={string(letters.title)||d.newsletter.title} body={string(letters.body)}/></div></section>:null,
+    newsletter:newsletter?<section key="newsletter" data-home-section="newsletter" className="home-section home-letters"><div className="home-inner"><NewsletterSignup title={string(letters.title)||d.newsletter.title} body={string(letters.body)} preview={newsletter==='preview'}/></div></section>:null,
   };
   return <div ref={root} className="home-root">
     <span data-nav-theme="dark" hidden/>

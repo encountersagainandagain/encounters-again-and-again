@@ -351,3 +351,9 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 html:has(.adm),body:has(.adm){overflow:visible;overflow-x:clip}
 .adm .adm-split:has(.adm-page-preview)>.adm-page-preview{top:16px}
 .adm-page-preview iframe{height:calc(100vh - 90px)}
+/* Image dialogs of the picker (same name, same photo, describe a new one). */
+.adm-dialog{width:min(560px,calc(100vw - 32px));padding:24px;border:1px solid var(--adm-line);border-radius:16px;background:#fff;color:var(--adm-ink);box-shadow:0 24px 60px rgba(6,24,38,.3)}
+.adm-dialog::backdrop{background:rgba(6,24,38,.55)}
+.adm-dialog h2{font-size:22px}
+.adm-dialog-pair{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center}
+@media(max-width:520px){.adm-dialog-pair{grid-template-columns:minmax(0,1fr)}}

@@ -1,6 +1,6 @@
 # Encounters Again and Again — guía para agentes (Claude Code, Codex y otros)
 
-Leé este archivo completo antes de tocar código. Resume el estado al **2026-10-28**, las reglas que no se negocian, las decisiones
+Leé este archivo completo antes de tocar código. Resume el estado al **2026-11-06**, las reglas que no se negocian, las decisiones
 tomadas y por dónde seguir. El detalle vive en `docs/encounters/`; acá están los punteros.
 
 > Prioridad de instrucciones: lo que diga Juani en la conversación actual → este archivo → `docs/encounters/page-progress.md`
@@ -19,7 +19,10 @@ emails ni el SEO.
 - **Sitio en revisión:** https://encounters-again-and-again-gamma.vercel.app (admin en `/admin`). Sin dominio propio, con `noindex`.
 - **Repositorio:** `encountersagainandagain/encounters-again-and-again`. Se trabaja en la rama `review`; `main` es lo desplegado.
 
-## 2. Estado al 2026-10-28
+## 2. Estado al 2026-11-06
+
+- **Última ronda (3 al 6 de noviembre):** decisiones y porqués en `docs/encounters/HANDOFF_2026-11-06.md` (Art, Expeditions y
+  Workshops, Home y su editor, Announcements, Settings, imágenes, errores del admin). Leelo después de este archivo.
 
 - **Todas las rutas públicas** usan su plantilla del prototipo (desde 2026-10-17). Juani aprobó visualmente la Home y lo que revisó
   en producción el 2026-10-24 (incluida Expeditions), solo en su computadora y navegador.
@@ -34,8 +37,8 @@ emails ni el SEO.
   El 2026-11-04 se aplicó `20261101000100_media_title.sql` (título opcional de cada imagen): 22 migraciones, sin pendientes.
   El 2026-11-05 se aplicó `20261105000100_session_price.sql` (precio por persona de cada sesión): 23 migraciones, sin pendientes.
   El 2026-11-06 se aplicó `20261106000100_delete_expired_announcements.sql` (activa `pg_cron` y borra cada noche los anuncios vencidos): 24 migraciones, sin pendientes.
-- **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
-  `6dd2c8f`; `027e795` es un commit vacío de reintento.
+- **Producción:** se despliega con cada push a `main` (ver §3, regla 13). Verificá el commit en GitHub/Vercel en cada entrega:
+  el 2026-11-05 Vercel tardó ~30 min en tomar un push; esperá antes de empujar otro.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
   (apagado), pruebas en Safari/iPhone/iPad/Android y red lenta, portadas pesadas (Crew 374 KB, Contact 220 KB).
 
@@ -190,6 +193,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Anuncios y pasadas (2026-11-06):** un anuncio se borra de la base la noche después de su último día (`public.delete_expired_announcements`, `pg_cron`). Nunca se anuncian expediciones ni workshops. Terminada y sin historia, una actividad se muestra en su lista sin enlace.
 
+**Imágenes (2026-11-06):** toda imagen subida queda en Media library. El selector (`MediaPicker`) avisa si ya hay una con el mismo nombre, usa la existente si es la misma foto (por `sha256`, sin copia nueva) y abre una ventana para título, descripción y crédito si es nueva. La ventana no tiene `<form>` propio (vive dentro del formulario del editor).
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.
@@ -216,7 +221,9 @@ una migración aplicada; un push no es un despliegue verificado.
 
 ## 9. Por dónde seguir
 
-1. **Prueba manual de Juani en producción:** New personal page, ficha de Crew simplificada, The Crew page y página personal.
+1. **Prueba manual de Juani en producción (ronda del 3 al 6 de noviembre):** orden con Up/Down (obras, expediciones,
+   workshops), editor de Home por secciones, subida de imágenes, Settings (cargar redes y donación) y workshops por sesiones.
+   Lo pendiente de esa ronda está al final de `docs/encounters/HANDOFF_2026-11-06.md`.
 2. Las migraciones de perfiles y de Art ya están aplicadas (2026-10-31): Juani puede probar Also in, Vimeo/SoundCloud y el bloque Video or audio en producción.
 3. **Cerrar la página personal de Crew con Juani:** cargar/revisar Related content, Credited crew y contacto de Georgia y revisar
    el cierre de la página.
@@ -233,6 +240,7 @@ una migración aplicada; un push no es un despliegue verificado.
 | `docs/encounters/PENDIENTES.md` | Lo que espera al lanzamiento: mover el dominio desde WordPress y configurar Resend (Contact y newsletter). |
 | `docs/encounters/page-progress.md` | Estado vivo por página, decisiones recientes, migraciones. **Actualizalo en cada entrega.** |
 | `docs/encounters/activities-logic.md` | Cómo funcionan Expeditions y Workshops: estados por fecha (Perth), historias, Results, sessions. |
+| `docs/encounters/HANDOFF_2026-11-06.md` | Última ronda: lo decidido con Juani del 3 al 6 de noviembre y por qué. |
 | `docs/encounters/HANDOFF_2026-10-28.md` | Resumen de la última ronda: decisiones de CMS, commits, migraciones pendientes y Vercel. |
 | `docs/encounters/entornos.md` | Entornos, scripts de staging y local, caché, portadas. (Su tabla inicial menciona un proyecto de Vercel `encounters-review` que no es el sitio en revisión actual: el sitio vivo es el `-gamma` de §1.) |
 | `docs/encounters/animation-performance-playbook.md` | Cómo están hechos el scroll, el agua y las animaciones; qué medir. |

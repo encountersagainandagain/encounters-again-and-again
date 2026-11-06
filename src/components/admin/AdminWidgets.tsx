@@ -1,5 +1,5 @@
 'use client';
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import Link from 'next/link';
 import {Check,ExternalLink,Eye,Plus,Search,X} from 'lucide-react';
 import {brand} from '@/config/brand';
@@ -72,24 +72,49 @@ export function CrewPagePanel({member,posts,busy,onCreate}:{member:Row;posts:Row
 }
 
 // Image field: shows the chosen image, lets you pick another one by sight or upload a new one in place.
+// Choosing an image: from the library, or a new one that goes into the library to be reused (Juani, 2026-11-06).
+// Before uploading, a file named like one already there is pointed out; the very same photo is never stored twice; a new
+// one opens a short form to describe it, so it can be found and understood later. The dialog sits inside the editor's
+// own form, so it has no form of its own: its buttons and Enter save the image, never the page.
 export function MediaPicker({id,value,media,onChange,folder,onUploaded,describedBy}:{id:string;value:unknown;media:Row[];onChange:(id:string|null)=>void;folder:string;onUploaded:()=>void;describedBy?:string}){
-  const [open,setOpen]=useState(false);const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [note,setNote]=useState('');const [alt,setAlt]=useState('');const [fresh,setFresh]=useState('');
+  const [open,setOpen]=useState(false);const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [note,setNote]=useState('');
+  const [step,setStep]=useState<null|{kind:'same-name';file:File;twin:Row}|{kind:'reused';id:string}|{kind:'describe';id:string}>(null);
+  const [form,setForm]=useState({title:'',alt:'',credit:''});const dialog=useRef<HTMLDialogElement>(null);
+  useEffect(()=>{const d=dialog.current;if(!d)return;if(step&&!d.open)d.showModal();if(!step&&d.open)d.close();},[step]);
   const chosen=media.find(m=>m.id===value);const label=text(chosen?.title)||text(chosen?.alt);
   const found=media.filter(m=>!query||`${text(m.title)} ${text(m.alt)}`.toLowerCase().includes(query.toLowerCase()));
-  async function upload(file:File){setBusy(true);setNote('');try{const {uploadMediaFile}=await import('@/lib/adminMedia');const url=await uploadMediaFile(file,folder);const newId=url.split('/').pop()!;onChange(newId);setFresh(newId);setAlt('');setOpen(false);onUploaded();setNote('Image uploaded. Describe it below so everyone can understand it.');}catch{setNote('The image could not be uploaded. Use a JPG, PNG, WebP or GIF under 10 MB.');}finally{setBusy(false);}}
-  async function describe(){const {supabase}=await import('@/lib/supabase');if(!supabase||!fresh||!alt.trim())return;const r=await supabase.from('media').update({alt:alt.trim()}).eq('id',fresh);setNote(r.error?'The description could not be saved. You can add it later in Media library.':'Description saved.');if(!r.error){setFresh('');onUploaded();}}
+  async function upload(file:File){setStep(null);setBusy(true);setNote('');
+    try{const {uploadMedia}=await import('@/lib/adminMedia');const r=await uploadMedia(file,folder);onChange(r.id);setOpen(false);onUploaded();
+      if(r.reused)setStep({kind:'reused',id:r.id});else{setForm({title:file.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ').trim(),alt:'',credit:''});setStep({kind:'describe',id:r.id});}}
+    catch{setNote('The image could not be uploaded. Check that it is a JPEG, PNG, WebP or GIF under 10 MB and try again.');}finally{setBusy(false);}}
+  async function pick(file:File){const {sameNameIn}=await import('@/lib/adminMedia');const twin=sameNameIn(media,file.name);if(twin)setStep({kind:'same-name',file,twin});else void upload(file);}
+  async function describe(){if(step?.kind!=='describe')return;const {supabase}=await import('@/lib/supabase');if(!supabase)return;
+    const r=await supabase.from('media').update({title:form.title.trim(),alt:form.alt.trim(),credit:form.credit.trim()}).eq('id',step.id);
+    setNote(r.error?'The details could not be saved. You can add them later in Media library.':'Saved in the Media library, ready to reuse.');setStep(null);if(!r.error)onUploaded();}
+  const field=(key:'title'|'alt'|'credit',labelText:string,help:string,placeholder:string)=><label className="adm-field">{labelText}<input value={form[key]} placeholder={placeholder} onChange={e=>setForm({...form,[key]:e.target.value})} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void describe();}}}/><small>{help}</small></label>;
   return <div className="adm-picker" id={id} aria-describedby={describedBy}>
     <div className="adm-picker-current"><AdminThumb id={value} size="100%"/><div className="adm-stack" style={{gap:8}}>
       <span>{value?label||<em>Image without a description</em>:'No image chosen'}</span>
       <div className="adm-actions">
         <button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setOpen(!open)} aria-expanded={open}>{open?'Close library':'Choose from library'}</button>
-        <label className={`adm-btn adm-btn--ghost adm-btn--small${busy?' is-busy':''}`}>{busy?'Uploading…':'Upload new image'}<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f);e.target.value='';}}/></label>
+        <label className={`adm-btn adm-btn--ghost adm-btn--small${busy?' is-busy':''}`}>{busy?'Uploading…':'Upload new image'}<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void pick(f);e.target.value='';}}/></label>
         {value?<button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>onChange(null)}>Remove</button>:null}
       </div>
     </div></div>
     {note&&<p className="adm-help" role="status">{note}</p>}
-    {fresh&&<div className="adm-picker-describe"><input value={alt} onChange={e=>setAlt(e.target.value)} placeholder="e.g. Flaco smiling on the boat at sunset" aria-label="Description of the new image"/><button type="button" className="adm-btn adm-btn--small" disabled={!alt.trim()} onClick={()=>void describe()}>Save description</button></div>}
     {open&&<div className="adm-picker-panel"><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by title or description" aria-label="Search images"/>
       <ul>{found.map(m=>{const on=m.id===value;return <li key={text(m.id)}><button type="button" aria-pressed={on} onClick={()=>{onChange(text(m.id));setOpen(false);}}><AdminThumb id={m.id} size="100%"/><span>{text(m.title)||text(m.alt)||'No description'}</span></button></li>;})}</ul></div>}
+    <dialog ref={dialog} className="adm-dialog" onClose={()=>setStep(null)} aria-labelledby={`${id}-dialog-title`}>
+      {step?.kind==='same-name'&&<div className="adm-stack"><h2 id={`${id}-dialog-title`}>This name is already in the library</h2>
+        <div className="adm-dialog-pair"><AdminThumb id={step.twin.id} size={120}/><p>An image called <strong>{step.file.name}</strong> is already in the Media library{text(step.twin.title)||text(step.twin.alt)?<> as “{text(step.twin.title)||text(step.twin.alt)}”</>:null}. If it is the same photo, use that one: nothing is uploaded twice.</p></div>
+        <div className="adm-actions"><button type="button" className="adm-btn" onClick={()=>{onChange(text(step.twin.id));setStep(null);setNote('Using the image already in the library.');}}>Use the one in the library</button><button type="button" className="adm-btn adm-btn--ghost" onClick={()=>void upload(step.file)}>Upload mine anyway</button><button type="button" className="adm-btn adm-btn--quiet" onClick={()=>setStep(null)}>Cancel</button></div></div>}
+      {step?.kind==='reused'&&<div className="adm-stack"><h2 id={`${id}-dialog-title`}>This photo was already in the library</h2>
+        <div className="adm-dialog-pair"><AdminThumb id={step.id} size={120}/><p>It is exactly the same photo as one already in the Media library, so that one is used here. Nothing was uploaded again. It may also be used elsewhere: that is fine, one image can be in many places.</p></div>
+        <div className="adm-actions"><button type="button" className="adm-btn" onClick={()=>setStep(null)}>OK</button></div></div>}
+      {step?.kind==='describe'&&<div className="adm-stack"><h2 id={`${id}-dialog-title`}>Saved in the Media library</h2>
+        <div className="adm-dialog-pair"><AdminThumb id={step.id} size={120}/><p>Describe it so it can be found and reused from the library, and understood by everyone.</p></div>
+        {field('title','Title','Short name to find it in the library.','e.g. Turtle on the reef')}{field('alt','Description','What the photo shows, for people who cannot see it.','e.g. A green turtle swimming over the coral')}{field('credit','Credit','Who took it. Optional.','e.g. Photo: Georgie')}
+        <div className="adm-actions"><button type="button" className="adm-btn" onClick={()=>void describe()}>Save details</button><button type="button" className="adm-btn adm-btn--quiet" onClick={()=>{setStep(null);setNote('You can describe it later in Media library.');}}>Later</button></div></div>}
+    </dialog>
   </div>;
 }
