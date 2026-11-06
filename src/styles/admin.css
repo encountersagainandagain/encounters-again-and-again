@@ -173,13 +173,19 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 @media(max-width:1100px){.adm-split{grid-template-columns:minmax(0,1fr)}.adm-split>aside{position:static}}
 @media(max-width:860px){
   .adm{grid-template-columns:minmax(0,1fr)}
-  .adm-side{position:sticky;z-index:30;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 12px}
-  .adm-brand span{font-size:14px}.adm-brand img{width:36px}
-  .adm-nav{order:3;width:100%;flex-direction:row;gap:4px;overflow-x:auto;padding-bottom:4px}
-  .adm-nav p{display:none}
-  .adm-nav a{flex:none;padding:7px 10px;font-size:13px}
-  .adm-nav a[aria-current=page]{box-shadow:inset 0 -2px 0 var(--adm-lagoon)}
-  .adm-side-foot{margin:0 0 0 auto;flex-direction:row;gap:14px}
+  /* Phone (Juani, 2026-11-06): a compact bar with the screen's name and a Menu button that opens the whole menu. */
+  .adm-side{position:sticky;top:0;z-index:50;height:auto;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:10px;padding:8px 12px}
+  .adm-brand{padding:2px 0}.adm-brand span{display:none}.adm-brand img{width:38px}
+  .adm-where{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;color:#eaf5fa}
+  .adm-menu-btn{display:inline-flex}
+  .adm-nav,.adm-side-foot{display:none}
+  .adm-side[data-open]{position:fixed;inset:0;height:100dvh;overflow-y:auto;flex-direction:column;align-items:stretch;gap:6px;padding:12px 16px 40px}
+  .adm-side[data-open] .adm-brand span{display:block}
+  .adm-side[data-open] .adm-where{display:none}
+  .adm-side[data-open] .adm-menu-btn{position:absolute;top:12px;right:16px}
+  .adm-side[data-open] .adm-nav{display:flex}
+  .adm-side[data-open] .adm-nav a{padding:12px;font-size:16px}
+  .adm-side[data-open] .adm-side-foot{display:flex;flex-direction:row;gap:24px;margin:20px 12px 0}
   .adm-main{padding:20px 14px 60px}
   .adm-fields{grid-template-columns:minmax(0,1fr)}
   .adm-table thead{display:none}
@@ -187,7 +193,15 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
   .adm-table tr{padding:10px 0;border-bottom:1px solid var(--adm-line)}
   .adm-table td{padding:4px 0;border:0}
   .adm-block-image{grid-template-columns:minmax(0,1fr)}
-  .adm-toolbar{top:96px}
+  .adm-toolbar{position:static;margin-bottom:12px}
+  .adm-main{padding:16px 12px 110px}
+  /* Phones zoom into fields under 16px: they stay at 16px so typing never moves the page. */
+  .adm :is(input,select,textarea){font-size:16px!important}
+  .adm-table tr{margin-bottom:10px;padding:14px;border:1px solid var(--adm-line);border-radius:12px;background:#fff}
+  .adm-table td{padding:5px 0}
+  .adm-row-actions{display:flex;flex-wrap:wrap;gap:8px}
+  .adm-tabs{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none}.adm-tabs::-webkit-scrollbar{display:none}
+  .adm-tabs .adm-tab-link{flex:none}
 }
 @media(prefers-reduced-motion:reduce){.adm *{transition:none!important}}
 .adm-media-large{aspect-ratio:auto;max-height:460px;background:#f2f7f9}
@@ -362,3 +376,22 @@ html:has(.adm),body:has(.adm){overflow:visible;overflow-x:clip}
   .adm-side-foot a,.adm-side-foot button,.adm-story{position:relative}
   .adm-side-foot a::after,.adm-side-foot button::after,.adm-story::after{content:'';position:absolute;inset:-8px -4px}
 }
+
+/* The phone menu button and the screen name exist only on phones. */
+@media(min-width:861px){.adm-menu-btn,.adm-where{display:none}}
+.adm-menu-btn{align-items:center;gap:6px;min-height:40px;padding:8px 12px;border:1px solid rgba(234,245,250,.3);border-radius:10px;background:transparent;color:#eaf5fa;font:600 14px var(--font-body),Arial,sans-serif;cursor:pointer}
+.adm-menu-btn svg{width:18px;height:18px}
+html.adm-menu-open{overflow:hidden}
+/* Touch: small buttons are 40px tall, comfortable for a finger. */
+@media (pointer:coarse){.adm-btn--small,.adm-segmented button{min-height:40px;padding:8px 12px}}
+/* Page editors on narrow screens: jump to a section; the preview opens full screen over the editor. */
+.adm-jump{max-width:420px}
+.adm-preview-open,.adm-preview-close{display:none}
+@media(max-width:1100px){
+  .adm-jump{position:sticky;top:0;z-index:20;max-width:none;padding:10px 12px;border:1px solid var(--adm-line);border-radius:12px;background:#fff;box-shadow:0 6px 18px rgba(6,24,38,.08)}
+  .adm-page-preview{display:none}
+  .adm .adm-split .adm-page-preview.is-open{display:flex;flex-direction:column;position:fixed;inset:0;top:0;z-index:70;border-radius:0}
+  .adm-page-preview.is-open iframe{flex:1;height:auto}
+  .adm-preview-open,.adm-page-preview.is-open .adm-preview-close{display:inline-flex}
+}
+@media(max-width:860px){.adm-jump{top:56px}}

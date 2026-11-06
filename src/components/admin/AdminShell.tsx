@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {useEffect,useState,type ReactNode} from 'react';
-import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users} from 'lucide-react';
+import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Menu,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users,X} from 'lucide-react';
 import {brand} from '@/config/brand';
 import {modules} from '@/config/modules';
 import {supabase} from '@/lib/supabase';
@@ -46,11 +46,16 @@ function useCurrent(){
 
 export function AdminShell({children}:{children:ReactNode}){
   const router=useRouter();const current=useCurrent();
+  // On a phone the menu is one button that opens the whole menu, grouped as on the computer (Juani, 2026-11-06).
+  const [menu,setMenu]=useState(false);const where=adminSections.find(s=>current(s.href));
+  useEffect(()=>{document.documentElement.classList.toggle('adm-menu-open',menu);return()=>document.documentElement.classList.remove('adm-menu-open');},[menu]);
   return <div className="adm">
     <a href="#admin-main" className="adm-skip">Skip to content</a>
-    <aside className="adm-side">
+    <aside className="adm-side" data-open={menu||undefined}>
       <Link href="/admin" className="adm-brand"><Image src={brand.logo} alt="" width={97} height={40}/><span>Encounters<small>administration</small></span></Link>
-      <nav className="adm-nav" aria-label="Administration">{groups.map(group=><div key={group} style={{display:'contents'}}><p>{group}</p>{adminSections.filter(s=>s.group===group).map(({href,label,icon:Icon})=><Link key={href} href={href} aria-current={current(href)?'page':undefined}><Icon aria-hidden="true"/>{label}</Link>)}</div>)}</nav>
+      <span className="adm-where" aria-hidden="true">{where?.label}</span>
+      <button type="button" className="adm-menu-btn" aria-expanded={menu} aria-controls="adm-menu" onClick={()=>setMenu(!menu)}>{menu?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}{menu?'Close':'Menu'}</button>
+      <nav id="adm-menu" className="adm-nav" aria-label="Administration">{groups.map(group=><div key={group} style={{display:'contents'}}><p>{group}</p>{adminSections.filter(s=>s.group===group).map(({href,label,icon:Icon})=><Link key={href} href={href} aria-current={current(href)?'page':undefined} onClick={()=>setMenu(false)}><Icon aria-hidden="true"/>{label}</Link>)}</div>)}</nav>
       <div className="adm-side-foot"><a href="/" target="_blank" rel="noreferrer">View site <ExternalLink aria-hidden="true" size={13}/></a><button type="button" onClick={()=>{void supabase?.auth.signOut().then(()=>router.replace('/admin/login'));}}><LogOut aria-hidden="true" size={13}/> Sign out</button></div>
     </aside>
     <main id="admin-main" className="adm-main" tabIndex={-1}>{children}</main>

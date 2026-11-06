@@ -37,9 +37,13 @@ export function PagePreviewFrame({pageKey,mode}:{pageKey:string;mode?:string}){
   useEffect(()=>{let live=true;if(!supabase||!messageIds)return;void supabase.from('post_blocks').select('*').in('post_id',messageIds.split(',')).order('position').then(r=>{if(live&&!r.error)setMessageBlocks((r.data||[]) as Row[]);});return()=>{live=false;};},[messageIds]);
   useEffect(()=>{let live=true;if(!supabase)return;
     void Promise.all(tables.map(t=>supabase!.from(t).select('*'))).then(results=>{if(!live)return;const failed=results.find(r=>r.error);if(failed){setError('The preview could not load the content.');return;}setData(Object.fromEntries(tables.map((t,i)=>[t,results[i].data||[]])) as Data);});
-    const receive=(e:MessageEvent)=>{if(e.origin!==location.origin)return;if(e.data?.type==='page-draft'&&e.data.key===pageKey)setDraft(e.data.value);if(e.data?.type==='card-draft')setCard(e.data.value);
+    let retries:number[]=[];const receive=(e:MessageEvent)=>{if(e.origin!==location.origin)return;if(e.data?.type==='page-draft'&&e.data.key===pageKey)setDraft(e.data.value);if(e.data?.type==='card-draft')setCard(e.data.value);
       // The editor tells which section is being edited: show it (Home marks its sections with data-home-section).
-      if(e.data?.type==='page-scroll'){const key=String(e.data.section||'');const el=key==='sections'?document.querySelector<HTMLElement>('[data-home-section=hero]'):document.querySelector<HTMLElement>(`[data-home-section="${CSS.escape(key)}"]`);if(el)scrollTo({top:Math.max(0,el.getBoundingClientRect().top+scrollY-(key==='upcoming'?0:40)),behavior:'auto'});}};
+      if(e.data?.type==='page-scroll'){const key=String(e.data.section||'');const el=key==='sections'?document.querySelector<HTMLElement>('[data-home-section=hero]'):document.querySelector<HTMLElement>(`[data-home-section="${CSS.escape(key)}"]`);if(!el)return;
+        // Home scrolls with Lenis, which keeps the page height it measured: after the preview was hidden (phones) that height
+        // is stale and stops the jump short, so it is told to measure again and the jump is repeated until it arrives.
+        const target=()=>Math.max(0,el.getBoundingClientRect().top+scrollY-(key==='upcoming'?0:40));dispatchEvent(new Event('resize'));scrollTo({top:target(),behavior:'auto'});
+        retries.forEach(clearTimeout);retries=[250,700].map(ms=>window.setTimeout(()=>{if(Math.abs(target()-scrollY)>4){dispatchEvent(new Event('resize'));scrollTo({top:target(),behavior:'auto'});}},ms));}};
     addEventListener('message',receive);parent.postMessage({type:'page-preview-ready'},location.origin);return()=>{live=false;removeEventListener('message',receive);};
   },[pageKey]);
   const value=(data?.site_settings.find(s=>s.key==='site')?.value||{}) as Row;

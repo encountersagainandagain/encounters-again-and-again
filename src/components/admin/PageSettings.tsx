@@ -127,13 +127,23 @@ export function PageSettings({pageKey}:{pageKey:string}){
   useEffect(()=>{const t=setTimeout(send,250);return()=>clearTimeout(t);},[send]);
   useEffect(()=>{const ready=(e:MessageEvent)=>{if(e.origin===location.origin&&e.data?.type==='page-preview-ready')send();};addEventListener('message',ready);return()=>removeEventListener('message',ready);},[send]);
   // The preview follows the editor: the section in view (or the field being edited) is shown in the preview.
-  const form=useRef<HTMLFormElement>(null);const ready=!!draft;
+  const form=useRef<HTMLFormElement>(null);const ready=!!draft;const lastSection=useRef('');const showSection=useRef<(key:string)=>void>(()=>{});
+  // Narrow screens: the preview opens over the editor, showing the section being edited (Juani, 2026-11-06).
+  const [previewOpen,setPreviewOpen]=useState(false);
+  // Hidden, the preview cannot scroll: once it is on screen and laid out, it is sent to the section being edited.
+  const openPreview=(open:boolean)=>{setPreviewOpen(open);if(open&&lastSection.current)setTimeout(()=>frame.current?.contentWindow?.postMessage({type:'page-scroll',section:lastSection.current},location.origin),350);};
+  const sectionList=schema.fields.filter(f=>f.type==='section');
   useEffect(()=>{const f=form.current;if(!f||!ready)return;let last='';
-    const go=(key:string)=>{if(!key||key===last)return;last=key;frame.current?.contentWindow?.postMessage({type:'page-scroll',section:key},location.origin);};
+    const go=(key:string)=>{if(!key||key===last)return;last=key;lastSection.current=key;frame.current?.contentWindow?.postMessage({type:'page-scroll',section:key},location.origin);};
+    // A field touched or a section chosen wins: the scroll that follows does not override it for a moment.
+    let held=0;const choose=(key:string)=>{held=Date.now()+1200;go(key);};showSection.current=choose;
     const sections=[...f.querySelectorAll<HTMLElement>('[data-preview-section]')];
-    const io=new IntersectionObserver(()=>{const top=sections.find(el=>{const r=el.getBoundingClientRect();return r.bottom>innerHeight*.3;});if(top)go(top.dataset.previewSection||'');},{rootMargin:'0px',threshold:[0,.25,.5,.75,1]});
-    sections.forEach(el=>io.observe(el));const focus=(e:FocusEvent)=>{const el=(e.target as HTMLElement).closest<HTMLElement>('[data-preview-section]');if(el)go(el.dataset.previewSection||'');};
-    f.addEventListener('focusin',focus);return()=>{io.disconnect();f.removeEventListener('focusin',focus);};},[ready,schema.key]);
+    // While scrolling, the section in view (the first whose bottom is below the top third) is read once the page stops,
+    // so the preview moves once and not through every section on the way.
+    let timer=0;const read=()=>{if(Date.now()<held)return;const top=sections.find(el=>el.getBoundingClientRect().bottom>innerHeight*.3);if(top)go(top.dataset.previewSection||'');};
+    const onScroll=()=>{clearTimeout(timer);timer=window.setTimeout(read,180);};addEventListener('scroll',onScroll,{passive:true});read();
+    const focus=(e:FocusEvent)=>{const el=(e.target as HTMLElement).closest<HTMLElement>('[data-preview-section]');if(el)choose(el.dataset.previewSection||'');};
+    f.addEventListener('focusin',focus);return()=>{removeEventListener('scroll',onScroll);clearTimeout(timer);f.removeEventListener('focusin',focus);};},[ready,schema.key]);
   async function save(e:FormEvent){e.preventDefault();if(!supabase||!draft||saving)return;setSaving(true);setMessage('Saving…');
     try{
     const current=await supabase.from('site_settings').select('value').eq('key','site').single();if(current.error){setMessage('Could not load the current settings. Nothing was saved.');return;}
@@ -156,8 +166,9 @@ export function PageSettings({pageKey}:{pageKey:string}){
     <div className="adm-split">
       <form ref={form} onSubmit={save} className="adm-stack adm-page-form" style={{gap:18}}>
         {converted&&<p className="adm-notice">The cards below are the ones the page shows today, read from {converted}. Saving keeps them here, looking the same; from then on they are edited only on this page.</p>}
+        {draft&&sectionList.length>2&&<label className="adm-field adm-jump"><span>Go to section</span><select value="" onChange={e=>{const el=form.current?.querySelector<HTMLElement>(`[data-preview-section="${e.target.value}"]`);if(el){el.scrollIntoView({block:'start',behavior:'smooth'});showSection.current(e.target.value);}}}><option value="" disabled>Choose a section…</option>{sectionList.map(f=><option key={f.key} value={f.key}>{f.label}</option>)}</select></label>}
         {draft?<Fields fields={schema.fields} value={draft} onChange={setDraft} media={media} reload={loadMedia} prefix={`${schema.key}-`} path={schema.path}/>:null}
-        <div className="adm-actions adm-sticky-actions"><button className="adm-btn" disabled={!draft||saving}>{saving?'Saving…':`Save ${schema.label}`}</button><p role="status" className="adm-help">{dirty&&!message?'Unsaved changes.':message}</p></div></form>
-      <section className="adm-preview adm-page-preview" aria-label="Visual preview"><header><strong>Visual preview</strong><span className="adm-help">{schema.key==='home'?'Follows the section you are editing, with your unsaved changes. You can also scroll inside it.':'The public template with these unsaved changes. Scroll inside it.'}</span></header><iframe ref={frame} title={`Preview of ${schema.label}`} src={`/admin/page-preview?page=${schema.key}`} onLoad={send}/></section>
+        <div className="adm-actions adm-sticky-actions"><button className="adm-btn" disabled={!draft||saving}>{saving?'Saving…':`Save ${schema.label}`}</button><button type="button" className="adm-btn adm-btn--ghost adm-preview-open" onClick={()=>openPreview(true)}>Preview</button><p role="status" className="adm-help">{dirty&&!message?'Unsaved changes.':message}</p></div></form>
+      <section className={`adm-preview adm-page-preview${previewOpen?' is-open':''}`} aria-label="Visual preview"><header><strong>Visual preview</strong><button type="button" className="adm-btn adm-btn--small adm-preview-close" onClick={()=>openPreview(false)}>Close preview</button><span className="adm-help">{schema.key==='home'?'Follows the section you are editing, with your unsaved changes. You can also scroll inside it.':'The public template with these unsaved changes. Scroll inside it.'}</span></header><iframe ref={frame} title={`Preview of ${schema.label}`} src={`/admin/page-preview?page=${schema.key}`} onLoad={send}/></section>
     </div></div>;
 }
