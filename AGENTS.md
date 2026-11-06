@@ -26,13 +26,14 @@ emails ni el SEO.
 - **En prueba con Juani: Crew, The Crew page y páginas personales** (`/crew/<slug>`, ejemplo real: Georgia Webb / Wild
   Wonders). El CMS quedó reducido a Banner → SEO → bloques y controles con efecto real; ver §6 y
   `docs/encounters/HANDOFF_2026-10-28.md`.
-- **Base real** (`lzwmwofxoegkxykglneq`): 23 migraciones, todas aplicadas; local y remoto coinciden. El 2026-10-31, con OK de
+- **Base real** (`lzwmwofxoegkxykglneq`): 24 migraciones, todas aplicadas; local y remoto coinciden. El 2026-10-31, con OK de
   Juani, respaldo y dry run, se aplicaron juntas `20261026000200_profile_default_blocks.sql`,
   `20261026000300_keep_legacy_profiles_convertible.sql` y `20261031000100_artwork_categories_and_media.sql` (la última).
   El 2026-11-01 se aplicó `20261031000200_announcement_until_and_signup.sql` (anuncios: último día y botón para anotarse):
   21 migraciones, sin pendientes. Redes que bloquean el puerto 5432 (aeropuertos) hacen fallar respaldo y migración.
   El 2026-11-04 se aplicó `20261101000100_media_title.sql` (título opcional de cada imagen): 22 migraciones, sin pendientes.
   El 2026-11-05 se aplicó `20261105000100_session_price.sql` (precio por persona de cada sesión): 23 migraciones, sin pendientes.
+  El 2026-11-06 se aplicó `20261106000100_delete_expired_announcements.sql` (activa `pg_cron` y borra cada noche los anuncios vencidos): 24 migraciones, sin pendientes.
 - **Producción:** `main` está en `027e795` y el deployment se confirmó exitoso. El cambio funcional de esta última entrega es
   `6dd2c8f`; `027e795` es un commit vacío de reintento.
 - **Pendiente de lanzamiento:** dominio del cliente, redirecciones desde WordPress, quitar `noindex`, correo del newsletter
