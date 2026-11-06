@@ -136,13 +136,15 @@ export function listGroups(list:Activity[],kind:'expedition'|'workshop'='expedit
 // Card of an expedition or workshop in a list: upcoming ones lead to their page; finished ones to their result.
 export function ActivityCard({activity:a,media,seq=.94}:{activity:Activity;media:Row[];seq?:number}){
   const finished=isFinished(a),href=finished&&a.result?`/posts/${string(a.result.slug)}`:a.path;
-  const label=finished?(a.result?'See how it went':'Read about it'):string(a.detail.cta_label)||(a.kind==='workshop'?'See the workshop':'See the expedition');
-  return <Link href={href} className="activity-card" data-seq={`${seq},0.4`} data-state={string(a.detail.activity_status)}>
+  const label=finished?'See how it went':string(a.detail.cta_label)||(a.kind==='workshop'?'See the workshop':'See the expedition');
+  // Once it has ended, the card leads to its story; without one it only tells where it went (Juani, 2026-11-06).
+  const body=<>
     <div className="activity-card-media"><Picture id={a.post.cover_id||(finished?a.result?.cover_id:null)} media={media}/></div>
     <span className="activity-card-kicker">{statusLabels[string(a.detail.activity_status)]||''}{dateLabel(a.detail)&&<span>{dateLabel(a.detail)}</span>}</span>
     <h3>{string(a.post.title)}</h3>
     {string(a.detail.place)&&<span className="activity-card-place">{string(a.detail.place)}</span>}
     {(finished?string(a.detail.outcome)||string(a.post.excerpt):string(a.post.excerpt))&&<p>{finished?string(a.detail.outcome)||string(a.post.excerpt):string(a.post.excerpt)}</p>}
-    <span className="activity-card-cta">{label} →</span>
-  </Link>;
+    {!(finished&&!a.result)&&<span className="activity-card-cta">{label} →</span>}</>;
+  return finished&&!a.result?<div className="activity-card activity-card--static" data-seq={`${seq},0.4`} data-state={string(a.detail.activity_status)}>{body}</div>
+    :<Link href={href} className="activity-card" data-seq={`${seq},0.4`} data-state={string(a.detail.activity_status)}>{body}</Link>;
 }

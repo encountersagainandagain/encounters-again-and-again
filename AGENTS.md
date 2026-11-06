@@ -187,6 +187,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 **Editor de Home (2026-11-06):** por secciones en el orden de la página, textos abiertos con lo que hoy se ve (`src/features/encounters/home-defaults.ts`, compartido con `HomeView`), lista «On Home now» en What is coming y vista previa fija que sigue a la sección editada (`data-home-section`). Si cambiás un texto por defecto de Home, cambialo en `home-defaults.ts`.
 
+**Anuncios y pasadas (2026-11-06):** un anuncio se borra de la base la noche después de su último día (`public.delete_expired_announcements`, `pg_cron`). Nunca se anuncian expediciones ni workshops. Terminada y sin historia, una actividad se muestra en su lista sin enlace.
+
 **Sesión del admin (2026-11-03):** el candado de Supabase espera 20 s en vez de 5 (`src/lib/supabase.ts`) para que el preview u otra pestaña no repitan un refresh lento. Perder la sesión no saca del formulario: aparece un aviso para volver a entrar en otra pestaña.
 
 **The Crew page (2026-10-27)** — editor en orden: Banner → SEO → Below the banner.

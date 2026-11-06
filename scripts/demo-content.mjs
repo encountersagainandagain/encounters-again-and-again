@@ -281,10 +281,9 @@ export function reviewSet(today=new Date()){
   ];
 
   // Announcements (Home → What is coming). They link to existing content and never repeat an activity:
-  // the agenda already lists upcoming activities, so these point to a book, a finished expedition and a message.
+  // the agenda already lists upcoming activities, so these point to a book and a message (expeditions and workshops are never announced).
   const announcements=[
     {id:id(91,1),title:'Book launch: The Tide Notebook',body:'A reading at the library, with the original drawings on the wall.',starts_on:day(25),post:'the-tide-notebook',media_id:img('tide-cover'),sort:1},
-    {id:id(91,2),title:'The winter crossing, in drawings',body:'A small exhibition of the logbook and the sketchbooks from the crossing.',starts_on:day(60),post:'winter-crossing-to-the-islands',media_id:img('winter-log'),sort:2,viaAdmin:true},
     {id:id(91,3),title:'A new poem on Meaningful Messages',body:'A few lines about the hour between tides, with a drawing to go with it.',starts_on:day(4),post:'what-the-rock-pool-keeps',media_id:img('msg-pool'),sort:3},
   ];
 
