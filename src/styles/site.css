@@ -712,6 +712,12 @@ body:has(.home-page) .editorial-footer{padding-bottom:clamp(40px,8vh,80px)}
   .editorial-nav nav a::after{content:'';position:absolute;inset:-7px -8px}
   body:has(.home-page) .editorial-nav nav a::after{inset:-9px -8px}
 }
+/* Touch screens (2026-11-06): the small capital links get the same invisible touch area as the menu, about 12px more
+   above and below, so a finger reaches them; nothing moves on screen (checked pixel for pixel at 390 and 768). */
+@media (pointer:coarse){
+  .home-head>a,.editorial-footer a,.art-cta,.about-write{position:relative}
+  .home-head>a::after,.editorial-footer a::after,.art-cta::after,.about-write::after{content:'';position:absolute;inset:-12px -6px}
+}
 /* The prototype scrolls natively: anchors and jumps are instant on Home. */
 html:has(.home-page){scroll-behavior:auto}
 /* Home with ?scroll=lenis (HomeView): the rules Lenis expects (lenis/dist/lenis.css). */

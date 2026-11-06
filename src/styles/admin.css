@@ -357,3 +357,8 @@ html:has(.adm),body:has(.adm){overflow:visible;overflow-x:clip}
 .adm-dialog h2{font-size:22px}
 .adm-dialog-pair{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center}
 @media(max-width:520px){.adm-dialog-pair{grid-template-columns:minmax(0,1fr)}}
+/* Touch screens: the small text links of the admin get a larger touch area without moving anything. */
+@media (pointer:coarse){
+  .adm-side-foot a,.adm-side-foot button,.adm-story{position:relative}
+  .adm-side-foot a::after,.adm-side-foot button::after,.adm-story::after{content:'';position:absolute;inset:-8px -4px}
+}
