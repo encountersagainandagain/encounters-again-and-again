@@ -18,7 +18,7 @@ export const entitySide=['status','sort','has_page','listed','page_post_id'];
 
 export const help:Record<string,string>={
   title:'Main title shown on the page and in lists.',
-  slug:'Part of the web address. Use lowercase words joined with hyphens.',
+  slug:'Part of the web address. It is filled in from the title until it is published; then it is locked.',
   status:'Drafts are private. Published content is visible to everyone.',
   subtitle:'Optional line shown under the title.',
   kicker:'Small line above the title on the cover.',

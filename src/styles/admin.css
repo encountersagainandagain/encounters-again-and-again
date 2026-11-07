@@ -288,6 +288,8 @@ button.adm-tile{font:inherit;text-align:left;cursor:pointer}
 .adm-page-section>h2{margin:0;font:600 18px var(--font-body),Arial,sans-serif;color:var(--adm-sea)}.adm-page-section>.adm-help{margin:0;max-width:70ch}
 /* Colour choice of a card: one swatch per palette colour, with its name. */
 .adm-swatches>div{display:flex;flex-wrap:wrap;gap:6px}
+.adm-slug-lock{display:flex;gap:8px;align-items:center}.adm-slug-lock input{flex:1;min-width:0;background:var(--adm-tint);color:var(--adm-ink,#0e2a38)}
+.adm-slug-warning{margin-top:8px}.adm-slug-warning p+p{margin-top:10px}.adm-slug-open{color:#8a5a00}
 /* Signature picker: each option shows its stroke on the dark of the closing band; pointing at it (or choosing it) draws it. */
 .adm-signatures>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:8px}
 .adm-signatures label{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--adm-line);border-radius:10px;background:#061826;color:rgba(234,245,250,.82);cursor:pointer}
