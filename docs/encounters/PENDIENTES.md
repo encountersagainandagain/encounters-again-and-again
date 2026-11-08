@@ -5,6 +5,8 @@ actualiza al resolver cada punto. Ninguna se hace sin el OK explícito de Juani 
 
 ## 1. Mover el dominio final de WordPress a este proyecto en Vercel
 
+**Plan paso a paso, inventario del DNS y vuelta atrás: `migracion-dominio.md`** (2026-11-08). Lo de abajo es el resumen.
+
 **Estado (2026-11-01):** el dominio final (`www`) ya existe pero apunta al WordPress actual (Hostinger). El sitio nuevo vive en
 https://encounters-again-and-again-gamma.vercel.app, con `noindex`.
 

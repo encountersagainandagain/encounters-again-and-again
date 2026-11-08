@@ -26,7 +26,7 @@ TTL bajos (60–300 s): el cambio se ve en minutos y, si algo sale mal, volver a
 
 ### Direcciones del WordPress y dónde tienen que llegar
 
-Probado contra el sitio nuevo (`curl -L`), hoy:
+Probado contra el sitio nuevo (`curl -L`). Desde el 2026-11-08 (commit `517d723`) todas llegan a su página:
 
 | Dirección vieja | Debe ir a | Hoy en el sitio nuevo |
 |---|---|---|
@@ -35,26 +35,28 @@ Probado contra el sitio nuevo (`curl -L`), hoy:
 | `/elementor-page-3462/` (Meet The Team) | `/crew` | ✅ |
 | `/elementor-2907/` (Wild Wonders) | `/crew/wild-wonders` | ✅ |
 | `/you-never-know-what-encounter-could-change-your-life/` | su mensaje en `/meaningful-messages` | ✅ |
-| `/elementor-3062/` (Expeditions) | `/expeditions` | ❌ 404 |
-| `/elementor-page-3107/` (Artsy Animals) | `/workshops` | ❌ 404 |
-| `/contact-3/` | `/contact` | ❌ 404 |
-| `/form/`, `/form/simple-contact-form/` | `/contact` | ❌ 404 |
-| `/category/you-never-know-what-encounter-could-change-your-life/` | `/meaningful-messages` | ❌ 404 |
-| `/services-3/` | `/` (no tiene equivalente) | ❌ 404 |
-| `/shop/`, `/checkout/`, `/customer-dashboard/` | `/art` (la tienda no existe; lo más cercano son las obras) | ❌ 404 |
-| `/wp-content/uploads/…` (imágenes indexadas) | 410 Gone (no vuelven) | 404 |
-| `/feed/`, `/wp-json/…`, `/wp-admin/`, `/wp-login.php` | 410 Gone | 404 |
+| `/elementor-3062/` (Expeditions) | `/expeditions` | ✅ (redirige) |
+| `/elementor-page-3107/` (Artsy Animals) | `/workshops` | ✅ (redirige) |
+| `/contact-3/` | `/contact` | ✅ (redirige) |
+| `/form/`, `/form/simple-contact-form/` | `/contact` | ✅ (redirige) |
+| `/category/you-never-know-what-encounter-could-change-your-life/` | `/meaningful-messages` | ✅ (redirige) |
+| `/services-3/` | `/` (no tiene equivalente) | ✅ (redirige) |
+| `/shop/`, `/checkout/`, `/customer-dashboard/` | `/art` (la tienda no existe; lo más cercano son las obras) | ✅ (redirige) |
+| `/wp-content/uploads/…` (imágenes indexadas) | 410 Gone (no vuelven) | ✅ 410 |
+| `/feed/`, `/wp-json/…`, `/wp-admin/`, `/wp-login.php` | 410 Gone | ✅ 410 |
 
 ## 1. Preparar el sitio nuevo (lo hago yo; no cambia nada para los visitantes de hoy)
 
-- [ ] **1.1 Redirecciones completas.** Que todas las direcciones de la tabla lleguen a su página: migración que suma las que
+- [x] **1.1 Redirecciones completas.** Que todas las direcciones de la tabla lleguen a su página: migración que suma las que
   faltan a `route_history` y deja que el resolvedor redirija también a las páginas fijas (`/expeditions`, `/workshops`,
   `/contact`, `/meaningful-messages`, `/art`, `/`). Las de WordPress que no vuelven (`wp-content`, `wp-json`, `wp-admin`,
   feeds) responden **410 Gone**, que le dice a Google que las saque rápido. Verificación: la tabla de arriba, todo en ✅.
-- [ ] **1.2 `www` y barra final.** En el sitio nuevo, `www` redirige a la dirección sin `www` (se configura en Vercel al
+  Hecho (2026-11-08): las que faltaban están en `src/config/legacy-wordpress.ts` (se aplica en `proxy.ts`, antes que todo, sin depender de la base; probado en `scripts/check-legacy-wordpress.mjs`); las que ya estaban en `route_history` siguen igual. Verificado en producción: las 15 direcciones del sitemap del WordPress llegan a su página y `wp-content`, `wp-admin` y `feed` responden 410.
+- [ ] **1.2 `www` y barra final.** (barra final ✅; `www` se configura el día del cambio, paso 3.1) En el sitio nuevo, `www` redirige a la dirección sin `www` (se configura en Vercel al
   agregar el dominio) y `/about/` → `/about` (ya funciona).
-- [ ] **1.3 Ensayo completo en la URL de revisión.** Correr el chequeo de todas las direcciones viejas, el sitemap, el admin,
+- [x] **1.3 Ensayo completo en la URL de revisión.** Correr el chequeo de todas las direcciones viejas, el sitemap, el admin,
   Contact y una muestra de páginas, y dejar el resultado anotado acá.
+  Hecho (2026-11-08): direcciones viejas ✅ (arriba); sitemap 23 páginas con fecha; SEO y datos estructurados verificados (`seo-plan.md`). Repetir el día del cambio contra el dominio real.
 
 ## 2. Antes del día del cambio (Juani)
 

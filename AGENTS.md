@@ -237,6 +237,8 @@ una migración aplicada; un push no es un despliegue verificado.
 
 | Documento | Para qué |
 |---|---|
+| `docs/encounters/migracion-dominio.md` | Plan para mover encountersagainandagain.com de WordPress (Hostinger) a este proyecto sin romper nada, y después activar Resend. |
+| `docs/encounters/seo-plan.md` | Auditoría y plan de SEO: lo hecho, lo del lanzamiento y el contenido pendiente. |
 | `docs/encounters/PENDIENTES.md` | Lo que espera al lanzamiento: mover el dominio desde WordPress y configurar Resend (Contact y newsletter). |
 | `docs/encounters/page-progress.md` | Estado vivo por página, decisiones recientes, migraciones. **Actualizalo en cada entrega.** |
 | `docs/encounters/activities-logic.md` | Cómo funcionan Expeditions y Workshops: estados por fecha (Perth), historias, Results, sessions. |
