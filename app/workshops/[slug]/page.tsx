@@ -7,6 +7,8 @@ import {editorialRedirectOr404} from '@/features/encounters/editorial-redirect';
 import {readBlocks} from '@/features/encounters/public-content';
 import {peopleOf,siteData} from '@/features/encounters/site-data';
 import {string} from '@/features/encounters/presentation';
+import {eventOf} from '@/features/encounters/structured-data';
+import {JsonLd} from '@/components/JsonLd';
 export const revalidate=300;
 export const dynamicParams=true;
 type Props={params:Promise<{slug:string}>};
@@ -14,5 +16,5 @@ const find=async(slug:string)=>{const data=await siteData();return {data,activit
 export async function generateMetadata({params}:Props){const {slug}=await params;const {activity}=await find(slug);if(!activity)return {title:'Workshop not found',robots:{index:false}};return editorialMetadata(string(activity.post.title),activity.path,activity.post,activity.post.cover_id);}
 export default async function Page({params}:Props){
   const {slug}=await params;const {data,activity}=await find(slug);if(!activity)return editorialRedirectOr404(`/workshops/${slug}`);
-  return <ScrollStage className="editorial-page post-page activity-page"><ActivityView activity={activity} blocks={await readBlocks(string(activity.post.id))} media={data.media} needs={[]} sessions={data.sessions.filter(s=>s.workshop_id===activity.post.id)} people={peopleOf(activity.post.id,data)} contactHref="/contact" trail={<Breadcrumbs items={[{label:'Workshops',href:'/workshops'},{label:string(activity.post.title),href:activity.path}]}/>}/></ScrollStage>;
+  return <ScrollStage className="editorial-page post-page activity-page"><JsonLd id="workshop-jsonld" data={{'@context':'https://schema.org',...eventOf(activity,data.sessions.filter(s=>s.workshop_id===activity.post.id))}}/><ActivityView activity={activity} blocks={await readBlocks(string(activity.post.id))} media={data.media} needs={[]} sessions={data.sessions.filter(s=>s.workshop_id===activity.post.id)} people={peopleOf(activity.post.id,data)} contactHref="/contact" trail={<Breadcrumbs items={[{label:'Workshops',href:'/workshops'},{label:string(activity.post.title),href:activity.path}]}/>}/></ScrollStage>;
 }

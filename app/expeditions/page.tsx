@@ -8,14 +8,12 @@ import {editorialMetadata} from '@/features/encounters/editorial-data';
 import {readBlocks} from '@/features/encounters/public-content';
 import {pageFor,siteData} from '@/features/encounters/site-data';
 import {string,type Row} from '@/features/encounters/presentation';
+import {eventOf} from '@/features/encounters/structured-data';
 export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).expeditions||{}) as Row;
 export async function generateMetadata(){const data=await siteData();const page=pageFor(data,'encounters_expeditions');const seo=expeditionsSeoOf(settingsOf(data),page);return editorialMetadata('Expeditions','/expeditions',{...page,seo_title:seo.title,meta_description:seo.description},settingsOf(data).cover_id||page?.cover_id);}
 // Search engines read the page as a collection of expeditions, each one an event with its dates and place.
-const eventStatus:Record<string,string>={postponed:'EventPostponed',cancelled:'EventCancelled'};
-const asEvent=(a:Activity)=>({'@type':'Event',name:string(a.post.title),url:siteUrl+a.path,description:string(a.post.excerpt)||undefined,startDate:string(a.detail.starts_on)||undefined,endDate:string(a.detail.ends_on)||undefined,
-  eventStatus:`https://schema.org/${eventStatus[string(a.detail.activity_status)]||'EventScheduled'}`,location:string(a.detail.place)?{'@type':'Place',name:string(a.detail.place)}:undefined,organizer:{'@id':`${siteUrl}/#organization`}});
-// The program page explains the expeditions (its presentation cards); the concrete expeditions follow.
+const asEvent=(a:Activity)=>eventOf(a);
 export default async function Page(){
   const data=await siteData();const page=pageFor(data,'encounters_expeditions');
   const cards=page?data.cards.filter(c=>c.post_id===page.id):[];

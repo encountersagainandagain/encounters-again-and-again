@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { indexable } from './src/config/indexing';
 const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
@@ -20,11 +21,13 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: '/:path*', headers: [
-      { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+      ...(indexable ? [] : [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]),
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
     ] },
+    // The admin, the API and the visual review are never for search engines, also after launch.
+    ...['/admin/:path*', '/api/:path*', '/review/:path*'].map(source => ({ source, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] })),
     // Design images (public, versioned with the code): one day in the browser instead of a check on every visit.
     ...['/design/:path*', '/images/brand/:path*'].map(source => ({ source, headers: [
       { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },

@@ -8,9 +8,12 @@ import {messagesSeoOf} from '@/features/encounters/messages-page';
 import {readBlocks} from '@/features/encounters/public-content';
 import {siteData} from '@/features/encounters/site-data';
 import {byOrder,string,type Row} from '@/features/encounters/presentation';
+import {covers} from '@/features/encounters/covers';
 export const revalidate=300;
 const settingsOf=(data:Awaited<ReturnType<typeof siteData>>)=>(((data.settings.pages||{}) as Row).messages||{}) as Row;
-export async function generateMetadata(){const data=await siteData();const s=settingsOf(data);const seo=messagesSeoOf(s);return editorialMetadata('Meaningful Messages','/meaningful-messages',{seo_title:seo.title,meta_description:seo.description},s.cover_id);}
+export async function generateMetadata(){const data=await siteData();const s=settingsOf(data);const seo=messagesSeoOf(s);// Shared with the page cover, else the first published illustration, else the design image of its banner.
+  const first=data.messages.map(m=>m.illustration_id).find(id=>typeof id==='string'&&data.media.some(x=>x.id===id));
+  return editorialMetadata('Meaningful Messages','/meaningful-messages',{seo_title:seo.title,meta_description:seo.description},s.cover_id||first||covers.messages(s).fallback);}
 // Search engines read the page as a collection of messages, each one a creative work with its words and illustration.
 export default async function Page(){
   const data=await siteData();const settings=settingsOf(data);const seo=messagesSeoOf(settings);

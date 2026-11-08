@@ -24,7 +24,7 @@ https://encounters-again-and-again-gamma.vercel.app, con `noindex`.
 2. En el proveedor de DNS: los registros que indique Vercel (A del dominio raíz y CNAME de `www`). Esto apaga WordPress para
    los visitantes; WordPress y Hostinger no se tocan ni se borran.
 3. Actualizar la URL del sitio: `NEXT_PUBLIC_SITE_URL` en Vercel y Site URL / Redirect URLs en Supabase Auth (login del admin).
-4. Quitar `noindex` (cabecera `X-Robots-Tag`, meta robots y `robots.txt`) y confirmar el sitemap.
+4. Abrir el sitio a buscadores: `ENCOUNTERS_INDEXABLE=true` en Vercel → Production (abre `robots.txt` con el sitemap, la meta robots y la cabecera `X-Robots-Tag` a la vez; ver `seo-plan.md`). Confirmar `/sitemap.xml`.
 5. Volver a desplegar `main` y verificar: Home, cada página, admin, redirecciones con `curl -I`, certificado HTTPS.
 6. Google Search Console: verificar el dominio y enviar el sitemap.
 
