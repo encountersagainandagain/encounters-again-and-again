@@ -48,6 +48,23 @@ Probado contra el sitio nuevo (`curl -L`). Desde el 2026-11-08 (commit `517d723`
 | `/wp-content/uploads/…` (imágenes indexadas) | 410 Gone (no vuelven) | ✅ 410 |
 | `/feed/`, `/wp-json/…`, `/wp-admin/`, `/wp-login.php` | 410 Gone | ✅ 410 |
 
+### Lo que muestra el panel de Hostinger (revisado con Juani el 2026-11-08, sin cambiar nada)
+
+- **Registros DNS (son todos):**
+  | Tipo | Nombre | Contenido | TTL |
+  |---|---|---|---|
+  | `ALIAS` | `@` | `encountersagainandagain.com.cdn.hstgr.net` | 300 |
+  | `CNAME` | `www` | `www.encountersagainandagain.com.cdn.hstgr.net` | 300 |
+  | `A` | `ftp` | `145.223.108.162` | 1800 |
+
+  No hay `A`/`AAAA` propios del dominio: las IPv4 e IPv6 que se ven desde afuera salen del `ALIAS` al CDN. No hay MX ni
+  TXT. **Estos tres valores son la vuelta atrás.**
+- **DNSSEC:** no configurado. **Redirecciones de dominio:** ninguna (el dominio está vinculado al sitio del hosting).
+- **Renovación automática del dominio: activada.** Vence 2027-01-11; el plan de hosting **Business** vence el mismo día.
+- **CDN de Hostinger: activo.** Respaldos: **diarios** (hPanel → sitio → Backups).
+- **WordPress 6.9.11 con 46 vulnerabilidades detectadas y 9 plugins sin actualizar** (aviso del panel). Hasta la migración
+  es el sitio público; después deja de verse por el dominio, pero sigue en el servidor: ver 4.4.
+
 ## 1. Preparar el sitio nuevo (lo hago yo; no cambia nada para los visitantes de hoy)
 
 - [x] **1.1 Redirecciones completas.** Que todas las direcciones de la tabla lleguen a su página: migración que suma las que
@@ -83,15 +100,17 @@ Orden pensado para que el sitio nunca quede caído.
    - `ENCOUNTERS_INDEXABLE` = `true` (abre el sitio a buscadores; `seo-plan.md` A8).
 3. **Supabase → Authentication → URL Configuration:** Site URL `https://encountersagainandagain.com` y sumar
    `https://encountersagainandagain.com/**` a Redirect URLs (sin sacar la de revisión hasta el final).
-4. **Hostinger → Domains → encountersagainandagain.com → DNS / Nameservers → DNS records:**
-   - `A` `@`: borrar `88.223.87.147` y `147.79.72.241`; crear el `A` que dio Vercel.
-   - `AAAA` `@`: **borrar los dos**.
-   - `CNAME` `www`: cambiar `…cdn.hstgr.net` por el `CNAME` que dio Vercel.
-   - No tocar `ftp`, `TXT` ni nada más. Si Hostinger tiene activado su **CDN** para el dominio, apagarlo (si no, sigue
-     sirviendo WordPress).
-5. **Vercel → Deployments → volver a desplegar `main`** para que tome las variables. Esperar a que Domains muestre el dominio
+4. **Hostinger → Websites → encountersagainandagain.com → CDN: apagarlo primero.** Al apagarlo, Hostinger cambia solo los
+   registros del CDN por los del hosting y WordPress sigue funcionando. Esperar un par de minutos y volver a mirar la lista
+   de registros, porque desde ese momento los valores que se cambian son los que queden ahí.
+5. **Hostinger → Domains → encountersagainandagain.com → DNS / Nameservers → DNS records:**
+   - Registro del dominio (`@`, sea `ALIAS` o `A` después de apagar el CDN): borrarlo y crear el `A` `@` que dio Vercel.
+     Si aparecieron `AAAA` `@`, **borrarlos** (si quedan, quien entra por IPv6 sigue viendo WordPress).
+   - `CNAME` `www`: cambiar su contenido por el `CNAME` que dio Vercel.
+   - No tocar `ftp` ni nada más, y **no volver a tocar el CDN** (prenderlo reescribe los registros).
+6. **Vercel → Deployments → volver a desplegar `main`** para que tome las variables. Esperar a que Domains muestre el dominio
    como válido y con certificado (HTTPS automático, minutos).
-6. **Verificación (yo):**
+7. **Verificación (yo):**
    - `https://encountersagainandagain.com` y `https://www…` (redirige) muestran el sitio nuevo, con HTTPS.
    - `dig` del dominio: solo el `A` de Vercel, sin `AAAA` de Hostinger.
    - Las 15 direcciones viejas llegan a su página (sección 0).
@@ -99,7 +118,7 @@ Orden pensado para que el sitio nunca quede caído.
    - Admin: login, guardar algo, la página pública se actualiza.
    - Contact, Home, Art, una obra, Expeditions, Workshops y Messages en teléfono y escritorio.
 
-**Volver atrás** (si algo grave falla): en Hostinger, poner de nuevo los `A`, `AAAA` y el `CNAME` de www anotados en 2.3.
+**Volver atrás** (si algo grave falla): en Hostinger, poner de nuevo `ALIAS` `@` → `encountersagainandagain.com.cdn.hstgr.net` y `CNAME` `www` → `www.encountersagainandagain.com.cdn.hstgr.net` (o volver a prender el CDN, que los restaura).
 En unos minutos vuelve WordPress. Las variables de Vercel se pueden dejar: no afectan a WordPress.
 
 ## 4. Después del cambio
@@ -109,8 +128,9 @@ En unos minutos vuelve WordPress. Las variables de Vercel se pueden dejar: no af
 - [ ] **4.2 Prueba de resultados enriquecidos** (obra, expedición, workshop, historia) y **PageSpeed** móvil.
 - [ ] **4.3 Sacar la URL de revisión** de Supabase → Redirect URLs y dejar `-gamma.vercel.app` solo como alias (Vercel la
   marca `noindex` sola).
-- [ ] **4.4 Hosting de WordPress:** mantenerlo 1–2 meses como respaldo y después decidir si se da de baja el plan de hosting
-  (el dominio se sigue renovando en Hostinger igual).
+- [ ] **4.4 Hosting de WordPress:** mantenerlo 1–2 meses como respaldo (con su copia descargada) y después quitar el sitio
+  WordPress del hosting o dar de baja el plan: tiene 46 vulnerabilidades sin corregir y, aunque ya no se vea por el
+  dominio, sigue en el servidor. El dominio se sigue renovando en Hostinger igual (renovación automática activada).
 - [ ] **4.5 Renovar el dominio** antes del 2027-01-11 (activar la renovación automática).
 
 ## 5. Emails con Resend (Contact y newsletter), con el dominio ya funcionando
