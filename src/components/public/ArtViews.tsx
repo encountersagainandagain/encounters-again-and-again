@@ -79,8 +79,7 @@ export function ArtworkView({post,art,category,number,people,blocks,media,pathPr
         {(post.excerpt||art.caption||safeHref(art.external_url))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{safeHref(art.external_url)?<a className="art-cta" href={safeHref(art.external_url)}>View the work ↗</a>:null}</div>:null}
       </div></section>
       {embedOf(art.embed_kind,art.embed_id)&&!isAudio(art.embed_kind)?<div className="art-section art-embed"><div className="art-frame art-work--tall"><VideoFrame kind={art.embed_kind} id={art.embed_id} title={title}>{art.media_id?<MediaImage id={art.media_id} media={media} alt=""/>:null}</VideoFrame></div></div>:<MediaEmbed kind={art.embed_kind} id={art.embed_id} audioHeight/>}
-      {/* A work has no automatic index (Juani, 2026-11-07); an Index block can still be added by hand. */}
-      {blocks.length>0&&<PostBlocks blocks={blocks} media={media}/>}
+      {blocks.length>0&&<PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>}
       {related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{related.map(r=><Link key={r.href} href={r.href}>{r.title} →</Link>)}</section>}
       {more}
     </div>

@@ -30,7 +30,7 @@ export const help:Record<string,string>={
   cover_alt:'Describe the cover for people who cannot see it.',
   sort:'Lower numbers appear first.',
   published_at:'Date shown with the content.',
-  show_index:'Shows an “In this post” list built from the headings.',
+  show_index:'Adds a short table of contents at the top of the story, titled “In this post”: every Heading block becomes a link that jumps to its part. Useful when the story is long and told in several parts (for example Day 1, Day 4, What we brought back). It appears only when the story has at least two Heading blocks.',
   name:'The person’s name, as on The Crew page. On the personal page it makes the small line of the banner, “meet <first name>”, unless that page sets its own.',
   alias:'Large title of the personal page banner, e.g. Wild Wonders. Empty: the Name.',
   role:'Short role, for example “Co-founder”.',
@@ -108,7 +108,7 @@ export const crewSections:[string,string,string][]=[
 export const crewStyles:[string,string][]=[['lead','Lead (larger serif)'],['body','Body text'],['aside','Continues the previous line, in italics'],['closing','Closing line in italics']];
 // Help that changes with the type of content.
 export const kindHelp:Record<string,Record<string,string>>={
-  artwork:{title:'Name of the work.',slug:'Last part of the address: /art/main-category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'Optional large image for the top of the work page. If empty, the main image of the work is used.',meta_line:'Optional line under the title, e.g. year or technique.',published_at:'Date of the work. Shown on its card on the Art page and read by search engines.'},
+  artwork:{title:'Name of the work.',slug:'Last part of the address: /art/main-category/this-part.',kicker:'Small line above the title. If empty, the category name is used.',excerpt:'One or two sentences shown beside the authors and when the work is shared.',cover_id:'The banner: the large photo at the top of the work’s own page (the one “Read more” opens). Leave it empty and the Image of the card is used as the banner too. Choose one only for a different, wide photo, e.g. the artist at work or the book open on a table.',meta_line:'Optional line under the title, e.g. year or technique.',published_at:'Date of the work. Shown on its card on the Art page and read by search engines.'},
   expedition:{title:'Name of the expedition.',excerpt:'The invitation: one or two sentences on what this expedition is and why to come. Shown large, with the join button, on the expedition page, and on its card in the Expeditions list.',
     place:'Where it goes, e.g. Ningaloo Reef, Western Australia. Shown under “Where” on the expedition page.',
     cta_label:'Text of the join button, e.g. “Ask to join”. It leads to Contact. Empty: “Join the expedition”.',availability_label:'Short line on places, e.g. “Two berths open”. Shown beside the join button and on Home.',
