@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {useEffect,useState,type ReactNode} from 'react';
-import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,LogOut,Mail,Megaphone,Menu,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users,X} from 'lucide-react';
+import {CalendarDays,ExternalLink,Feather,FileText,Home,ImageIcon,LayoutPanelTop,History,LogOut,Mail,Megaphone,Menu,Palette,PanelsTopLeft,Settings,Shapes,Ship,UserRound,Users,X} from 'lucide-react';
 import {brand} from '@/config/brand';
 import {modules} from '@/config/modules';
 import {supabase} from '@/lib/supabase';
@@ -35,6 +35,7 @@ export const adminSections=[
   {href:'/admin/content?table=media',label:'Media library',icon:ImageIcon,group:'Site',enabled:modules.media},
   {href:'/admin/settings',label:'Settings',icon:Settings,group:'Site',enabled:modules.cms},
   {href:'/admin/newsletter',label:'Newsletter',icon:Mail,group:'Site',enabled:modules.newsletter},
+  {href:'/admin/activity',label:'Activity',icon:History,group:'Site',enabled:modules.cms},
 ].filter(section=>section.enabled);
 const groups=[...new Set(adminSections.map(s=>s.group))];
 
