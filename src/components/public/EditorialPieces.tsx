@@ -4,7 +4,8 @@ import {MediaImage} from './MediaImage';
 import {type Row} from '@/features/encounters/presentation';
 import {JsonLd} from '@/components/JsonLd';
 import {siteUrl} from '@/config/brand';
-import {signatures,type SignatureChoice} from '@/features/encounters/signatures';
+import {type SignatureChoice} from '@/features/encounters/signatures';
+import {SignatureStrokes,signatureViewBox} from './SignatureStrokes';
 const scribbles={
   title:['0 0 600 130','M10 92 C 96 26, 188 20, 244 56 C 296 90, 256 118, 218 100 C 172 78, 214 40, 306 38 C 420 36, 522 56, 590 26'],
   loop:['0 0 600 120','M14 70 C 120 18, 300 14, 430 34 C 540 52, 520 86, 380 90 C 240 94, 120 78, 66 58 C 36 46, 70 34, 150 34'],
@@ -25,7 +26,7 @@ export function Breadcrumbs({items}:{items:{label:string;href:string}[]}) {retur
 // 'none' draws nothing. The class keeps the name the closings had (scribble-loop, scribble-waves) so they look the same.
 export function Signature({signature}:{signature:SignatureChoice}) {
   if(signature==='none')return null;
-  return <svg className={`editorial-scribble scribble-${signature==='curls'?'waves':signature}`} data-scribble data-signature={signature} viewBox="0 0 600 120" aria-hidden="true">{signatures[signature].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>)}</svg>;
+  return <svg className={`editorial-scribble scribble-${signature==='curls'?'waves':signature}`} data-scribble data-signature={signature} viewBox={signatureViewBox(signature)} aria-hidden="true"><SignatureStrokes signature={signature} width={1.6}/></svg>;
 }
 // Closing block: the dark band at the end of a page, a phrase and its signature, above the shared footer.
 export function DarkClosing({title,signature='loop'}:{title:string;signature?:SignatureChoice}) {return <section className="art-closing"><div className="crew-heading"><h2 data-seq="1.1,0.5">{title}</h2><Signature signature={signature}/></div></section>;}

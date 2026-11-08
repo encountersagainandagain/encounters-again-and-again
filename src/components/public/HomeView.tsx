@@ -13,7 +13,8 @@ import {brand} from '@/config/brand';
 import {Picture} from './MediaImage';
 import {NewsletterSignup} from './NewsletterSignup';
 import {clamp01,useFrame} from './useFrame';
-import {closingSignature,signatureOf,signatures} from '@/features/encounters/signatures';
+import {closingSignature,signatureOf} from '@/features/encounters/signatures';
+import {SignatureStrokes,signatureViewBox} from './SignatureStrokes';
 import {creatures} from '@/features/encounters/home-creatures';
 import {createWater,waterMaxScale,type Water} from './homeWater';
 
@@ -298,6 +299,6 @@ export function HomeView({view,media,closing,newsletter}:{view:View;media:Row[];
       </div>
     </section>
     {sections.map(k=>blocks[k])}
-    <section className="home-closing" data-home-section="closing"><h2 data-hseq="1.05,0.45">{closing}</h2>{homeSignature!=='none'&&<svg data-hscribble data-signature={homeSignature} viewBox="0 0 600 120" aria-hidden="true">{signatures[homeSignature].paths.map((d,i)=><path key={i} pathLength="1" d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>)}</svg>}</section>
+    <section className="home-closing" data-home-section="closing"><h2 data-hseq="1.05,0.45">{closing}</h2>{homeSignature!=='none'&&<svg data-hscribble data-signature={homeSignature} viewBox={signatureViewBox(homeSignature)} aria-hidden="true"><SignatureStrokes signature={homeSignature} width={1.6}/></svg>}</section>
   </div>;
 }
