@@ -10,7 +10,7 @@ Se marca cada punto al terminarlo, con qué se hizo y cómo se verificó.
   aparece, lo despublicado o borrado desaparece). Falta incluir Home, Expeditions, Workshops, Meaningful Messages, About,
   Contact, cada expedición, cada workshop y cada historia de Results, y `lastModified` con la última edición de cada página.
   Los mensajes no van (su dirección redirige a un ancla de su página) ni las field notes (ocultas).
-  Hecho: `app/sitemap.ts` lista Home, Art y categorías, cada obra, Expeditions y cada expedición, Workshops y cada workshop, cada historia de Results, Meaningful Messages, Crew y cada página personal, About y Contact, con `lastModified` (la última edición; en las listas, la más reciente de lo que muestran). Local: 32 páginas, 30 con fecha.
+  Hecho: `app/sitemap.ts` lista Home, Art y categorías, cada obra, Expeditions y cada expedición, Workshops y cada workshop, cada historia de Results, Meaningful Messages, Crew y cada página personal, About y Contact, con `lastModified` (la última edición; en las listas, la más reciente de lo que muestran). Local: 32 páginas, 30 con fecha. Producción (2026-11-08): 23 páginas, todas con fecha.
 - [x] **A2 · SEO de la Home.** Sección «Search engines (SEO)» en Home page, como el resto, con texto sugerido. La Home publica
   su título, descripción y temas; hoy dice solo el nombre y «Art, ocean, education and conservation.».
   Hecho: Home page → «Search engines (SEO)» (título, descripción y temas, con texto sugerido en `home-defaults.ts`); `app/page.tsx` publica título, descripción, temas e imagen para compartir. Probado: guardar un título lo publica; vaciarlo vuelve al sugerido.
@@ -44,4 +44,5 @@ Se marca cada punto al terminarlo, con qué se hizo y cómo se verificó.
 
 - [ ] Descripción de la obra «Re-encounters…» (hoy «My experience encountering in the experience»).
 - [ ] Descripción de la categoría Books (73 caracteres; mejor 120–160).
+- [ ] Cargar las redes del colectivo en Settings (Instagram, YouTube, etc.): hoy no hay ninguna, y son las que la Home publica para que Google y las IAs reconozcan la marca (`sameAs`). También aparecen en Contact y en el pie.
 - [ ] Revisar el SEO sugerido de la Home y de cada página, y reescribirlo con la voz del colectivo si hace falta.
