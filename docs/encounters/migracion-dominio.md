@@ -21,6 +21,9 @@ se borran: quedan como respaldo hasta que el sitio nuevo esté estable. Cada pas
 | Dirección principal | sin `www` (`https://encountersagainandagain.com/`) | Se mantiene: el sitio nuevo también va sin `www` y `www` redirige |
 | WordPress | PHP 8.3, Elementor, indexado, `sitemap_index.xml` | 15 páginas en el sitemap (más 4 plantillas internas de Elementor) |
 | Otro dominio | `encountersagainandagain.org` (el libro) | No se toca |
+| CDN de Hostinger | Activo (`server: hcdn`) | El día del cambio, apagarlo en hPanel (Websites → CDN) para que no siga sirviendo WordPress |
+| Google en el WordPress | Sin etiqueta de Search Console ni Google Analytics ni píxeles (revisado el 2026-11-08) | No hay nada que trasladar; Search Console se verifica por DNS (`TXT`) |
+| WordPress en sí | No se toca | Todo el cambio es en Hostinger (DNS), Vercel y Supabase; el WordPress sigue en el hosting, solo deja de verse por el dominio |
 
 TTL bajos (60–300 s): el cambio se ve en minutos y, si algo sale mal, volver atrás también.
 
