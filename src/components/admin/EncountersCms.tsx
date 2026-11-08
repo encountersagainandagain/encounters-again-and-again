@@ -9,7 +9,7 @@ import {children,commonFields,details,entities,kinds,type Field} from '@/feature
 import {meetLine,safeHref} from '@/features/encounters/presentation';
 import {activityStatus,dateLabel,manualStatuses,perthToday,statusLabels,withSessionDates} from '@/features/encounters/activities';
 import {announceable,announcementShown,signupLink} from '@/features/encounters/announcements';
-import {artCategoryIds,embedFromUrl,embedLabels,embedLink,embedOf} from '@/features/encounters/art';
+import {artCategoryIds,embedFromUrl,embedLabels,embedLink,embedOf,isAudio,presentationLabels,presentations,workPresentation} from '@/features/encounters/art';
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {MediaRemoval} from './MediaRemoval';
 import {modules} from '@/config/modules';
@@ -314,27 +314,57 @@ const pieceKinds:[Piece['kind'],string,string][]=[['title','Title','Large words,
 // or heard without leaving the page, and its size in the grid. Its date is the Publication date; its artists, Artists.
 // Other categories and Vimeo or SoundCloud links need the database update of 2026-10-31 (more_categories): until then
 // they are not offered, and the work keeps its one category.
-function ArtworkEditor({record,detail,options,onRecord,onDetail}:{record:Row;detail:Row;options:Record<string,Row[]>;onRecord:(record:Row)=>void;onDetail:(detail:Row)=>void}){
+function ArtworkEditor({record,detail,options,onRecord,onDetail,ready}:{record:Row;detail:Row;options:Record<string,Row[]>;onRecord:(record:Row)=>void;onDetail:(detail:Row)=>void;ready:boolean}){
   const fields=details.artwork.fields;const categories=options.art_categories||[];const more=Array.isArray(detail.more_categories)?(detail.more_categories as unknown[]).map(String):null;
+  const reload=useContext(ReloadOptions);const {errors}=useContext(FieldErrors);
   const [link,setLink]=useState(()=>embedLink(detail.embed_kind,detail.embed_id));const found=link.trim()?embedFromUrl(link):null;
   const later=(kind:string)=>more===null&&(kind==='vimeo'||kind==='soundcloud');
   const setUrl=(text:string)=>{setLink(text);const e=embedFromUrl(text);const ok=e&&!later(e.kind)?e:null;onDetail({...detail,embed_kind:ok?.kind??null,embed_id:ok?.id??null});};
   const saved=!link&&!!detail.embed_kind&&!embedOf(detail.embed_kind,detail.embed_id);
-  return <Card title="On the Art page" lead="How the work appears on the Art page and on the page of each of its categories: its image, title, categories and date, artists, summary and Read more, which opens the full work below. The date is the one in Publication; the artists are chosen in Artists.">
-    <div className="adm-stack" style={{gap:14}}>
-      <Fields fields={[{...pick(fields,['category_id'])[0],label:'Main category'}]} value={detail} onChange={v=>onDetail({...v,...(more?{more_categories:more.filter(id=>id!==v.category_id)}:{})})} options={options} notes={{category_id:'It gives the work its address, /art/category/work, and is named first on its card.'}}/>
-      {more?<fieldset className="adm-group"><legend>Also in</legend><p className="adm-help">Optional. The work also appears in these categories, with the same card and address.</p><div className="adm-checks">{categories.filter(c=>c.id!==detail.category_id).map(c=>{const id=String(c.id);return <label key={id} className="adm-check"><input type="checkbox" checked={more.includes(id)} onChange={e=>onDetail({...detail,more_categories:e.target.checked?[...more,id]:more.filter(x=>x!==id)})}/><span>{String(c.name)}{c.status!=='published'?' (draft)':''}</span></label>;})}</div></fieldset>
-        :<p className="adm-help">A work in more than one category will be available after the next database update.</p>}
-      <Fields fields={[{key:'excerpt',label:'Summary',type:'textarea'}]} value={record} onChange={onRecord} options={options} notes={{excerpt:'One or two sentences that say what the work is. Shown on its card, beside the artists, and when the work is shared. Longer text is cut after three lines.'}}/>
-      <Fields fields={[{...pick(fields,['media_id'])[0],label:'Image of the card'}]} value={detail} onChange={onDetail} options={options} notes={{media_id:'The work itself: the drawing, the photo, the book cover or a still of the film. Shown on its card on the Art page, in its categories and in New art on Home, and as the banner of its own page unless you choose a Cover below.'}}/>
-      <label className="adm-field adm-field--wide">Video or audio link (optional)<input value={link} placeholder="https://www.youtube.com/watch?v=… or https://open.spotify.com/episode/…" onChange={e=>setUrl(e.target.value)}/>
-        <small className="adm-help">The site does not keep video or audio files: upload them to YouTube or Vimeo (video), or Spotify or SoundCloud (audio), and paste the link here. A video plays inside the image of the card; an audio, under it. Both also play at the top of the work page.</small>
-        {found&&!later(found.kind)&&<small className="adm-help">Recognised: {embedLabels[found.kind]}.</small>}
-        {found&&later(found.kind)&&<small className="adm-help adm-warning">{embedLabels[found.kind]} links will be available after the next database update. Use YouTube or Spotify meanwhile.</small>}
-        {link.trim()&&!found&&<small className="adm-help adm-warning">This link is not recognised. Paste the address of one video or audio on YouTube, Vimeo, Spotify or SoundCloud, as shown in the browser.</small>}
-        {saved&&<small className="adm-help adm-warning">The saved video or audio could not be read. Paste its link again.</small>}</label>
-      <Fields fields={[{...pick(fields,['external_url'])[0],label:'Where to see or get the whole work (optional)'},{...pick(fields,['caption'])[0],label:'Description on the work page (optional)'}]} value={detail} onChange={onDetail} options={options} notes={{external_url:'e.g. the book shop, the full film or the gallery. Shown as “View the work ↗” on the work page.',caption:'Shown beside the summary at the top of the work page.'}}/>
-    </div></Card>;
+  const kind=workPresentation(detail);const extra=Array.isArray(detail.images)?(detail.images as unknown[]).map(String):[];
+  const setExtra=(next:string[])=>onDetail({...detail,images:next});
+  const image=(label:string,note:string)=><Fields fields={[{...pick(fields,['media_id'])[0],label}]} value={detail} onChange={onDetail} options={options} notes={{media_id:note}}/>;
+  // The video or audio link: one field, with what it recognised and what it expects for this kind of work.
+  const wanted=kind==='audio'?'Spotify or SoundCloud':'YouTube or Vimeo';const mismatch=found&&!later(found.kind)&&(kind==='audio')!==isAudio(found.kind);
+  const linkField=<label className={`adm-field adm-field--wide${errors['work-link']?' adm-field--error':''}`} htmlFor="field-work-link">{kind==='audio'?'Audio link':'Video link'} *<input id="field-work-link" value={link} placeholder={kind==='audio'?'https://open.spotify.com/episode/…':'https://www.youtube.com/watch?v=…'} onChange={e=>setUrl(e.target.value)}/>
+    {errors['work-link']&&<strong className="adm-field-error" role="alert">{errors['work-link']}</strong>}
+    <small className="adm-help">The site does not keep {kind==='audio'?'audio':'video'} files: upload it to {wanted} and paste its link, as shown in the browser. Nothing loads from there until a visitor presses play.</small>
+    {found&&!later(found.kind)&&!mismatch&&<small className="adm-help">Recognised: {embedLabels[found.kind]}.</small>}
+    {mismatch&&<small className="adm-help adm-warning">This is {embedLabels[found.kind].toLowerCase()}, but the work is shown as {kind==='audio'?'an audio':'a video'}. Choose {isAudio(found.kind)?'Audio':'Video'} above, or paste a {wanted} link.</small>}
+    {found&&later(found.kind)&&<small className="adm-help adm-warning">{embedLabels[found.kind]} links will be available after the next database update.</small>}
+    {link.trim()&&!found&&<small className="adm-help adm-warning">This link is not recognised. Paste the address of one {kind==='audio'?'audio':'video'} on {wanted}.</small>}
+    {saved&&<small className="adm-help adm-warning">The saved link could not be read. Paste it again.</small>}</label>;
+  // The extra images of a series, or the pages of a book, in order.
+  const list=(label:string,help:string,max:number)=><fieldset className="adm-group adm-work-images"><legend>{label}</legend><p className="adm-help">{help}</p>
+    {extra.map((id,i)=><div key={`${id}-${i}`} className="adm-work-image"><MediaPicker id={`work-image-${i}`} value={id} media={options.media||[]} folder="art" onUploaded={reload} onChange={v=>setExtra(v?extra.map((x,k)=>k===i?v:x):extra.filter((_,k)=>k!==i))}/>
+      <div className="adm-row-actions"><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===0} onClick={()=>{const n=[...extra];[n[i-1],n[i]]=[n[i],n[i-1]];setExtra(n);}} aria-label={`Move image ${i+1} up`}><ArrowUp aria-hidden="true"/></button><button type="button" className="adm-btn adm-btn--quiet adm-btn--small" disabled={i===extra.length-1} onClick={()=>{const n=[...extra];[n[i+1],n[i]]=[n[i],n[i+1]];setExtra(n);}} aria-label={`Move image ${i+1} down`}><ArrowDown aria-hidden="true"/></button></div></div>)}
+    {extra.length<max&&<WorkImageAdd media={options.media||[]} onAdd={id=>setExtra([...extra,id])} onUploaded={reload}/>}</fieldset>;
+  const getLink=(label:string,note:string,button:string)=><div className="adm-fields">
+    <Fields fields={[{...pick(fields,['external_url'])[0],label}]} value={detail} onChange={onDetail} options={options} notes={{external_url:note}}/>
+    {'link_label' in detail||ready?<label className="adm-field" htmlFor="field-link_label">Button text<input id="field-link_label" value={String(detail.link_label||'')} placeholder={button} onChange={e=>onDetail({...detail,link_label:e.target.value})}/><small>Empty: “{button}”.</small></label>:null}</div>;
+  return <>
+    <Card title="On the Art page" lead="How the work appears on the Art page and on the page of each of its categories: its image, title, categories and date, artists, summary and Read more, which opens the work’s own page. The date is the one in Publication; the artists are chosen in Artists.">
+      <div className="adm-stack" style={{gap:14}}>
+        <Fields fields={[{...pick(fields,['category_id'])[0],label:'Main category'}]} value={detail} onChange={v=>onDetail({...v,...(more?{more_categories:more.filter(id=>id!==v.category_id)}:{})})} options={options} notes={{category_id:'It gives the work its address, /art/category/work, and is named first on its card.'}}/>
+        {more?<fieldset className="adm-group"><legend>Also in</legend><p className="adm-help">Optional. The work also appears in these categories, with the same card and address.</p><div className="adm-checks">{categories.filter(c=>c.id!==detail.category_id).map(c=>{const id=String(c.id);return <label key={id} className="adm-check"><input type="checkbox" checked={more.includes(id)} onChange={e=>onDetail({...detail,more_categories:e.target.checked?[...more,id]:more.filter(x=>x!==id)})}/><span>{String(c.name)}{c.status!=='published'?' (draft)':''}</span></label>;})}</div></fieldset>
+          :<p className="adm-help">A work in more than one category will be available after the next database update.</p>}
+        <Fields fields={[{key:'excerpt',label:'Summary',type:'textarea'}]} value={record} onChange={onRecord} options={options} notes={{excerpt:'One or two sentences that say what the work is. Shown on its card, beside the artists, and when the work is shared. Longer text is cut after three lines.'}}/>
+        <Fields fields={[{...pick(fields,['caption'])[0],label:'Description on the work page (optional)'}]} value={detail} onChange={onDetail} options={options} notes={{caption:'Shown beside the summary, under the work, on its own page.'}}/>
+      </div></Card>
+    <Card title="The work" lead="The work itself, as visitors see it on its own page, right under the banner. Choose what kind of work it is: the form asks only for what that kind needs. Its image is also the one on its card.">
+      <div className="adm-stack" style={{gap:14}}>
+        {ready?<fieldset className="adm-field adm-field--wide adm-work-kinds"><legend>How is this work shown?</legend><div>{presentations.map(p=><label key={p}><input type="radio" name="work-kind" value={p} checked={kind===p} onChange={()=>onDetail({...detail,presentation:p})}/><strong>{presentationLabels[p].label}</strong><small>{presentationLabels[p].hint}</small></label>)}</div></fieldset>
+          :<p className="adm-help">Choosing how the work is shown (image, series, video, audio or book) arrives with the next database update. Until then a work with a video or audio link shows it, and the others show their image.</p>}
+        {kind==='image'&&<>{image('The image *','The drawing, painting, illustration or photo, shown whole on its page (never cropped), on its card, in its categories and in New art on Home. Visitors can open it full screen and zoom in. Upload it as large and sharp as you have it.')}{getLink('Where to see or get it (optional)','e.g. the gallery, the shop or the print. Shown as a button under the summary.','View the work')}</>}
+        {kind==='series'&&<>{image('First image *','The first of the series: shown large on its page and on its card.')}{list('More images of the series','In order. On its page they appear as small images under the first one; each opens full screen.',12)}{getLink('Where to see or get it (optional)','e.g. the exhibition or the shop.','View the work')}</>}
+        {kind==='video'&&<>{linkField}{image('Image before play','Shown before the video plays, on its page and on its card. Empty: on YouTube, its own thumbnail.')}{getLink('Where to watch it whole (optional)','e.g. the full film on a festival site.','View the work')}</>}
+        {kind==='audio'&&<>{linkField}{image('Square image *','Shown beside the player on its page, and on its card. A square image works best, like a podcast cover.')}{getLink('Where to listen to it whole (optional)','e.g. the show on Spotify or the album page.','View the work')}</>}
+        {kind==='book'&&<>{image('Cover of the book *','Shown as the book itself on its page, and on its card. The front cover, upright.')}{list('Pages inside (optional)','A few spreads or pages, in order. Shown as small images beside the cover; each opens full screen.',8)}{getLink('Where to get it *','The shop, the publisher or a page to order it. Shown as a button beside the cover.','Get the book')}</>}
+      </div></Card></>;
+}
+// Adds an image to a series or a book: chosen from the library or uploaded, like any image field.
+function WorkImageAdd({media,onAdd,onUploaded}:{media:Row[];onAdd:(id:string)=>void;onUploaded:()=>void}){
+  return <div className="adm-work-add"><span className="adm-help">Add an image</span><MediaPicker id="work-image-new" value={null} media={media} folder="art" onUploaded={onUploaded} onChange={id=>{if(id)onAdd(id);}}/></div>;
 }
 function MessageEditor({detail,pieces,options,onDetail,onPieces}:{detail:Row;pieces:Piece[];options:Record<string,Row[]>;onDetail:(detail:Row)=>void;onPieces:(pieces:Piece[])=>void}){
   const edit=(n:number,p:Partial<Piece>)=>onPieces(pieces.map((x,k)=>k===n?{...x,...p}:x));
@@ -462,6 +492,9 @@ export function EncountersCms(){
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [embedReady,setEmbedReady]=useState(false);const [preview,setPreview]=useState(false);
   // The Video or audio block needs the database update of 2026-10-31; it is offered once the database has it.
   useEffect(()=>{let live=true;void supabase?.from('artworks').select('more_categories').limit(1).then(r=>{if(live)setEmbedReady(!r.error);});return()=>{live=false;};},[]);
+  // How a work is shown (image, series, video, audio, book) needs the database update of 2026-11-08.
+  const [workReady,setWorkReady]=useState(false);
+  useEffect(()=>{let live=true;void supabase?.from('artworks').select('presentation').limit(1).then(r=>{if(live)setWorkReady(!r.error);});return()=>{live=false;};},[]);
   // An announcement's last day and sign-up button need the database update of 2026-10-31 (second one).
   const [announceReady,setAnnounceReady]=useState(false);const [announceAsk,setAnnounceAsk]=useState(false);
   useEffect(()=>{let live=true;void supabase?.from('upcoming_items').select('cta_url').limit(1).then(r=>{if(live)setAnnounceReady(!r.error);});return()=>{live=false;};},[]);
@@ -535,6 +568,11 @@ export function EncountersCms(){
       else if(f.key==='slug'&&slugProblem(v))found[prefix+f.key]=slugProblem(v);
       else if(fieldProblem(f.key,v,value))found[prefix+f.key]=fieldProblem(f.key,v,value);
       else if(f.reference&&f.reference!=='media'&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
+    // A work being published needs what its kind shows: the link of its video or audio, its image, and for a book where to get it.
+    if(table==='posts'&&kind==='artwork'&&workReady&&current.status==='published'){const k=workPresentation(specific);const e=embedOf(specific.embed_kind,specific.embed_id);
+      if((k==='video'||k==='audio')&&(!e||isAudio(e.kind)!==(k==='audio')))found['work-link']=`Paste the link of the ${k}, on ${k==='audio'?'Spotify or SoundCloud':'YouTube or Vimeo'}.`;
+      if(k!=='video'&&!specific.media_id)found.media_id=k==='book'?'Choose the cover of the book.':'Choose the image of the work.';
+      if(k==='book'&&!safeHref(specific.external_url))found.external_url='Add where to get the book.';}
     if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
     else check(entities[table].fields,current);
     if(table==='upcoming_items'&&!current.post_id&&!String(current.title||'').trim())found.title='Choose what it announces, or write a title for the card.';
@@ -542,7 +580,7 @@ export function EncountersCms(){
   }
   // Where a problem is, in the words of the form: card, then field. Fields are looked up by their key; a session or a
   // need adds its number.
-  function fieldLabel(key:string){const all=table==='posts'?[...commonFields,...(details[kind]?.fields||[])]:entities[table]?.fields||[];return all.find(f=>f.key===key)?.label||key;}
+  function fieldLabel(key:string){if(key==='work-link')return `The work › ${workPresentation(specific)==='audio'?'Audio':'Video'} link`;if(kind==='artwork'&&(key==='media_id'||key==='external_url'))return `The work › ${key==='media_id'?(workPresentation(specific)==='book'?'Cover of the book':'Image'):'Where to get it'}`;const all=table==='posts'?[...commonFields,...(details[kind]?.fields||[])]:entities[table]?.fields||[];return all.find(f=>f.key===key)?.label||key;}
   function problemPlace(key:string){
     const child=key.match(/^child-(\d+)-(.+)$/);
     if(child){const group=children[kind];return [group?.label,`${kind==='workshop'?'Session':'Need'} ${Number(child[1])+1}`,group?.fields.find(f=>f.key===child[2])?.label||child[2]].join(' › ');}
@@ -567,7 +605,7 @@ export function EncountersCms(){
         if(typeof current.cover_image==='string')payload.cover_image=current.cover_image;
         if(kind==='crew_member'&&Array.isArray(current.tags))payload.tags=(current.tags as unknown[]).map(t=>String(t).trim()).filter(Boolean);
         if(!current.updated_at){payload.status=current.status||'draft';}
-        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{}),...(kind==='artwork'&&Array.isArray(specific.more_categories)?{more_categories:specific.more_categories}:{})}:null;
+        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{}),...(kind==='artwork'&&Array.isArray(specific.more_categories)?{more_categories:specific.more_categories}:{}),...(kind==='artwork'&&workReady?{presentation:workPresentation(specific),images:Array.isArray(specific.images)?specific.images:[],link_label:String(specific.link_label||'').trim()||null}:{})}:null;
         const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map((related_post_id,sort)=>({related_post_id,sort,relation:['expedition','workshop'].includes(kind)?'result':'related',...(relatedNotes?{note:relatedNotes[related_post_id]||''}:{})})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
       }else if(table==='media'){
         // save_entity inserts before resolving the conflict, so it cannot update media rows (storage path and hash are required). Media keeps its file and only updates the editable fields.
@@ -755,7 +793,7 @@ export function EncountersCms(){
       :isCrewPage?<CrewPageSeo record={record} onChange={setRecord} cover={crewCover}/>
       :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
         <Fields fields={pick(commonFields,isMessage?['title']:kind==='artwork'?postGroups.general.filter(k=>k!=='excerpt'&&k!=='subtitle'):postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
-      {kind==='artwork'&&<ArtworkEditor key={String(record.id)} record={record} detail={specific} options={options} onRecord={setRecord} onDetail={setSpecific}/>}
+      {kind==='artwork'&&<ArtworkEditor key={String(record.id)} record={record} detail={specific} options={options} onRecord={setRecord} onDetail={setSpecific} ready={workReady}/>}
       {isMessage?<MessageEditor detail={specific} pieces={pieces} options={options} onDetail={setSpecific} onPieces={setPieces}/>:kind==='workshop'&&!blocks.length?null:<Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':kind==='artwork'?'The full story':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':kind==='artwork'?'What opens with Read more: the page of the work, under its title, summary and video or audio. Tell how it was made and show it, block by block: text, images, a carousel, a quote, a YouTube video, or a video or audio from another service.':kind==='workshop'?'This workshop already has these blocks, and they show on its own page under the invitation. You can edit or remove them, but not add more: a workshop is told through its Sessions, and what happened afterwards goes in its story in Results.':isActivity?`The rest of the story on this expedition’s own page, block by block, under the invitation. They do not appear on the Expeditions list.`:'The page is built from these blocks, in this order.'}>
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{profileKinds.find(k=>k.layout===profileLayout(b))?.label||blockLabel(b.type)}</span><div className="adm-block-tools">

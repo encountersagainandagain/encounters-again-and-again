@@ -397,3 +397,13 @@ html.adm-menu-open{overflow:hidden}
   .adm-preview-open,.adm-page-preview.is-open .adm-preview-close{display:inline-flex}
 }
 @media(max-width:860px){.adm-jump{top:56px}}
+/* The work: what kind of work it is, as cards to choose from, and the images of a series or the pages of a book. */
+.adm-work-kinds>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px}
+.adm-work-kinds label{position:relative;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--adm-line);border-radius:10px;background:#fff;cursor:pointer}
+.adm-work-kinds label strong{font-size:14px}.adm-work-kinds label small{font-size:12px;line-height:1.45;color:var(--adm-muted,#4b6170)}
+.adm-work-kinds label:has(input:checked){border-color:var(--adm-sea);box-shadow:0 0 0 2px rgba(27,93,116,.25);background:var(--adm-tint)}
+.adm-work-kinds label:has(input:focus-visible){outline:2px solid var(--adm-sea);outline-offset:2px}
+.adm-work-kinds input{position:absolute;opacity:0;pointer-events:none}
+.adm-work-images{display:flex;flex-direction:column;gap:12px}
+.adm-work-image{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--adm-line);border-radius:10px}
+.adm-work-add{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px dashed var(--adm-line);border-radius:10px}

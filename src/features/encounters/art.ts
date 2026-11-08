@@ -61,3 +61,26 @@ export const audioHeight=(kind:unknown,id:unknown)=>kind==='soundcloud'?166:/^(a
 export function workDate(value:unknown){
   const d=new Date(string(value));return isNaN(d.getTime())?'':d.toLocaleDateString('en-AU',{month:'long',year:'numeric',timeZone:'Australia/Perth'});
 }
+
+// How a work is shown on its page. Chosen in the admin (artworks.presentation); empty, it is deduced from what the work
+// has, so works saved before keep showing what they had: their video, their audio, or else their image.
+export const presentations=['image','series','video','audio','book'] as const;
+export type Presentation=(typeof presentations)[number];
+export const presentationLabels:Record<Presentation,{label:string;hint:string}>={
+  image:{label:'Image',hint:'A drawing, a painting, an illustration or a photo, shown whole. Visitors can open it full screen and zoom in.'},
+  series:{label:'Series of images',hint:'Several drawings or photos that make one work. The first is shown large, the others below; each opens full screen.'},
+  video:{label:'Video',hint:'A film or a video on YouTube or Vimeo, played large on the page.'},
+  audio:{label:'Audio',hint:'A podcast, a recording or music on Spotify or SoundCloud, played beside its image.'},
+  book:{label:'Book',hint:'A book or publication: its cover, a few pages inside, and a button to get it.'},
+};
+export function workPresentation(art:Row|null|undefined):Presentation{
+  const chosen=string(art?.presentation) as Presentation;if(presentations.includes(chosen))return chosen;
+  const e=embedOf(art?.embed_kind,art?.embed_id);return e?(isAudio(e.kind)?'audio':'video'):'image';
+}
+// The images of a work in order: its main image, then the extra ones of a series or the pages of a book.
+export function workImages(art:Row|null|undefined):string[]{
+  const extra=Array.isArray(art?.images)?(art!.images as unknown[]).map(String):[];
+  return [...new Set([string(art?.media_id),...extra].filter(Boolean))];
+}
+// The button to see or get the whole work: its own text, or the usual one for its kind.
+export const workLinkLabel=(art:Row|null|undefined)=>string(art?.link_label).trim()||(workPresentation(art)==='book'?'Get the book':'View the work');

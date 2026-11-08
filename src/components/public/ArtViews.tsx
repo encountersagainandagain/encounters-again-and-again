@@ -7,7 +7,8 @@ import {MediaImage} from './MediaImage';
 import {Breadcrumbs,DarkClosing,EmptyState,PhotoHero,Scribble} from './EditorialPieces';
 import {MediaEmbed,VideoFrame} from './EditorialInteractive';
 import {PostBlocks} from './PostBlocks';
-import {artCategoryIds,embedOf,inCategory,isAudio,workDate} from '@/features/encounters/art';
+import {artCategoryIds,embedOf,inCategory,isAudio,workDate,workImages,workLinkLabel,workPresentation} from '@/features/encounters/art';
+import {ArtStage} from './ArtStage';
 import type {SignatureChoice} from '@/features/encounters/signatures';
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
@@ -32,7 +33,8 @@ export function ArtworkCards({posts,data,layout='gallery',pathPrefix='',summary=
   const artOf=(post:ContentRow)=>data.artworks.find(a=>a.id===post.id)||{};const shown=posts.filter(p=>artworkPath(p,data.artworks,data.categories));
   const card=(post:ContentRow,i:number)=>{const art=artOf(post);const path=artworkPath(post,data.artworks,data.categories);if(!path)return null;const href=pathPrefix+path;const image=art.media_id||post.cover_id;
     const span=layout==='gallery'?gallerySpan(i,shown.length):layout==='feature'||layout==='more'?3:6;const tall=layout==='feature'||layout==='video';
-    const play=embedOf(art.embed_kind,art.embed_id);const video=play&&!isAudio(play.kind)&&(summary||layout==='video')?play:null;const audio=play&&isAudio(play.kind)&&(summary||layout==='audio')?play:null;
+    // The card plays the video or audio only of a work shown as one (a work shown as an image keeps a saved link quiet).
+    const kindOf=workPresentation(art);const play=kindOf==='video'||kindOf==='audio'?embedOf(art.embed_kind,art.embed_id):null;const video=play&&!isAudio(play.kind)&&(summary||layout==='video')?play:null;const audio=play&&isAudio(play.kind)&&(summary||layout==='audio')?play:null;
     const frame=video?<VideoFrame kind={video.kind} id={video.id} title={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt||(data.media.find(m=>m.id===image)?.alt as string)||post.title}/>:null}</VideoFrame>:<Link href={href} className="art-frame-link" aria-label={post.title}>{image?<MediaImage id={image} media={data.media} alt={post.cover_alt} contain={layout==='feature'}/>:<span className="art-frame-empty">{post.title}</span>}</Link>;
     return <figure key={post.id} className={`art-work${tall?' art-work--tall':''}`} style={{gridColumn:`span ${span}`}} data-seq={`${i%2?.86:1},0.45`}>
       <div className="art-frame">{frame}</div>
@@ -72,13 +74,16 @@ export function ArtHero({title,kicker,children}:{title:string;kicker:string;chil
 // Single work: banner, credits, text, embed and blocks; the CMS preview passes unsaved values.
 export function ArtworkView({post,art,category,number,people,blocks,media,pathPrefix='',trail,related=[],more,signature='loop'}:{signature?:SignatureChoice;post:Row;art:Row;category:Row|null;number:string;people:Person[];blocks:ContentBlock[];media:Row[];pathPrefix?:string;trail?:ReactNode;related?:{title:string;href:string}[];more?:ReactNode}){
   const title=string(post.title)||'Untitled work';
-  return <><PhotoHero title={title} kicker={string(post.kicker)||string(category?.name)} meta={string(post.meta_line)} cover={post.cover_id||art.media_id} media={media}/>
+  const presentation=workPresentation(art);const images=workImages(art).filter(id=>media.some(m=>m.id===id));const embed=embedOf(art.embed_kind,art.embed_id);const href=safeHref(art.external_url);
+  // The banner shows a photo only when the work has its own Cover; otherwise the title stands on the page and the work
+  // is shown whole just below, never cropped under the title.
+  return <>{post.cover_id?<PhotoHero title={title} kicker={string(post.kicker)||string(category?.name)} meta={string(post.meta_line)} cover={post.cover_id} media={media}/>:<ArtHero title={title} kicker={string(post.kicker)||string(category?.name)}>{string(post.meta_line)?<p className="art-hero-meta">{string(post.meta_line)}</p>:null}</ArtHero>}
     <div id="editorial-content">{trail}
+      <ArtStage presentation={presentation} images={images} media={media} title={title} video={embed&&!isAudio(embed.kind)?embed:null} audio={embed&&isAudio(embed.kind)?embed:null} link={presentation==='book'&&href?{href,label:workLinkLabel(art)}:null}/>
       <section className="art-section art-work-intro"><div className="art-row">
         <div className="art-intro-title" data-seq="1.2,0.5">{category?<span className="art-kicker"><small>{number}</small>{category.slug?<Link href={`${pathPrefix}/art/${category.slug}`}>{string(category.name)}</Link>:string(category.name)}</span>:null}<h2>{title}</h2><PeopleLine people={people}/></div>
-        {(post.excerpt||art.caption||safeHref(art.external_url))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{safeHref(art.external_url)?<a className="art-cta" href={safeHref(art.external_url)}>View the work ↗</a>:null}</div>:null}
+        {(post.excerpt||art.caption||(href&&presentation!=='book'))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{href&&presentation!=='book'?<a className="art-cta" href={href}>{workLinkLabel(art)} ↗</a>:null}</div>:null}
       </div></section>
-      {embedOf(art.embed_kind,art.embed_id)&&!isAudio(art.embed_kind)?<div className="art-section art-embed"><div className="art-frame art-work--tall"><VideoFrame kind={art.embed_kind} id={art.embed_id} title={title}>{art.media_id?<MediaImage id={art.media_id} media={media} alt=""/>:null}</VideoFrame></div></div>:<MediaEmbed kind={art.embed_kind} id={art.embed_id} audioHeight/>}
       {blocks.length>0&&<PostBlocks blocks={blocks} media={media} showIndex={!!post.show_index}/>}
       {related.length>0&&<section className="editorial-related"><h2>Related encounters</h2>{related.map(r=><Link key={r.href} href={r.href}>{r.title} →</Link>)}</section>}
       {more}

@@ -21,3 +21,15 @@ assert.equal(inCategory({category_id:'a',more_categories:['b']},'b'),true);asser
 assert.equal(workDate('2026-10-22T10:00:00Z'),'October 2026');assert.equal(workDate(''),'');
 assert.equal(artSeoOf({}).title,artSeo.title);assert.deepEqual(artSeoOf({seo_title:'X',seo_topics:['a','','b']}),{title:'X',description:artSeo.description,topics:['a','b']});
 fs.rmSync(tmp,{recursive:true});console.log('art: ok');
+{
+  const {workPresentation,workImages,workLinkLabel}=await import(pathToFileURL(path.join(tmp,'art.ts')).href);
+  assert.equal(workPresentation({}),'image','no video or audio: an image');
+  assert.equal(workPresentation({embed_kind:'youtube',embed_id:'dQw4w9WgXcQ'}),'video');
+  assert.equal(workPresentation({embed_kind:'spotify',embed_id:'episode/4rOoJ6Egrf8K2IrywzwOMk'}),'audio');
+  assert.equal(workPresentation({presentation:'book',embed_kind:'youtube',embed_id:'dQw4w9WgXcQ'}),'book','a choice wins over what is deduced');
+  assert.equal(workPresentation({presentation:'nonsense'}),'image');
+  assert.deepEqual(workImages({media_id:'a',images:['b','a','c']}),['a','b','c'],'main first, no repeats');
+  assert.deepEqual(workImages({images:['b']}),['b']);
+  assert.equal(workLinkLabel({presentation:'book'}),'Get the book');assert.equal(workLinkLabel({}),'View the work');assert.equal(workLinkLabel({link_label:' Listen '}),'Listen');
+  console.log('art presentation: ok');
+}

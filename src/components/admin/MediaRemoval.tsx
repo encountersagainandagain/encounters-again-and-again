@@ -25,7 +25,7 @@ export async function mediaUses(id:string):Promise<Use[]>{
   if(!supabase)return [];const c=supabase;
   const q=(table:string,cols:string)=>c.from(table).select(cols).limit(5000);
   const [posts,blocks,postMedia,artworks,messages,expeditions,sessions,cards,upcoming,crew,categories,settings]=await Promise.all([
-    q('posts','id,kind,title,source_role,cover_id'),q('post_blocks','post_id,content'),q('post_media','post_id,media_id'),q('artworks','id,media_id'),q('messages','id,illustration_id'),
+    q('posts','id,kind,title,source_role,cover_id'),q('post_blocks','post_id,content'),q('post_media','post_id,media_id'),q('artworks','*'),q('messages','id,illustration_id'),
     q('expeditions','id,underwater_id'),q('workshop_sessions','id,workshop_id,title,media_id'),q('expedition_cards','id,title,media_id'),q('upcoming_items','id,title,post_id,media_id'),
     q('crew_members','id,name,portrait_id'),q('art_categories','id,name,cover_id'),q('site_settings','key,value')]);
   const failed=[posts,blocks,postMedia,artworks,messages,expeditions,sessions,cards,upcoming,crew,categories,settings].find(r=>r.error);if(failed?.error)throw failed.error;
@@ -35,6 +35,7 @@ export async function mediaUses(id:string):Promise<Use[]>{
   rows(blocks).filter(b=>JSON.stringify(b.content||{}).includes(id)).forEach(b=>{const p=post(b.post_id);if(p)add(`A block of ${postName(p)}`,postHref(p));});
   rows(postMedia).filter(m=>m.media_id===id).forEach(m=>{const p=post(m.post_id);if(p)add(`Gallery of ${postName(p)}`,postHref(p));});
   rows(artworks).filter(a=>a.media_id===id).forEach(a=>{const p=post(a.id);if(p)add(`Image of ${postName(p)}`,postHref(p));});
+  rows(artworks).filter(a=>Array.isArray(a.images)&&(a.images as unknown[]).includes(id)).forEach(a=>{const p=post(a.id);if(p)add(`${a.presentation==='book'?'A page of':'An image of the series of'} ${postName(p)}`,postHref(p));});
   rows(messages).filter(m=>m.illustration_id===id).forEach(m=>{const p=post(m.id);if(p)add(`Illustration of ${postName(p)}`,postHref(p));});
   rows(expeditions).filter(e=>e.underwater_id===id).forEach(e=>{const p=post(e.id);if(p)add(`Underwater image of ${postName(p)}`,postHref(p));});
   rows(sessions).filter(s=>s.media_id===id).forEach(s=>{const p=post(s.workshop_id);if(p)add(`Session “${text(s.title)}” of ${postName(p)}`,postHref(p));});
