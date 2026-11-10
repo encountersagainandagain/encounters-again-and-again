@@ -36,6 +36,7 @@ export async function mediaUses(id:string):Promise<Use[]>{
   rows(postMedia).filter(m=>m.media_id===id).forEach(m=>{const p=post(m.post_id);if(p)add(`Gallery of ${postName(p)}`,postHref(p));});
   rows(artworks).filter(a=>a.media_id===id).forEach(a=>{const p=post(a.id);if(p)add(`Image of ${postName(p)}`,postHref(p));});
   rows(artworks).filter(a=>Array.isArray(a.images)&&(a.images as unknown[]).includes(id)).forEach(a=>{const p=post(a.id);if(p)add(`${a.presentation==='book'?'A page of':'An image of the series of'} ${postName(p)}`,postHref(p));});
+  rows(artworks).filter(a=>JSON.stringify(a.downloads||[]).includes(id)).forEach(a=>{const p=post(a.id);if(p)add(`A free download of ${postName(p)}`,postHref(p));});
   rows(messages).filter(m=>m.illustration_id===id).forEach(m=>{const p=post(m.id);if(p)add(`Illustration of ${postName(p)}`,postHref(p));});
   rows(expeditions).filter(e=>e.underwater_id===id).forEach(e=>{const p=post(e.id);if(p)add(`Underwater image of ${postName(p)}`,postHref(p));});
   rows(sessions).filter(s=>s.media_id===id).forEach(s=>{const p=post(s.workshop_id);if(p)add(`Session “${text(s.title)}” of ${postName(p)}`,postHref(p));});

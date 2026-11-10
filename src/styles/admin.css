@@ -415,3 +415,13 @@ html.adm-menu-open{overflow:hidden}
 
 /* The last change of a record, in the editor's toolbar (Activity). */
 .adm-last-edit{font-size:12px;color:var(--adm-muted,#4b6170)}
+
+/* Files to download (PDF, EPUB): their fields, and how they look in the Media library. */
+.adm-downloads{display:flex;flex-direction:column;gap:10px}
+.adm-download{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:end;padding:10px;border:1px solid var(--adm-line);border-radius:10px}
+.adm-download-file{display:flex;gap:10px;align-items:center}.adm-download-file svg{width:28px;height:28px;color:var(--adm-sea);flex:none}
+.adm-download-file span{display:flex;flex-direction:column}.adm-download-file small{font-size:12px;color:var(--adm-muted,#4b6170)}
+.adm-download-add{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.adm-download-add select{min-height:36px;max-width:100%}
+.adm-doc-thumb{display:grid;place-items:center;gap:6px;aspect-ratio:4/3;background:var(--adm-tint);border-radius:8px;color:var(--adm-sea);font-size:12px;font-weight:600}.adm-doc-thumb svg{width:40px;height:40px}
+.adm-doc-large{display:flex;gap:16px;align-items:center}.adm-doc-large svg{width:48px;height:48px;color:var(--adm-sea);flex:none}.adm-doc-large span{display:flex;flex-direction:column;gap:4px}
+@media (max-width:760px){.adm-download{grid-template-columns:minmax(0,1fr)}}

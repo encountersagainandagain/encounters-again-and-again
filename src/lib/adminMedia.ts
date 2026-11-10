@@ -323,3 +323,28 @@ export async function uploadMedia(
   if(saved.error)throw saved.error;
   return {id,reused:false};
 }
+
+// A file to download (PDF or EPUB): kept as uploaded, up to 50 MB, deduplicated like images. Its title is the file
+// name, so it can be found in the Media library.
+const MAX_DOCUMENT_SIZE = 50 * 1024 * 1024;
+export async function uploadDocumentFile(file: File, folder = 'art') {
+  const client = requireSupabase();
+  const { documentMime } = await import('@/features/encounters/downloads');
+  const type = documentMime(file.name, file.type);
+  if (!type) throw new Error('Only PDF or EPUB files can be uploaded here.');
+  if (file.size > MAX_DOCUMENT_SIZE) throw new Error('This file is larger than 50 MB. Export a lighter version (for example with smaller images) and try again.');
+  const safeFolder = ['crew','expeditions','workshops','art','posts','settings'].includes(folder) ? folder : 'art';
+  const sha256 = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))).map(x => x.toString(16).padStart(2, '0')).join('');
+  const existing = await client.from('media').select('id').eq('sha256', sha256).maybeSingle();
+  if (existing.error) throw existing.error;
+  if (existing.data) return String(existing.data.id);
+  const id = crypto.randomUUID();
+  const name = sanitizeFileName(file.name, type === 'application/pdf' ? 'pdf' : 'epub');
+  const filePath = `${safeFolder}/${sha256}-${name}`;
+  const { error } = await client.storage.from(MEDIA_BUCKET).upload(filePath, file, { cacheControl: LONG_LIVED_CACHE_SECONDS, upsert: false, contentType: type });
+  if (error) throw error;
+  const title = file.name.replace(/\.[^/.]+$/, '').slice(0, 120);
+  const saved = await client.from('media').insert({ id, storage_path: filePath, sha256, mime_type: type, bytes: file.size, alt: '', title });
+  if (saved.error) throw saved.error;
+  return id;
+}

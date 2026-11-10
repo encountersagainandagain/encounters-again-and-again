@@ -2,14 +2,14 @@
 import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
-import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,Info,LinkIcon,Plus,Trash2,Upload} from 'lucide-react';
+import {ArrowDown,ArrowLeft,ArrowUp,Copy,ExternalLink,Eye,EyeOff,FileText,Info,LinkIcon,Plus,Trash2,Upload} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 import {uploadMediaFile} from '@/lib/adminMedia';
 import {children,commonFields,details,entities,kinds,type Field} from '@/features/encounters/cms-fields';
 import {meetLine,safeHref} from '@/features/encounters/presentation';
 import {activityStatus,dateLabel,manualStatuses,perthToday,statusLabels,withSessionDates} from '@/features/encounters/activities';
 import {announceable,announcementShown,signupLink} from '@/features/encounters/announcements';
-import {artCategoryIds,embedFromUrl,embedLabels,embedLink,embedOf,isAudio,presentationLabels,presentations,workPresentation} from '@/features/encounters/art';
+import {artCategoryIds,audioLink,embedFromUrl,embedLabels,embedLink,embedOf,isAudio,presentationLabels,presentations,workPresentation} from '@/features/encounters/art';
 import {isMessageText,messageBlock,messageColumns,messagePieces,plainText,type Piece} from '@/features/encounters/message-text';
 import {MediaRemoval} from './MediaRemoval';
 import {modules} from '@/config/modules';
@@ -20,6 +20,8 @@ import {AdminHeader,AdminThumb,ExampleBadge,StatusBadge} from './AdminShell';
 import {hasProfileBlocks,imagesOf,maxPhotos,paragraphStyles,profileKinds,profileLayout,profileParagraphs,toCrewProfileBlocks,toProfileBlocks,type Paragraph} from '@/features/encounters/profile-sections';
 import {categoryHelp,crewPageCredit,kindListLabels,blockLabel,creditLabels,defaultCredit,entitySide,help,kindHelp,kindLabel,newKinds,optionText,postGroups,singular,tableLabel} from './adminLabels';
 import {LastEdit} from './AdminActivity';
+import {DownloadFiles} from './DownloadFiles';
+import {isDocument,isImage,sizeLabel} from '@/features/encounters/downloads';
 type Row=Record<string,unknown>;
 type Block={id?:string;type:string;position:number;content:Row;source_block_id?:string;anchor?:string};
 const tables=['posts',...Object.keys(entities)];
@@ -109,7 +111,7 @@ function Fields({fields,value,onChange:change,options,notes=help,prefix=''}:{fie
   })}</div>;
 }
 // Blocks of the Post template (handoff 04-editor-de-bloques.md). Keys match what the public renderer reads.
-const postBlockTypes=['paragraph','heading','image','image-pair','carousel','youtube','embed','quote','list','quick_facts','costs','faq','accordion','link','divider','toc'];
+const postBlockTypes=['paragraph','heading','image','image-pair','carousel','youtube','embed','quote','list','quick_facts','costs','faq','accordion','link','download','divider','toc'];
 const blockRows:Record<string,{key:string;label:string;columns:[string,string,boolean?][];max:number;add:string}>={
   quick_facts:{key:'quickFactItems',label:'Facts',columns:[['label','Label'],['value','Value']],max:4,add:'Add fact'},
   costs:{key:'costItems',label:'Rows',columns:[['label','Concept'],['note','Detail'],['amount','Amount']],max:20,add:'Add row'},
@@ -131,7 +133,7 @@ const blockText:Record<string,[string,string,(boolean|string)?,string?][]>={
 function BlockImages({block,index,max,media,onChange}:{block:{content:Row};index:number;max:number;media:Row[];onChange:(content:Row)=>void}){
   const c=block.content;const list:Row[]=Array.isArray(c.images)?(c.images as Row[]):c.media_id||c.src?[{media_id:c.media_id||String(c.src||'').split('/').pop(),caption:c.caption,alt:c.alt}]:[];
   const save=(images:Row[])=>onChange({...c,media_id:undefined,src:undefined,caption:max===1?images[0]?.caption:undefined,alt:max===1?images[0]?.alt:undefined,images:images.map(img=>({...img,src:img.media_id?`/api/media/${img.media_id}`:undefined}))});
-  return <div className="adm-stack" style={{gap:10}}>{list.map((img,n)=><div key={n} className="adm-block-image"><AdminThumb id={img.media_id} size="100%"/><div className="adm-stack" style={{gap:8}}><label className="adm-field">Image {max>1?n+1:''}<select aria-label={`Block ${index+1} image ${n+1}`} value={String(img.media_id||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,media_id:e.target.value||null}:x))}><option value="">Choose image</option>{media.map(m=><option key={String(m.id)} value={String(m.id)}>{String(m.title||m.alt||m.id)}</option>)}</select></label>
+  return <div className="adm-stack" style={{gap:10}}>{list.map((img,n)=><div key={n} className="adm-block-image"><AdminThumb id={img.media_id} size="100%"/><div className="adm-stack" style={{gap:8}}><label className="adm-field">Image {max>1?n+1:''}<select aria-label={`Block ${index+1} image ${n+1}`} value={String(img.media_id||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,media_id:e.target.value||null}:x))}><option value="">Choose image</option>{media.filter(m=>isImage(m.mime_type)).map(m=><option key={String(m.id)} value={String(m.id)}>{String(m.title||m.alt||m.id)}</option>)}</select></label>
     <label className="adm-field">Caption<input value={String(img.caption||'')} onChange={e=>save(list.map((x,k)=>k===n?{...x,caption:e.target.value}:x))}/></label><label className="adm-field">Image description<input value={String(img.alt||'')} placeholder={libraryAlt(media,img.media_id)} onChange={e=>save(list.map((x,k)=>k===n?{...x,alt:e.target.value}:x))}/><small>For people who cannot see it. Empty: the description of the library is used.</small></label>
     {max>1&&<button type="button" className="adm-btn adm-btn--quiet adm-btn--small" onClick={()=>save(list.filter((_,k)=>k!==n))}>Remove image</button>}</div></div>)}
     {list.length<max&&<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>save([...list,{media_id:null,caption:''}])}><Plus aria-hidden="true"/>Add image</button>}</div>;
@@ -315,7 +317,7 @@ const pieceKinds:[Piece['kind'],string,string][]=[['title','Title','Large words,
 // or heard without leaving the page, and its size in the grid. Its date is the Publication date; its artists, Artists.
 // Other categories and Vimeo or SoundCloud links need the database update of 2026-10-31 (more_categories): until then
 // they are not offered, and the work keeps its one category.
-function ArtworkEditor({record,detail,options,onRecord,onDetail,ready}:{record:Row;detail:Row;options:Record<string,Row[]>;onRecord:(record:Row)=>void;onDetail:(detail:Row)=>void;ready:boolean}){
+function ArtworkEditor({record,detail,options,onRecord,onDetail,ready,downloadsReady}:{record:Row;detail:Row;options:Record<string,Row[]>;onRecord:(record:Row)=>void;onDetail:(detail:Row)=>void;ready:boolean;downloadsReady:boolean}){
   const fields=details.artwork.fields;const categories=options.art_categories||[];const more=Array.isArray(detail.more_categories)?(detail.more_categories as unknown[]).map(String):null;
   const reload=useContext(ReloadOptions);const {errors}=useContext(FieldErrors);
   const [link,setLink]=useState(()=>embedLink(detail.embed_kind,detail.embed_id));const found=link.trim()?embedFromUrl(link):null;
@@ -326,7 +328,7 @@ function ArtworkEditor({record,detail,options,onRecord,onDetail,ready}:{record:R
   const setExtra=(next:string[])=>onDetail({...detail,images:next});
   const image=(label:string,note:string)=><Fields fields={[{...pick(fields,['media_id'])[0],label}]} value={detail} onChange={onDetail} options={options} notes={{media_id:note}}/>;
   // The video or audio link: one field, with what it recognised and what it expects for this kind of work.
-  const wanted=kind==='audio'?'Spotify or SoundCloud':'YouTube or Vimeo';const mismatch=found&&!later(found.kind)&&(kind==='audio')!==isAudio(found.kind);
+  const wanted=kind==='audio'?'Spotify, SoundCloud or YouTube':'YouTube or Vimeo';const mismatch=found&&!later(found.kind)&&(kind==='audio'?!audioLink(found.kind):isAudio(found.kind));
   const linkField=<label className={`adm-field adm-field--wide${errors['work-link']?' adm-field--error':''}`} htmlFor="field-work-link">{kind==='audio'?'Audio link':'Video link'} *<input id="field-work-link" value={link} placeholder={kind==='audio'?'https://open.spotify.com/episode/…':'https://www.youtube.com/watch?v=…'} onChange={e=>setUrl(e.target.value)}/>
     {errors['work-link']&&<strong className="adm-field-error" role="alert">{errors['work-link']}</strong>}
     <small className="adm-help">The site does not keep {kind==='audio'?'audio':'video'} files: upload it to {wanted} and paste its link, as shown in the browser. Nothing loads from there until a visitor presses play.</small>
@@ -360,7 +362,7 @@ function ArtworkEditor({record,detail,options,onRecord,onDetail,ready}:{record:R
         {kind==='series'&&<>{image('First image *','The first of the series: shown large on its page and on its card.')}{list('More images of the series','In order. On its page they appear as small images under the first one; each opens full screen.',12)}{getLink('Where to see or get it (optional)','e.g. the exhibition or the shop.','View the work')}</>}
         {kind==='video'&&<>{linkField}{image('Image before play','Shown before the video plays, on its page and on its card. Empty: on YouTube, its own thumbnail.')}{getLink('Where to watch it whole (optional)','e.g. the full film on a festival site.','View the work')}</>}
         {kind==='audio'&&<>{linkField}{image('Square image *','Shown beside the player on its page, and on its card. A square image works best, like a podcast cover.')}{getLink('Where to listen to it whole (optional)','e.g. the show on Spotify or the album page.','View the work')}</>}
-        {kind==='book'&&<>{image('Cover of the book *','Shown as the book itself on its page, and on its card. The front cover, upright.')}{list('Pages inside (optional)','A few spreads or pages, in order. Shown as small images beside the cover; each opens full screen.',8)}{getLink('Where to get it *','The shop, the publisher or a page to order it. Shown as a button beside the cover.','Get the book')}</>}
+        {kind==='book'&&<>{image('Cover of the book *','Shown as the book itself on its page, and on its card. The front cover, upright.')}{list('Pages inside (optional)','A few spreads or pages, in order. Shown as small images beside the cover; each opens full screen.',8)}{downloadsReady&&<fieldset className="adm-group"><legend>Free downloads (optional)</legend><p className="adm-help">The book as PDF and/or EPUB, for people to download. Shown as buttons beside the cover, under Get the book.</p><DownloadFiles value={detail.downloads} media={options.media||[]} onChange={downloads=>onDetail({...detail,downloads})} onUploaded={reload}/></fieldset>}{getLink('Where to get it *','The shop, the publisher or a page to order it. Shown as a button beside the cover.','Get the book')}</>}
       </div></Card></>;
 }
 // Adds an image to a series or a book: chosen from the library or uploaded, like any image field.
@@ -416,8 +418,10 @@ function ProfileBlockFields({block,index,media,onChange}:{block:{type:string;con
   </div>;
 }
 function BlockFields({block,index,media,onChange}:{block:{type:string;content:Row;anchor?:string};index:number;media:Row[];onChange:(block:never)=>void}){
-  const c=block.content;const set=(content:Row)=>onChange({...block,content} as never);const rowsSpec=blockRows[block.type];
+  const c=block.content;const set=(content:Row)=>onChange({...block,content} as never);const rowsSpec=blockRows[block.type];const reload=useContext(ReloadOptions);
   return <div className="adm-stack" style={{gap:10}}>
+    {block.type==='download'&&<><label className="adm-field">Title (optional)<input value={String(c.title||'')} placeholder="e.g. Read the book" onChange={e=>set({...c,title:e.target.value})}/></label><label className="adm-field">Text (optional)<textarea rows={2} value={String(c.text||'')} placeholder="e.g. Free to download and share." onChange={e=>set({...c,text:e.target.value})}/></label>
+      <DownloadFiles value={c.files} media={media} onChange={files=>set({...c,files})} onUploaded={reload}/></>}
     {block.type==='image'&&<><BlockImages block={block} index={index} max={1} media={media} onChange={set}/><label className="adm-field">Number<input value={String(c.number||'')} placeholder="Automatic" onChange={e=>set({...c,number:e.target.value})}/><small>Shown before the caption. Empty: images are numbered in order.</small></label></>}
     {block.type==='image-pair'&&<BlockImages block={block} index={index} max={2} media={media} onChange={set}/>}
     {block.type==='carousel'&&<BlockImages block={block} index={index} max={8} media={media} onChange={set}/>}
@@ -493,6 +497,9 @@ export function EncountersCms(){
   const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [revision,setRevision]=useState(0);const [relatedNotes,setRelatedNotes]=useState<Record<string,string>|null>(null);const [embedReady,setEmbedReady]=useState(false);const [preview,setPreview]=useState(false);
   // The Video or audio block needs the database update of 2026-10-31; it is offered once the database has it.
   useEffect(()=>{let live=true;void supabase?.from('artworks').select('more_categories').limit(1).then(r=>{if(live)setEmbedReady(!r.error);});return()=>{live=false;};},[]);
+  // Files to download (Downloads block, a book's free downloads) need the database update of 2026-11-10.
+  const [downloadsReady,setDownloadsReady]=useState(false);
+  useEffect(()=>{let live=true;void supabase?.from('artworks').select('downloads').limit(1).then(r=>{if(live)setDownloadsReady(!r.error);});return()=>{live=false;};},[]);
   // How a work is shown (image, series, video, audio, book) needs the database update of 2026-11-08.
   const [workReady,setWorkReady]=useState(false);
   useEffect(()=>{let live=true;void supabase?.from('artworks').select('presentation').limit(1).then(r=>{if(live)setWorkReady(!r.error);});return()=>{live=false;};},[]);
@@ -571,7 +578,7 @@ export function EncountersCms(){
       else if(f.reference&&f.reference!=='media'&&!exists(f.reference,v))found[prefix+f.key]='This option no longer exists. Choose another one.';});
     // A work being published needs what its kind shows: the link of its video or audio, its image, and for a book where to get it.
     if(table==='posts'&&kind==='artwork'&&workReady&&current.status==='published'){const k=workPresentation(specific);const e=embedOf(specific.embed_kind,specific.embed_id);
-      if((k==='video'||k==='audio')&&(!e||isAudio(e.kind)!==(k==='audio')))found['work-link']=`Paste the link of the ${k}, on ${k==='audio'?'Spotify or SoundCloud':'YouTube or Vimeo'}.`;
+      if((k==='video'||k==='audio')&&(!e||(k==='audio'?!audioLink(e.kind):isAudio(e.kind))))found['work-link']=`Paste the link of the ${k}, on ${k==='audio'?'Spotify, SoundCloud or YouTube':'YouTube or Vimeo'}.`;
       if(k!=='video'&&!specific.media_id)found.media_id=k==='book'?'Choose the cover of the book.':'Choose the image of the work.';
       if(k==='book'&&!safeHref(specific.external_url))found.external_url='Add where to get the book.';}
     if(table==='posts'){check(commonFields,current);if(details[kind])check(details[kind].fields,specific);if(children[kind])childRows.forEach((row,i)=>check(children[kind].fields,row,`child-${i}-`));}
@@ -606,13 +613,15 @@ export function EncountersCms(){
         if(typeof current.cover_image==='string')payload.cover_image=current.cover_image;
         if(kind==='crew_member'&&Array.isArray(current.tags))payload.tags=(current.tags as unknown[]).map(t=>String(t).trim()).filter(Boolean);
         if(!current.updated_at){payload.status=current.status||'draft';}
-        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{}),...(kind==='artwork'&&Array.isArray(specific.more_categories)?{more_categories:specific.more_categories}:{}),...(kind==='artwork'&&workReady?{presentation:workPresentation(specific),images:Array.isArray(specific.images)?specific.images:[],link_label:String(specific.link_label||'').trim()||null}:{})}:null;
+        const detail=details[kind]?{...Object.fromEntries(details[kind].fields.filter(f=>specific[f.key]!==undefined).map(f=>[f.key,specific[f.key]])),...(kind==='workshop'&&specific.materials?{materials:specific.materials}:{}),...(kind==='artwork'&&Array.isArray(specific.more_categories)?{more_categories:specific.more_categories}:{}),...(kind==='artwork'&&downloadsReady?{downloads:Array.isArray(specific.downloads)?specific.downloads:[]}:{}),...(kind==='artwork'&&workReady?{presentation:workPresentation(specific),images:Array.isArray(specific.images)?specific.images:[],link_label:String(specific.link_label||'').trim()||null}:{})}:null;
         const r=await supabase.rpc('save_content',{p_post:payload,p_blocks:blocks.map((b,i)=>({...b,position:i})),p_details:detail,p_contributors:[...new Set(contributors)].map((crew_member_id,position)=>({crew_member_id,position,role:contributorRoles[crew_member_id]||''})),p_relations:[...new Set(related)].filter(id=>id!==current.id).map((related_post_id,sort)=>({related_post_id,sort,relation:['expedition','workshop'].includes(kind)?'result':'related',...(relatedNotes?{note:relatedNotes[related_post_id]||''}:{})})),p_children:children[kind]?childRows:null,expected_updated_at:current.updated_at||null});if(r.error)throw r.error;
       }else if(table==='media'){
         // save_entity inserts before resolving the conflict, so it cannot update media rows (storage path and hash are required). Media keeps its file and only updates the editable fields.
         const r=await supabase.from('media').update(Object.fromEntries(entities.media.fields.filter(f=>current[f.key]!==undefined).map(f=>[f.key,current[f.key]]))).eq('id',current.id);if(r.error)throw r.error;
       }else{const r=await supabase.rpc('save_entity',{entity:table,payload});if(r.error)throw r.error;}
       const fresh=await supabase.from(table).select('*').eq('id',current.id).single();if(fresh.error)throw fresh.error;setRecord(fresh.data);setRevision(x=>x+1);await requestAdminRevalidation({scope:'posts'});setMarkClean(true);
+      // An open Full preview of this content reloads by itself.
+      try{const ch=new BroadcastChannel('encounters-preview');ch.postMessage({id:current.id});ch.close();}catch{/* no BroadcastChannel: the preview is refreshed by hand */}
       // Published content that can be announced, and is not yet, is offered an announcement on Home.
       const nowPublished=(patch.status||current.status)==='published';
       setAnnounceAsk(table==='posts'&&nowPublished&&announceable.includes(kind)&&!(options.upcoming_items||[]).some(u=>u.post_id===current.id));
@@ -690,7 +699,7 @@ export function EncountersCms(){
         return <tr key={String(row.id)}><td><span className="adm-row-title"><AdminThumb id={row.media_id||of?.cover_id} size={52}/><span><strong>{String(row.title||'')||optionLabel(of||row)}</strong><small>{dateLabel(row)||'No date'}{of?` · ${kindLabel(of.kind)}`:''}</small></span></span></td>
           <td>{row.status!=='published'?<StatusBadge status={row.status}/>:!announcementShown(row,today)?<><span className="adm-badge adm-badge--plain">Expired</span> <small className="adm-help">Its date has passed: no longer on Home.</small></>:<span className="adm-state" data-state="upcoming">{until?`Shown until ${date(`${until}T12:00:00`)}`:'Shown until unpublished'}</span>} <ExampleBadge row={row}/></td>
           <td>{link?<span className="adm-help">{String(row.cta_label||'Sign up')}</span>:of?<span className="adm-help">Read more</span>:'—'}</td><td>{String(row.sort??0)}</td><td><span className="adm-row-actions">{editButton(row)}{deleteButton(row)}</span></td></tr>;})}</tbody></table>,
-      media:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}><AdminThumb id={row.id} size="100%" alt={String(row.alt||'')}/><div className="adm-item-body">{String(row.title||'')&&<strong>{String(row.title)}</strong>}<small>{needsAlt(row)?'No description yet':String(row.alt)}</small><div className="adm-item-meta">{needsAlt(row)?<span className="adm-badge adm-badge--dirty">Needs a description</span>:null}<span className="adm-badge adm-badge--plain">{row.width&&row.height?`${row.width} × ${row.height}`:'Size unknown'}</span>{row.fit?<span className="adm-badge adm-badge--plain">{String(row.fit)}</span>:null}</div><span className="adm-row-actions">{editButton(row)}{deleteButton(row)}</span></div></article>)}</div>,
+      media:<div className="adm-cards">{filtered.map(row=><article className="adm-item" key={String(row.id)}>{isDocument(row.mime_type)?<div className="adm-doc-thumb"><FileText aria-hidden="true"/><span>{String(row.mime_type)==='application/pdf'?'PDF':'EPUB'} · {sizeLabel(row.bytes)}</span></div>:<AdminThumb id={row.id} size="100%" alt={String(row.alt||'')}/>}<div className="adm-item-body">{String(row.title||'')&&<strong>{String(row.title)}</strong>}<small>{needsAlt(row)?'No description yet':String(row.alt)}</small><div className="adm-item-meta">{needsAlt(row)?<span className="adm-badge adm-badge--dirty">Needs a description</span>:null}<span className="adm-badge adm-badge--plain">{row.width&&row.height?`${row.width} × ${row.height}`:'Size unknown'}</span>{row.fit?<span className="adm-badge adm-badge--plain">{String(row.fit)}</span>:null}</div><span className="adm-row-actions">{editButton(row)}{deleteButton(row)}</span></div></article>)}</div>,
     };
     const profileCandidates=(options.crew_members||[]).filter(member=>!member.page_post_id).sort((a,b)=>Number(a.sort||0)-Number(b.sort||0)||optionLabel(a).localeCompare(optionLabel(b)));
     return <div className="adm-stack">
@@ -743,7 +752,7 @@ export function EncountersCms(){
     <div className="adm-actions">
       {table==='expedition_cards'&&<><button type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setPreview(!preview)} aria-pressed={preview}>{preview?<EyeOff aria-hidden="true"/>:<Eye aria-hidden="true"/>}Visual preview</button><details className="adm-info-tip"><summary aria-label="What Visual preview does"><Info aria-hidden="true"/></summary><span>Shows how the page looks with the changes currently in the form, even before you save them.</span></details></>}
       {saved&&published&&['posts','art_categories','crew_members'].includes(table)&&(table!=='posts'||record.kind!=='crew_member')&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={publicPath(table,record,specific,options)} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
-      {table==='posts'&&saved&&record.kind!=='message'&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${record.id}/preview`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Full preview</a>}
+      {table==='posts'&&saved&&record.kind!=='message'&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${record.id}/preview?from=editor`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Full preview</a>}
       <button type="submit" className="adm-btn" disabled={busy}>{busy?'Saving…':'Save'}</button>
       {hasStatus&&!pageEditor&&(published?<button type="button" className="adm-btn adm-btn--ghost" disabled={busy} onClick={()=>void save(undefined,{status:'draft'})}>Unpublish</button>:<button type="button" className="adm-btn adm-btn--publish" disabled={busy} onClick={()=>void save(undefined,{status:'published'})}>Save and publish</button>)}
     </div></div>;
@@ -756,7 +765,7 @@ export function EncountersCms(){
       <AdminHeader kicker={tableLabel(table)} title={title}/>
       {toolbar}<FloatingActions busy={busy} dirty={dirty}/>{notice}
       <div className={side.length||imageFields.length||table==='media'?'adm-split':'adm-stack'}><div className="adm-stack">
-        {table==='media'&&(record.id?<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>
+        {table==='media'&&(record.id?isDocument(record.mime_type)?<section className="adm-card adm-doc-large"><FileText aria-hidden="true"/><span><strong>{String(record.title||'File')}</strong><small>{String(record.mime_type)==='application/pdf'?'PDF':'EPUB'} · {sizeLabel(record.bytes)} · a file to download, offered from a Downloads block or beside a book.</small></span></section>:<section className="adm-card"><AdminThumb id={record.id} size="100%" alt={String(record.alt||'')} className="adm-media-large"/></section>
           :<label className="adm-upload"><Upload aria-hidden="true"/><span><strong>{busy?'Uploading and optimising…':'Choose a photo'}</strong><br/><small className="adm-help">JPG, PNG, WebP or GIF, from a phone or a camera. Every photo is optimised before it is saved: converted to WebP, up to 1400 px wide and around 450 KB, so pages stay fast. It stays private until it is used in published content.</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f);e.target.value='';}}/></label>)}
         {table==='media'?(record.id?<MediaDetails key={String(record.id)} record={record} onChange={setRecord} crew={options.crew_members||[]}/>:null):table==='upcoming_items'?<AnnouncementCards fields={main} record={record} onChange={setRecord} options={options} ready={announceReady}/>:
         <Card title="Details"><Fields fields={main} value={record} onChange={v=>setRecord(autoSlug(record,v,'name'))} options={table==='expedition_cards'?{...options,posts:programPages}:options} notes={table==='art_categories'?categoryHelp:help}/></Card>}
@@ -794,7 +803,7 @@ export function EncountersCms(){
       :isCrewPage?<CrewPageSeo record={record} onChange={setRecord} cover={crewCover}/>
       :<Card title="General information" lead={`Type: ${kindLabel(kind)}. The type is chosen when the content is created and does not change, so its address, details and relations stay intact.`}>
         <Fields fields={pick(commonFields,isMessage?['title']:kind==='artwork'?postGroups.general.filter(k=>k!=='excerpt'&&k!=='subtitle'):postGroups.general)} value={record} onChange={v=>setRecord(autoSlug(record,v,'title'))} options={options} notes={notes}/></Card>}
-      {kind==='artwork'&&<ArtworkEditor key={String(record.id)} record={record} detail={specific} options={options} onRecord={setRecord} onDetail={setSpecific} ready={workReady}/>}
+      {kind==='artwork'&&<ArtworkEditor key={String(record.id)} record={record} detail={specific} options={options} onRecord={setRecord} onDetail={setSpecific} ready={workReady} downloadsReady={downloadsReady}/>}
       {isMessage?<MessageEditor detail={specific} pieces={pieces} options={options} onDetail={setSpecific} onPieces={setPieces}/>:kind==='workshop'&&!blocks.length?null:<Card title={(kind==='crew_member'||isCrewPage)?'Below the banner':kind==='artwork'?'The full story':'Content blocks'} lead={(kind==='crew_member'||isCrewPage)?'Everything under the banner, block by block, in this order. Profile blocks use the Crew page design; ordinary blocks look as in a post.':kind==='artwork'?'What opens with Read more: the page of the work, under its title, summary and video or audio. Tell how it was made and show it, block by block: text, images, a carousel, a quote, a YouTube video, or a video or audio from another service.':kind==='workshop'?'This workshop already has these blocks, and they show on its own page under the invitation. You can edit or remove them, but not add more: a workshop is told through its Sessions, and what happened afterwards goes in its story in Results.':isActivity?`The rest of the story on this expedition’s own page, block by block, under the invitation. They do not appear on the Expeditions list.`:'The page is built from these blocks, in this order.'}>
         <div className="adm-blocks">{blocks.map((b,i)=><div key={b.id||i} className="adm-block">
           <div className="adm-block-head"><span><b>{i+1}</b>{profileKinds.find(k=>k.layout===profileLayout(b))?.label||blockLabel(b.type)}</span><div className="adm-block-tools">
@@ -809,7 +818,7 @@ export function EncountersCms(){
           {blocks.length===0&&<p className="adm-empty">No blocks yet. Add the first one below.</p>}
         </div>
         {(kind==='crew_member'||isCrewPage)&&<div className="adm-add" role="group" aria-label="Add a profile block">{profileKinds.map(k=><button key={k.layout} type="button" title={k.hint} className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type:k.type,position:blocks.length,content:{layout:k.layout}}])}><Plus aria-hidden="true"/>{k.label}</button>)}</div>}
-        {kind!=='workshop'&&<div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes.filter(t=>t!=='embed'||embedReady)).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>}
+        {kind!=='workshop'&&<div className="adm-add" role="group" aria-label="Add a block">{((kind==='crew_member'||isCrewPage)?['paragraph','heading','image','image-pair','quote','link','youtube','divider']:postBlockTypes.filter(t=>(t!=='embed'||embedReady)&&(t!=='download'||downloadsReady))).map(type=><button key={type} type="button" className="adm-btn adm-btn--ghost adm-btn--small" onClick={()=>setBlocks([...blocks,{id:crypto.randomUUID(),type,position:blocks.length,content:{}}])}><Plus aria-hidden="true"/>{blockLabel(type)}</button>)}</div>}
       </Card>}
       {details[kind]&&!isMessage&&kind!=='artwork'&&<Card title={kind==='artwork'?'Artwork: category and display':`${kindLabel(kind)} details`} lead={kind==='artwork'?'The category decides where the work appears and its address. Main image, caption and size are used in the category grid.':undefined}><Fields fields={details[kind].fields.filter(f=>f.key!=='activity_status'&&(f.key!=='outcome'||(kind==='expedition'&&stage==='finished')))} value={specific} onChange={setSpecific} options={options} notes={notes}/></Card>}
       {!isCrewPage&&<><Card title={credit.title} lead={credit.lead}>

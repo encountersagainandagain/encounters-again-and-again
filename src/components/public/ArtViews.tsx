@@ -10,6 +10,7 @@ import {PostBlocks} from './PostBlocks';
 import {artCategoryIds,embedOf,inCategory,isAudio,workDate,workImages,workLinkLabel,workPresentation} from '@/features/encounters/art';
 import {ArtStage} from './ArtStage';
 import type {SignatureChoice} from '@/features/encounters/signatures';
+import {downloadsOf} from '@/features/encounters/downloads';
 
 // Art following Art.dc.html. Every view takes its records explicitly so the CMS preview can reuse it.
 export type Person={member:Row;role:string;href:string|null};
@@ -79,7 +80,7 @@ export function ArtworkView({post,art,category,number,people,blocks,media,pathPr
   // is shown whole just below, never cropped under the title.
   return <>{post.cover_id?<PhotoHero title={title} kicker={string(post.kicker)||string(category?.name)} meta={string(post.meta_line)} cover={post.cover_id} media={media}/>:<ArtHero title={title} kicker={string(post.kicker)||string(category?.name)}>{string(post.meta_line)?<p className="art-hero-meta">{string(post.meta_line)}</p>:null}</ArtHero>}
     <div id="editorial-content">{trail}
-      <ArtStage presentation={presentation} images={images} media={media} title={title} video={embed&&!isAudio(embed.kind)?embed:null} audio={embed&&isAudio(embed.kind)?embed:null} link={presentation==='book'&&href?{href,label:workLinkLabel(art)}:null}/>
+      <ArtStage presentation={presentation} images={images} media={media} title={title} video={presentation!=='audio'&&embed&&!isAudio(embed.kind)?embed:null} audio={presentation==='audio'&&embed?embed:null} link={presentation==='book'&&href?{href,label:workLinkLabel(art)}:null} downloads={presentation==='book'?downloadsOf(art.downloads,media):[]}/>
       <section className="art-section art-work-intro"><div className="art-row">
         <div className="art-intro-title" data-seq="1.2,0.5">{category?<span className="art-kicker"><small>{number}</small>{category.slug?<Link href={`${pathPrefix}/art/${category.slug}`}>{string(category.name)}</Link>:string(category.name)}</span>:null}<h2>{title}</h2><PeopleLine people={people}/></div>
         {(post.excerpt||art.caption||(href&&presentation!=='book'))?<div className="art-intro-copy" data-seq="1.05,0.5">{post.excerpt?<p className="art-lead">{string(post.excerpt)}</p>:null}{art.caption?<p>{string(art.caption)}</p>:null}{href&&presentation!=='book'?<a className="art-cta" href={href}>{workLinkLabel(art)} ↗</a>:null}</div>:null}

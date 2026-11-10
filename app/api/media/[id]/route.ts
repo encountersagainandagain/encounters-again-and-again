@@ -16,7 +16,7 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false},...(authorization?{global:{headers:{Authorization:authorization}}}:{})});
   // Access is decided here, the same for the original and for every width: the row and the file are read with the
   // caller's rights (anonymous: published content only).
-  const {data:media,error}=await client.from('media').select('storage_path,mime_type').eq('id',id).maybeSingle();
+  const {data:media,error}=await client.from('media').select('*').eq('id',id).maybeSingle();
   if(error)return new Response(null,{status:502});
   if(!media)return new Response(null,{status:404});
   const {data,error:downloadError}=await client.storage.from('media').download(media.storage_path);
@@ -41,6 +41,12 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
       if(resized.length<original.length)return new Response(new Uint8Array(resized),{headers:{...headers,'Content-Type':'image/webp'}});
     }catch{/* an image sharp cannot read is served as stored */}
     return new Response(new Uint8Array(original),{headers:{...headers,'Content-Type':media.mime_type}});
+  }
+  // A file to download (PDF, EPUB) carries its name; ?download=1 asks the browser to save it instead of opening it.
+  if(media.mime_type==='application/pdf'||media.mime_type==='application/epub+zip'){
+    const ext=media.mime_type==='application/pdf'?'pdf':'epub';const name=(String(media.title||'')||'download').replace(/[^\w .()-]+/g,'').trim().slice(0,100)||'download';
+    const disposition=search.get('download')||ext==='epub'?'attachment':'inline';
+    return new Response(data,{headers:{...headers,'Content-Type':media.mime_type,'Content-Disposition':`${disposition}; filename="${name}.${ext}"`}});
   }
   return new Response(data,{headers:{...headers,'Content-Type':media.mime_type}});
 }

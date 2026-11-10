@@ -33,6 +33,8 @@ export function embedOf(kind:unknown,id:unknown):{kind:EmbedKind;id:string}|null
   const k=string(kind) as EmbedKind;const v=string(id);return k in valid&&valid[k].test(v)?{kind:k,id:v}:null;
 }
 export const isAudio=(kind:unknown)=>kind==='spotify'||kind==='soundcloud';
+// The links an Audio work takes: an audio service, or YouTube (podcasts are often uploaded there too).
+export const audioLink=(kind:unknown)=>isAudio(kind)||kind==='youtube';
 export function embedFromUrl(text:string):{kind:EmbedKind;id:string}|null{
   let url:URL;try{url=new URL(text.trim());}catch{return null;}
   const host=url.hostname.replace(/^(www|m|music|open|player)\./,'');const parts=url.pathname.split('/').filter(Boolean);
@@ -70,7 +72,7 @@ export const presentationLabels:Record<Presentation,{label:string;hint:string}>=
   image:{label:'Image',hint:'A drawing, a painting, an illustration or a photo, shown whole. Visitors can open it full screen and zoom in.'},
   series:{label:'Series of images',hint:'Several drawings or photos that make one work. The first is shown large, the others below; each opens full screen.'},
   video:{label:'Video',hint:'A film or a video on YouTube or Vimeo, played large on the page.'},
-  audio:{label:'Audio',hint:'A podcast, a recording or music on Spotify or SoundCloud, played beside its image.'},
+  audio:{label:'Audio',hint:'A podcast, a recording or music on Spotify, SoundCloud or YouTube, played beside its image.'},
   book:{label:'Book',hint:'A book or publication: its cover, a few pages inside, and a button to get it.'},
 };
 export function workPresentation(art:Row|null|undefined):Presentation{

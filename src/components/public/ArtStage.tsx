@@ -7,7 +7,7 @@ import {MediaEmbed,VideoFrame} from './EditorialInteractive';
 type Embed={kind:string;id:string}|null;
 // The work itself, right under the banner, shown by its kind (artworks.presentation): an image whole, a series with its
 // thumbnails, a video or an audio played on the page, a book with its cover and pages. Images open full screen.
-export function ArtStage({presentation,images,media,title,video,audio,link}:{presentation:Presentation;images:string[];media:Row[];title:string;video:Embed;audio:Embed;link:{href:string;label:string}|null}){
+export function ArtStage({presentation,images,media,title,video,audio,link,downloads=[]}:{presentation:Presentation;images:string[];media:Row[];title:string;video:Embed;audio:Embed;link:{href:string;label:string}|null;downloads?:{id:string;label:string;kind:string;size:string;href:string}[]}){
   const [open,setOpen]=useState<number|null>(null);const [current,setCurrent]=useState(0);
   const main=images[0];const pages=images.slice(1);
   const view=(i:number)=>()=>setOpen(i);
@@ -18,7 +18,8 @@ export function ArtStage({presentation,images,media,title,video,audio,link}:{pre
   else if(presentation==='audio'&&audio)body=<div className="art-stage-audio">{main?<div className="art-stage-square">{frame(main,0,'(max-width: 760px) 100vw, 34vw')}</div>:null}<div className="art-stage-player"><MediaEmbed kind={audio.kind} id={audio.id} audioHeight/></div></div>;
   else if(presentation==='book'&&main)body=<div className="art-stage-book"><div className="art-stage-cover">{frame(main,0,'(max-width: 760px) 80vw, 34vw')}</div>
     <div className="art-stage-side">{pages.length>0&&<><span className="art-stage-label">Inside</span><ul className="art-stage-thumbs">{pages.map((id,i)=><li key={id}><button type="button" onClick={view(i+1)} aria-label={`Open page ${i+1} full screen`}><MediaImage id={id} media={media} alt="" sizes="160px"/></button></li>)}</ul></>}
-      {link&&<a className="art-stage-get" href={link.href} target="_blank" rel="noopener">{link.label} ↗</a>}</div></div>;
+      {link&&<a className="art-stage-get" href={link.href} target="_blank" rel="noopener">{link.label} ↗</a>}
+      {downloads.length>0&&<div className="art-stage-downloads"><span className="art-stage-label">Free download</span>{downloads.map(f=><a key={f.id} className="art-stage-download" href={f.href} download>{f.label}<small>{f.kind}{f.size?` · ${f.size}`:''}</small></a>)}</div>}</div></div>;
   else if(presentation==='series'&&main)body=<div className="art-stage-series">{frame(images[current]||main,current)}
     {images.length>1&&<div className="art-stage-strip"><span className="art-stage-count">{String(current+1).padStart(2,'0')} / {String(images.length).padStart(2,'0')}</span>
       <ul className="art-stage-thumbs">{images.map((id,i)=><li key={id}><button type="button" aria-pressed={i===current} onClick={()=>setCurrent(i)} aria-label={`Show image ${i+1} of ${images.length}`}><MediaImage id={id} media={media} alt="" sizes="160px"/></button></li>)}</ul></div>}</div>;

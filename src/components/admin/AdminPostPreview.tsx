@@ -24,12 +24,22 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
   const [profile, setProfile] = useState<{ crew: Record<string, unknown>[]; media: Record<string, unknown>[]; categories: Record<string, unknown>[]; detail: Record<string, unknown>; contributors: { id: string; role: string }[]; posts: Record<string, unknown>[]; children: Record<string, unknown>[]; related: string[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  // Saving in the editor tells this tab (BroadcastChannel): the preview reloads the saved content by itself.
+  const [revision, setRevision] = useState(0);
+  const [opened, setOpened] = useState(false);
+  useEffect(() => {
+    setOpened(!!window.opener||new URLSearchParams(location.search).get('from')==='editor');
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('encounters-preview');
+    channel.onmessage = (event) => { if (event.data?.id === id) setRevision((r) => r + 1); };
+    return () => channel.close();
+  }, [id]);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPreview() {
-      setIsLoading(true);
+      if (!revision) setIsLoading(true);
       setErrorMessage('');
 
       try {
@@ -78,7 +88,12 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, revision]);
+
+  // Opened from the editor in a new tab: closing it goes back to where you were. Otherwise, to this content's editor.
+  const back = opened
+    ? <button type="button" onClick={() => { window.close(); setTimeout(() => { if (!window.closed) location.href = `/admin/content?table=posts&edit=${id}`; }, 300); }} className="btn-secondary justify-center">Close preview</button>
+    : <Link href={`/admin/content?table=posts&edit=${id}`} className="btn-secondary justify-center">Back to editor</Link>;
 
   if (isLoading) {
     return (
@@ -100,7 +115,7 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
             {errorMessage || 'Unable to load preview.'}
           </div>
           <Link
-            href={`/admin/posts/${id}/edit`}
+            href={`/admin/content?table=posts&edit=${id}`}
             className="mt-6 inline-flex font-body text-sm uppercase tracking-[0.14em] text-ocean hover:underline"
           >
             Back to editor
@@ -120,14 +135,12 @@ export function AdminPostPreview({ id }: AdminPostPreviewProps) {
             </span>
             <p className="font-body text-sm text-black/60">
               {post.status === 'published'
-                ? 'This post is published. Preview is still reading the saved admin content.'
-                : 'This draft is not public yet. Save changes in the editor before previewing them.'}
+                ? 'Published. This preview shows the saved content and updates by itself every time you save in the editor.'
+                : 'Draft: not public yet. This preview shows the saved content and updates by itself every time you save in the editor.'}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href={`/admin/posts/${id}/edit`} className="btn-secondary justify-center">
-              Back to editor
-            </Link>
+            {back}
           </div>
         </div>
       </div>

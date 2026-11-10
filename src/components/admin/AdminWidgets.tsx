@@ -6,6 +6,7 @@ import {brand} from '@/config/brand';
 import {AdminThumb,StatusBadge} from './AdminShell';
 import {kindLabel} from './adminLabels';
 import {messagePath} from '@/features/encounters/message-text';
+import {isImage} from '@/features/encounters/downloads';
 type Row=Record<string,unknown>;
 const text=(v:unknown)=>typeof v==='string'?v:'';
 
@@ -65,7 +66,7 @@ export function CrewPagePanel({member,posts,busy,onCreate}:{member:Row;posts:Row
     <div className="adm-toolbar-state"><span>Personal page:</span>{page?<StatusBadge status={page.status}/>:<span className="adm-badge adm-badge--plain">Not created</span>}</div>
     {!saved?<p className="adm-help">Save this person first to create their page.</p>:page?<div className="adm-actions">
       <Link className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/content?table=posts&edit=${page.id}`}>Edit personal page</Link>
-      <a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${page.id}/preview`} target="_blank" rel="noreferrer"><Eye aria-hidden="true"/>Preview</a>
+      <a className="adm-btn adm-btn--ghost adm-btn--small" href={`/admin/posts/${page.id}/preview?from=editor`} target="_blank" rel="noreferrer"><Eye aria-hidden="true"/>Preview</a>
       {live&&<a className="adm-btn adm-btn--ghost adm-btn--small" href={`/crew/${text(member.slug)}`} target="_blank" rel="noreferrer"><ExternalLink aria-hidden="true"/>Open public page</a>}
     </div>:<button type="button" className="adm-btn adm-btn--ghost adm-btn--small" disabled={busy} onClick={onCreate}><Plus aria-hidden="true"/>Create personal page (draft)</button>}
   </div>;
@@ -82,7 +83,8 @@ export function MediaPicker({id,value,media,onChange,folder,onUploaded,described
   const [form,setForm]=useState({title:'',alt:'',credit:''});const dialog=useRef<HTMLDialogElement>(null);
   useEffect(()=>{const d=dialog.current;if(!d)return;if(step&&!d.open)d.showModal();if(!step&&d.open)d.close();},[step]);
   const chosen=media.find(m=>m.id===value);const label=text(chosen?.title)||text(chosen?.alt);
-  const found=media.filter(m=>!query||`${text(m.title)} ${text(m.alt)}`.toLowerCase().includes(query.toLowerCase()));
+  // Only images: files to download (PDF, EPUB) are chosen in their own fields.
+  const found=media.filter(m=>isImage(m.mime_type)).filter(m=>!query||`${text(m.title)} ${text(m.alt)}`.toLowerCase().includes(query.toLowerCase()));
   async function upload(file:File){setStep(null);setBusy(true);setNote('');
     try{const {uploadMedia}=await import('@/lib/adminMedia');const r=await uploadMedia(file,folder);onChange(r.id);setOpen(false);onUploaded();
       if(r.reused)setStep({kind:'reused',id:r.id});else{setForm({title:file.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ').trim(),alt:'',credit:''});setStep({kind:'describe',id:r.id});}}

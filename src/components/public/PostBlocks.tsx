@@ -6,6 +6,7 @@ import {MediaImage} from './MediaImage';
 import {InlineText} from './InlineText';
 import {ramp,useFrame} from './useFrame';
 import {audioHeight,embedFromUrl,embedLabels,embedSrc,isAudio,type EmbedKind} from '@/features/encounters/art';
+import {downloadsOf} from '@/features/encounters/downloads';
 
 // Blocks of the Post template (Post.dc.html, handoff 04-editor-de-bloques.md). Content keys follow the
 // block editor: paragraph {lead,text}, heading {kicker,number,text}, image {media_id,caption,number},
@@ -77,6 +78,8 @@ export function PostBlocks({blocks,media,showIndex=false}:{blocks:ContentBlock[]
     if(type==='faq'){const items=rows(c.faqItems||c.items).map(x=>({q:string(x.question)||string(x.q),a:string(x.answer)||string(x.a)})).filter(x=>x.q);if(items.length)out.push(<div className="pb pb-faqs" key={key} id={b.anchor?anchorOf(b):undefined}><div data-seq="0.94,0.4">{(string(c.title)||string(c.text))&&<h3>{string(c.title)||string(c.text)}</h3>}<Accordion items={items} boxed={false}/></div></div>);continue;}
     if(type==='accordion'){const items=rows(c.accordionItems||c.items).map(x=>({q:string(x.title)||string(x.label),a:string(x.text)||string(x.body)})).filter(x=>x.q);if(items.length)out.push(<div className="pb pb-accordion" key={key}><div data-seq="0.94,0.4"><Accordion items={items} boxed/></div></div>);continue;}
     if(type==='list'){const items=(Array.isArray(c.items)?c.items:[]).map(x=>typeof x==='string'?x:string((x as Row).text)||string((x as Row).title)).filter(Boolean);if(!items.length)continue;out.push(<div className="pb pb-list" key={key}><div data-seq="0.94,0.4">{(string(c.title)||string(c.text))&&<h3>{string(c.title)||string(c.text)}</h3>}<ol>{items.map((x,i)=><li key={i}><span>{pad(i+1)}</span><span>{x}</span></li>)}</ol></div></div>);continue;}
+    // Files to download (a book as PDF or EPUB): a title, a line and one button per file with its kind and size.
+    if(type==='download'){const files=downloadsOf(c.files,media);if(!files.length)continue;out.push(<div className="pb pb-download" key={key}><div className="pb-download-box" data-seq="0.94,0.4">{string(c.title)&&<h3>{string(c.title)}</h3>}{string(c.text)&&<p>{string(c.text)}</p>}<div className="pb-download-files">{files.map(f=><a key={f.id} className="pb-download-file" href={f.href} download><span>{f.label}</span><small>{f.kind}{f.size?` · ${f.size}`:''}</small></a>)}</div></div></div>);continue;}
     if(type==='link'||type==='source'){const links=blockLinks(c);if(!links.length)continue;out.push(<div className="pb pb-link" key={key}>{string(c.text)&&type==='link'&&<p>{string(c.text)}</p>}{links.map((l,i)=>{const href=safeHref(l.url)!;return <a key={i} href={href} {...(/^https?:/.test(href)?{target:'_blank',rel:'noopener'}:{})}>{string(l.label)||href}<span aria-hidden="true">→</span></a>;})}</div>);continue;}
     // Paragraph (and imported text blocks): an optional lead in Garamond, then the body.
     const body=paragraphs(c);if(!string(c.lead)&&!body.length)continue;

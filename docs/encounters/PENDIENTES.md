@@ -57,3 +57,18 @@ proyecto.
 **Atajo posible antes del dominio:** sin dominio verificado Resend solo envía desde `onboarding@resend.dev` al email dueño de
 la cuenta. Sirve para Contact si la cuenta de Resend se crea con el mismo email de contacto de Settings; no sirve para el
 newsletter.
+
+## 3. Entrega al cliente: cuentas de administrador (con la migración)
+
+**Estado (2026-11-10):** el admin ya registra quién hace cada cambio (Admin → Site → **Activity** y «Last edited by» en cada
+editor). Falta crear las cuentas de las personas del colectivo que van a editar.
+
+**Por qué espera:** se entrega junto con el dominio final, cuando el sitio pase a ser el oficial.
+
+**Pasos**
+1. Juani, en Supabase → Authentication → Users → **Add user** (email + contraseña inicial, con «Auto Confirm User») o
+   **Invite user** (les llega un mail para elegir la contraseña; con Resend configurado, sale desde el dominio).
+2. Darles permiso de administrador (sin esto pueden entrar pero no ven ni editan nada):
+   `ADMIN_EMAILS=persona1@mail.com,persona2@mail.com node scripts/encounters-admins.mjs --apply`
+3. Mostrarles Activity y pedirles que borren el contenido de ejemplo (etiqueta «Example»; 15 en producción al
+   2026-11-08). Las tres categorías de arte son de ejemplo pero tienen obras reales: renombrarlas en vez de borrarlas.

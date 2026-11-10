@@ -32,6 +32,10 @@
 .editorial-nav[data-light=true] .editorial-brand img{filter:brightness(0)}
 .editorial-footer{background:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)) top center/min(1240px,calc(100% - 2*var(--enc-page-padding))) 1px no-repeat,#061826;color:rgba(234,245,250,.55);padding:clamp(20px,3vh,34px) max(var(--enc-page-padding),calc((100% - 1240px)/2)) clamp(90px,20vh,220px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.08em}
 .editorial-footer a{color:rgba(234,245,250,.8)}
+/* Who made the website (Juani, 2026-11-10): a quiet line under the footer, on the right. */
+.footer-credit{flex-basis:100%;margin-top:clamp(10px,2vh,18px);text-align:right;font-size:9px;letter-spacing:.08em;color:rgba(234,245,250,.38)}
+.editorial-footer .footer-credit a{color:rgba(234,245,250,.55);text-decoration:none}.editorial-footer .footer-credit a:hover{color:#8fd9ea}
+@media(max-width:600px){.footer-credit{text-align:left}}
 .editorial-footer>div{display:flex;gap:20px;flex-wrap:wrap}
 /* Local CMS only: says the examples are fictional, without competing with the footer. */
 .local-review-note{flex-basis:100%;font-size:inherit;letter-spacing:inherit;opacity:.75}
@@ -401,3 +405,13 @@ html:has(.photo-hero-pin),body:has(.photo-hero-pin){overflow-x:clip}
 .art-lightbox-bar button:hover{background:#eaf5fa;color:#08222f}
 @media (max-width:600px){.art-lightbox-hint{display:none}}
 @media (prefers-reduced-motion:reduce){.art-lightbox-image{transition:none}}
+
+/* Files to download (Juani, 2026-11-10): the Downloads block and a book's free downloads. */
+.pb-download-box{display:flex;flex-direction:column;gap:12px;padding:clamp(20px,3vw,32px);border:1px solid rgba(14,42,56,.16);background:#f4efe6}
+.pb-download-box h3{font-family:var(--font-display),Georgia,serif;font-size:clamp(20px,2vw,28px)!important;line-height:1.15!important}
+.pb-download-box p{margin:0}
+.pb-download-files{display:flex;flex-wrap:wrap;gap:10px}
+.pb-download-file,.art-stage-download{display:inline-flex;align-items:baseline;gap:10px;padding:13px 18px;border:1px solid #0f3b4c;color:#0f3b4c!important;font-family:var(--font-body),Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none}
+.pb-download-file small,.art-stage-download small{font-size:10px;font-weight:500;letter-spacing:.08em;opacity:.7}
+.pb-download-file:hover,.art-stage-download:hover{background:#0f3b4c;color:#fff!important}
+.art-stage-downloads{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px}
